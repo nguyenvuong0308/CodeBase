@@ -21,7 +21,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CodeBaseTemplate"
+rootProject.name = "LibCore"
 
 include(":app")
 include(":core")
