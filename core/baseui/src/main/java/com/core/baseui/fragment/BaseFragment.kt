@@ -336,7 +336,7 @@ abstract class BaseFragment<B : ViewBinding>(
      */
     fun showRewardAd(
         adPlaceName: IAdPlaceName,
-        onHandleCompleted: ((isShown: Boolean, isEarnedReward: Boolean) -> Unit)
+        onHandleCompleted: ((isShown: Boolean, isEarnedReward: Boolean, isNoAds: Boolean) -> Unit)
     ) {
         contextAds?.showRewardAd(adPlaceName, onHandleCompleted)
     }

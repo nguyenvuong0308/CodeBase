@@ -75,7 +75,7 @@ abstract class ContextAds(
     private var _isDisableAdDueManyClickFlow: Boolean? = null
 
     private var listHandleFullAds: HashMap<IAdPlaceName, (isShown: Boolean) -> Unit> = hashMapOf()
-    private var listHandleRewardAds: HashMap<IAdPlaceName, (isShown: Boolean, isEarnedReward: Boolean) -> Unit> =
+    private var listHandleRewardAds: HashMap<IAdPlaceName, (isShown: Boolean, isEarnedReward: Boolean, isNoAds: Boolean) -> Unit> =
         hashMapOf()
 
     init {
@@ -223,7 +223,7 @@ abstract class ContextAds(
 
     private fun setHandleRewardAds(
         adPlaceName: IAdPlaceName,
-        callback: (isShown: Boolean, isEarnedReward: Boolean) -> Unit
+        callback: (isShown: Boolean, isEarnedReward: Boolean, isNoAds: Boolean) -> Unit
     ) {
         listHandleRewardAds[adPlaceName] = callback
     }
@@ -252,7 +252,7 @@ abstract class ContextAds(
         if (isReward) { // trường hợp ads reward
             if (!adResource.isShown && listHandleRewardAds[adPlaceName] != null) {
                 if (adRewardWithoutAutoRetry.contains(adPlaceName)) {
-                    listHandleRewardAds[adPlaceName]?.invoke(false, false)
+                    listHandleRewardAds[adPlaceName]?.invoke(false, false, false)
                     listHandleRewardAds.remove(adPlaceName)
                     return
                 }
@@ -276,7 +276,11 @@ abstract class ContextAds(
                             }
                         }
                         onCancel = {
-                            listHandleRewardAds[adPlaceName]?.invoke(false, false)
+                            if (_retryLoadReward < _maxRetryLoadReward){
+                                listHandleRewardAds[adPlaceName]?.invoke(false, false, false)
+                            } else {
+                                listHandleRewardAds[adPlaceName]?.invoke(false, false, true)
+                            }
                             listHandleRewardAds.remove(adPlaceName)
                         }
 
@@ -309,14 +313,15 @@ abstract class ContextAds(
                         //Show loading
                     }, onCancel = {
                         dismissDialogLoadingAds()
-                        listHandleRewardAds[adPlaceName]?.invoke(false, false)
+                        listHandleRewardAds[adPlaceName]?.invoke(false, false, false)
                         listHandleRewardAds.remove(adPlaceName)
                     })
                 }
             } else {
                 listHandleRewardAds[adPlaceName]?.invoke(
                     adResource.isShown,
-                    adResource.isEarnedReward
+                    adResource.isEarnedReward,
+                    false
                 )
                 listHandleRewardAds.remove(adPlaceName)
             }
@@ -349,7 +354,7 @@ abstract class ContextAds(
 
     fun showRewardAd(
         adPlaceName: IAdPlaceName,
-        onHandleCompleted: ((isShown: Boolean, isEarnedReward: Boolean) -> Unit),
+        onHandleCompleted: ((isShown: Boolean, isEarnedReward: Boolean, isNoAds: Boolean) -> Unit),
         autoRetry: Boolean = true
     ) {
         if (!autoRetry) {

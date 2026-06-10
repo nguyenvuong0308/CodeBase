@@ -1,12 +1,10 @@
 package com.codebasetemplate.required
 
 import android.app.Application
-import com.codebasetemplate.required.adjust.AdjustTracking
 import com.codebasetemplate.required.ads.ProviderAppProviderAdPlaceName
 import com.codebasetemplate.required.firebase.GetDataFromRemoteUseCaseImpl
 import com.codebasetemplate.required.inapp.ProductIdProviderImpl
 import com.codebasetemplate.required.update.InAppUpdateImpl
-import com.core.ads.admob.AdjustAnalytics
 import com.core.billing.ProductIdProvider
 import com.core.config.domain.GetDataFromRemoteConfigUseCase
 import com.core.config.domain.data.IAppProviderAdPlaceName
@@ -35,8 +33,4 @@ class RequiredModule {
     @Provides
     @Singleton
     fun provideInAppUpdateImpl(app: Application): InAppUpdateImpl = InAppUpdateImpl(app)
-
-    @Provides
-    @Singleton
-    fun providerAdjustTracking(): AdjustAnalytics = AdjustTracking()
 }

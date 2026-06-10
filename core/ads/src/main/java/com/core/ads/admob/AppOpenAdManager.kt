@@ -25,7 +25,6 @@ import com.core.utilities.getCurrentTimeInSecond
 import com.core.utilities.manager.isNetworkConnected
 import com.core.utilities.removeDimForReopenApp
 import com.core.utilities.showDimForReopenApp
-import com.google.android.gms.ads.OnPaidEventListener
 import com.google.firebase.Firebase
 import com.google.firebase.crashlytics.crashlytics
 import kotlinx.coroutines.CoroutineScope
@@ -45,8 +44,7 @@ class AppOpenAdManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val remoteConfigRepository: RemoteConfigRepository,
     private val adManager: AdsManager,
-    private val reOpenShowCondition: ReOpenShowCondition,
-    private val adjustAnalytics: AdjustAnalytics
+    private val reOpenShowCondition: ReOpenShowCondition
 ) : LifecycleObserver, Application.ActivityLifecycleCallbacks {
 
     companion object {
@@ -219,13 +217,6 @@ class AppOpenAdManager @Inject constructor(
 
             Log.i(TAG, "AppOpenAd start show $adPlaceName")
             adHolder.appOpenAd?.fullScreenContentCallback = fullScreenContentCallback
-            adHolder.appOpenAd?.onPaidEventListener = OnPaidEventListener { adValue ->
-                adjustAnalytics.trackRevenueNetwork(
-                    adUnitId = adHolder.adPlace.adId,
-                    adValueMicros = adValue.valueMicros,
-                    adValueCurrencyCode = adValue.currencyCode
-                )
-            }
             adHolder.appOpenAd?.show(activity)
         } else {
             if (context.isNetworkConnected()) {

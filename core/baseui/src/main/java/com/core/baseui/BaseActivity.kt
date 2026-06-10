@@ -549,14 +549,41 @@ abstract class BaseActivity<T : ViewBinding> : AppCompatActivity(), CoroutineSco
     }
 
     /**
+     * Hiển thị quảng cáo reward
+     *
+     * @param adPlaceName Tên vị trí quảng cáo.
+     * @param callbackSuccess Quảng cáo đã xem xong
+     * @param callbackClose Cancel quảng cáo
+     * @param callbackRetry Quảng cáo lỗi có thể gọi thử lại
+     */
+    fun unlockWithRewarded(
+        adPlaceName: IAdPlaceName,
+        callbackSuccess: () -> Unit,
+        callbackClose: (() -> Unit)? = null,
+        callbackRetry: (() -> Unit)? = null,
+        callbackNoAds: (() -> Unit)? = null
+    ) {
+        showRewardAd(adPlaceName = adPlaceName, onHandleCompleted = { isShown, isEarnedReward, isNoAds ->
+            if (isEarnedReward) {
+                callbackSuccess.invoke()
+            } else if (isShown) {
+                callbackClose?.invoke()
+            } else if (isNoAds) {
+                callbackNoAds?.invoke()
+            } else {
+                callbackRetry?.invoke()
+            }
+        })
+    }
+
+    /**
      * Hiển thị quảng cáo reward.
      *
      * @param adPlaceName Tên vị trí quảng cáo.
      * @param onHandleCompleted Callback được gọi khi quảng cáo được hiển thị hoặc không và người dùng có nhận được phần thưởng hay không.
      */
-    fun showRewardAd(
-        adPlaceName: IAdPlaceName,
-        onHandleCompleted: ((isShown: Boolean, isEarnedReward: Boolean) -> Unit)
+    private fun showRewardAd(
+        adPlaceName: IAdPlaceName, onHandleCompleted: ((isShown: Boolean, isEarnedReward: Boolean, isNoAds: Boolean) -> Unit)
     ) {
         contextAds?.showRewardAd(adPlaceName, onHandleCompleted)
     }

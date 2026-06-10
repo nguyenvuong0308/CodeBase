@@ -49,12 +49,10 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdValue
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
-import com.google.android.gms.ads.OnPaidEventListener
 import com.google.android.gms.ads.VideoOptions
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
@@ -95,8 +93,7 @@ class AdmobManager @Inject constructor(
     private val remoteConfigRepository: RemoteConfigRepository,
     private val purchasePreferences: PurchasePreferences,
     private val analyticsManager: AnalyticsManager,
-    private val appPref: AppPreferences,
-    private val adjustAnalytics: AdjustAnalytics
+    private val appPref: AppPreferences
 ) : AdsManager {
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -628,9 +625,6 @@ class AdmobManager @Inject constructor(
                         increaseAdClickedCount()
                     }
                 }
-                interstitialAd.onPaidEventListener = OnPaidEventListener { adValue ->
-                    adjustAnalytics.trackRevenueNetwork(adUnitId = adHolder.adPlace.adId, adValueMicros = adValue.valueMicros, adValueCurrencyCode = adValue.currencyCode)
-                }
                 interstitialAd.show(activity)
             }
         } else {
@@ -708,9 +702,6 @@ class AdmobManager @Inject constructor(
                     }
 
                 }
-            rewardedInterstitialAd.onPaidEventListener = OnPaidEventListener { adValue ->
-                adjustAnalytics.trackRevenueNetwork(adUnitId = adHolder.adPlace.adId, adValueMicros = adValue.valueMicros, adValueCurrencyCode = adValue.currencyCode)
-            }
             rewardedInterstitialAd.show(activity) { rewardedItem ->
                 Log.d(TAG, "showRewardedInterstitialVideo: $rewardedItem")
                 adHolder.isEarnedReward = true
@@ -788,9 +779,6 @@ class AdmobManager @Inject constructor(
                     increaseAdClickedCount()
                 }
 
-            }
-            rewardedAd.onPaidEventListener = OnPaidEventListener { adValue ->
-                adjustAnalytics.trackRevenueNetwork(adUnitId = adHolder.adPlace.adId, adValueMicros = adValue.valueMicros, adValueCurrencyCode = adValue.currencyCode)
             }
             rewardedAd.show(activity) { rewardedItem ->
                 adHolder.isEarnedReward = true
@@ -1220,9 +1208,6 @@ class AdmobManager @Inject constructor(
                                 sendEventShow(adHolder.adPlace.placeName)
                             }
                         }
-                        nativeAd?.setOnPaidEventListener { adValue ->
-                            adjustAnalytics.trackRevenueNetwork(adUnitId = adHolder.adPlace.adId, adValueMicros = adValue.valueMicros, adValueCurrencyCode = adValue.currencyCode)
-                        }
                     }
                     .withAdListener(object : AdListener() {
                         override fun onAdLoaded() {
@@ -1457,9 +1442,6 @@ class AdmobManager @Inject constructor(
                             sendEventShow(adHolder.adPlace.placeName)
                         }
                     }
-                    bannerAd?.setOnPaidEventListener { adValue ->
-                        adjustAnalytics.trackRevenueNetwork(adUnitId = adHolder.adPlace.adId, adValueMicros = adValue.valueMicros, adValueCurrencyCode = adValue.currencyCode)
-                    }
                 }
 
                 override fun onAdClosed() {
@@ -1643,7 +1625,7 @@ class AdmobManager @Inject constructor(
     }
 
     private fun isBannerNativeAdPlacedLoaded(adPlace: AdPlace): Boolean {
-        val adHolder = adHolderFullScreenMap[adPlace.adId] ?: return false
+        val adHolder = adHolderMap[adPlace.placeName] ?: return false
         return when (adPlace.adType) {
             AdType.Banner -> adHolder is BannerAdHolder && adHolder.bannerAd != null
             AdType.Native -> adHolder is NativeAdHolder && adHolder.nativeAd != null

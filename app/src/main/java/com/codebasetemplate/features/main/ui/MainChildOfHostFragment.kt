@@ -55,7 +55,7 @@ class MainChildOfHostFragment : BaseChildOfHostFragment<CoreFragmentMainBinding,
             }
 
             showRewardLayout.setOnSingleClick {
-                showRewardAd(AppAdPlaceName.REWARD_TEST) { isShown, isEarnedReward ->
+                showRewardAd(AppAdPlaceName.REWARD_TEST) { isShown, isEarnedReward, isNoAds ->
                     toast("Show reward ad completed $isEarnedReward")
                 }
             }

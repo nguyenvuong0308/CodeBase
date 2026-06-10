@@ -10,9 +10,13 @@
 
     <com.core.baseui.toolbar.CoreToolbarView
         android:id="@+id/toolbar"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        app:ctv_ic_back_icon="@drawable/fb_ic_back_feedback" />
+        android:layout_height="wrap_content"
+        app:ctv_ic_back_background="@drawable/bg_delete_2"
+        app:ctv_ic_back_icon="@drawable/fb_ic_back_feedback"
+        app:ctv_ic_back_width_height="@dimen/_36dp"
+        app:ctv_riv_padding_ripple="@dimen/_2dp"
+        app:ctv_tv_title_center_horizontal="true"/>
 
     <androidx.appcompat.widget.AppCompatImageView style="@style/LogoFeedback"/>
 
@@ -30,7 +34,7 @@
         android:id="@+id/matterFlexible"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="12dp"
+        android:layout_marginHorizontal="@dimen/_12dp"
         android:layout_marginTop="@dimen/fb_matter_marginTop"
         android:visibility="gone"
         app:flexWrap="wrap"
@@ -52,7 +56,7 @@
             android:id="@+id/tvCrashFl"
             style="@style/TextMatter"
             android:text="@string/fb_feedback_crash"
-            tools:ignore="MissingConstraints" />
+            tools:ignore="MissingConstraints"/>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tvOtherFl"
@@ -74,7 +78,7 @@
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="12dp">
+            android:paddingHorizontal="@dimen/_12dp">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tvFeatureQuality"
@@ -82,9 +86,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
-                android:layout_marginEnd="12dp"
+                android:layout_marginEnd="@dimen/_12dp"
                 android:layout_weight="1"
-                android:paddingVertical="8dp"
+                android:paddingVertical="@dimen/_8dp"
                 android:text="@string/fb_feedback_feature_quality"/>
 
             <androidx.appcompat.widget.AppCompatTextView
@@ -95,15 +99,15 @@
                 android:layout_marginTop="0dp"
                 android:layout_marginEnd="0dp"
                 android:layout_weight="1"
-                android:paddingVertical="8dp"
-                android:text="@string/fb_feedback_bug" />
+                android:paddingVertical="@dimen/_8dp"
+                android:text="@string/fb_feedback_bug"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:paddingHorizontal="12dp">
+            android:layout_marginTop="@dimen/_12dp"
+            android:paddingHorizontal="@dimen/_12dp">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tvCrash"
@@ -111,10 +115,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="0dp"
-                android:layout_marginEnd="12dp"
+                android:layout_marginEnd="@dimen/_12dp"
                 android:layout_weight="1"
-                android:paddingVertical="8dp"
-                android:text="@string/fb_feedback_crash" />
+                android:paddingVertical="@dimen/_8dp"
+                android:text="@string/fb_feedback_crash"/>
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tvOthers"
@@ -124,7 +128,7 @@
                 android:layout_marginTop="0dp"
                 android:layout_marginEnd="0dp"
                 android:layout_weight="1"
-                android:paddingVertical="8dp"
+                android:paddingVertical="@dimen/_8dp"
                 android:text="@string/fb_feedback_other"/>
 
         </androidx.appcompat.widget.LinearLayoutCompat>
@@ -135,24 +139,24 @@
         android:id="@+id/edtFeedback"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="12dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="@dimen/_12dp"
+        android:layout_marginTop="@dimen/_20dp"
         android:layout_weight="1"
         android:background="@drawable/fb_bg_edit_feedback"
         android:fontFamily="@font/roboto_regular"
         android:gravity="start"
         android:hint="@string/fb_hint_feedback"
-        android:lineSpacingExtra="3dp"
-        android:padding="10dp"
+        android:lineSpacingExtra="@dimen/_3dp"
+        android:padding="@dimen/_10dp"
         android:textColor="@color/fb_feedback_title"
         android:textColorHint="#A6A6A6"
-        android:textSize="14sp"/>
+        android:textSize="@dimen/_14sp"/>
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/ivSendFeedback"
         android:layout_width="match_parent"
         android:layout_height="@dimen/fb_button_send_height"
-        android:layout_marginHorizontal="25dp"
+        android:layout_marginHorizontal="@dimen/_25dp"
         android:layout_marginTop="@dimen/fb_button_send_margin_top"
         android:layout_marginBottom="@dimen/fb_button_send_margin_bottom"
         android:background="@drawable/fb_bg_rate_us_button"
@@ -161,7 +165,7 @@
         android:gravity="center"
         android:maxLines="1"
         android:text="@string/fb_send"
-        android:textColor="#ffffff"
+        android:textColor="@android:color/white"
         android:textSize="@dimen/fb_text_size_button_send"
         app:layout_constraintTop_toBottomOf="@+id/ivHand"/>
 

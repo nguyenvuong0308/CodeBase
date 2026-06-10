@@ -282,7 +282,7 @@ abstract class BaseAdsBottomSheetDialogFragment<B : ViewBinding> : BottomSheetDi
      */
     fun showRewardAd(
         adPlaceName: IAdPlaceName,
-        onHandleCompleted: ((isShown: Boolean, isEarnedReward: Boolean) -> Unit)
+        onHandleCompleted: ((isShown: Boolean, isEarnedReward: Boolean, isNoAds: Boolean) -> Unit)
     ) {
         contextAds?.showRewardAd(adPlaceName, onHandleCompleted)
     }

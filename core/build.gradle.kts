@@ -7,7 +7,7 @@ plugins {
 android {
     namespace = "com.core"
     compileSdk = libs.versions.targetSdk.get().toInt()
-    // version: 25.05.2026
+    // version: 05.06.2026
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
