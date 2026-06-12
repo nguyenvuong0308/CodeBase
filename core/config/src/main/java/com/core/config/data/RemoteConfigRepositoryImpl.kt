@@ -134,6 +134,9 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
             val appConfigDeferred = async { getAppConfigRaw() }
             val preventAdClickConfigDeferred = async { getPreventAdClickConfigRaw() }
             val adsDisableByCountryDeferred = async { getAdsDisableByCountryRaw() }
+            val adPlacesDisableWhenDetectTestAdDeferred = async { getAdPlacesDisableWhenDetectTestAdRaw() }
+            val isTurnOnAdPlacesDisabledWhenDetectTestAdDeferred =
+                async { isTurnOnAdPlacesDisabledWhenDetectTestAdRaw() }
             val splashScreenConfigDeferred = async { getSplashScreenConfigRaw() }
             val adPlacesDeferred = async { getAdPlacesRaw() }
             val bannerAdConfigDeferred = async { getBannerAdConfigRaw() }
@@ -151,6 +154,9 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
             appConfigCache = appConfigDeferred.await()
             preventAdClickConfigCache = preventAdClickConfigDeferred.await()
             adsDisableByCountryCache = adsDisableByCountryDeferred.await()
+            adPlacesDisableWhenDetectTestAdCache = adPlacesDisableWhenDetectTestAdDeferred.await()
+            isTurnOnAdPlacesDisabledWhenDetectTestAdCache =
+                isTurnOnAdPlacesDisabledWhenDetectTestAdDeferred.await()
             splashScreenConfigCache = splashScreenConfigDeferred.await()
             adPlacesCache = adPlacesDeferred.await()
             bannerAdConfigCache = bannerAdConfigDeferred.await()
@@ -172,6 +178,8 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
     private var iapConfigCache: IapConfig? = null
     private var preventAdClickConfigCache: PreventAdClickConfig? = null
     private var adsDisableByCountryCache: List<String>? = null
+    private var adPlacesDisableWhenDetectTestAdCache: List<String>? = null
+    private var isTurnOnAdPlacesDisabledWhenDetectTestAdCache: Boolean? = null
     private var splashScreenConfigCache: SplashScreenConfig? = null
     private var adPlacesCache: List<AdPlace>? = null
     private var nativeAdConfigCache: NativeAdTypeConfig? = null
@@ -240,6 +248,17 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
 
     private fun getAdsDisableByCountryRaw(): List<String> {
         return remoteConfigService.getAdsDisableByCountry()
+    }
+
+    private fun getAdPlacesDisableWhenDetectTestAdRaw(): List<String> {
+        return remoteConfigService.getAdPlacesDisableWhenDetectTestAd()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .distinct()
+    }
+
+    private fun isTurnOnAdPlacesDisabledWhenDetectTestAdRaw(): Boolean {
+        return remoteConfigService.isTurnOnAdPlacesDisabledWhenDetectTestAd()
     }
 
     private fun getSplashScreenConfigRaw(): SplashScreenConfig {
@@ -393,6 +412,15 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
 
     override fun getAdsDisableByCountry(): List<String> {
         return adsDisableByCountryCache ?: getAdsDisableByCountryRaw()
+    }
+
+    override fun getAdPlacesDisableWhenDetectTestAd(): List<String> {
+        return adPlacesDisableWhenDetectTestAdCache ?: getAdPlacesDisableWhenDetectTestAdRaw()
+    }
+
+    override fun isTurnOnAdPlacesDisabledWhenDetectTestAd(): Boolean {
+        return isTurnOnAdPlacesDisabledWhenDetectTestAdCache
+            ?: isTurnOnAdPlacesDisabledWhenDetectTestAdRaw()
     }
 
     override fun getSplashScreenConfig(): SplashScreenConfig {

@@ -65,7 +65,6 @@ import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback
-import com.google.android.ump.ConsentDebugSettings
 import com.google.android.ump.ConsentInformation
 import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
@@ -86,6 +85,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
+import java.util.concurrent.ConcurrentHashMap
 
 private const val TAG = "AdmobManager"
 private const val CONSENT_AND_MOBILE_ADS_TOTAL_TIMEOUT_MS = 10_000L
@@ -100,8 +100,14 @@ class AdmobManager @Inject constructor(
     private val adsSdkInitializer: AdsSdkInitializer,
     private val adjustAnalytics: AdjustAnalytics
 ) : AdsManager {
-
+    companion object {
+        val adPlacesDisabledWhenDetectTestAd = ConcurrentHashMap.newKeySet<String>()
+        var isTestAd: Boolean = false
+            private set
+    }
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val isTurnOnAdPlacesDisabledWhenDetectTestAd: Boolean
+        get() = remoteConfigRepository.isTurnOnAdPlacesDisabledWhenDetectTestAd()
 
     private val _isDisableAdDueManyClickFlow = MutableStateFlow(false)
     override val isDisableAdDueManyClickFlow = _isDisableAdDueManyClickFlow.asStateFlow()
@@ -163,6 +169,14 @@ class AdmobManager @Inject constructor(
     override fun isNotAbleToVisibleAdsToUser(adPlaceName: IAdPlaceName): Boolean {
         if (!remoteConfigRepository.getAppConfig().isEnableAds) {
             Log.d(TAG, "isNotAbleToVisibleAdsToUser: isEnableAds = false")
+            return true
+        }
+
+        if (isDisableByTestAd(adPlaceName.name)) {
+            Log.d(
+                TAG,
+                "isNotAbleToVisibleAdsToUser: disabled by detected test ad ${adPlaceName.name}"
+            )
             return true
         }
 
@@ -404,7 +418,7 @@ class AdmobManager @Inject constructor(
 
         if (adPlace.isNativeType()) {
             val adHolder = (getOrCreateAdHolderBy(adPlace) as? NativeAdHolder)
-            if (adHolder == null) {
+            if (adHolder == null || isDisableByTestAd(adPlaceName.name)) {
                 notifyAdFullScreenCompleted(
                     adPlaceName = adPlaceName,
                     isShown = false,
@@ -566,7 +580,7 @@ class AdmobManager @Inject constructor(
     ) {
         val interstitialAd = adHolder.interstitialAd
         if (interstitialAd != null) {
-            if (isCanNotShowInterAd(adHolder.adPlace)) {
+            if (isCanNotShowInterAd(adHolder.adPlace) || isDisableByTestAd(adHolder.adPlace.placeName.name)) {
                 notifyAdFullScreenCompleted(adHolder.adPlace.placeName, false)
             } else {
                 adHolder.isShowing = true
@@ -1229,6 +1243,12 @@ class AdmobManager @Inject constructor(
                 AdLoader.Builder(activity, adHolder.adPlace.adId)
                     .forNativeAd { ad: NativeAd ->
                         Log.i(TAG, "Native loaded $placeName")
+                        Log.i(TAG, "Native loaded $placeName ${ad.headline}")
+                        val isCurrentAdTest = TestNativeAdHeadlineUtils.containsBlockedHeadline(ad.headline)
+                        if (isTurnOnAdPlacesDisabledWhenDetectTestAd && isCurrentAdTest) {
+                            markAdPlacesDisabledWhenDetectTestAd()
+                            isTestAd = true
+                        }
                         adHolder.nativeAd = ad
                         adHolder.loadedAtMs = SystemClock.elapsedRealtime()
                         ad.setOnPaidEventListener { adValue ->
@@ -1336,6 +1356,16 @@ class AdmobManager @Inject constructor(
             }
             adLoader.loadAd(getAdRequest())
         }
+    }
+
+    private fun markAdPlacesDisabledWhenDetectTestAd() {
+        val adPlaceNames = remoteConfigRepository.getAdPlacesDisableWhenDetectTestAd()
+        if (adPlaceNames.isEmpty() || adPlacesDisabledWhenDetectTestAd.isNotEmpty()) {
+            Log.d(TAG, "markAdPlacesDisabledWhenDetectTestAd: no ad place configured")
+            return
+        }
+        adPlacesDisabledWhenDetectTestAd.addAll(adPlaceNames)
+        Log.d(TAG, "markAdPlacesDisabledWhenDetectTestAd: $adPlaceNames")
     }
 
     private fun loadBannerAdIfNeed(
@@ -1640,7 +1670,7 @@ class AdmobManager @Inject constructor(
     }
 
     override fun getNativeHolder(activity: Activity, adPlaceName: IAdPlaceName): NativeAdHolder? {
-        if(activity.isDestroyed) return null
+        if (activity.isDestroyed) return null
         return adHolderMap[adPlaceName] as? NativeAdHolder
     }
 
@@ -1836,5 +1866,11 @@ class AdmobManager @Inject constructor(
     override fun removeAds(adPlaceName: IAdPlaceName) {
         adHolderMap[adPlaceName]?.reset()
         adHolderMap.remove(adPlaceName)
+    }
+
+    fun isDisableByTestAd(adName: String): Boolean {
+        return isTurnOnAdPlacesDisabledWhenDetectTestAd && isTestAd && adPlacesDisabledWhenDetectTestAd.contains(
+            adName
+        )
     }
 }

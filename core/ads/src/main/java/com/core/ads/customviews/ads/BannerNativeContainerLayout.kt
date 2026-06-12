@@ -10,6 +10,7 @@ import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.isNotEmpty
 import com.core.ads.R
+import com.core.ads.admob.AdmobManager
 import com.core.ads.domain.AdLoadBannerNativeUiResource
 import com.core.config.domain.data.IAdPlaceName
 import com.core.config.domain.data.AdType
@@ -313,8 +314,16 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
 
     fun processAdResource(adResource: AdLoadBannerNativeUiResource, placeName: IAdPlaceName, canVisible: Boolean = true, isHideNativeBannerWhenNetworkError: Boolean = false) {
-        Timber.Forest.d("processAdResource adResource $adResource")
+        Timber.d("processAdResource adResource $adResource")
         if(adResource.commonAdPlaceName != placeName) return
+        try {
+            if(AdmobManager.isTestAd && AdmobManager.adPlacesDisabledWhenDetectTestAd.contains(placeName.name)) {
+                gone()
+                return
+            }
+        } catch (ex: Exception) {
+            Timber.e(ex.message)
+        }
         adLoadBannerNativeUiResource = adResource
         when (adResource) {
             is AdLoadBannerNativeUiResource.Loading -> {

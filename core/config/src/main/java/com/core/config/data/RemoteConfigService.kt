@@ -123,6 +123,19 @@ class RemoteConfigService @Inject constructor(
         )
     }
 
+    internal fun getAdPlacesDisableWhenDetectTestAd(): List<String> {
+        return remoteConfig.readList(
+            moshi,
+            ConfigParam.AdPlacesDisableWhenDetectTestAdParam
+        )
+    }
+
+    internal fun isTurnOnAdPlacesDisabledWhenDetectTestAd(): Boolean {
+        return remoteConfig.getBoolean(
+            ConfigParam.IsTurnOnAdPlacesDisabledWhenDetectTestAdParam.key
+        )
+    }
+
     internal fun getSplashScreenConfig(): SplashScreenConfigModel? {
         return remoteConfig.read(
             moshi, ConfigParam.SplashScreenConfigParam

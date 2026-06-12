@@ -70,6 +70,18 @@ internal sealed class ConfigParam<T : Any> {
 
     }
 
+    internal object AdPlacesDisableWhenDetectTestAdParam: ConfigParam<String>() {
+
+        override val key = "ad_places_disable_when_detect_test_ad"
+
+    }
+
+    internal object IsTurnOnAdPlacesDisabledWhenDetectTestAdParam: ConfigParam<Boolean>() {
+
+        override val key = "is_turn_on_ad_places_disabled_when_detect_test_ad"
+
+    }
+
     internal object SplashScreenConfigParam: ConfigParam<SplashScreenConfigModel>() {
 
         override val key = "splash_screen_config"

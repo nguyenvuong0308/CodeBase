@@ -33,6 +33,10 @@ interface RemoteConfigRepository {
 
     fun getAdsDisableByCountry(): List<String>
 
+    fun getAdPlacesDisableWhenDetectTestAd(): List<String>
+
+    fun isTurnOnAdPlacesDisabledWhenDetectTestAd(): Boolean
+
     fun getSplashScreenConfig(): SplashScreenConfig
 
     fun getAdPlaces(): List<AdPlace>
