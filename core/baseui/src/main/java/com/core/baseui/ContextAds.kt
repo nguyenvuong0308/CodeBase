@@ -91,6 +91,9 @@ abstract class ContextAds(
         isWaitingLoad = false
     }
 
+    fun isRewardReady(adPlaceName: IAdPlaceName): Boolean {
+        return adsManager.isRewardReady(adPlaceName)
+    }
     fun reinitAdPlaceName(
         initPreloadBannerNativeAdPlaceName: List<IAdPlaceName>? = null,
         initBannerNativeAdPlaceName: List<IAdPlaceName>? = null,

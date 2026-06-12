@@ -2,6 +2,7 @@ package com.core.baseui.fragment
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -40,8 +42,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 
 private const val TAG = "BaseFragment"
+private const val PICKED_IMAGE_DIR = "picked_images"
+private const val MAX_PICKED_IMAGE_AGE_MS = 24 * 60 * 60 * 1000L
+private const val MAX_PICKED_IMAGE_FILES = 20
 abstract class BaseFragment<B : ViewBinding>(
 ) : Fragment(), CoroutineScope {
 
@@ -53,7 +61,8 @@ abstract class BaseFragment<B : ViewBinding>(
 
     protected abstract fun bindingProvider(inflater: LayoutInflater, container: ViewGroup?): B
 
-
+    private lateinit var pickImageIntent: ActivityResultLauncher<PickVisualMediaRequest>
+    private var onImagePicked: ((Uri?) -> Unit)? = null
     private lateinit var startActivityIntent: ActivityResultLauncher<Intent>
     private var onResult: ((ActivityResult) -> Unit)? = null
     private lateinit var askCheckPermission: ActivityResultLauncher<Array<String>>
@@ -108,6 +117,13 @@ abstract class BaseFragment<B : ViewBinding>(
         startActivityIntent.launch(intent)
     }
 
+    fun launchImagePicker(onResult: (Uri?) -> Unit) {
+        onImagePicked = onResult
+        pickImageIntent.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+        )
+    }
+
 
     abstract val screenType: ScreenType
 
@@ -128,8 +144,83 @@ abstract class BaseFragment<B : ViewBinding>(
         ) { result ->
             onResult?.invoke(result)
         }
+
+        pickImageIntent = registerForActivityResult(
+            ActivityResultContracts.PickVisualMedia()
+        ) { uri ->
+            viewLifecycleOwner.lifecycleScope.launch {
+                val cachedUri = withContext(Dispatchers.IO) {
+                    uri?.let(::copyPickedImageToCache)
+                }
+                onImagePicked?.invoke(cachedUri)
+            }
+        }
         _viewBinding = bindingProvider(inflater, container)
         return _viewBinding?.root
+    }
+
+    private fun copyPickedImageToCache(uri: Uri): Uri? {
+        val context = context ?: return null
+        val imageDirs = listOfNotNull(
+            context.cacheDir,
+            context.externalCacheDir,
+            context.filesDir
+        ).map { File(it, PICKED_IMAGE_DIR) }
+
+        cleanupPickedImageDirs(imageDirs)
+
+        imageDirs.forEach { imageDir ->
+            val copiedUri = runCatching {
+                if (!imageDir.exists() && !imageDir.mkdirs()) return@runCatching null
+                val imageFile = File(imageDir, "picked_${System.currentTimeMillis()}.jpg")
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    FileOutputStream(imageFile).use { output ->
+                        input.copyTo(output)
+                        output.flush()
+                    }
+                } ?: return@runCatching null
+                Uri.fromFile(imageFile)
+            }.getOrNull()
+            if (copiedUri != null) return copiedUri
+        }
+
+        return null
+    }
+
+    protected fun deletePickedImageCacheFile(uri: Uri) {
+        if (uri.scheme != "file") return
+        val context = context ?: return
+        val file = File(uri.path ?: return)
+        val parent = file.parentFile ?: return
+        if (parent.name != PICKED_IMAGE_DIR) return
+
+        val pickedImageDirs = listOfNotNull(
+            context.cacheDir,
+            context.externalCacheDir,
+            context.filesDir
+        ).map { File(it, PICKED_IMAGE_DIR).canonicalFile }
+
+        val canonicalParent = runCatching { parent.canonicalFile }.getOrNull() ?: return
+        if (pickedImageDirs.any { it == canonicalParent }) {
+            runCatching { file.delete() }
+        }
+    }
+
+    private fun cleanupPickedImageDirs(imageDirs: List<File>) {
+        val cutoff = System.currentTimeMillis() - MAX_PICKED_IMAGE_AGE_MS
+        imageDirs.forEach { imageDir ->
+            val files = imageDir.listFiles()?.filter { it.isFile } ?: return@forEach
+            files.filter { it.lastModified() < cutoff }.forEach { file ->
+                runCatching { file.delete() }
+            }
+            imageDir.listFiles()
+                ?.filter { it.isFile }
+                ?.sortedByDescending { it.lastModified() }
+                ?.drop(MAX_PICKED_IMAGE_FILES)
+                ?.forEach { file ->
+                    runCatching { file.delete() }
+                }
+        }
     }
 
     fun requiredOpenSettingPermission(permissions: Array<String>): Boolean {
@@ -386,6 +477,8 @@ abstract class BaseFragment<B : ViewBinding>(
      */
     open fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
     }
+
+    fun isRewardReady(adPlaceName: IAdPlaceName) = contextAds?.isRewardReady(adPlaceName) == true
     //endregion
 
     open fun displayFirstData() {}

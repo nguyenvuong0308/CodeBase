@@ -28,8 +28,6 @@ class FrameListAdapter @Inject constructor(
     private var adsResource: AdLoadBannerNativeUiResource? = null
     var onRetryLoad: (() -> Unit)? = null
 
-    var onItemClick: ((position: Int, item: FrameModel) -> Unit)? = null
-
     fun setAdsResource(adsResource: AdLoadBannerNativeUiResource) {
         this.adsResource = adsResource
         for (i in 0 until itemCount) {
@@ -99,7 +97,7 @@ class FrameListAdapter @Inject constructor(
                 _viewBinding.run {
                     Glide.with(itemView.context).load(data.imageUrl).into(ivThumb)
                     viewContainer.setOnSingleClick {
-                        onItemClick?.invoke(position, data)
+                        OnItemClickCallBack?.invoke(position, data)
                     }
                 }
             }

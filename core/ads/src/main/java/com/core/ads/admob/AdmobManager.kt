@@ -1873,4 +1873,10 @@ class AdmobManager @Inject constructor(
             adName
         )
     }
+
+    override fun isRewardReady(adPlaceName: IAdPlaceName): Boolean {
+        val adPlace = remoteConfigRepository.getAdPlaceBy(adPlaceName)
+        val adHolder = getOrCreateAdHolderFullScreenBy(adPlace, true)
+        return (adHolder as? RewardedAdHolder)?.rewardedAd != null
+    }
 }

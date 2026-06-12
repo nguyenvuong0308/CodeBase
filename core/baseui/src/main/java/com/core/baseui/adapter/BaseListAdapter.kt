@@ -19,6 +19,7 @@ abstract class BaseListAdapter<T, V : BaseViewHolder<T>>(
         .setBackgroundThreadExecutor(appExecutors.diskIO())
         .build()
 ) {
+    var OnItemClickCallBack: ((position: Int, data: T) -> Unit)? = null
     protected val TYPE_NORMAL = 1
     protected val TYPE_ADS = 2
     protected val TYPE_LOAD_MORE = 3

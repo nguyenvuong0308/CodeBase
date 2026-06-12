@@ -63,8 +63,8 @@ class FrameListFragment :
                 frameAdapter.onRetryLoad = {
                     _viewModel.loadMoreFrameItems()
                 }
-                frameAdapter.onItemClick = { position, data ->
-                    Navigator.startFrameDetail(requireActivity(), data.id)
+                frameAdapter.OnItemClickCallBack = { position, data ->
+                    Navigator.startFrameDetail(requireActivity(), data.identify)
                 }
             }
 

@@ -3,6 +3,7 @@ package com.core.baseui
 import android.app.Activity
 import android.app.LocaleManager
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.LocaleList
@@ -13,6 +14,7 @@ import android.view.WindowInsetsController
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -58,12 +60,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
+import kotlin.collections.forEach
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.max
 
+private const val PICKED_IMAGE_DIR = "picked_images"
+private const val MAX_PICKED_IMAGE_AGE_MS = 24 * 60 * 60 * 1000L
+private const val MAX_PICKED_IMAGE_FILES = 21
 abstract class BaseActivity<T : ViewBinding> : AppCompatActivity(), CoroutineScope {
     private lateinit var askCheckPermission: ActivityResultLauncher<Array<String>>
+    private lateinit var pickImageIntent: ActivityResultLauncher<PickVisualMediaRequest>
+    private var onImagePicked: ((Uri?) -> Unit)? = null
     private val insetsViewModel: InsetsViewModel by viewModels()
     private val keyboardChangeViewModel: KeyboardChangeViewModel by viewModels()
     private var _onPermissionResult: ((Map<String, Boolean>) -> Unit)? = null
@@ -73,7 +84,7 @@ abstract class BaseActivity<T : ViewBinding> : AppCompatActivity(), CoroutineSco
     protected open val isRegisterOnKeyboardListener = false
 
     open val isWaitingAds = false
-
+    protected open val isSpaceKeyboard = false
     private var keyboardHeightProvider: KeyboardProvider? = null
     private var onChangeKeyBoardHeight = ArrayList<(Int) -> Unit>()
 
@@ -223,6 +234,8 @@ abstract class BaseActivity<T : ViewBinding> : AppCompatActivity(), CoroutineSco
 
     open fun getSurfaceView(): View = viewBinding.root
 
+    open var enableEdgeToEdge = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (isRegisterOnKeyboardListener) {
@@ -241,6 +254,17 @@ abstract class BaseActivity<T : ViewBinding> : AppCompatActivity(), CoroutineSco
         ) { result ->
             onResult?.invoke(result)
         }
+
+        pickImageIntent = registerForActivityResult(
+            ActivityResultContracts.PickVisualMedia()
+        ) { uri ->
+            lifecycleScope.launch {
+                val cachedUri = withContext(Dispatchers.IO) {
+                    uri?.let(::copyPickedImageToCache)
+                }
+                onImagePicked?.invoke(cachedUri)
+            }
+        }
         setContentView(viewBinding.root)
         if (isHideNavigationBar) {
             hideNavigationBar()
@@ -256,7 +280,9 @@ abstract class BaseActivity<T : ViewBinding> : AppCompatActivity(), CoroutineSco
                 )
             )
         }
-        enableEdgeToEdge()
+        if(enableEdgeToEdge) {
+            enableEdgeToEdge()
+        }
 
         if (isHideStatusBar) {
             hideSystemBars(window)
@@ -265,7 +291,7 @@ abstract class BaseActivity<T : ViewBinding> : AppCompatActivity(), CoroutineSco
             // Lấy thông tin về kích thước của các thanh hệ thống
             val systemBarInsets = windowInsets.resolveSystemBarInsets()
             val cutoutInsets = windowInsets.getInsets(WindowInsetsCompat.Type.displayCutout())
-
+            val imeInsets = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
             Timber.d("insets $systemBarInsets ")
             Timber.d("cutoutInsets $cutoutInsets ")
 
@@ -273,7 +299,11 @@ abstract class BaseActivity<T : ViewBinding> : AppCompatActivity(), CoroutineSco
             // Ở đây, ta thêm padding ở trên cùng và dưới cùng của layout
             val topPadding =
                 if (isSpaceDisplayCutout && cutoutInsets.top > 0) cutoutInsets.top else if (isSpaceStatusBar) systemBarInsets.top else 0
-            val bottomPadding = if (isHideNavigationBar) 0 else systemBarInsets.bottom
+            val bottomPadding = if (isSpaceKeyboard) {
+                if(isHideNavigationBar && imeInsets.bottom == 0) 0 else max(systemBarInsets.bottom, imeInsets.bottom)
+            } else {
+                if (isHideNavigationBar) 0 else systemBarInsets.bottom
+            }
             getSurfaceView().setPadding(systemBarInsets.left, topPadding, systemBarInsets.right, bottomPadding)
 
             insetsViewModel.updateInsets(
@@ -329,6 +359,75 @@ abstract class BaseActivity<T : ViewBinding> : AppCompatActivity(), CoroutineSco
                 onChangeVipState(isVip)
                 listVipListener.forEach { it.invoke() }
             }
+        }
+    }
+
+    fun launchImagePicker(onResult: (Uri?) -> Unit) {
+        onImagePicked = onResult
+        pickImageIntent.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+        )
+    }
+
+    private fun copyPickedImageToCache(uri: Uri): Uri? {
+        val imageDirs = listOfNotNull(
+            cacheDir,
+            externalCacheDir,
+            filesDir
+        ).map { File(it, PICKED_IMAGE_DIR) }
+
+        cleanupPickedImageDirs(imageDirs)
+
+        imageDirs.forEach { imageDir ->
+            val copiedUri = runCatching {
+                if (!imageDir.exists() && !imageDir.mkdirs()) return@runCatching null
+                val imageFile = File(imageDir, "picked_${System.currentTimeMillis()}.jpg")
+                contentResolver.openInputStream(uri)?.use { input ->
+                    FileOutputStream(imageFile).use { output ->
+                        input.copyTo(output)
+                        output.flush()
+                    }
+                } ?: return@runCatching null
+                Uri.fromFile(imageFile)
+            }.getOrNull()
+            if (copiedUri != null) return copiedUri
+        }
+
+        return null
+    }
+
+    protected fun deletePickedImageCacheFile(uri: Uri) {
+        if (uri.scheme != "file") return
+        val file = File(uri.path ?: return)
+        val parent = file.parentFile ?: return
+        if (parent.name != PICKED_IMAGE_DIR) return
+
+        val pickedImageDirs = listOfNotNull(
+            cacheDir,
+            externalCacheDir,
+            filesDir
+        ).map { File(it, PICKED_IMAGE_DIR).canonicalFile }
+
+        val canonicalParent = runCatching { parent.canonicalFile }.getOrNull() ?: return
+        if (pickedImageDirs.any { it == canonicalParent }) {
+            runCatching { file.delete() }
+        }
+    }
+
+    private fun cleanupPickedImageDirs(imageDirs: List<File>) {
+        val cutoff = System.currentTimeMillis() - MAX_PICKED_IMAGE_AGE_MS
+        imageDirs.forEach { imageDir ->
+            val files = imageDir.listFiles()?.filter { it.isFile } ?: return@forEach
+            files.filter { it.lastModified() < cutoff }.forEach { file ->
+                runCatching { file.delete() }
+            }
+            imageDir.listFiles()
+                ?.filter { it.isFile }
+                ?.sortedByDescending { it.lastModified() }
+                ?.drop(MAX_PICKED_IMAGE_FILES)
+                ?.forEach { file ->
+                    runCatching { file.delete() }
+                }
         }
     }
 
@@ -665,6 +764,9 @@ abstract class BaseActivity<T : ViewBinding> : AppCompatActivity(), CoroutineSco
     fun preloadAds() {
         contextAds?.preloadAds()
     }
+
+    fun isRewardReady(adPlaceName: IAdPlaceName) = contextAds?.isRewardReady(adPlaceName) == true
+
     //endregion
 
     companion object {
