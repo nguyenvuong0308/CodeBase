@@ -1,9 +1,11 @@
 package com.core.config.data
 
 import android.content.Context
+import android.os.Build
 import com.squareup.moshi.Moshi
 import com.core.config.R
 import com.core.config.data.model.AppOpenAdConfigModel
+import com.core.config.data.model.AdPlacesVersionKeyModel
 import com.core.config.data.model.InterstitialAdConfigModel
 import com.core.config.data.model.NativeAdConfigModel
 import com.core.config.data.model.RewardedAdConfigModel
@@ -146,39 +148,95 @@ class RemoteConfigService @Inject constructor(
     }
 
     internal fun getBannerNativeAdPlaces(): List<AdPlaceModel> {
-        val lst2 = remoteConfig.readList(
-            moshi, ConfigParam.BannerNativeAdPlaces2
-        )
-        if(lst2.isNotEmpty()) {
-            return lst2
-        }
-        return remoteConfig.readList(
-            moshi, ConfigParam.BannerNativeAdPlaces
+        return getAdPlacesByConfigKeys(
+            versionedKeySelector = { it.bannerNative },
+            fallbackOverrideKey = ConfigParam.BannerNativeAdPlaces2.key,
+            defaultKey = ConfigParam.BannerNativeAdPlaces.key,
         )
     }
 
     internal fun getAppOpenAdPlaces(): List<AdPlaceModel> {
-        val lst2 = remoteConfig.readList(
-            moshi, ConfigParam.AppOpenAdPlaces2
-        )
-        if (lst2.isNotEmpty()) {
-            return lst2
-        }
-        return remoteConfig.readList(
-            moshi, ConfigParam.AppOpenAdPlaces
+        return getAdPlacesByConfigKeys(
+            versionedKeySelector = { it.appOpen },
+            fallbackOverrideKey = ConfigParam.AppOpenAdPlaces2.key,
+            defaultKey = ConfigParam.AppOpenAdPlaces.key,
         )
     }
 
     internal fun getRewardedRewardedInterInterAdPlaces(): List<AdPlaceModel> {
-        val lst2 = remoteConfig.readList(
-            moshi, ConfigParam.RewardedRewardedInterInterAdPlaces2
+        return getAdPlacesByConfigKeys(
+            versionedKeySelector = { it.rewardInter },
+            fallbackOverrideKey = ConfigParam.RewardedRewardedInterInterAdPlaces2.key,
+            defaultKey = ConfigParam.RewardedRewardedInterInterAdPlaces.key,
         )
-        if (lst2.isNotEmpty()) {
-            return lst2
+    }
+
+    private fun getAdPlacesByConfigKeys(
+        versionedKeySelector: (AdPlacesVersionKeyModel) -> String?,
+        fallbackOverrideKey: String,
+        defaultKey: String,
+    ): List<AdPlaceModel> {
+        val versionedKey = getVersionedAdPlacesKey(versionedKeySelector)
+        if (!versionedKey.isNullOrBlank()) {
+            val versionedList = readAdPlaceList(versionedKey)
+            if (versionedList.isNotEmpty()) {
+                return versionedList
+            }
         }
+
+        val fallbackOverrideList = readAdPlaceList(fallbackOverrideKey)
+        if (fallbackOverrideList.isNotEmpty()) {
+            return fallbackOverrideList
+        }
+
+        return readAdPlaceList(defaultKey)
+    }
+
+    private fun getVersionedAdPlacesKey(
+        versionedKeySelector: (AdPlacesVersionKeyModel) -> String?,
+    ): String? {
+        val currentVersionCode = getCurrentVersionCode()
         return remoteConfig.readList(
-            moshi, ConfigParam.RewardedRewardedInterInterAdPlaces
-        )
+            moshi,
+            ConfigParam.AdPlacesVersionConfigParam
+        ).firstOrNull { config ->
+            config.versionCodes?.contains(currentVersionCode) == true
+        }?.key?.let(versionedKeySelector)
+    }
+
+    private fun readAdPlaceList(key: String): List<AdPlaceModel> {
+        return try {
+            val json = remoteConfig.getString(key)
+            if (json.isBlank()) {
+                emptyList()
+            } else {
+                val listType = com.squareup.moshi.Types.newParameterizedType(
+                    List::class.java,
+                    AdPlaceModel::class.java
+                )
+                moshi.adapter<List<AdPlaceModel>>(listType).fromJson(json).orEmpty()
+            }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    private fun getCurrentVersionCode(): Long {
+        val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.packageManager.getPackageInfo(
+                context.packageName,
+                android.content.pm.PackageManager.PackageInfoFlags.of(0)
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            context.packageManager.getPackageInfo(context.packageName, 0)
+        }
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            packageInfo.longVersionCode
+        } else {
+            @Suppress("DEPRECATION")
+            packageInfo.versionCode.toLong()
+        }
     }
 
     internal fun getBannerAdConfig(): BannerAdConfigModel? {

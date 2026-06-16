@@ -88,6 +88,12 @@ internal sealed class ConfigParam<T : Any> {
 
     }
 
+    internal object AdPlacesVersionConfigParam: ConfigParam<com.core.config.data.model.AdPlacesVersionConfigModel>() {
+
+        override val key = "ad_places_version_config"
+
+    }
+
     internal object BannerNativeAdPlaces: ConfigParam<AdPlaceModel>() {
 
         override val key = "banner_native_ad_places"
