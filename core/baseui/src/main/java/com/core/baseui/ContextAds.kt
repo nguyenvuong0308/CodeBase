@@ -12,9 +12,9 @@ import com.core.ads.domain.AdFullScreenUiResource
 import com.core.ads.domain.AdLoadBannerNativeUiResource
 import com.core.ads.domain.AdsManager
 import com.core.baseui.ext.collectFlowOn
-import com.core.config.BuildConfig
 import com.core.config.domain.RemoteConfigRepository
 import com.core.config.domain.data.IAdPlaceName
+import com.core.utilities.isAppDebuggable
 import com.core.utilities.manager.isNetworkConnected
 import com.core.utilities.toast
 import com.core.utilities.util.Timber
@@ -369,7 +369,7 @@ abstract class ContextAds(
 
     fun showInterAd(adPlaceName: IAdPlaceName, onHandleCompleted: ((isShown: Boolean) -> Unit)) {
         activityRef.get()?.let { activity ->
-            if (BuildConfig.DEBUG) {
+            if (activity.isAppDebuggable()) {
                 if (!adInterstitialAll.contains(adPlaceName) && !adInterstitialLazyLoad.contains(
                         adPlaceName
                     )
@@ -398,7 +398,7 @@ abstract class ContextAds(
             adRewardWithoutAutoRetry.remove(adPlaceName)
         }
         activityRef.get()?.let { activity ->
-            if (BuildConfig.DEBUG) {
+            if (activity.isAppDebuggable()) {
                 if (!adRewardAll.contains(adPlaceName) && !adRewardLazyLoad.contains(adPlaceName)) {
                     activity.toast("Vui lòng check lại danh sách adPlaceName trong hàm providerRewardAdPlaceName ${adPlaceName.name}, hoặc gọi loadRewardAds")
                 }

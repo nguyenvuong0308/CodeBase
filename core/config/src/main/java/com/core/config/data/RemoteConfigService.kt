@@ -1,6 +1,6 @@
 package com.core.config.data
 
-import com.core.config.BuildConfig
+import android.content.Context
 import com.squareup.moshi.Moshi
 import com.core.config.R
 import com.core.config.data.model.AppOpenAdConfigModel
@@ -21,12 +21,15 @@ import com.core.config.data.model.RequestConsentConfigModel
 import com.google.firebase.Firebase
 import com.google.firebase.remoteconfig.remoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
+import com.core.utilities.isAppDebuggable
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class RemoteConfigService @Inject constructor(
-    private val moshi: Moshi
+    private val moshi: Moshi,
+    @ApplicationContext private val context: Context
 ) {
 
     companion object {
@@ -49,7 +52,7 @@ class RemoteConfigService @Inject constructor(
     private val remoteConfig by lazy {
         val settings = remoteConfigSettings {
             fetchTimeoutInSeconds = 30
-            minimumFetchIntervalInSeconds = if (BuildConfig.DEBUG || BuildConfig.FLAVOR == "dev") {
+            minimumFetchIntervalInSeconds = if (context.isAppDebuggable()) {
                 0
             } else {
                 CONFIG_CACHE_EXPIRATION_SECONDS

@@ -113,8 +113,10 @@ fun Context.openUrl(url: String) {
     }
 }
 
-fun Context.isDebug(): Boolean {
-    return 0 != applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
+fun Context.isDebug(): Boolean = isAppDebuggable()
+
+fun Context.isAppDebuggable(): Boolean {
+    return 0 != (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE)
 }
 
 fun Context.openAppNotificationSettings() {

@@ -7,9 +7,9 @@ import android.webkit.WebView
 import androidx.appcompat.app.AppCompatDelegate
 import com.core.ads.extensions.getAndroidId
 import com.core.ads.extensions.md5
-import com.core.config.BuildConfig
 import com.core.preference.AppPreferences
 import com.core.preference.SharedPrefs
+import com.core.utilities.isAppDebuggable
 import com.core.utilities.util.Timber
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
@@ -69,7 +69,7 @@ abstract class BaseAdmobApplication : Application() {
      * @param isDebug = true cho thiết bị thành thành thiết bị test -> hiển thị quảng cáo test
      */
     open fun setupDeviceTest() {
-        if (BuildConfig.DEBUG) {
+        if (isAppDebuggable()) {
             deviceTestList.add(md5(getAndroidId(this)).uppercase())
             deviceTestList.add("161B90FEB622DEDE256FE344E5585390")
 
@@ -87,7 +87,7 @@ abstract class BaseAdmobApplication : Application() {
 
     open fun initLogging() {
         if (Timber.treeCount != 0) return
-        if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
+        if (isAppDebuggable()) Timber.plant(Timber.DebugTree())
     }
 
     /**

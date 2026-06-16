@@ -1,7 +1,6 @@
 package com.core.config.data.mapper
 
 import android.content.Context
-import com.core.config.BuildConfig
 import com.core.config.data.model.AdPlaceModel
 import com.core.config.domain.data.AdType
 import com.core.config.domain.data.AdPlace
@@ -17,6 +16,7 @@ import com.core.config.domain.data.NativeTemplateSize
 import com.core.config.domain.data.NoneAdPlace
 import com.core.config.domain.data.RewardedInterstitialAdPlace
 import com.core.config.domain.data.RewardedVideoAdPlace
+import com.core.utilities.isAppDebuggable
 import com.core.utilities.util.Timber
 import com.core.utilities.util.toast.Toasty
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -33,7 +33,7 @@ internal class AdPlaceModelMapper @Inject constructor(
     override fun toData(model: AdPlaceModel): AdPlace {
         val placeNameApp = appAdPlaceName.findAdPlaceName(model.adPlace ?: "")
         val placeNameCore =  CoreAdPlaceName.fromKey(model.adPlace ?: "")
-        if(placeNameApp != null && placeNameCore != NONE && BuildConfig.DEBUG) {
+        if(placeNameApp != null && placeNameCore != NONE && context.isAppDebuggable()) {
             Toasty.error(context, "Conflict adPlaname core and app ${placeNameCore.name}, please remove it from app module").show()
             Timber.e("Conflict adPlaname core and app ${placeNameCore.name}, please remove it from app module")
         }

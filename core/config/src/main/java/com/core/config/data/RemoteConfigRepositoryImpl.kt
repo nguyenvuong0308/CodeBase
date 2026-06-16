@@ -37,7 +37,7 @@ import com.core.config.domain.data.RewardedAdTypeConfig
 import com.core.config.domain.data.RewardedInterstitialAdTypeConfig
 import com.core.config.domain.data.SplashScreenConfig
 import com.core.preference.AppPreferences
-import com.core.utilities.isDebug
+import com.core.utilities.isAppDebuggable
 import com.core.utilities.toast
 import com.core.utilities.util.toast.Toasty
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -99,7 +99,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
         Log.e(TAG, "fetch loading")
         remoteConfigService.fetchAndActive { isSuccess ->
             isFetching = false
-            if (applicationContext.isDebug() /*|| BuildConfig.FLAVOR == "dev"*/) {
+            if (applicationContext.isAppDebuggable() /*|| BuildConfig.FLAVOR == "dev"*/) {
                 applicationContext.toast("fetch RemoteConfig Successfully!", Toasty.SUCCESS)
             }
             if (!isFetchComplete) {
@@ -118,7 +118,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
                     appPreferences.isRemoteConfigFirstTimeFetch = false
                     analyticsManager.logEvent(AnalyticsEvent.EVENT_REMOTE_CONFIG_FETCH_TIMEOUT_FIRST)
                 }
-                if (applicationContext.isDebug() /*|| BuildConfig.FLAVOR == "dev"*/) {
+                if (applicationContext.isAppDebuggable() /*|| BuildConfig.FLAVOR == "dev"*/) {
                     applicationContext.toast("fetch RemoteConfig Timeout!", Toasty.WARNING)
                 }
                 Log.e(TAG, "fetch complete timeout")

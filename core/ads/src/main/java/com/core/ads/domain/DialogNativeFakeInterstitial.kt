@@ -17,13 +17,13 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.core.ads.R
 import com.core.ads.databinding.DialogNativeFakeInterstitialBinding
-import com.core.config.BuildConfig
 import com.core.config.domain.RemoteConfigRepository
 import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.CoreAdPlaceName.NONE
 import com.core.config.domain.data.IAdPlaceName
 import com.core.config.domain.data.IAppProviderAdPlaceName
 import com.core.config.domain.data.NativeAdPlace
+import com.core.utilities.isAppDebuggable
 import com.core.utilities.util.Timber
 import com.core.utilities.util.toast.Toasty
 import dagger.hilt.android.AndroidEntryPoint
@@ -74,7 +74,7 @@ class DialogNativeFakeInterstitial : DialogFragment() {
         isCancelable = false
         val placeNameApp = appAdPlaceName.findAdPlaceName(adPlaceNameString)
         val placeNameCore = CoreAdPlaceName.fromKey(adPlaceNameString)
-        if (placeNameApp != null && placeNameCore != NONE && BuildConfig.DEBUG) {
+        if (placeNameApp != null && placeNameCore != NONE && requireContext().isAppDebuggable()) {
             Toasty.error(
                 requireContext(),
                 "Conflict adPlaname core and app ${placeNameCore.name}, please remove it from app module"
