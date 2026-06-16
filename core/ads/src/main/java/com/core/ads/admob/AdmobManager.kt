@@ -1247,6 +1247,7 @@ class AdmobManager @Inject constructor(
                         val isCurrentAdTest = TestNativeAdHeadlineUtils.containsBlockedHeadline(ad.headline)
                         if (isTurnOnAdPlacesDisabledWhenDetectTestAd && isCurrentAdTest) {
                             markAdPlacesDisabledWhenDetectTestAd()
+                            Log.i(TAG, "Native loaded block ad test $placeName ${ad.headline}")
                             isTestAd = true
                         }
                         adHolder.nativeAd = ad
