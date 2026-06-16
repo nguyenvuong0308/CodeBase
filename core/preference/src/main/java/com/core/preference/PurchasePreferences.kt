@@ -9,6 +9,8 @@ import javax.inject.Singleton
 
 @Singleton
 class PurchasePreferences @Inject constructor(@ApplicationContext private val applicationContext: Context) {
+
+    var isVipDebug = false
     private val currentKeyVipList = mutableListOf<String>()
 
     val changeVipState = MutableLiveData<Boolean>()
@@ -18,15 +20,15 @@ class PurchasePreferences @Inject constructor(@ApplicationContext private val ap
         changeVipState.value = isUserVip()
     }
 
-    var isProByYear by prefs.preference(defaultValue = false, key = KEY_IS_PRO_BY_YEAR){
+    var isProByYear by prefs.preference(defaultValue = false, key = KEY_IS_PRO_BY_YEAR) {
         changeVipState.value = isUserVip()
     }
 
-    var isProByMonth by prefs.preference(defaultValue = false, key = KEY_IS_PRO_BY_MONTH){
+    var isProByMonth by prefs.preference(defaultValue = false, key = KEY_IS_PRO_BY_MONTH) {
         changeVipState.value = isUserVip()
     }
 
-    var isProByWeek by prefs.preference(defaultValue = false, key = KEY_IS_PRO_BY_WEEK){
+    var isProByWeek by prefs.preference(defaultValue = false, key = KEY_IS_PRO_BY_WEEK) {
         changeVipState.value = isUserVip()
     }
 
@@ -43,18 +45,17 @@ class PurchasePreferences @Inject constructor(@ApplicationContext private val ap
      * Kiểm tra xem người dùng đã mua vip chưa
      */
     fun isUserVip(): Boolean {
+        if (isVipDebug) return true
         return currentKeyVipList.any { keyVip ->
             prefs.get(keyVip, false)
         }
     }
 
     fun isUserNotVip(): Boolean {
-        return !currentKeyVipList.any { keyVip ->
-            prefs.get(keyVip, false)
-        }
+        return !isUserVip()
     }
 
-    fun saveBoughtState(key: String, value: Boolean){
+    fun saveBoughtState(key: String, value: Boolean) {
         prefs.put(key, value)
     }
 
