@@ -29,9 +29,7 @@ Use the modules you need:
 
 ```kotlin
 dependencies {
-    implementation("com.github.nguyenvuong0308.CodeBase:baseui:1.0.0")
-    implementation("com.github.nguyenvuong0308.CodeBase:ads:1.0.0")
-    implementation("com.github.nguyenvuong0308.CodeBase:rate:1.0.0")
+    implementation("com.github.nguyenvuong0308:CodeBase:2.0.5")
 }
 ```
 
