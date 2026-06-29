@@ -129,7 +129,7 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
                     NativeTemplateSize.MiniCtaRight -> R.layout.gnt_mini_cta_right_shimmer
 
-                    NativeTemplateSize.FullCtaBottom, NativeTemplateSize.FullCtaTop, NativeTemplateSize.FullCtaRight, NativeTemplateSize.FullInterstitialV1, NativeTemplateSize.FullInterstitialV2 -> R.layout.gnt_full_cta_bottom_template_view_shimmer
+                    NativeTemplateSize.FullCtaBottomOnboarding, NativeTemplateSize.FullCtaBottom, NativeTemplateSize.FullCtaTop, NativeTemplateSize.FullCtaRight, NativeTemplateSize.FullInterstitialV1, NativeTemplateSize.FullInterstitialV2 -> R.layout.gnt_full_cta_bottom_template_view_shimmer
 
                     else -> customNativeAds.createShimmerLayoutPlaceHolder(nativeTemplateSize = nativeTemplateSize)
                 }
@@ -288,6 +288,8 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
             NativeTemplateSize.SmallLong -> NativeSmallLongTemplateView(context)
 
             NativeTemplateSize.FullCtaBottom -> NativeFullCtaBottomTemplateView(context)
+
+            NativeTemplateSize.FullCtaBottomOnboarding -> NativeFullCtaBottomOnboardingTemplateView(context)
 
             NativeTemplateSize.FullCtaTop -> NativeFullCtaTopTemplateView(context)
 
