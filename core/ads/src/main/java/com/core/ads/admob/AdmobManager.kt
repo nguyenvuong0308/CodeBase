@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.SystemClock
 import android.util.Log
+import android.view.ViewGroup
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.FragmentManager
 import com.core.ads.AdsSdkInitializer
@@ -83,9 +84,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
-import java.util.concurrent.ConcurrentHashMap
 
 private const val TAG = "AdmobManager"
 private const val CONSENT_AND_MOBILE_ADS_TOTAL_TIMEOUT_MS = 10_000L
@@ -121,7 +122,7 @@ class AdmobManager @Inject constructor(
     private val _requestConsentFlow = MutableSharedFlow<ConsentFormUiResource>()
     override val requestConsentFlow = _requestConsentFlow.asSharedFlow()
 
-    private val adHolderMap = mutableMapOf<IAdPlaceName, AdHolder>()
+    private val adHolderBannerNativeMap = mutableMapOf<IAdPlaceName, AdHolder>()
     private val adHolderFullScreenMap = mutableMapOf<String, AdHolder>()
     private val adHolderAppOpenMap = mutableMapOf<IAdPlaceName, AppOpenAdHolder>()
 
@@ -149,11 +150,11 @@ class AdmobManager @Inject constructor(
             }
         }
 
-        adHolderMap.values.forEach { adHolder ->
-            if (adHolder.isShowing) {
-                return true
-            }
-        }
+//        adHolderBannerNativeMap.values.forEach { adHolder ->
+//            if (adHolder.isShowing) {
+//                return true
+//            }
+//        }
         return isHasAppOpenAdShowing()
     }
 
@@ -417,7 +418,7 @@ class AdmobManager @Inject constructor(
         }
 
         if (adPlace.isNativeType()) {
-            val adHolder = (getOrCreateAdHolderBy(adPlace) as? NativeAdHolder)
+            val adHolder = (getOrCreateAdBannerNativeHolderBy(adPlace) as? NativeAdHolder)
             if (adHolder == null || isDisableByTestAd(adPlaceName.name)) {
                 notifyAdFullScreenCompleted(
                     adPlaceName = adPlaceName,
@@ -544,7 +545,7 @@ class AdmobManager @Inject constructor(
         Log.d(TAG, "loadBannerNativeAd: ")
         val adPlace = remoteConfigRepository.getAdPlaceBy(adPlaceName)
 
-        val adHolder = getOrCreateAdHolderBy(adPlace)
+        val adHolder = getOrCreateAdBannerNativeHolderBy(adPlace)
         adHolder.needRetry = true
         if (adPlace.isNativeType()) {
             loadNativeAdIfNeed(
@@ -569,7 +570,7 @@ class AdmobManager @Inject constructor(
 
     override fun releaseBannerNative(adPlaceName: IAdPlaceName) {
         val adPlace = remoteConfigRepository.getAdPlaceBy(adPlaceName)
-        val adHolder = getOrCreateAdHolderBy(adPlace)
+        val adHolder = getOrCreateAdBannerNativeHolderBy(adPlace)
         adHolder.reset()
         adHolder.needRetry = false
     }
@@ -1386,6 +1387,23 @@ class AdmobManager @Inject constructor(
         var bannerAd = adHolder.bannerAd
         Timber.d("loadBannerAdIfNeed: ${adHolder.bannerAd} ${bannerAd?.parent} $this")
 //        if (bannerAd != null && bannerAd.parent == null && !bannerAd.isShown) {
+        if (bannerAd != null && !bannerAdPlace.isCollapsible) {
+            val parentAdView = bannerAd.parent as? ViewGroup
+            if (parentAdView == null) {
+                notifyBannerLoaded(bannerAd, bannerAdPlace)
+                return
+            }
+            if (parentAdView.isAttachedToWindow) {
+                Timber.d("loadBannerAdIfNeed: banner already attached $placeName")
+                return
+            }
+            runCatching { parentAdView.endViewTransition(bannerAd) }
+            parentAdView.layoutTransition = null
+            parentAdView.removeView(bannerAd)
+            adHolder.bannerAd = null
+            bannerAd = null
+        }
+
         if (bannerAd != null && bannerAd.parent == null) {
             notifyBannerLoaded(bannerAd, bannerAdPlace)
             return
@@ -1672,7 +1690,7 @@ class AdmobManager @Inject constructor(
 
     override fun getNativeHolder(activity: Activity, adPlaceName: IAdPlaceName): NativeAdHolder? {
         if (activity.isDestroyed) return null
-        return adHolderMap[adPlaceName] as? NativeAdHolder
+        return adHolderBannerNativeMap[adPlaceName] as? NativeAdHolder
     }
 
     override fun getOrCreateAppOpenAdHolderBy(adPlace: AdPlace): AppOpenAdHolder {
@@ -1685,16 +1703,17 @@ class AdmobManager @Inject constructor(
         return adHolder
     }
 
-    private fun getOrCreateAdHolderBy(adPlace: AdPlace): AdHolder {
-        var adHolder = adHolderMap[adPlace.placeName]
+    private fun getOrCreateAdBannerNativeHolderBy(adPlace: AdPlace): AdHolder {
+        var adHolder = adHolderBannerNativeMap[adPlace.placeName]
         if (adHolder == null || adHolder.adPlace.adType != adPlace.adType) {
             adHolder = when (adPlace.adType) {
                 AdType.Banner -> BannerAdHolder(adPlace = adPlace)
                 AdType.Native -> NativeAdHolder(adPlace = adPlace)
-                AdType.AppOpen -> AppOpenAdHolder(adPlace = adPlace)
-                else -> RewardedAdHolder(adPlace = adPlace)
+//                AdType.AppOpen -> AppOpenAdHolder(adPlace = adPlace)
+//                else -> RewardedAdHolder(adPlace = adPlace)
+                else -> NativeAdHolder(adPlace = adPlace)
             }
-            adHolderMap[adPlace.placeName] = adHolder
+            adHolderBannerNativeMap[adPlace.placeName] = adHolder
         }
         adHolder.adPlace = adPlace
         return adHolder
@@ -1731,7 +1750,7 @@ class AdmobManager @Inject constructor(
     }
 
     private fun isBannerNativeAdPlacedLoaded(adPlace: AdPlace): Boolean {
-        val adHolder = adHolderMap[adPlace.placeName] ?: return false
+        val adHolder = adHolderBannerNativeMap[adPlace.placeName] ?: return false
         return when (adPlace.adType) {
             AdType.Banner -> adHolder is BannerAdHolder && adHolder.bannerAd != null
             AdType.Native -> adHolder is NativeAdHolder && adHolder.nativeAd != null
@@ -1864,9 +1883,9 @@ class AdmobManager @Inject constructor(
         disableAdCountDownTimer?.start()
     }
 
-    override fun removeAds(adPlaceName: IAdPlaceName) {
-        adHolderMap[adPlaceName]?.reset()
-        adHolderMap.remove(adPlaceName)
+    override fun removeNativeAds(adPlaceName: IAdPlaceName) {
+        adHolderBannerNativeMap[adPlaceName]?.reset()
+        adHolderBannerNativeMap.remove(adPlaceName)
     }
 
     fun isDisableByTestAd(adName: String): Boolean {
