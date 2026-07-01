@@ -74,9 +74,9 @@ interface AdsManager {
     fun startDisableAdCountDownTimer()
 
     /*
-        Xóa quảng cáo để ứng dụng có thể tải lại quảng cáo khi vào lại app (thường dùng cho các quảng cáo sử dụng oneTimeLoad = true
+        Xóa quảng cáo native để ứng dụng có thể tải lại quảng cáo khi vào lại app (thường dùng cho các quảng cáo sử dụng oneTimeLoad = true
      */
-    fun removeAds(adPlaceName: IAdPlaceName)
+    fun removeNativeAds(adPlaceName: IAdPlaceName)
 
     fun isRewardReady(adPlaceName: IAdPlaceName): Boolean
 }

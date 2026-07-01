@@ -128,7 +128,7 @@ class MainActivityHost : HostBaseActivity<CoreActivityMainBinding, MainFeatureEv
                 dialogExit?.onExit = {
                     dialogExit = null
 
-                    adsManager.removeAds(AppAdPlaceName.ANCHORED_EXIT)
+                    adsManager.removeNativeAds(AppAdPlaceName.ANCHORED_EXIT)
 
                     finish()
                 }
