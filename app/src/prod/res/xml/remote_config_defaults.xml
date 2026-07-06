@@ -434,6 +434,14 @@
             "background_cta": "#77cf7f",
             "border_color": "#2d3d4a",
             "count_down_timer": 30
+            },
+            {
+            "place_name": "action_next_in_introduction",
+            "ad_id": "ca-app-pub-3940256099942544/1033173712",
+            "is_ignore_interval": true,
+            "ad_type": "interstitial",
+            "is_auto_load_after_dismiss": false,
+            "is_enable": true
             }
             ]
         </value>
