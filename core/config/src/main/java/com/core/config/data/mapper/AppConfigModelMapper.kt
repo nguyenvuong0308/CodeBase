@@ -30,7 +30,13 @@ internal class AppConfigModelMapper @Inject constructor(
                 DEFINE_INTRO_HAVE_ADS,
                 DEFINE_INTRO_HAVE_ADS,
                 DEFINE_INTRO_HAVE_ADS
-            ), introDataV2 = model.intro_data_v2 ?: arrayListOf(
+            ),
+            introDataV2 = model.intro_data_v2 ?: arrayListOf(
+                DEFINE_INTRO_NO_ADS,
+                DEFINE_INTRO_NO_ADS,
+                DEFINE_INTRO_HAVE_ADS
+            ),
+            introDataV3 = model.introDataV3 ?: arrayListOf(
                 DEFINE_INTRO_NO_ADS,
                 DEFINE_INTRO_NO_ADS,
                 DEFINE_INTRO_HAVE_ADS

@@ -47,6 +47,13 @@
             0,
             2,
             1
+            ],
+            "intro_data_v3": [
+            0,
+            2,
+            0,
+            2,
+            1
             ]
             }
         </value>
@@ -98,8 +105,8 @@
     <!--native_template_size:
     small - small_cta_top - small_cta_bottom - small_cta_right -
     small_long - small_for_popup - medium - medium_cta_top - medium_cta_bottom -
-    medium_cta_right_top - medium_cta_right - medium_media_right -
-    medium_media_left - full_cta_bottom - full_cta_top - full_cta_right
+    medium_cta_right_top - medium_cta_right - medium_media_right - medium_collapsible_cta_bottom
+    medium_media_left - full_cta_bottom - full_cta_top - full_cta_right - full_cta_bottom_onboarding
     hoặc custom key
     -->
     <!--background_color: màu nền-->
@@ -483,11 +490,13 @@
             }
         </value>
     </entry>
+    <!--reopen mode = custom_activity/app_open_ad-->
     <entry>
         <key>app_open_ad_config</key>
         <value>
             {
             "time_interval": 3,
+            "reopen_mode": "app_open_ad",
             "time_millis_delay_before_show": 200,
             "is_enable_retry": true,
             "max_retry_count": 5,

@@ -29,6 +29,7 @@ data class AppConfig(
      */
     val introData: List<Int>,
     val introDataV2: List<Int>,
+    val introDataV3: List<Int>,
 ) {
     override fun toString(): String {
         val builder = StringBuilder()

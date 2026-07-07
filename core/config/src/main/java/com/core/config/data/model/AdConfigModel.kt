@@ -85,6 +85,8 @@ internal data class AppOpenAdConfigModel(
 
     @Json(name = "is_enable_retry")
     val isEnableRetry: Boolean?,
+    @Json(name = "reopen_mode")
+    val reopenMode: String?,
     @Json(name = "max_retry_count")
     val maxRetryCount: Int?,
     @Json(name = "retry_interval_second_list")

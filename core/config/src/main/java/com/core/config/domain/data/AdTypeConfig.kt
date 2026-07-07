@@ -45,5 +45,12 @@ data class AppOpenAdTypeConfig(
     val timeInterval: Long,
     val isEnableRetry: Boolean,
     val maxRetryCount: Int,
+    val reopenMode: String,
     val retryIntervalSecondList: List<Long>,
-)
+) {
+    companion object {
+        const val REOPEN_MODE_CUSTOM_ACTIVITY = "custom_activity"
+        const val REOPEN_MODE_APP_OPEN_AD = "app_open_ad"
+    }
+
+}

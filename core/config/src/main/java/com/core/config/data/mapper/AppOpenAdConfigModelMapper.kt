@@ -17,6 +17,7 @@ internal class AppOpenAdConfigModelMapper @Inject constructor(
             isEnableRetry = model.isEnableRetry ?: ConfigParam.RETRY_IS_ENABLE_RETRY,
             maxRetryCount = model.maxRetryCount ?: ConfigParam.RETRY_MAX_RETRY_COUNT,
             retryIntervalSecondList = model.retryIntervalSecondList ?: ConfigParam.RETRY_INTERVAL_LIST,
+            reopenMode = model.reopenMode ?: AppOpenAdTypeConfig.REOPEN_MODE_APP_OPEN_AD
         )
     }
 

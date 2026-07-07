@@ -109,6 +109,8 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
                     NativeTemplateSize.MediumCtaRightTop -> R.layout.gnt_medium_cta_right_top_shimmer
 
+                    NativeTemplateSize.MediumCollapsibleCtaBottom -> R.layout.gnt_mini_cta_right_shimmer
+
                     NativeTemplateSize.MediumCtaTop -> R.layout.gnt_medium_cta_top_template_view_shimmer
 
                     NativeTemplateSize.MediumMediaLeft -> R.layout.gnt_medium_media_left_shimmer
@@ -277,6 +279,8 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
             NativeTemplateSize.MediumMediaLeft -> NativeMediumMediaLeftTemplateView(context)
 
+            NativeTemplateSize.MediumCollapsibleCtaBottom -> NativeCollapsibleMediumCtaBottomTemplateView(context)
+
             NativeTemplateSize.Small -> NativeSmallTemplateView(context)
 
             NativeTemplateSize.SmallCtaTop -> NativeSmallCtaTopTemplateView(context)
@@ -313,7 +317,6 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
             onClose?.invoke()
         }
     }
-
 
     fun processAdResource(adResource: AdLoadBannerNativeUiResource, placeName: IAdPlaceName, canVisible: Boolean = true, isHideNativeBannerWhenNetworkError: Boolean = false) {
         Timber.d("processAdResource adResource $adResource")

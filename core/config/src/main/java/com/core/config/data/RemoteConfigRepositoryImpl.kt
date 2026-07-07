@@ -210,7 +210,8 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
                 isPreloadBannerNativeExit = false,
                 intervalDayAlwaysShowIntroAndLanguage = 3,
                 isAlwaysShowIntroAndLanguageScreenWithInterval = false,
-                introDataV2 = arrayListOf(DEFINE_INTRO_NO_ADS,DEFINE_INTRO_NO_ADS,DEFINE_INTRO_HAVE_ADS)
+                introDataV2 = arrayListOf(DEFINE_INTRO_NO_ADS,DEFINE_INTRO_NO_ADS,DEFINE_INTRO_HAVE_ADS),
+                introDataV3 = arrayListOf(DEFINE_INTRO_NO_ADS,DEFINE_INTRO_NO_ADS,DEFINE_INTRO_HAVE_ADS)
             )
         } else {
             appConfigModelMapper.toData(model)
@@ -375,6 +376,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
                 isEnableRetry = ConfigParam.RETRY_IS_ENABLE_RETRY,
                 maxRetryCount = ConfigParam.RETRY_MAX_RETRY_COUNT,
                 retryIntervalSecondList = ConfigParam.RETRY_INTERVAL_LIST,
+                reopenMode = AppOpenAdTypeConfig.REOPEN_MODE_CUSTOM_ACTIVITY
             )
         } else {
             appOpenAdConfigModelMapper.toData(model)

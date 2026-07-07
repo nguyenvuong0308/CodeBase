@@ -59,6 +59,8 @@ internal data class AppConfigModel(
     @Json(name = "intro_data")
     val introData: List<Int>?,
     @Json(name = "intro_data_v2")
-    val intro_data_v2: List<Int>?
+    val intro_data_v2: List<Int>?,
+    @Json(name = "intro_data_v3")
+    val introDataV3: List<Int>?
 
 )

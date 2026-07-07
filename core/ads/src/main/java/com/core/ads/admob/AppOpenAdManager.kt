@@ -47,7 +47,8 @@ class AppOpenAdManager @Inject constructor(
     private val remoteConfigRepository: RemoteConfigRepository,
     private val adManager: AdsManager,
     private val reOpenShowCondition: ReOpenShowCondition,
-    private val adjustAnalytics: AdjustAnalytics
+    private val adjustAnalytics: AdjustAnalytics,
+    private val reopenAction: ReopenAction
 ) : LifecycleObserver, Application.ActivityLifecycleCallbacks {
 
     companion object {
@@ -79,7 +80,13 @@ class AppOpenAdManager @Inject constructor(
         currentActivity?.let { activity ->
             applicationScope.launch {
                 delay(remoteConfigRepository.getAppOpenAdConfig().timeMillisDelayBeforeShow)
-                showAdIfAvailable(activity, CoreAdPlaceName.APP_REOPEN)
+                if(!reopenAction.isCustomAction()) {
+                    showAdIfAvailable(activity, CoreAdPlaceName.APP_REOPEN)
+                } else {
+                    if(!adManager.isHasFullscreenAdShowing()) {
+                        reopenAction.reopenAction(activity)
+                    }
+                }
             }
         }
     }
@@ -106,6 +113,8 @@ class AppOpenAdManager @Inject constructor(
     }
 
     fun fetchAd(activity: Activity, adPlaceName: IAdPlaceName) {
+        if(reopenAction.isCustomAction() && adPlaceName == CoreAdPlaceName.APP_REOPEN) return
+
         if (adManager.isNotAbleToVisibleAdsToUser(adPlaceName)) {
             notifyAdNotValidOrLoadFailed(adPlaceName)
             return

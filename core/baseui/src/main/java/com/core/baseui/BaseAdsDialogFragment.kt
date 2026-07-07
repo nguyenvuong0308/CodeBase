@@ -248,7 +248,7 @@ abstract class BaseAdsDialogFragment<B : ViewBinding> : DialogFragment(), Corout
      * @param adPlaceName Tên vị trí quảng cáo.
      * @param oneTimeLoad Chỉ tải quảng cáo một lần nếu true.
      */
-    fun loadBannerOrNativeAds(adPlaceName: IAdPlaceName, oneTimeLoad: Boolean, isReload: Boolean = false) {
+    fun loadBannerOrNativeAdsByDialog(adPlaceName: IAdPlaceName, oneTimeLoad: Boolean, isReload: Boolean = false) {
         contextAds?.loadBannerOrNativeAds(adPlaceName, oneTimeLoad, isReload = isReload)
     }
 
@@ -258,7 +258,7 @@ abstract class BaseAdsDialogFragment<B : ViewBinding> : DialogFragment(), Corout
      * @param adPlaceName Tên vị trí quảng cáo.
      * @param oneTimeLoad Chỉ tải quảng cáo một lần nếu true.
      */
-    fun loadInterstitialAds(adPlaceName: IAdPlaceName, oneTimeLoad: Boolean) {
+    fun loadInterstitialAdsByDialog(adPlaceName: IAdPlaceName, oneTimeLoad: Boolean) {
         contextAds?.loadInterstitialAds(adPlaceName, oneTimeLoad)
     }
 
@@ -268,7 +268,7 @@ abstract class BaseAdsDialogFragment<B : ViewBinding> : DialogFragment(), Corout
      * @param adPlaceName Tên vị trí quảng cáo.
      * @param oneTimeLoad Chỉ tải quảng cáo một lần nếu true.
      */
-    fun loadRewardAds(adPlaceName: IAdPlaceName, oneTimeLoad: Boolean) {
+    fun loadRewardAdsByDialog(adPlaceName: IAdPlaceName, oneTimeLoad: Boolean) {
         contextAds?.loadRewardAds(adPlaceName, oneTimeLoad)
     }
 
@@ -278,7 +278,7 @@ abstract class BaseAdsDialogFragment<B : ViewBinding> : DialogFragment(), Corout
      * @param adPlaceName Tên vị trí quảng cáo.
      * @param onHandleCompleted Callback được gọi khi quảng cáo được hiển thị hoặc không và người dùng có nhận được phần thưởng hay không.
      */
-    fun showRewardAd(
+    fun showRewardAdByDialog(
         adPlaceName: IAdPlaceName,
         onHandleCompleted: ((isShown: Boolean, isEarnedReward: Boolean, isNoAds: Boolean) -> Unit)
     ) {
@@ -291,7 +291,7 @@ abstract class BaseAdsDialogFragment<B : ViewBinding> : DialogFragment(), Corout
      * @param adPlaceName Tên vị trí quảng cáo.
      * @param onHandleCompleted Callback được gọi khi quảng cáo được hiển thị hoặc không.
      */
-    fun showInterAd(adPlaceName: IAdPlaceName, onHandleCompleted: ((isShown: Boolean) -> Unit)) {
+    fun showInterAdByDialog(adPlaceName: IAdPlaceName, onHandleCompleted: ((isShown: Boolean) -> Unit)) {
         contextAds?.showInterAd(adPlaceName, onHandleCompleted)
     }
 
