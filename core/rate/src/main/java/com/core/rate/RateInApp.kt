@@ -29,6 +29,11 @@ class RateInApp {
 
     val rateConfig = RateConfig()
 
+    /**
+     * Đổi màu theo theme
+     */
+    var primaryColorInt: Int? = null
+
     private var intentActivity = HashMap<Int, ActivityResultLauncher<Intent>>()
 
     // Call this method in onCreate() of Application

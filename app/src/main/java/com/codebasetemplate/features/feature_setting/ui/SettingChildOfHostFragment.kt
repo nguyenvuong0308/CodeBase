@@ -70,6 +70,7 @@ class SettingChildOfHostFragment :
 
             tvRateUs.setOnSingleClick {
                 activity?.let {
+//                    RateInApp.instance.primaryColorInt = "#ff0000".toColorInt()
                     RateInApp.instance.showDialogRateAndFeedback(
                         context = it,
                         onRated = { rate ->

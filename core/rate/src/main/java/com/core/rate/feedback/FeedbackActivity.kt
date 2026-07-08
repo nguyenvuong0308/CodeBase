@@ -9,6 +9,8 @@ import com.core.baseui.BaseActivity
 import com.core.baseui.toolbar.CoreToolbarView
 import com.core.rate.R
 import com.core.rate.RateInApp
+import com.core.rate.applyRateFeedbackOptionColors
+import com.core.rate.applyRatePrimaryBackgroundTint
 import com.core.rate.databinding.FbActivityFeedbackBinding
 import com.core.utilities.setOnSingleClick
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,6 +32,10 @@ class FeedbackActivity : BaseActivity<FbActivityFeedbackBinding>() {
         super.initViews(savedInstanceState)
 
         viewBinding.apply {
+            RateInApp.instance.primaryColorInt?.let { primaryColor ->
+                ivSendFeedback.applyRatePrimaryBackgroundTint(primaryColor)
+            }
+
             toolbar.onToolbarListener = object : CoreToolbarView.OnToolbarListener {
                 override fun onBack() {
                     finish()
@@ -52,6 +58,9 @@ class FeedbackActivity : BaseActivity<FbActivityFeedbackBinding>() {
 
             val listOption = if (!isFlexUI) listOf(tvFeatureQuality, tvCrash, tvBug, tvOthers) else listOf(tvFeatureQualityFl, tvCrashFl, tvBugFl, tvOtherFl)
             listOption.forEach {
+                RateInApp.instance.primaryColorInt?.let { primaryColor ->
+                    it.applyRateFeedbackOptionColors(primaryColor)
+                }
                 it.setOnSingleClick { _ ->
                     it.isSelected = !it.isSelected
                 }

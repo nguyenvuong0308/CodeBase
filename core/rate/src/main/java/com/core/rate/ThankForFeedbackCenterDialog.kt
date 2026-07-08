@@ -1,5 +1,6 @@
 package com.core.rate
 
+import android.content.res.ColorStateList
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,6 +17,10 @@ class ThankForFeedbackCenterDialog(context: Context) : AlertDialog(context) {
         super.onCreate(savedInstanceState)
         setContentView(mViewBinding.root)
         mViewBinding.apply {
+            RateInApp.instance.primaryColorInt?.let { primaryColor ->
+                imageLogoThank.imageTintList = ColorStateList.valueOf(primaryColor)
+                tvOk.applyRatePrimaryBackgroundTint(primaryColor)
+            }
             val showHeader = context.resources.getBoolean(R.bool.fb_show_header_thank_feedback)
             imageHeader.visibility = if (showHeader) View.VISIBLE else View.GONE
 

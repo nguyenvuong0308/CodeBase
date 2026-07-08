@@ -50,6 +50,11 @@ class RateBottomDialog : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mViewBinding.apply {
+            RateInApp.instance.primaryColorInt?.let { primaryColor ->
+                tvReview.applyRatePrimaryBackgroundTint(primaryColor)
+                tvDescription.setTextColor(primaryColor)
+            }
+
             val listStar = listOf(
                 ivStar1, ivStar2, ivStar3, ivStar4, ivStar5
             )

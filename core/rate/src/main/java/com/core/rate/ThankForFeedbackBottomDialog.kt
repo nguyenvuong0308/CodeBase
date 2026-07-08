@@ -1,5 +1,6 @@
 package com.core.rate
 
+import android.content.res.ColorStateList
 import android.app.Dialog
 import android.graphics.Color
 import android.os.Bundle
@@ -32,6 +33,10 @@ class ThankForFeedbackBottomDialog : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mViewBinding.apply {
+            RateInApp.instance.primaryColorInt?.let { primaryColor ->
+                imageLogoThank.imageTintList = ColorStateList.valueOf(primaryColor)
+                tvOk.applyRatePrimaryBackgroundTint(primaryColor)
+            }
             val showHeader = resources.getBoolean(R.bool.fb_show_header_thank_feedback)
             imageHeader.visibility = if (showHeader) View.VISIBLE else View.GONE
 

@@ -31,6 +31,11 @@ class RateCenterDialog(context: Context) : AlertDialog(context) {
         super.onCreate(savedInstanceState)
         setContentView(mViewBinding.root)
         mViewBinding.apply {
+            RateInApp.instance.primaryColorInt?.let { primaryColor ->
+                tvReview.applyRatePrimaryBackgroundTint(primaryColor)
+                tvDescription.setTextColor(primaryColor)
+            }
+
             val listStar = listOf(
                 ivStar1,
                 ivStar2,
