@@ -26,7 +26,6 @@ import com.core.baseui.countdown.JsgCountDownTimer
 import com.core.baseui.ext.collectFlowOn
 import com.core.config.data.FetchRemoteConfigState
 import com.core.config.domain.data.AdType
-import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
 import com.core.preference.SharedPrefs
 import com.core.utilities.getCurrentLanguageCode
@@ -58,17 +57,17 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
 
     private val appOpenPlaceName by lazy {
         if (viewModel.isFirstOpenApp) {
-            CoreAdPlaceName.APP_OPEN_FIRST_OPEN
+            AppAdPlaceName.APP_OPEN_FIRST_OPEN
         } else {
-            CoreAdPlaceName.APP_OPEN
+            AppAdPlaceName.APP_OPEN
         }
     }
 
     private val interstitialPlaceName by lazy {
         if (viewModel.isFirstOpenApp) {
-            CoreAdPlaceName.ACTION_OPEN_APP_FIRST_OPEN
+            AppAdPlaceName.ACTION_OPEN_APP_FIRST_OPEN
         } else {
-            CoreAdPlaceName.ACTION_OPEN_APP
+            AppAdPlaceName.ACTION_OPEN_APP
         }
     }
 
@@ -177,8 +176,8 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
     override fun providerInterAdPlaceName(): List<IAdPlaceName> {
         return mutableListOf<IAdPlaceName>().apply {
             if(getCurrentLanguageCode().isBlank() || isAlwaysShowIntroAndLanguageScreen) {
-                add(CoreAdPlaceName.ACTION_NEXT_IN_INTRODUCTION)
-                add(CoreAdPlaceName.ACTION_SKIP_IN_INTRODUCTION)
+                add(AppAdPlaceName.ACTION_NEXT_IN_INTRODUCTION)
+                add(AppAdPlaceName.ACTION_SKIP_IN_INTRODUCTION)
             }
         }
     }
@@ -187,15 +186,15 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
         val isLoadLanguage = getCurrentLanguageCode().isBlank() || isAlwaysShowIntroAndLanguageScreen
         return mutableListOf<IAdPlaceName>().apply {
             if (isLoadLanguage) {
-                add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_BOTTOM)
+                add(AppAdPlaceName.ANCHORED_CHANGE_LANGUAGE_BOTTOM)
             }
             if(isEnableIntroductionScreen && isLoadLanguage) {
                 addAll(OnBoardingConfigFactory.getOnBoardingAdPlaceName(getDataFromRemoteUseCase.onBoardingConfig, remoteConfigRepository.getAppConfig()))
             }
 
             if(targetScreenFromShortCut == AppScreenType.Uninstall.screenName) {
-                add(CoreAdPlaceName.ANCHORED_UNINSTALL_BOTTOM_STEP_1)
-                add(CoreAdPlaceName.ANCHORED_UNINSTALL_BOTTOM_STEP_2)
+                add(AppAdPlaceName.ANCHORED_UNINSTALL_BOTTOM_STEP_1)
+                add(AppAdPlaceName.ANCHORED_UNINSTALL_BOTTOM_STEP_2)
             }
 
             add(AppAdPlaceName.ANCHORED_BOTTOM_HOME)

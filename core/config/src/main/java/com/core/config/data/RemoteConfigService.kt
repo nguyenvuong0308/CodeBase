@@ -20,6 +20,7 @@ import com.core.config.data.model.AppConfigModel
 import com.core.config.data.model.BannerAdConfigModel
 import com.core.config.data.model.IapConfigModel
 import com.core.config.data.model.RequestConsentConfigModel
+import com.core.config.data.model.TutorialConfigModel
 import com.google.firebase.Firebase
 import com.google.firebase.remoteconfig.remoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
@@ -278,6 +279,12 @@ class RemoteConfigService @Inject constructor(
     internal fun getRequestConsentConfig(): RequestConsentConfigModel? {
         return remoteConfig.read(
             moshi, ConfigParam.RequestConsentConfigParam
+        )
+    }
+
+    internal fun getTutorialConfig(): TutorialConfigModel? {
+        return remoteConfig.read(
+            moshi, ConfigParam.TutorialConfig
         )
     }
 

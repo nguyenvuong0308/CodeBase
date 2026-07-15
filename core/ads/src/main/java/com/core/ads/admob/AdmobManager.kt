@@ -230,6 +230,11 @@ class AdmobManager @Inject constructor(
         }
 
         val adPlace = remoteConfigRepository.getAdPlaceBy(adPlaceName)
+        if (adPlace.isDisabledByTutorialConfig()) {
+            Log.d(TAG, "isNotAbleToVisibleAdsToUser: disabled by tutorial_config ${adPlaceName.name}")
+            return true
+        }
+
         if (adPlace.isNotValidToLoad()) {
             Log.d(TAG, "isNotAbleToVisibleAdsToUser: isNotValidToLoad")
             return true
@@ -527,6 +532,11 @@ class AdmobManager @Inject constructor(
             }
         }
         if (isNotAbleToVisibleAdsToUser(adPlaceName)) {
+            // Riêng trường hợp bị tắt bởi tutorial_config, phát thêm callback load-failed để
+            // listener (vd: tracking) phân biệt được với các lý do ẩn ad khác (VIP, country, capping...).
+            if (adPlace.isDisabledByTutorialConfig()) {
+                notifyAdFullScreenNotValidOrLoadFailed(adPlaceName)
+            }
             if (!isRequestFromExternal && adHolder.isWaitLoadToShow) {
                 notifyAdFullScreenCompleted(adPlaceName, false)
             }
@@ -909,7 +919,10 @@ class AdmobManager @Inject constructor(
         }
         adHolder.isLoading = true
         val waterfallAdUnitIds = adHolder.adPlace.getWaterfallAdUnitIds()
-        // Try configured high-floor ids first, then fall back to the normal ad id.
+        if (waterfallAdUnitIds.isEmpty()) {
+            failFullScreenLoadBecauseNoAdUnit(activity, adHolder)
+            return
+        }
         Log.d(TAG, "${adHolder.adPlace.placeName} waterfallAdUnitIds: $waterfallAdUnitIds  adHolder.adPlace.highFloorAdIds ${adHolder.adPlace.highFloorAdIds} waterfallIndex $waterfallIndex")
         val adUnitId = waterfallAdUnitIds[waterfallIndex]
         val adUnitHolder = getOrCreateFullScreenAdUnitHolder(adHolder.adPlace, adUnitId)
@@ -1051,6 +1064,10 @@ class AdmobManager @Inject constructor(
         }
         adHolder.isLoading = true
         val waterfallAdUnitIds = adHolder.adPlace.getWaterfallAdUnitIds()
+        if (waterfallAdUnitIds.isEmpty()) {
+            failFullScreenLoadBecauseNoAdUnit(activity, adHolder)
+            return
+        }
         val adUnitId = waterfallAdUnitIds[waterfallIndex]
         val adUnitHolder = getOrCreateFullScreenAdUnitHolder(adHolder.adPlace, adUnitId)
         if (adUnitHolder.isLoading) {
@@ -1197,6 +1214,10 @@ class AdmobManager @Inject constructor(
         }
         adHolder.isLoading = true
         val waterfallAdUnitIds = adHolder.adPlace.getWaterfallAdUnitIds()
+        if (waterfallAdUnitIds.isEmpty()) {
+            failFullScreenLoadBecauseNoAdUnit(activity, adHolder)
+            return
+        }
         val adUnitId = waterfallAdUnitIds[waterfallIndex]
         val adUnitHolder = getOrCreateFullScreenAdUnitHolder(adHolder.adPlace, adUnitId)
         if (adUnitHolder.isLoading) {
@@ -1367,6 +1388,10 @@ class AdmobManager @Inject constructor(
         }
         adHolder.isLoading = true
         val waterfallAdUnitIds = adHolder.adPlace.getWaterfallAdUnitIds()
+        if (waterfallAdUnitIds.isEmpty()) {
+            failBannerNativeLoadBecauseNoAdUnit(adHolder)
+            return
+        }
         val adUnitId = waterfallAdUnitIds[waterfallIndex]
 
         applicationScope.launch {
@@ -1579,6 +1604,10 @@ class AdmobManager @Inject constructor(
         }
         adHolder.isLoading = true
         val waterfallAdUnitIds = adHolder.adPlace.getWaterfallAdUnitIds()
+        if (waterfallAdUnitIds.isEmpty()) {
+            failBannerNativeLoadBecauseNoAdUnit(adHolder)
+            return
+        }
         val adUnitId = waterfallAdUnitIds[waterfallIndex]
 
         val adSize = when (bannerAdPlace.bannerSize) {
@@ -1704,12 +1733,53 @@ class AdmobManager @Inject constructor(
         bannerAd.loadAd(getAdRequest(bannerAdPlace.isCollapsible))
     }
 
+    /**
+     * Danh sách ad unit id để load theo thứ tự waterfall: highFloorAdIds được ưu tiên,
+     * adId thường đóng vai trò fallback cuối cùng.
+     *
+     * Với các ad place thuộc tutorial flow (isTutorialFlow = true), tutorial_config còn tinh chỉnh
+     * riêng từng nhóm id:
+     *  - enableAd1 = false -> loại toàn bộ highFloorAdIds (nhóm ad 1 = high floor).
+     *  - enableAd2 = false -> loại adId thường (nhóm ad 2 = adId mặc định).
+     * (Công tắc tổng enableAllAds được xử lý ở [isDisabledByTutorialConfig], không xét tại đây.)
+     *
+     * Kết quả có thể rỗng khi mọi id bị tắt/để trống -> caller phải tự xử lý qua nhánh fail.
+     */
     private fun AdPlace.getWaterfallAdUnitIds(): List<String> {
-        // highFloorAdIds are prioritized, adId is kept as the guaranteed fallback.
-        return (highFloorAdIds + adId)
+        val tutorialConfig = remoteConfigRepository.getTutorialConfig().takeIf { isTutorialFlow }
+        val availableHighFloorAdIds = if (tutorialConfig?.enableAd1 == false) {
+            emptyList()
+        } else {
+            highFloorAdIds
+        }
+        val availableAdId = if (tutorialConfig?.enableAd2 == false) "" else adId
+        return (availableHighFloorAdIds + availableAdId)
             .filter { it.isNotBlank() }
             .distinct()
-            .ifEmpty { listOf(adId) }
+    }
+
+    /** Công tắc tổng: tắt hoàn toàn ad place thuộc tutorial flow khi enableAllAds = false. */
+    private fun AdPlace.isDisabledByTutorialConfig(): Boolean {
+        return isTutorialFlow && !remoteConfigRepository.getTutorialConfig().enableAllAds
+    }
+
+    private fun failFullScreenLoadBecauseNoAdUnit(activity: Activity, adHolder: AdHolder) {
+        val placeName = adHolder.adPlace.placeName
+        Log.i(TAG, "FullScreen no available ad unit $placeName")
+        val wasWaitLoadToShow = adHolder.isWaitLoadToShow
+        adHolder.reset()
+        notifyAdFullScreenNotValidOrLoadFailed(placeName)
+        if (wasWaitLoadToShow) {
+            activity.removeLoader()
+            notifyAdFullScreenCompleted(placeName, false)
+        }
+    }
+
+    private fun failBannerNativeLoadBecauseNoAdUnit(adHolder: AdHolder) {
+        val placeName = adHolder.adPlace.placeName
+        Log.i(TAG, "BannerNative no available ad unit $placeName")
+        adHolder.reset()
+        notifyBannerNativeFailedToLoad(placeName)
     }
 
     private fun getFullScreenAdUnitKey(adPlace: AdPlace, adUnitId: String): FullScreenAdUnitKey {

@@ -16,6 +16,9 @@ internal data class AdPlaceModel(
     @Json(name = "high_floor_ad_ids")
     val highFloorAdIds: List<String>?,
 
+    @Json(name = "is_tutorial_flow")
+    val isTutorialFlow: Boolean?,
+
     @Json(name = "ad_type")
     val adType: String?,
 

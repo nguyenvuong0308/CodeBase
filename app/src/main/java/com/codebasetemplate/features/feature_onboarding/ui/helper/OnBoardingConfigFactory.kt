@@ -3,9 +3,9 @@ package com.codebasetemplate.features.feature_onboarding.ui.helper
 import com.codebasetemplate.R
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingActivity
 import com.codebasetemplate.features.feature_onboarding.ui.v2.OnBoardingActivity2
+import com.codebasetemplate.required.ads.AppAdPlaceName
 import com.codebasetemplate.required.firebase.OnBoardingConfig
 import com.core.config.domain.data.AppConfig
-import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
 
 object OnBoardingConfigFactory {
@@ -19,16 +19,16 @@ object OnBoardingConfigFactory {
     ): List<IAdPlaceName> {
         return if (onBoardingConfig.version == OnBoardingConfig.ONBOARDING_VERSION_1) {
             mutableListOf<IAdPlaceName>().apply {
-                add(CoreAdPlaceName.ANCHORED_ONBOARDING_BOTTOM)
+                add(AppAdPlaceName.ANCHORED_ONBOARDING_BOTTOM)
                 if (appConfig.introData.contains(AppConfig.DEFINE_INTRO_FULL_AD)) {
-                    add(CoreAdPlaceName.ANCHORED_FULL_ONBOARDING)
+                    add(AppAdPlaceName.ANCHORED_FULL_ONBOARDING)
                 }
             }
         } else {
             mutableListOf<IAdPlaceName>().apply {
-                add(CoreAdPlaceName.ANCHORED_ONBOARDING_BOTTOM_v2)
+                add(AppAdPlaceName.ANCHORED_ONBOARDING_BOTTOM_v2)
                 if (appConfig.introDataV2.contains(AppConfig.DEFINE_INTRO_FULL_AD)) {
-                    add(CoreAdPlaceName.ANCHORED_FULL_ONBOARDING_v2)
+                    add(AppAdPlaceName.ANCHORED_FULL_ONBOARDING_v2)
                 }
             }
         }
@@ -36,9 +36,9 @@ object OnBoardingConfigFactory {
 
     fun getOnBoardingAnchorFullAdPlaceName(onBoardingConfig: OnBoardingConfig): IAdPlaceName {
         return if (onBoardingConfig.version == OnBoardingConfig.ONBOARDING_VERSION_1) {
-            CoreAdPlaceName.ANCHORED_FULL_ONBOARDING
+            AppAdPlaceName.ANCHORED_FULL_ONBOARDING
         } else {
-            CoreAdPlaceName.ANCHORED_FULL_ONBOARDING_v2
+            AppAdPlaceName.ANCHORED_FULL_ONBOARDING_v2
         }
     }
 

@@ -13,6 +13,7 @@ import com.codebasetemplate.features.feature_onboarding.ui.model.OnBoardingItem
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingEvent
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingViewModel
 import com.codebasetemplate.features.main.ui.MainActivityHost
+import com.codebasetemplate.required.ads.AppAdPlaceName
 import com.codebasetemplate.required.shortcut.AppShortCut
 import com.core.ads.BaseAdmobApplication
 import com.core.ads.domain.AdLoadBannerNativeUiResource
@@ -21,7 +22,6 @@ import com.core.baseui.ext.collectFlowOn
 import com.core.config.domain.data.AppConfig.Companion.DEFINE_INTRO_FULL_AD
 import com.core.config.domain.data.AppConfig.Companion.DEFINE_INTRO_HAVE_ADS
 import com.core.config.domain.data.AppConfig.Companion.DEFINE_INTRO_NO_ADS
-import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
 import com.core.utilities.getStatusBarHeight
 import com.core.utilities.gone
@@ -91,7 +91,7 @@ class OnBoardingActivity2 : CoreActivity<CoreActivityOnboardingBinding>() {
                     }
 
                     DEFINE_INTRO_FULL_AD -> {
-                        if (!adsManager.isNotAbleToVisibleAdsToUser(CoreAdPlaceName.ANCHORED_FULL_ONBOARDING_v2)) {
+                        if (!adsManager.isNotAbleToVisibleAdsToUser(AppAdPlaceName.ANCHORED_FULL_ONBOARDING_v2)) {
                             add(
                                 OnBoardingItem.FullNativeItem
                             )
@@ -129,7 +129,7 @@ class OnBoardingActivity2 : CoreActivity<CoreActivityOnboardingBinding>() {
 
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
         super.onBannerNativeResult(adResource)
-        if (adResource.commonAdPlaceName == CoreAdPlaceName.ANCHORED_ONBOARDING_BOTTOM_v2) {
+        if (adResource.commonAdPlaceName == AppAdPlaceName.ANCHORED_ONBOARDING_BOTTOM_v2) {
             when (adResource) {
                 is AdLoadBannerNativeUiResource.Loading -> {
                     viewBinding.layoutBannerNative.setAdSize(
@@ -199,7 +199,7 @@ class OnBoardingActivity2 : CoreActivity<CoreActivityOnboardingBinding>() {
                         analyticsManager.logEvent(AnalyticsEvent.EVENT_ACTION_PASS_INTRO)
                     }
                     showInterAd(
-                        CoreAdPlaceName.ACTION_NEXT_IN_INTRODUCTION
+                        AppAdPlaceName.ACTION_NEXT_IN_INTRODUCTION
                     ) {
                         openMain()
                     }
@@ -210,18 +210,18 @@ class OnBoardingActivity2 : CoreActivity<CoreActivityOnboardingBinding>() {
     }
 
     override fun providerBannerNativeAdPlaceName(): List<IAdPlaceName> {
-        return listOf(CoreAdPlaceName.ANCHORED_ONBOARDING_BOTTOM_v2)
+        return listOf(AppAdPlaceName.ANCHORED_ONBOARDING_BOTTOM_v2)
     }
 
     override fun providerInterAdPlaceName(): List<IAdPlaceName> {
         return listOf(
-            CoreAdPlaceName.ACTION_NEXT_IN_INTRODUCTION,
-            CoreAdPlaceName.ACTION_SKIP_IN_INTRODUCTION
+            AppAdPlaceName.ACTION_NEXT_IN_INTRODUCTION,
+            AppAdPlaceName.ACTION_SKIP_IN_INTRODUCTION
         )
     }
 
     override fun onDestroy() {
-        adsManager.releaseBannerNative(CoreAdPlaceName.ANCHORED_FULL_ONBOARDING_v2)
+        adsManager.releaseBannerNative(AppAdPlaceName.ANCHORED_FULL_ONBOARDING_v2)
         super.onDestroy()
     }
 

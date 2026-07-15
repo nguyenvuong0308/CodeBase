@@ -12,6 +12,7 @@ import com.core.config.data.model.RewardedInterstitialAdConfigModel
 import com.core.config.data.model.PreventAdClickConfigModel
 import com.core.config.data.model.RequestConsentConfigModel
 import com.core.config.data.model.SplashScreenConfigModel
+import com.core.config.data.model.TutorialConfigModel
 
 internal sealed class ConfigParam<T : Any> {
     abstract val key: String
@@ -169,6 +170,12 @@ internal sealed class ConfigParam<T : Any> {
     internal object RequestConsentConfigParam: ConfigParam<RequestConsentConfigModel>() {
 
         override val key = "request_consent_config"
+
+    }
+
+    internal object TutorialConfig: ConfigParam<TutorialConfigModel>() {
+
+        override val key = "tutorial_config"
 
     }
 }

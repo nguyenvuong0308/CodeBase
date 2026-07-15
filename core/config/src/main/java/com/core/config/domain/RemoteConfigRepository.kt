@@ -14,6 +14,7 @@ import com.core.config.domain.data.RewardedInterstitialAdTypeConfig
 import com.core.config.domain.data.PreventAdClickConfig
 import com.core.config.domain.data.RequestConsentConfig
 import com.core.config.domain.data.SplashScreenConfig
+import com.core.config.domain.data.TutorialConfig
 import kotlinx.coroutines.flow.SharedFlow
 
 
@@ -54,5 +55,7 @@ interface RemoteConfigRepository {
     fun getAppOpenAdConfig(): AppOpenAdTypeConfig
 
     fun getRequestConsentConfig(): RequestConsentConfig
+
+    fun getTutorialConfig(): TutorialConfig
 
 }

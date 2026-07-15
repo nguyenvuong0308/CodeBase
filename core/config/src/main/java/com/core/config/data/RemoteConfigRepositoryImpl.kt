@@ -17,6 +17,7 @@ import com.core.config.data.mapper.PreventAdClickConfigModelMapper
 import com.core.config.data.mapper.RequestConsentConfigModelMapper
 import com.core.config.data.mapper.RewardedAdConfigModelMapper
 import com.core.config.data.mapper.SplashScreenConfigModelMapper
+import com.core.config.data.mapper.TutorialConfigModelMapper
 import com.core.config.domain.GetDataFromRemoteConfigUseCase
 import com.core.config.domain.RemoteConfigRepository
 import com.core.config.domain.data.AdPlace
@@ -36,6 +37,7 @@ import com.core.config.domain.data.RequestConsentConfig
 import com.core.config.domain.data.RewardedAdTypeConfig
 import com.core.config.domain.data.RewardedInterstitialAdTypeConfig
 import com.core.config.domain.data.SplashScreenConfig
+import com.core.config.domain.data.TutorialConfig
 import com.core.preference.AppPreferences
 import com.core.utilities.isAppDebuggable
 import com.core.utilities.toast
@@ -69,6 +71,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
     private val rewardedAdConfigModelMapper: RewardedAdConfigModelMapper,
     private val appOpenAdConfigModelMapper: AppOpenAdConfigModelMapper,
     private val requestConsentConfigModelMapper: RequestConsentConfigModelMapper,
+    private val tutorialConfigModelMapper: TutorialConfigModelMapper,
     private val remoteConfigService: RemoteConfigService,
     private val getRemoteConfigUseCase: GetDataFromRemoteConfigUseCase,
 ) : RemoteConfigRepository {
@@ -147,6 +150,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
             val rewardedAdConfigDeferred = async { getRewardedAdConfigRaw() }
             val appOpenAdConfigDeferred = async { getAppOpenAdConfigRaw() }
             val requestConsentConfigDeferred = async { getRequestConsentConfigRaw() }
+            val tutorialConfigDeferred = async { getTutorialConfigRaw() }
             val getOtherConfig = async {
                 getRemoteConfigUseCase.invoke(remoteConfigService)
             }
@@ -166,6 +170,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
             rewardedAdConfigCache = rewardedAdConfigDeferred.await()
             appOpenAdConfigCache = appOpenAdConfigDeferred.await()
             requestConsentConfigCache = requestConsentConfigDeferred.await()
+            tutorialConfigCache = tutorialConfigDeferred.await()
             getOtherConfig.await()
 
             if (isNotifyComplete) {
@@ -189,6 +194,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
     private var rewardedAdConfigCache: RewardedAdTypeConfig? = null
     private var appOpenAdConfigCache: AppOpenAdTypeConfig? = null
     private var requestConsentConfigCache: RequestConsentConfig? = null
+    private var tutorialConfigCache: TutorialConfig? = null
 
     private fun getAppConfigRaw(): AppConfig {
         val model = remoteConfigService.getAppConfig()
@@ -396,6 +402,19 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
         }
     }
 
+    private fun getTutorialConfigRaw(): TutorialConfig {
+        val model = remoteConfigService.getTutorialConfig()
+        return if (model == null) {
+            TutorialConfig(
+                enableAllAds = true,
+                enableAd1 = true,
+                enableAd2 = true,
+            )
+        } else {
+            tutorialConfigModelMapper.toData(model)
+        }
+    }
+
     override fun getAppConfig(): AppConfig {
         return appConfigCache ?: getAppConfigRaw()
     }
@@ -459,5 +478,9 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
 
     override fun getRequestConsentConfig(): RequestConsentConfig {
         return requestConsentConfigCache ?: getRequestConsentConfigRaw()
+    }
+
+    override fun getTutorialConfig(): TutorialConfig {
+        return tutorialConfigCache ?: getTutorialConfigRaw()
     }
 }

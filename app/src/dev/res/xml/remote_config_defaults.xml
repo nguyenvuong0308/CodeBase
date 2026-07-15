@@ -28,7 +28,7 @@
             "is_always_show_intro_and_language_screen": true,
             "is_always_show_intro_and_language_screen_with_interval": false,
             "is_enable_introduction_screen": true,
-            "is_enable_change_language_screen": false,
+            "is_enable_change_language_screen": true,
             "is_enable_app_shortcut": true,
             "is_enable_app_shortcut_uninstall": true,
             "is_enable_open_app_ads_from_uninstall_shortcut": false,
@@ -65,6 +65,16 @@
             "max_ad_click_per_session": 6,
             "time_per_session": 120,
             "time_disable_ads_when_reached_max_ad_click": 20
+            }
+        </value>
+    </entry>
+    <entry>
+        <key>tutorial_config</key>
+        <value>
+            {
+            "enable_all_ads": true,
+            "enable_ad_1": true,
+            "enable_ad_2": true
             }
         </value>
     </entry>
@@ -177,6 +187,7 @@
             "ad_type": "native",
             "is_tracking_click": true,
             "native_template_size": "small_cta_bottom",
+            "is_tutorial_flow": true,
             "is_enable": true,
             "background_color": "#242424",
             "primary_text_color": "#F0F0F0",
@@ -187,9 +198,11 @@
             {
             "place_name": "anchored_onboarding_bottom_v2",
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": ["ca-app-pub-3940256099942544/2247696110"],
             "ad_type": "native",
             "is_tracking_click": true,
             "native_template_size": "small_cta_bottom",
+            "is_tutorial_flow": true,
             "is_enable": true,
             "background_color": "#ffffff",
             "primary_text_color": "#1D1D1D",
@@ -201,8 +214,10 @@
             {
             "place_name": "anchored_full_onboarding",
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": ["ca-app-pub-3940256099942544/2247696110"],
             "ad_type": "native",
             "native_template_size": "full_cta_bottom_onboarding",
+            "is_tutorial_flow": true,
             "is_enable": true,
             "background_color": "#FFFFFF",
             "background_full_color": "#FFFFFF",
@@ -216,8 +231,10 @@
             {
             "place_name": "anchored_full_onboarding_v2",
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": ["ca-app-pub-3940256099942544/2247696110"],
             "ad_type": "native",
             "native_template_size": "full_cta_bottom_onboarding",
+            "is_tutorial_flow": true,
             "is_enable": true,
             "background_color": "#767676,#00000000",
             "background_full_color": "#000",
@@ -454,6 +471,7 @@
                 "ca-app-pub-3940256099942544/1033173719"
             ],
             "ad_type": "interstitial",
+            "is_tutorial_flow": true,
             "is_auto_load_after_dismiss": false,
             "is_enable": true
             }

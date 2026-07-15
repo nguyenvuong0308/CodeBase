@@ -16,6 +16,7 @@ import com.codebasetemplate.databinding.CoreActivityLanguageBinding
 import com.codebasetemplate.features.feature_language.ui.adapter.SupportedLanguageAdapter
 import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
 import com.codebasetemplate.features.main.ui.MainActivityHost
+import com.codebasetemplate.required.ads.AppAdPlaceName
 import com.codebasetemplate.required.firebase.GetDataFromRemoteUseCaseImpl
 import com.codebasetemplate.required.shortcut.AppShortCut
 import com.core.ads.BaseAdmobApplication
@@ -27,7 +28,6 @@ import com.core.baseui.ext.bindLiveData
 import com.core.baseui.recyclerview.NpaLinearLayoutManager
 import com.core.baseui.supportedlanguage.SupportedLanguage
 import com.core.baseui.toolbar.CoreToolbarView
-import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
 import com.core.utilities.getCurrentLanguageCode
 import com.core.utilities.gone
@@ -237,7 +237,7 @@ class LanguageActivity : CoreActivity<CoreActivityLanguageBinding>() {
             return listOf()
         }
         return mutableListOf<IAdPlaceName>().apply {
-            add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_BOTTOM)
+            add(AppAdPlaceName.ANCHORED_CHANGE_LANGUAGE_BOTTOM)
             if ((isOpenFromSlash || backFromIntroduction) && isEnableIntroductionScreen) {
                 addAll(OnBoardingConfigFactory.getOnBoardingAdPlaceName(getDataFromRemoteUseCase.onBoardingConfig, remoteConfigRepository.getAppConfig()))
             }
@@ -247,7 +247,7 @@ class LanguageActivity : CoreActivity<CoreActivityLanguageBinding>() {
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
         viewBinding.layoutBannerNative.processAdResource(
             adResource,
-            CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_BOTTOM
+            AppAdPlaceName.ANCHORED_CHANGE_LANGUAGE_BOTTOM
         )
     }
 

@@ -18,6 +18,7 @@ import com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.core.ads.domain.AdOpenAdUiResource
 import com.core.ads.domain.AdsManager
+import com.core.ads.model.AppOpenAdHolder
 import com.core.ads.model.PreventShowManyInterstitialAds
 import com.core.analytics.AdjustAnalytics
 import com.core.config.domain.RemoteConfigRepository
@@ -159,6 +160,10 @@ class AppOpenAdManager @Inject constructor(
         }
         adHolder.isLoading = true
         val waterfallAdUnitIds = adHolder.adPlace.getWaterfallAdUnitIds()
+        if (waterfallAdUnitIds.isEmpty()) {
+            failAppOpenLoadBecauseNoAdUnit(adHolder)
+            return
+        }
         val adUnitId = waterfallAdUnitIds[waterfallIndex]
         val adUnitHolder = appOpenAdUnitHolderMap.getOrPut(adUnitId) { AppOpenAdUnitHolder() }
         if (adUnitHolder.isLoading) {
@@ -351,12 +356,33 @@ class AppOpenAdManager @Inject constructor(
 
     override fun onActivityDestroyed(activity: Activity) {}
 
+    /**
+     * Danh sách ad unit id để load theo thứ tự waterfall: highFloorAdIds được ưu tiên,
+     * adId thường là fallback cuối cùng.
+     *
+     * Với ad place thuộc tutorial flow (isTutorialFlow = true), tutorial_config tinh chỉnh từng nhóm:
+     *  - enableAd1 = false -> loại toàn bộ highFloorAdIds (nhóm ad 1 = high floor).
+     *  - enableAd2 = false -> loại adId thường (nhóm ad 2 = adId mặc định).
+     * Kết quả có thể rỗng -> caller phải tự xử lý qua nhánh fail.
+     */
     private fun AdPlace.getWaterfallAdUnitIds(): List<String> {
-        // Load high-floor ids first; adId remains the final fallback for compatibility.
-        return (highFloorAdIds + adId)
+        val tutorialConfig = remoteConfigRepository.getTutorialConfig().takeIf { isTutorialFlow }
+        val availableHighFloorAdIds = if (tutorialConfig?.enableAd1 == false) {
+            emptyList()
+        } else {
+            highFloorAdIds
+        }
+        val availableAdId = if (tutorialConfig?.enableAd2 == false) "" else adId
+        return (availableHighFloorAdIds + availableAdId)
             .filter { it.isNotBlank() }
             .distinct()
-            .ifEmpty { listOf(adId) }
+    }
+
+    private fun failAppOpenLoadBecauseNoAdUnit(adHolder: AppOpenAdHolder) {
+        val placeName = adHolder.adPlace.placeName
+        Log.i(TAG, "AppOpenAd no available ad unit $placeName")
+        adHolder.reset()
+        notifyAdNotValidOrLoadFailed(placeName)
     }
 
     private fun findLoadedAppOpenAdUnitHolder(adPlace: AdPlace): AppOpenAdUnitHolder? {
