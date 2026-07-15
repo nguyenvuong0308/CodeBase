@@ -26,6 +26,7 @@
         <attr name="riv_icon_ripple" format="reference"/>
         <attr name="riv_ripple_color" format="reference|color"/>
         <attr name="riv_circle_ripple" format="reference|boolean"/>
+        <attr name="riv_apply_scale_x" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="CoreToolbarView">
@@ -37,11 +38,21 @@
         <attr name="ctv_ic_back_margin_start" format="dimension"/>
         <attr name="ctv_ic_back_background" format="reference"/>
         <attr name="ctv_ic_back_width_height" format="reference"/>
+        <attr name="ctv_ic_back_apply_scale_x" format="boolean"/>
+
+        <attr name="ctv_ic_help_show" format="boolean"/>
+        <attr name="ctv_ic_help_icon" format="reference"/>
+        <attr name="ctv_ic_help_enable" format="boolean"/>
+        <attr name="ctv_ic_help_margin_start" format="dimension"/>
+        <attr name="ctv_ic_help_background" format="reference"/>
+        <attr name="ctv_ic_help_width_height" format="reference"/>
+        <attr name="ctv_ic_help_apply_scale_x" format="boolean"/>
 
         <attr name="ctv_tv_title" format="reference|string"/>
         <attr name="ctv_tv_title_show" format="reference|boolean"/>
         <attr name="ctv_tv_title_text_color" format="reference|color"/>
         <attr name="ctv_tv_title_center_horizontal" format="boolean"/>
+        <attr name="ctv_tv_title_click_enable" format="boolean"/>
 
         <attr name="ctv_ic_up_down_up_show" format="boolean"/>
         <attr name="ctv_ic_up_down_up_icon" format="reference"/>
@@ -62,11 +73,13 @@
         <attr name="ctv_ic_action_margin_end" format="dimension"/>
         <attr name="ctv_ic_action_background" format="reference"/>
         <attr name="ctv_ic_action_width_height" format="reference"/>
+        <attr name="ctv_ic_action_apply_scale_x" format="boolean"/>
 
         <attr name="ctv_ic_action_extra_show" format="boolean"/>
         <attr name="ctv_ic_action_extra_icon" format="reference"/>
         <attr name="ctv_ic_action_extra_enable" format="boolean"/>
         <attr name="ctv_ic_action_extra_background" format="reference"/>
         <attr name="ctv_ic_action_extra_width_height" format="reference"/>
+        <attr name="ctv_ic_action_extra_apply_scale_x" format="boolean"/>
     </declare-styleable>
 </resources>

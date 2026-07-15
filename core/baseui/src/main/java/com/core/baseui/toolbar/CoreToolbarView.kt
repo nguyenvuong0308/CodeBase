@@ -99,12 +99,18 @@ class CoreToolbarView @JvmOverloads constructor(context: Context, attrs: Attribu
             invalidate()
         }
 
+    var isEnableTitleClick: Boolean = false
+        set(value) {
+            field = value
+            updateTitleClickState()
+            invalidate()
+        }
+
     var showUpDown: Boolean = false
         set(value) {
             field = value
             viewBinding.imageUpDown.visibleIf(value)
-            viewBinding.clTitle.isEnabled = value
-            viewBinding.clTitle.isClickable = value
+            updateTitleClickState()
             invalidate()
         }
 
@@ -297,6 +303,7 @@ class CoreToolbarView @JvmOverloads constructor(context: Context, attrs: Attribu
                 showTitle = getBoolean(R.styleable.CoreToolbarView_ctv_tv_title_show, showTitle)
                 textColorTitle = getColor(R.styleable.CoreToolbarView_ctv_tv_title_text_color, textColorTitle)
                 centerTitleHorizontal = getBoolean(R.styleable.CoreToolbarView_ctv_tv_title_center_horizontal, centerTitleHorizontal)
+                isEnableTitleClick = getBoolean(R.styleable.CoreToolbarView_ctv_tv_title_click_enable, isEnableTitleClick)
 
                 showUpDown = getBoolean(R.styleable.CoreToolbarView_ctv_ic_up_down_up_show, showUpDown)
                 resUp = getResourceId(R.styleable.CoreToolbarView_ctv_ic_up_down_up_icon, resUp)
@@ -368,6 +375,12 @@ class CoreToolbarView @JvmOverloads constructor(context: Context, attrs: Attribu
         } else {
             viewBinding.imageUpDown.setImageResource(resDown)
         }
+    }
+
+    private fun updateTitleClickState() {
+        val enableClick = showUpDown || isEnableTitleClick
+        viewBinding.clTitle.isEnabled = enableClick
+        viewBinding.clTitle.isClickable = enableClick
     }
 
     private fun updateTitleConstraint() {

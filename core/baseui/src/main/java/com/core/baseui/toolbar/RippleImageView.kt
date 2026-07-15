@@ -48,6 +48,12 @@ class RippleImageView @JvmOverloads constructor(context: Context, attrs: Attribu
             rebuildRipple()
         }
 
+    var applyScaleX: Boolean = true
+        set(value) {
+            field = value
+            updateIconScaleX()
+        }
+
     init {
         isClickable = true
         isFocusable = true
@@ -55,18 +61,19 @@ class RippleImageView @JvmOverloads constructor(context: Context, attrs: Attribu
 
         if (imageView == null) {
             imageView = AppCompatImageView(context).also { iv ->
-                iv.scaleX = resources.getInteger(R.integer.locale_mirror_flip).toFloat()
                 val lp = LayoutParams(
                     LayoutParams.MATCH_PARENT,
                     LayoutParams.MATCH_PARENT
                 ).apply { gravity = Gravity.CENTER }
                 addView(iv, lp)
             }
+            updateIconScaleX()
         }
 
         context.withStyledAttributes(attrs, R.styleable.RippleImageView) {
             paddingRipple = getDimension(R.styleable.RippleImageView_riv_padding_ripple, paddingRipple)
             iconRippleRes = getResourceId(R.styleable.RippleImageView_riv_icon_ripple, iconRippleRes)
+            applyScaleX = getBoolean(R.styleable.RippleImageView_riv_apply_scale_x, applyScaleX)
             if (hasValue(R.styleable.RippleImageView_riv_ripple_color)) {
                 rippleColor = getColor(R.styleable.RippleImageView_riv_ripple_color, 0)
             }
@@ -129,6 +136,14 @@ class RippleImageView @JvmOverloads constructor(context: Context, attrs: Attribu
 
         rippleDrawable = rd
         foreground = rd
+    }
+
+    private fun updateIconScaleX() {
+        imageView?.scaleX = if (applyScaleX) {
+            resources.getInteger(R.integer.locale_mirror_flip).toFloat()
+        } else {
+            1f
+        }
     }
 
     override fun setEnabled(enabled: Boolean) {
