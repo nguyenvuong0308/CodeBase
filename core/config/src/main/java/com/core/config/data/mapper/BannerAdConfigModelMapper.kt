@@ -14,6 +14,7 @@ internal class BannerAdConfigModelMapper @Inject constructor(
         return BannerAdTypeConfig(
             isEnableRetry = model.isEnableRetry ?: ConfigParam.RETRY_IS_ENABLE_RETRY,
             maxRetryCount = model.maxRetryCount ?: ConfigParam.RETRY_MAX_RETRY_COUNT,
+            isHideWhenError = model.isHideWhenError ?: ConfigParam.IS_HIDE_WHEN_ERROR,
             retryIntervalSecondList = model.retryIntervalSecondList ?: ConfigParam.RETRY_INTERVAL_LIST,
         )
     }

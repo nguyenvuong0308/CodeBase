@@ -10,6 +10,8 @@ internal class BannerAdConfigModel(
     val isEnableRetry: Boolean?,
     @Json(name = "max_retry_count")
     val maxRetryCount: Int?,
+    @Json(name = "is_hide_when_error")
+    val isHideWhenError: Boolean?,
     @Json(name = "retry_interval_second_list")
     val retryIntervalSecondList: List<Long>?,
 )
@@ -20,6 +22,8 @@ internal class NativeAdConfigModel(
     val isEnableRetry: Boolean?,
     @Json(name = "max_retry_count")
     val maxRetryCount: Int?,
+    @Json(name = "is_hide_when_error")
+    val isHideWhenError: Boolean?,
     @Json(name = "expired_time_second")
     val expiredTimeSecond: Int?,
     @Json(name = "retry_interval_second_list")

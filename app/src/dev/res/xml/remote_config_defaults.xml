@@ -514,6 +514,7 @@
             {
             "is_enable_retry": true,
             "max_retry_count": 5,
+            "is_hide_when_error": true,
             "retry_interval_second_list": [
             1,
             2,
@@ -528,6 +529,7 @@
             {
             "is_enable_retry": true,
             "max_retry_count": 5,
+            "is_hide_when_error": true,
             "retry_interval_second_list": [
             1,
             2,

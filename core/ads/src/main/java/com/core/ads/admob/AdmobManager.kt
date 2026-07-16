@@ -1326,7 +1326,9 @@ class AdmobManager @Inject constructor(
 
                                     else -> {
                                         Log.i(TAG, "Native retry exceeded count$placeName")
-//                                notifyBannerNativeFailedToLoad(placeName)
+                                        if (nativeAdConfig.isHideWhenError) {
+                                            notifyBannerNativeFailedToLoad(placeName)
+                                        }
                                         adHolder.reset()
                                     }
                                 }
@@ -1514,7 +1516,9 @@ class AdmobManager @Inject constructor(
 
                             else -> {
                                 Log.i(TAG, "Banner retry exceeded count$placeName")
-//                                notifyBannerNativeFailedToLoad(placeName)
+                                if (bannerAdConfig.isHideWhenError) {
+                                    notifyBannerNativeFailedToLoad(placeName)
+                                }
                                 adHolder.reset()
                             }
                         }

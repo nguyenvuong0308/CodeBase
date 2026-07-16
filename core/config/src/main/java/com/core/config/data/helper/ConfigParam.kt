@@ -7,10 +7,10 @@ import com.core.config.data.model.BannerAdConfigModel
 import com.core.config.data.model.IapConfigModel
 import com.core.config.data.model.InterstitialAdConfigModel
 import com.core.config.data.model.NativeAdConfigModel
-import com.core.config.data.model.RewardedAdConfigModel
-import com.core.config.data.model.RewardedInterstitialAdConfigModel
 import com.core.config.data.model.PreventAdClickConfigModel
 import com.core.config.data.model.RequestConsentConfigModel
+import com.core.config.data.model.RewardedAdConfigModel
+import com.core.config.data.model.RewardedInterstitialAdConfigModel
 import com.core.config.data.model.SplashScreenConfigModel
 
 internal sealed class ConfigParam<T : Any> {
@@ -39,6 +39,7 @@ internal sealed class ConfigParam<T : Any> {
 
         const val RETRY_IS_ENABLE_RETRY = false
         const val RETRY_MAX_RETRY_COUNT = 5
+        const val IS_HIDE_WHEN_ERROR = false
         const val EXPIRED_NATIVE_TIME_DEFAULT = 60
         val RETRY_INTERVAL_LIST = listOf(3L, 6L, 9L, 12L, 15L)
 
