@@ -20,19 +20,36 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Cấu hình cho phép hiển thị có bản cập nhật mới ở trong ứng dụng để người dùng có thể cập nhật
+ * Cách dùng:
+ *
+ * private val activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result: ActivityResult -> }
+ *
+ * viewBinding.mainContainer.doOnAttach {
+ *             inAppUpdateImpl.checkForUpdate(
+ *                 activity = this,
+ *                 launcher = activityResultLauncher,
+ *                 rootView = it
+ *             )
+ *         }
+ */
 @Singleton
 class InAppUpdateImpl @Inject constructor(
     app: Application
 ) {
+
+    companion object {
+        /** Chỉ khi staleness >= ngưỡng mới HIỂN THỊ in-app update */
+        private const val DAYS_FOR_FLEXIBLE_UPDATE: Int = 7
+    }
+
     /** Safe init: tránh crash nếu Play Services/Store lỗi hoặc không có */
     private val appUpdateManager: AppUpdateManager? = runCatching {
         AppUpdateManagerFactory.create(app)
     }.getOrNull()
 
     private var installListener: InstallStateUpdatedListener? = null
-
-    /** Chỉ khi staleness >= ngưỡng mới HIỂN THỊ in-app update */
-    var DAYS_FOR_FLEXIBLE_UPDATE: Int = 7
 
     /**
      * Gọi từ Activity:

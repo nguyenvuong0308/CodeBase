@@ -10,13 +10,9 @@
 
     <com.core.baseui.toolbar.CoreToolbarView
         android:id="@+id/toolbar"
+        style="@style/FB_Toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:ctv_ic_back_background="@drawable/bg_delete_2"
-        app:ctv_ic_back_icon="@drawable/fb_ic_back_feedback"
-        app:ctv_ic_back_width_height="@dimen/_36dp"
-        app:ctv_riv_padding_ripple="@dimen/_2dp"
-        app:ctv_tv_title_center_horizontal="true"/>
+        android:layout_height="wrap_content"/>
 
     <androidx.appcompat.widget.AppCompatImageView style="@style/LogoFeedback"/>
 

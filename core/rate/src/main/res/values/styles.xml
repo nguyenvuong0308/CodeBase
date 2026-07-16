@@ -14,6 +14,16 @@
         <item name="android:visibility">visible</item>
     </style>
 
+    <!-- Ghi đè style của toolbar của activity feedback -->
+    <style name="FB_Toolbar">
+        <!--        <item name="ctv_ic_back_background">@drawable/bg_delete_2</item>-->
+        <!--        <item name="ctv_ic_back_icon">@drawable/fb_ic_back_feedback</item>-->
+        <!--        <item name="ctv_ic_back_width_height">@dimen/_36dp</item>-->
+        <!--        <item name="ctv_riv_padding_ripple">@dimen/_2dp</item>-->
+        <!--        <item name="ctv_tv_title_center_horizontal">true</item>-->
+    </style>
+
+    <!-- Ghi đè style của title của activity feedback -->
     <style name="TitleFeedback" parent="BaseTitleFeedback">
 
     </style>

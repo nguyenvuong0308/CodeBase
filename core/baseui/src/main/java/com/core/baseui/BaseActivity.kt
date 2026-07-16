@@ -660,7 +660,34 @@ abstract class BaseActivity<T : ViewBinding> : AppCompatActivity(), CoroutineSco
      * @param adPlaceName Tên vị trí quảng cáo.
      * @param callbackSuccess Quảng cáo đã xem xong
      * @param callbackClose Cancel quảng cáo
+     * @param callbackNoAds Khi thử tải quảng cáo hết lượt thử mà vẫn không tải được quảng cáo nào cả
      * @param callbackRetry Quảng cáo lỗi có thể gọi thử lại
+     *
+     * Cách dùng ưu tiên
+     *
+     * abstract class BaseAdsActivity<VM : BaseViewModel, B : ViewBinding> : BaseActivity<VM, B>() {
+     *
+     *     fun unlock(callbackSuccess: () -> Unit, callbackFailed: () -> Unit) {
+     *         unlockWithRewarded(
+     *             adPlaceName = AppAdPlaceName.REWARDED,
+     *             callbackSuccess = callbackSuccess,
+     *             callbackClose = {
+     *                 cancelRewarded()
+     *             },
+     *             callbackNoAds = {
+     *                 callbackFailed.invoke()
+     *             },
+     *             callbackRetry = {
+     *                 callbackFailed.invoke()
+     *             })
+     *     }
+     *
+     *     open fun cancelRewarded() {}
+     *
+     *     override fun providerRewardAdPlaceName(): List<IAdPlaceName> {
+     *         return listOf(AppAdPlaceName.REWARDED)
+     *     }
+     * }
      */
     fun unlockWithRewarded(
         adPlaceName: IAdPlaceName,
