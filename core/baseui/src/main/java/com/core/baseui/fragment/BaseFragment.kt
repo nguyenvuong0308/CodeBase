@@ -53,7 +53,10 @@ private const val MAX_PICKED_IMAGE_FILES = 20
 abstract class BaseFragment<B : ViewBinding>(
 ) : Fragment(), CoroutineScope {
 
-    private var _viewBinding: B? = null
+    protected var _viewBinding: B? = null
+        set(value) {
+            field = value
+        }
 
     protected val viewBinding
         get() = _viewBinding
