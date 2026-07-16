@@ -37,8 +37,14 @@
         android:progress="0"
         android:progressBackgroundTint="#33FFFFFF"
         android:progressTint="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bannerNative"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <com.core.ads.customviews.ads.BannerNativeContainerLayout
+        android:layout_width="match_parent"
+        android:id="@+id/bannerNative"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="wrap_content"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

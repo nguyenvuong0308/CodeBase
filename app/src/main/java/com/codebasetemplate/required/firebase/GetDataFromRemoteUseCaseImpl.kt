@@ -9,11 +9,15 @@ import javax.inject.Singleton
 @Singleton
 class GetDataFromRemoteUseCaseImpl @Inject constructor(): GetDataFromRemoteConfigUseCase {
     var onBoardingConfig: OnBoardingConfig = OnBoardingConfig()
+    var languageActivityConfig: LanguageActivityConfig = LanguageActivityConfig()
+
     override fun invoke(remoteConfig: RemoteConfigService) {
         val onBoardingConfigModel = remoteConfig.fetchOtherConfig<OnBoardingConfigModel>("onboarding_config")
-        onBoardingConfig = OnBoardingConfig(
-            onBoardingConfigModel?.version ?: OnBoardingConfig.ONBOARDING_VERSION_1
-        )
-        Timber.Forest.d("onBoardingConfig: $onBoardingConfig")
+        onBoardingConfig = OnBoardingConfig.from(onBoardingConfigModel)
+        val languageActivityConfigModel =
+            remoteConfig.fetchOtherConfig<LanguageActivityConfigModel>("language_activity_config")
+        languageActivityConfig = LanguageActivityConfig.from(languageActivityConfigModel)
+        Timber.d("onBoardingConfig: $onBoardingConfig")
+        Timber.d("languageActivityConfig: $languageActivityConfig")
     }
 }

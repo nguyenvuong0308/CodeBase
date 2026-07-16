@@ -13,12 +13,23 @@
         app:bnl_isNativeFullscreen="true" />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:layout_width="@dimen/_32dp"
-        android:layout_height="@dimen/_32dp"
+        android:layout_width="@dimen/_24dp"
+        android:layout_height="@dimen/_24dp"
         android:layout_alignParentEnd="true"
         android:padding="@dimen/_2dp"
         android:id="@+id/ivClose"
         android:background="@drawable/bg_button_gray"
         android:layout_margin="@dimen/_15dp"
         android:src="@drawable/ic_rounded_close"/>
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:layout_width="wrap_content"
+        app:lottie_rawRes="@raw/swipe_left"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        android:alpha="0.8"
+        android:id="@+id/swipe"
+        android:visibility="gone"
+        android:layout_centerInParent="true"
+        android:layout_height="@dimen/_50dp"/>
 </RelativeLayout>

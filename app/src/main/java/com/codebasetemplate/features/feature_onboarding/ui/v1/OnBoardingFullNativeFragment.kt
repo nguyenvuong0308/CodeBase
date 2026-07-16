@@ -27,6 +27,7 @@ import javax.inject.Inject
 class OnBoardingFullNativeFragment : BaseFragment<CoreFragmentOnboardingFullNativeBinding>() {
 
     private val sharedViewModel: OnBoardingViewModel by activityViewModels()
+
     @Inject
     lateinit var getDataFromRemoteUseCase: GetDataFromRemoteUseCaseImpl
 
@@ -62,13 +63,13 @@ class OnBoardingFullNativeFragment : BaseFragment<CoreFragmentOnboardingFullNati
                 }
             } ?: ContextCompat.getColor(requireContext(), R.color.intro_blue)
 
-            viewBinding.layoutRoot.setBackgroundColor(backgroundColor) // đặt màu nền giống màu nền quảng cáo
+            viewBinding.layoutRoot.setBackgroundColor(backgroundColor)
         }
 
         viewBinding.ivClose.setOnSingleClick {
             sharedViewModel.navigateTo(OnBoardingEvent.NextEvent)
         }
-        viewBinding.layoutRoot.padding(top = getStatusBarHeight()) // Fullscreen cách statusbar (để hiển thị chữ "i" quảng cáo không bị che)
+        viewBinding.layoutRoot.padding(top = getStatusBarHeight())
     }
 
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {

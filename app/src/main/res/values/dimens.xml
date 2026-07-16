@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="app_header_height">72dp</dimen>
+    <dimen name="app_header_horizontal_padding_start">14dp</dimen>
+    <dimen name="app_header_horizontal_padding_end">16dp</dimen>
+    <dimen name="app_header_back_size">40dp</dimen>
+    <dimen name="app_header_back_padding">7dp</dimen>
+    <dimen name="app_header_title_margin_start">3dp</dimen>
+</resources>

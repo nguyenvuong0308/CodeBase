@@ -97,7 +97,7 @@ class OnBoardingActivity : CoreActivity<CoreActivityOnboardingBinding>() {
                     DEFINE_INTRO_FULL_AD -> {
                         if (!adsManager.isNotAbleToVisibleAdsToUser(AppAdPlaceName.ANCHORED_FULL_ONBOARDING)) {
                             add(
-                                OnBoardingItem.FullNativeItem
+                                OnBoardingItem.FullNativeItem()
                             )
                         }
                     }
@@ -189,14 +189,14 @@ class OnBoardingActivity : CoreActivity<CoreActivityOnboardingBinding>() {
 
                 }
 
-                OnBoardingEvent.NextEvent -> {
+                OnBoardingEvent.NextEvent, is OnBoardingEvent.NextAction -> {
                     viewBinding.viewPager.setCurrentItemFixCrash(
                         viewBinding.viewPager.currentItem + 1,
                         true
                     )
                 }
 
-                OnBoardingEvent.FinishStep -> {
+                OnBoardingEvent.FinishStep, is OnBoardingEvent.FinishAction -> {
                     if (BaseAdmobApplication.isFirstSaveLanguage) {
                         BaseAdmobApplication.isFirstSaveLanguage = false
                         analyticsManager.logEvent(AnalyticsEvent.EVENT_ACTION_PASS_INTRO)

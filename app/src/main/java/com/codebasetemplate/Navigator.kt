@@ -7,6 +7,8 @@ import com.codebasetemplate.features.feature_demo_frame_mvvm.frame_detail.ui.Fra
 import com.codebasetemplate.features.main.ui.MainActivityHost
 
 object Navigator {
+    fun mainClass(): Class<*> = MainActivityHost::class.java
+
     fun startMainActivity(context: Context) {
         val intent = Intent(context, MainActivityHost::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK

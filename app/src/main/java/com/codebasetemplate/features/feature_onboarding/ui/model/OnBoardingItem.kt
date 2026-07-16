@@ -1,12 +1,13 @@
 package com.codebasetemplate.features.feature_onboarding.ui.model
 
-sealed class OnBoardingItem(var isShowAds: Boolean, var isPageEnd: Boolean) {
+sealed class OnBoardingItem(var isShowAds: Boolean, var isPageEnd: Boolean, var position: Int) {
     class Item(
         isPageEnd: Boolean,
-        var position: Int,
+        position: Int,
+        var realPosition: Int = 0,
         isShowAds: Boolean
     ) :
-        OnBoardingItem(isShowAds, isPageEnd)
+        OnBoardingItem(isShowAds, isPageEnd, position)
 
-    object FullNativeItem : OnBoardingItem(false, false)
+    class FullNativeItem(position: Int = 0) : OnBoardingItem(false, false, position)
 }

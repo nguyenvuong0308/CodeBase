@@ -49,11 +49,10 @@
             1
             ],
             "intro_data_v3": [
-            0,
+            1,
+            1,
             2,
-            0,
-            2,
-            1
+            0
             ]
             }
         </value>
@@ -244,6 +243,189 @@
             "background_cta": "#F59E0B,#EF4444",
             "border_color": "#00000000",
             "cta_radius_dp": 12
+            },
+            {
+            "place_name": "flow_tutorial_201_language_1_n_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/2247696110"
+            ],
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "is_tutorial_flow": true,
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "flow_tutorial_201_language_2_n_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/2247696110"
+            ],
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "is_tutorial_flow": true,
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "flow_tutorial_201_language_3_n_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/2247696110"
+            ],
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "is_tutorial_flow": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "flow_tutorial_301_onb1_n_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/2247696110"
+            ],
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "is_tutorial_flow": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "flow_tutorial_302_onb2_n_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/2247696110"
+            ],
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "is_tutorial_flow": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "flow_tutorial_303_onb3_n_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/2247696110"
+            ],
+            "ad_type": "native",
+            "native_template_size": "full_cta_bottom",
+            "is_enable": true,
+            "is_tutorial_flow": true,
+            "background_color": "#FFFFFF",
+            "background_full_color": "#000",
+            "is_tracking_click": true,
+            "primary_text_color": "#1D1D1D",
+            "body_text_color": "#404040",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "flow_tutorial_303_onb4_n_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/2247696110"
+            ],
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "is_tutorial_flow": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "anchored_change_language_v2_native_1",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "anchored_change_language_v2_native_2",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "anchored_change_language_v2_native_3",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "anchored_change_language_v2_from_setting_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
             },
             {
             "place_name": "anchored_uninstall_bottom_step_1",
@@ -464,6 +646,12 @@
             "count_down_timer": 30
             },
             {
+            "place_name": "fullscreen_back_language_setting",
+            "ad_id": "ca-app-pub-3940256099942544/1033173712",
+            "ad_type": "interstitial",
+            "is_enable": true
+            },
+            {
             "place_name": "action_next_in_introduction",
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "is_ignore_interval": true,
@@ -572,12 +760,27 @@
             }
         </value>
     </entry>
-
+    <!--position_next:bottom/top-->
     <entry>
         <key>onboarding_config</key>
         <value>
             {
-            "version": 2
+            "version": 3,
+            "position_next": "top",
+            "is_show_close": true,
+            "is_show_swipe": false,
+            "delay_show_close_swipe_seconds": 1,
+            "background_top_next": "#000000"
+            }
+        </value>
+    </entry>
+
+    <entry>
+        <key>language_activity_config</key>
+        <value>
+            {
+            "version": 2,
+            "time_show_loading_lfo": 3
             }
         </value>
     </entry>

@@ -6,4 +6,6 @@ sealed class OnBoardingEvent: NavigatorEvent {
     object BackEvent: OnBoardingEvent()
     object NextEvent: OnBoardingEvent()
     object FinishStep: OnBoardingEvent()
+    data class NextAction(val actionMethod: String) : OnBoardingEvent()
+    data class FinishAction(val actionMethod: String) : OnBoardingEvent()
 }

@@ -9,7 +9,7 @@ import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.viewbinding.ViewBinding
 import com.codebasetemplate.core.base_ui.CoreActivity
-import com.codebasetemplate.features.feature_language.ui.LanguageActivity
+import com.codebasetemplate.features.feature_language.ui.LanguageActivityNavigator
 import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
 import com.codebasetemplate.features.feature_uninstall.ui.UninstallActivityHost
 import com.codebasetemplate.features.main.ui.MainActivityHost
@@ -603,8 +603,9 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
     private fun createSplashIntent(): Intent {
         return if (isEnableLanguageScreen) {
             timeShowIntro = System.currentTimeMillis()
-            LanguageActivity.intentStart(
+            LanguageActivityNavigator.intentStart(
                 this@BaseSplashActivity,
+                config = getDataFromRemoteUseCase.languageActivityConfig,
                 fromSplash = true
             )
         } else if (!isEnableLanguageScreen && isEnableIntroductionScreen) {

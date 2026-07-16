@@ -3,8 +3,11 @@ package com.codebasetemplate.features.feature_splash.ui
 import android.view.LayoutInflater
 import androidx.activity.viewModels
 import com.codebasetemplate.databinding.CoreActivitySplashBinding
+import com.codebasetemplate.required.ads.AppAdPlaceName
+import com.core.ads.domain.AdLoadBannerNativeUiResource
 import com.core.baseui.R
 import com.core.baseui.ext.bindLiveData
+import com.core.config.domain.data.IAdPlaceName
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -133,6 +136,16 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
         if (splashCountdownStarted) {
             updateCountdownMessage(displayProgress, max)
         }
+    }
+
+    override fun providerBannerNativeAdPlaceName(): List<IAdPlaceName> {
+        return listOf(
+            AppAdPlaceName.ANCHORED_BOTTOM_SPLASH
+        )
+    }
+
+    override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
+        viewBinding.bannerNative.processAdResource(adResource, AppAdPlaceName.ANCHORED_BOTTOM_SPLASH)
     }
 
 }
