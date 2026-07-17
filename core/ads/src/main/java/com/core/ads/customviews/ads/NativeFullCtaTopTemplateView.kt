@@ -113,6 +113,7 @@ class NativeFullCtaTopTemplateView @JvmOverloads constructor(
             binding.background.margin(left = 0, right = 0)
             binding.background.background = null
             binding.adNotificationView.setBackgroundResource(com.core.ads.R.drawable.gnt_rounded_bottom_corner_shape)
+            reapplyAdsNotifyViewStyles(binding.adNotificationView)
             binding.primary.setTextColor(ContextCompat.getColor(context, com.core.ads.R.color.neutral_dark_primary))
             binding.primary.setShadowLayer(10f, 2f, 2f, Color.BLACK)
             binding.body.setTextColor(ContextCompat.getColor(context, com.core.ads.R.color.neutral_dark_primary))
@@ -218,6 +219,7 @@ class NativeFullCtaTopTemplateView @JvmOverloads constructor(
         styles.backgroundAdsNotifyView?.let {
             binding.adNotificationView.setBackgroundResource(it)
         }
+        applyAdsNotifyViewStyles(styles, binding.adNotificationView)
 
         styles.primaryTextBackgroundColor?.let {
             binding.primary.background = it

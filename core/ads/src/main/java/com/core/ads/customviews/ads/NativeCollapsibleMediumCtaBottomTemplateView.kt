@@ -208,6 +208,7 @@ class NativeCollapsibleMediumCtaBottomTemplateView @JvmOverloads constructor(
             binding.adNotificationView.setBackgroundResource(it)
             binding.adNotificationViewMini.setBackgroundResource(it)
         }
+        applyAdsNotifyViewStyles(styles, binding.adNotificationView, binding.adNotificationViewMini)
 
         styles.primaryTextBackgroundColor?.let {
             binding.primary.background = it

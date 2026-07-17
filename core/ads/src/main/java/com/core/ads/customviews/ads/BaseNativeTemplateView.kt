@@ -4,6 +4,9 @@ import android.content.Context
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.widget.FrameLayout
+import android.widget.TextView
+import androidx.core.graphics.toColorInt
+import com.core.ads.extensions.updateBackgroundColor
 import com.google.android.gms.ads.nativead.NativeAd
 
 abstract class BaseNativeTemplateView @JvmOverloads constructor(
@@ -11,6 +14,7 @@ abstract class BaseNativeTemplateView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     var onClose: (() -> Unit) ?= null
+    private var adsNotifyViewStyles: NativeTemplateStyle? = null
     abstract fun destroyNativeAd()
 
     override fun onDetachedFromWindow() {
@@ -36,6 +40,34 @@ abstract class BaseNativeTemplateView @JvmOverloads constructor(
     open fun onHostPause() = Unit
 
     open fun onHostResume() = Unit
+
+    protected fun applyAdsNotifyViewStyles(styles: NativeTemplateStyle, vararg views: TextView) {
+        adsNotifyViewStyles = styles
+        updateAdsNotifyViews(styles, *views)
+    }
+
+    protected fun reapplyAdsNotifyViewStyles(vararg views: TextView) {
+        adsNotifyViewStyles?.let { styles ->
+            updateAdsNotifyViews(styles, *views)
+        }
+    }
+
+    private fun updateAdsNotifyViews(styles: NativeTemplateStyle, vararg views: TextView) {
+        styles.backgroundColorAdsNotifyView?.let { color ->
+            views.forEach { view ->
+                view.updateBackgroundColor(color)
+            }
+        }
+
+        styles.textColorAdsNotifyView?.let { color ->
+            runCatching {
+                val colorInt = color.toColorInt()
+                views.forEach { view ->
+                    view.setTextColor(colorInt)
+                }
+            }
+        }
+    }
 
     fun adHasOnlyStore(nativeAd: NativeAd): Boolean {
         val store = nativeAd.store

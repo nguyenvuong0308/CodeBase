@@ -140,16 +140,7 @@ class NativeMediumShortCtaBottomTemplateView @JvmOverloads constructor(
         styles.backgroundAdsNotifyView?.let {
             binding.adNotificationView.setBackgroundResource(it)
         }
-
-        styles.backgroundColorAdsNotifyView?.let {
-            binding.adNotificationView.updateBackgroundColor(it)
-        }
-
-        styles.textColorAdsNotifyView?.let {
-            runCatching {
-                binding.adNotificationView.setTextColor(it.toColorInt())
-            }
-        }
+        applyAdsNotifyViewStyles(styles, binding.adNotificationView)
 
         styles.primaryTextBackgroundColor?.let {
             binding.primary.background = it
