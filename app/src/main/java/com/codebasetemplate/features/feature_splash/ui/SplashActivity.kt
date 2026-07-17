@@ -1,19 +1,31 @@
 package com.codebasetemplate.features.feature_splash.ui
 
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import androidx.activity.viewModels
 import com.codebasetemplate.databinding.CoreActivitySplashBinding
+import com.codebasetemplate.features.feature_language.ui.LanguageActivityNavigator
+import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
+import com.codebasetemplate.features.feature_uninstall.ui.UninstallActivityHost
+import com.codebasetemplate.features.main.ui.MainActivityHost
 import com.codebasetemplate.required.ads.AppAdPlaceName
+import com.codebasetemplate.required.shortcut.AppScreenType
+import com.codebasetemplate.required.shortcut.AppShortCut
 import com.core.ads.domain.AdLoadBannerNativeUiResource
 import com.core.baseui.R
 import com.core.baseui.ext.bindLiveData
 import com.core.config.domain.data.IAdPlaceName
+import com.core.utilities.getCurrentLanguageCode
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+
+private const val TAG = "SplashActivity"
 
 @AndroidEntryPoint
 class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
@@ -22,6 +34,7 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
         private const val EARLY_PROGRESS_RATIO = 0.2f
         private const val EARLY_PROGRESS_DURATION_MS = 1_200L
     }
+
     private var earlyProgressJob: Job? = null
     private var splashCountdownStarted = false
     private var splashProgressMax = 15_000
@@ -145,7 +158,78 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
     }
 
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
-        viewBinding.bannerNative.processAdResource(adResource, AppAdPlaceName.ANCHORED_BOTTOM_SPLASH)
+        viewBinding.bannerNative.processAdResource(
+            adResource,
+            AppAdPlaceName.ANCHORED_BOTTOM_SPLASH
+        )
+    }
+
+    private fun createSplashIntent(): Intent {
+        return if (isEnableLanguageScreen) {
+            timeShowIntro = System.currentTimeMillis()
+            LanguageActivityNavigator.intentStart(
+                this@SplashActivity,
+                config = getDataFromRemoteUseCase.languageActivityConfig,
+                fromSplash = true
+            )
+        } else if (!isEnableLanguageScreen && isEnableIntroductionScreen) {
+            timeShowIntro = System.currentTimeMillis()
+            Intent(
+                this@SplashActivity,
+                OnBoardingConfigFactory.getOnBoardingClass(getDataFromRemoteUseCase.onBoardingConfig)
+            )
+        } else {
+            Intent(this@SplashActivity, MainActivityHost::class.java)
+        }
+    }
+
+    override fun openNextScreen() {
+        val intentNext =
+            when {
+                targetScreenFromShortCut == AppScreenType.Uninstall.screenName -> {
+                    Intent(this@SplashActivity, UninstallActivityHost::class.java).apply {
+                        val bundle = Bundle().apply {
+                            putString(
+                                AppShortCut.KEY_SHORTCUT_TARGET_SCREEN,
+                                targetScreenFromShortCut
+                            )
+                        }
+                        putExtras(bundle)
+                    }
+                }
+
+                /**Những case shortcut khác*/
+                targetScreenFromShortCut?.isNotBlank() == true -> {
+                    Intent(this@SplashActivity, MainActivityHost::class.java).apply {
+                        val bundle = Bundle().apply {
+                            putString(
+                                AppShortCut.KEY_SHORTCUT_TARGET_SCREEN,
+                                targetScreenFromShortCut
+                            )
+                        }
+                        putExtras(bundle)
+                    }
+                }
+
+                /**Case chưa vào màn main lần nào*/
+                getCurrentLanguageCode().isBlank() && !appPreferences.isShowIntro -> {
+                    Log.d(
+                        TAG,
+                        "checkAbleToNextScreen: getCurrentLanguageCode() ${getCurrentLanguageCode()} appPreferences.isShowIntro ${appPreferences.isShowIntro}"
+                    )
+                    createSplashIntent()
+                }
+
+                isAlwaysShowIntroAndLanguageScreen && !purchasePreferences.isUserVip() -> {
+                    createSplashIntent()
+                }
+
+                else -> {
+                    Intent(this@SplashActivity, MainActivityHost::class.java)
+                }
+            }
+        intentNext.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+        this@SplashActivity.startActivity(intentNext)
     }
 
 }

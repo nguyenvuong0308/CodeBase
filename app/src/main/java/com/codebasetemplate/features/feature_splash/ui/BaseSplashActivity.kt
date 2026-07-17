@@ -9,10 +9,7 @@ import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.viewbinding.ViewBinding
 import com.codebasetemplate.core.base_ui.CoreActivity
-import com.codebasetemplate.features.feature_language.ui.LanguageActivityNavigator
 import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
-import com.codebasetemplate.features.feature_uninstall.ui.UninstallActivityHost
-import com.codebasetemplate.features.main.ui.MainActivityHost
 import com.codebasetemplate.required.ads.AppAdPlaceName
 import com.codebasetemplate.required.firebase.GetDataFromRemoteUseCaseImpl
 import com.codebasetemplate.required.shortcut.AppScreenType
@@ -33,9 +30,9 @@ import com.core.utilities.hideNavigationBar
 import com.core.utilities.manager.isNetworkConnected
 import com.core.utilities.util.Timber
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
@@ -43,20 +40,24 @@ import javax.inject.Inject
 import kotlin.math.absoluteValue
 
 private const val TAG = "BaseSplashActivity"
+
 abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
 
     @Inject
     lateinit var getDataFromRemoteUseCase: GetDataFromRemoteUseCaseImpl
-    private val viewModel by viewModels<SplashViewModel>()
+    protected val baseViewModel by viewModels<SplashViewModel>()
     override val isWaitingAds: Boolean
         get() = true
-    private var timeShowIntro by SharedPrefs.instance.preference(defaultValue = 0L, key = "timeShowIntro")
+    protected var timeShowIntro by SharedPrefs.instance.preference(
+        defaultValue = 0L,
+        key = "timeShowIntro"
+    )
 
-    private var countDownTimer: JsgCountDownTimer? = null
-    private var delayedShowAdJob: Job? = null
+    protected var countDownTimer: JsgCountDownTimer? = null
+    protected var delayedShowAdJob: Job? = null
 
     private val appOpenPlaceName by lazy {
-        if (viewModel.isFirstOpenApp) {
+        if (baseViewModel.isFirstOpenApp) {
             AppAdPlaceName.APP_OPEN_FIRST_OPEN
         } else {
             AppAdPlaceName.APP_OPEN
@@ -64,23 +65,23 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
     }
 
     private val interstitialPlaceName by lazy {
-        if (viewModel.isFirstOpenApp) {
+        if (baseViewModel.isFirstOpenApp) {
             AppAdPlaceName.ACTION_OPEN_APP_FIRST_OPEN
         } else {
             AppAdPlaceName.ACTION_OPEN_APP
         }
     }
 
-    private val isEnableIntroductionScreen: Boolean by lazy {
+    protected val isEnableIntroductionScreen: Boolean by lazy {
         remoteConfigRepository.getAppConfig().isEnableIntroductionScreen
     }
-    private val isEnableLanguageScreen: Boolean by lazy {
+    protected val isEnableLanguageScreen: Boolean by lazy {
         remoteConfigRepository.getAppConfig().isEnableChangeLanguageScreen
     }
-    private val isAlwaysShowIntroAndLanguageScreen: Boolean by lazy {
-        if(remoteConfigRepository.getAppConfig().isAlwaysShowIntroAndLanguageScreen) {
+    protected val isAlwaysShowIntroAndLanguageScreen: Boolean by lazy {
+        if (remoteConfigRepository.getAppConfig().isAlwaysShowIntroAndLanguageScreen) {
             true
-        } else if(remoteConfigRepository.getAppConfig().isAlwaysShowIntroAndLanguageScreenWithInterval){
+        } else if (remoteConfigRepository.getAppConfig().isAlwaysShowIntroAndLanguageScreenWithInterval) {
             val subDate = subDate(System.currentTimeMillis(), timeShowIntro)
             subDate >= remoteConfigRepository.getAppConfig().intervalDayAlwaysShowIntroAndLanguage
         } else {
@@ -111,7 +112,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 
     /**Shortcut Data - Điều hướng màn hình theo shortcut*/
-    private val targetScreenFromShortCut by lazy {
+    protected val targetScreenFromShortCut by lazy {
         intent.extras?.getString(AppShortCut.KEY_SHORTCUT_TARGET_SCREEN, "")
     }
 
@@ -161,7 +162,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
             }
 
             else -> {
-                if(targetScreenFromShortCut != null) {
+                if (targetScreenFromShortCut != null) {
                     analyticsManager.logEvent(AnalyticsEvent.EVENT_CLICK_SHORT_CUT + targetScreenFromShortCut)
                 }
             }
@@ -175,7 +176,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
 
     override fun providerInterAdPlaceName(): List<IAdPlaceName> {
         return mutableListOf<IAdPlaceName>().apply {
-            if(getCurrentLanguageCode().isBlank() || isAlwaysShowIntroAndLanguageScreen) {
+            if (getCurrentLanguageCode().isBlank() || isAlwaysShowIntroAndLanguageScreen) {
                 add(AppAdPlaceName.ACTION_NEXT_IN_INTRODUCTION)
                 add(AppAdPlaceName.ACTION_SKIP_IN_INTRODUCTION)
             }
@@ -183,16 +184,22 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
     }
 
     override fun providerPreloadBannerNativeAdPlaceName(): List<IAdPlaceName> {
-        val isLoadLanguage = getCurrentLanguageCode().isBlank() || isAlwaysShowIntroAndLanguageScreen
+        val isLoadLanguage =
+            getCurrentLanguageCode().isBlank() || isAlwaysShowIntroAndLanguageScreen
         return mutableListOf<IAdPlaceName>().apply {
             if (isLoadLanguage) {
                 add(AppAdPlaceName.ANCHORED_CHANGE_LANGUAGE_BOTTOM)
             }
-            if(isEnableIntroductionScreen && isLoadLanguage) {
-                addAll(OnBoardingConfigFactory.getOnBoardingAdPlaceName(getDataFromRemoteUseCase.onBoardingConfig, remoteConfigRepository.getAppConfig()))
+            if (isEnableIntroductionScreen && isLoadLanguage) {
+                addAll(
+                    OnBoardingConfigFactory.getOnBoardingAdPlaceName(
+                        getDataFromRemoteUseCase.onBoardingConfig,
+                        remoteConfigRepository.getAppConfig()
+                    )
+                )
             }
 
-            if(targetScreenFromShortCut == AppScreenType.Uninstall.screenName) {
+            if (targetScreenFromShortCut == AppScreenType.Uninstall.screenName) {
                 add(AppAdPlaceName.ANCHORED_UNINSTALL_BOTTOM_STEP_1)
                 add(AppAdPlaceName.ANCHORED_UNINSTALL_BOTTOM_STEP_2)
             }
@@ -203,23 +210,23 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.isActivityResume = true
-        if (viewModel.needHandleEventWhenResume) {
-            viewModel.needHandleEventWhenResume = false
+        baseViewModel.isActivityResume = true
+        if (baseViewModel.needHandleEventWhenResume) {
+            baseViewModel.needHandleEventWhenResume = false
             showRequireTurnOnNetworkBottomSheetFragment()
         }
 
         if (countDownTimer?.isTimerPaused() == true) {
             countDownTimer?.resumeTimer()
         }
-        if (countDownTimer == null && viewModel.isSplashAdsFlowStarted) {
+        if (countDownTimer == null && baseViewModel.isSplashAdsFlowStarted) {
             startCountDownTimer()
         }
     }
 
     override fun handleObservable() {
         val ignoreSuper = true
-        if(!ignoreSuper) {
+        if (!ignoreSuper) {
             super.handleObservable()
         }
         collectFlowOn(remoteConfigRepository.fetchStateCompleteFlow) { fetchState ->
@@ -247,7 +254,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
 
                 ConsentFormUiResource.Complete -> {
                     Timber.e("ConsentFormUiResource.Complete")
-                    viewModel.isRequestEuConsentComplete = true
+                    baseViewModel.isRequestEuConsentComplete = true
                     tryStartSplashAdsFlow()
                 }
             }
@@ -301,24 +308,29 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
             }
         }
 
-        collectFlowOn(viewModel.showRequireTurnOnNetworkWhenRetryClickedFlow) {
-            if (viewModel.isActivityResume) {
+        collectFlowOn(baseViewModel.showRequireTurnOnNetworkWhenRetryClickedFlow) {
+            if (baseViewModel.isActivityResume) {
                 showRequireTurnOnNetworkBottomSheetFragment()
             } else {
-                viewModel.needHandleEventWhenResume = true
+                baseViewModel.needHandleEventWhenResume = true
             }
         }
     }
 
     private fun fetchSplashAds() {
         Log.d(TAG, "fetchSplashAds: 0")
-        if (viewModel.isFirstOpenApp) {
+        if (baseViewModel.isFirstOpenApp) {
             if (remoteConfigRepository.getSplashScreenConfig().adTypeFirstOpen == AdType.AppOpen) {
                 Log.d(TAG, "fetchSplashAds: 1")
                 appOpenAdManager.fetchAd(this, appOpenPlaceName)
             } else {
                 Log.d(TAG, "fetchSplashAds: 2")
-                adsManager.loadFullscreenAd(this, interstitialPlaceName, isNeedUpdateAdPlace = true, identifier = "")
+                adsManager.loadFullscreenAd(
+                    this,
+                    interstitialPlaceName,
+                    isNeedUpdateAdPlace = true,
+                    identifier = ""
+                )
             }
         } else {
             if (remoteConfigRepository.getSplashScreenConfig().adType == AdType.AppOpen) {
@@ -326,13 +338,17 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
                 appOpenAdManager.fetchAd(this, appOpenPlaceName)
             } else {
                 Log.d(TAG, "fetchSplashAds: 4")
-                adsManager.loadFullscreenAd(this, interstitialPlaceName, isNeedUpdateAdPlace = true, identifier = "")
+                adsManager.loadFullscreenAd(
+                    this,
+                    interstitialPlaceName,
+                    isNeedUpdateAdPlace = true,
+                    identifier = ""
+                )
             }
         }
     }
 
     private fun handleRemoteConfigReady() {
-//                    applyAppIconFromRemoteConfig()
         AppShortCut.setUpShortCut(
             this,
             remoteConfigRepository.getAppConfig().isEnableAppShortCut,
@@ -340,26 +356,26 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
         )
         PreventShowManyInterstitialAds.initIntervalTimeShowInterstitialMillis()
         adsManager.startDisableAdCountDownTimer()
-        viewModel.isRemoteConfigReady = true
+        baseViewModel.isRemoteConfigReady = true
         tryStartSplashAdsFlow()
     }
 
     private fun startSplashPrerequisites() {
         remoteConfigRepository.fetchAndActive()
-        if (!viewModel.isRequestEuConsentComplete) {
+        if (!baseViewModel.isRequestEuConsentComplete) {
             adsManager.requestConsentInfoUpdate(this, false)
         }
     }
 
     private fun tryStartSplashAdsFlow() {
-        if (!viewModel.isRemoteConfigReady || !viewModel.isRequestEuConsentComplete) {
+        if (!baseViewModel.isRemoteConfigReady || !baseViewModel.isRequestEuConsentComplete) {
             return
         }
-        if (viewModel.isSplashAdsFlowStarted) {
+        if (baseViewModel.isSplashAdsFlowStarted) {
             return
         }
 
-        viewModel.isSplashAdsFlowStarted = true
+        baseViewModel.isSplashAdsFlowStarted = true
         reinitAdPlaceName(
             initInterstitialAdPlaceName = providerInterAdPlaceName(),
             initBannerNativeAdPlaceName = providerBannerNativeAdPlaceName(),
@@ -369,60 +385,91 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
         readyAds()
         preloadAds()
 
-        val isShowAd = when {
-            purchasePreferences.isUserVip() -> false
-            targetScreenFromShortCut.isNullOrBlank() -> true
-            targetScreenFromShortCut == AppScreenType.Uninstall.screenName -> {
-                remoteConfigRepository.getAppConfig().isEnableOpenAppAdsFromUninstallShortcut
-            }
-            else -> {
-                remoteConfigRepository.getAppConfig().isEnableOpenAppAdsFromShortcut
-            }
-        }
-
-        if (isShowAd) {
+        if (isShowAd()) {
             fetchSplashAds()
         } else {
             onSplashStatusChanged(SplashStatus.AdsUnavailable)
             handleWhenAdNotValidOrLoadFailed()
         }
 
-        if (viewModel.isActivityResume) {
+        if (baseViewModel.isActivityResume) {
             onSplashStatusChanged(SplashStatus.CountdownRunning)
             startCountDownTimer()
         }
     }
 
+    open fun isShowAd(): Boolean {
+        val isShowAd = when {
+            purchasePreferences.isUserVip() -> false
+            targetScreenFromShortCut.isNullOrBlank() -> true
+            targetScreenFromShortCut == AppScreenType.Uninstall.screenName -> {
+                remoteConfigRepository.getAppConfig().isEnableOpenAppAdsFromUninstallShortcut
+            }
+
+            else -> {
+                remoteConfigRepository.getAppConfig().isEnableOpenAppAdsFromShortcut
+            }
+        }
+        return isShowAd
+    }
+
     private fun handleWhenAdLoaded() {
         Log.d(TAG, "handleWhenAdLoaded: ")
         onSplashStatusChanged(SplashStatus.AdLoaded)
-        viewModel.handleWhenAdLoaded()
+        baseViewModel.handleWhenAdLoaded()
     }
 
     private fun handleWhenAdNotValidOrLoadFailed() {
         Log.d(TAG, "handleWhenAdNotValidOrLoadFailed: ")
         onSplashStatusChanged(SplashStatus.AdsUnavailable)
-        viewModel.handleWhenAdNotValidOrLoadFailed()
+        baseViewModel.handleWhenAdNotValidOrLoadFailed()
         checkAbleToNextScreen()
     }
+
+    private fun checkAbleToNextScreen() {
+        if (isFinishing || isDestroyed) return
+        val nextScreen = {
+            countDownTimer?.pauseTimer()
+            appOpenAdManager.isFirstOpenApp = false
+            openNextScreen()
+            finish()
+        }
+
+        if (baseViewModel.currentProgress >= baseViewModel.timeSkipAppOpenAdWhenNotAvailable && baseViewModel.isAdNotValidOrLoadFailed) {
+            nextScreen()
+            return
+        }
+
+        if (baseViewModel.isTimerComplete && !baseViewModel.isAppOpenAdLoaded && !baseViewModel.isAppOpenAdShowing) {
+            nextScreen()
+            return
+        }
+
+        if (baseViewModel.isAppOpenAdDismissed) {
+            nextScreen()
+            return
+        }
+    }
+
+    abstract fun openNextScreen()
 
     private fun handleWhenAdShowing() {
         Log.d(TAG, "handleWhenAdShowing: ")
         onSplashStatusChanged(SplashStatus.ShowingAd)
         hideLoadingX()
-        viewModel.handleWhenAdShowing()
+        baseViewModel.handleWhenAdShowing()
     }
 
     private fun handleWhenAdDismissed() {
         Log.d(TAG, "handleWhenAdDismissed: ")
         onSplashStatusChanged(SplashStatus.ReadyToEnterApp)
-        viewModel.handleWhenAdDismissed()
+        baseViewModel.handleWhenAdDismissed()
         checkAbleToNextScreen()
     }
 
     override fun onPause() {
         super.onPause()
-        viewModel.isActivityResume = false
+        baseViewModel.isActivityResume = false
         if (countDownTimer?.isTimerRunning() == true) {
             countDownTimer?.pauseTimer()
         }
@@ -458,32 +505,34 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
             remoteConfigRepository.getSplashScreenConfig().minTimeWaitProgressBeforeShowAd * 1000L
         val timeMillisDelayBeforeShow =
             remoteConfigRepository.getAppOpenAdConfig().timeMillisDelayBeforeShow
-        viewModel.timeSkipAppOpenAdWhenNotAvailable =
+        baseViewModel.timeSkipAppOpenAdWhenNotAvailable =
             remoteConfigRepository.getSplashScreenConfig().timeSkipAppOpenAdWhenNotAvailable * 1000L
 
-        viewModel.maxProgress = remoteConfigRepository.getSplashScreenConfig().maxTimeToWaitAppOpenAd * 1000L
-        onSplashCountdownStarted(viewModel.maxProgress.toInt())
+        baseViewModel.maxProgress =
+            remoteConfigRepository.getSplashScreenConfig().maxTimeToWaitAppOpenAd * 1000L
+        onSplashCountdownStarted(baseViewModel.maxProgress.toInt())
         onSplashStatusChanged(SplashStatus.CountdownRunning)
-        updateSplashProgress(progress = 0, max = viewModel.maxProgress.toInt())
+        updateSplashProgress(progress = 0, max = baseViewModel.maxProgress.toInt())
 
-        Timber.e("startCountDownTimer ${viewModel.maxProgress}")
+        Timber.e("startCountDownTimer ${baseViewModel.maxProgress}")
 
-        countDownTimer = object : JsgCountDownTimer(viewModel.maxProgress, 100) {
+        countDownTimer = object : JsgCountDownTimer(baseViewModel.maxProgress, 100) {
             override fun onTimerTick(timeRemaining: Long) {
-                viewModel.currentProgress = viewModel.maxProgress - timeRemaining
+                baseViewModel.currentProgress = baseViewModel.maxProgress - timeRemaining
                 updateSplashProgress(
-                    progress = viewModel.currentProgress.coerceAtMost(viewModel.maxProgress).toInt(),
-                    max = viewModel.maxProgress.toInt()
+                    progress = baseViewModel.currentProgress.coerceAtMost(baseViewModel.maxProgress)
+                        .toInt(),
+                    max = baseViewModel.maxProgress.toInt()
                 )
-                Timber.e("startCountDownTimer ${viewModel.currentProgress}")
-                if (viewModel.isAppOpenAdLoaded) {
-                    Timber.e("isAppOpenAdLoaded ${viewModel.isAppOpenAdLoaded}")
-                    if (viewModel.currentProgress >= minTimeWaitProgressBeforeShowAd) {
-                        viewModel.isAppOpenAdLoaded = false
+                Timber.e("startCountDownTimer ${baseViewModel.currentProgress}")
+                if (baseViewModel.isAppOpenAdLoaded) {
+                    Timber.e("isAppOpenAdLoaded ${baseViewModel.isAppOpenAdLoaded}")
+                    if (baseViewModel.currentProgress >= minTimeWaitProgressBeforeShowAd) {
+                        baseViewModel.isAppOpenAdLoaded = false
                         delayedShowAdJob?.cancel()
                         delayedShowAdJob = CoroutineScope(coroutineContext).launch {
                             delay(timeMillisDelayBeforeShow)
-                            if (viewModel.isFirstOpenApp) {
+                            if (baseViewModel.isFirstOpenApp) {
                                 if (remoteConfigRepository.getSplashScreenConfig().adTypeFirstOpen == AdType.AppOpen) {
                                     appOpenAdManager.showAdIfAvailable(
                                         this@BaseSplashActivity,
@@ -520,100 +569,16 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
             }
 
             override fun onTimerFinish() {
-                viewModel.isTimerComplete = true
+                baseViewModel.isTimerComplete = true
                 updateSplashProgress(
-                    progress = viewModel.maxProgress.toInt(),
-                    max = viewModel.maxProgress.toInt()
+                    progress = baseViewModel.maxProgress.toInt(),
+                    max = baseViewModel.maxProgress.toInt()
                 )
                 onSplashStatusChanged(SplashStatus.ReadyToEnterApp)
                 checkAbleToNextScreen()
             }
         }
         countDownTimer?.startTimer()
-    }
-
-    private fun checkAbleToNextScreen() {
-        if (isFinishing || isDestroyed) return
-
-        val nextScreen = {
-            countDownTimer?.pauseTimer()
-            appOpenAdManager.isFirstOpenApp = false
-            val intent =
-                when {
-                    targetScreenFromShortCut == AppScreenType.Uninstall.screenName -> {
-                        Intent(this@BaseSplashActivity, UninstallActivityHost::class.java).apply {
-                            val bundle = Bundle().apply {
-                                putString(
-                                    AppShortCut.KEY_SHORTCUT_TARGET_SCREEN,
-                                    targetScreenFromShortCut
-                                )
-                            }
-                            putExtras(bundle)
-                        }
-                    }
-
-                    /**Những case shortcut khác*/
-                    targetScreenFromShortCut?.isNotBlank() == true -> {
-                        Intent(this@BaseSplashActivity, MainActivityHost::class.java).apply {
-                            val bundle = Bundle().apply {
-                                putString(
-                                    AppShortCut.KEY_SHORTCUT_TARGET_SCREEN,
-                                    targetScreenFromShortCut
-                                )
-                            }
-                            putExtras(bundle)
-                        }
-                    }
-
-                    /**Case chưa vào màn main lần nào*/
-                    getCurrentLanguageCode().isBlank() && !appPreferences.isShowIntro -> {
-                        Log.d(TAG, "checkAbleToNextScreen: getCurrentLanguageCode() ${getCurrentLanguageCode()} appPreferences.isShowIntro ${appPreferences.isShowIntro}")
-                        createSplashIntent()
-                    }
-
-                    isAlwaysShowIntroAndLanguageScreen && !purchasePreferences.isUserVip() -> {
-                        createSplashIntent()
-                    }
-
-                    else -> {
-                        Intent(this@BaseSplashActivity, MainActivityHost::class.java)
-                    }
-                }
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-            this@BaseSplashActivity.startActivity(intent)
-            finish()
-        }
-
-        if (viewModel.currentProgress >= viewModel.timeSkipAppOpenAdWhenNotAvailable && viewModel.isAdNotValidOrLoadFailed) {
-            nextScreen()
-            return
-        }
-
-        if (viewModel.isTimerComplete && !viewModel.isAppOpenAdLoaded && !viewModel.isAppOpenAdShowing) {
-            nextScreen()
-            return
-        }
-
-        if (viewModel.isAppOpenAdDismissed) {
-            nextScreen()
-            return
-        }
-    }
-
-    private fun createSplashIntent(): Intent {
-        return if (isEnableLanguageScreen) {
-            timeShowIntro = System.currentTimeMillis()
-            LanguageActivityNavigator.intentStart(
-                this@BaseSplashActivity,
-                config = getDataFromRemoteUseCase.languageActivityConfig,
-                fromSplash = true
-            )
-        } else if (!isEnableLanguageScreen && isEnableIntroductionScreen) {
-            timeShowIntro = System.currentTimeMillis()
-            Intent(this@BaseSplashActivity, OnBoardingConfigFactory.getOnBoardingClass(getDataFromRemoteUseCase.onBoardingConfig))
-        } else {
-            Intent(this@BaseSplashActivity, MainActivityHost::class.java)
-        }
     }
 
     private fun showRequireTurnOnNetworkBottomSheetFragment() {
@@ -625,7 +590,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : CoreActivity<VB>() {
                         analyticsManager.logEvent(AnalyticsEvent.ACTION_SPLASH_RETRY_TURN_ON)
                         startSplashPrerequisites()
                     } else {
-                        viewModel.showRequireTurnOnNetworkWhenRetryClickedFlow.emit(true)
+                        baseViewModel.showRequireTurnOnNetworkWhenRetryClickedFlow.emit(true)
                         val intentNetwork = if (Build.VERSION.SDK_INT >= 29) {
                             Intent("android.settings.panel.action.INTERNET_CONNECTIVITY")
                         } else {
