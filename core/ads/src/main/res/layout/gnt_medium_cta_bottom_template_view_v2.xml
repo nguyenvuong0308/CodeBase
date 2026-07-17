@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.gms.ads.nativead.NativeAdView
+        android:id="@+id/native_ad_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/core_bg_native_ads">
+
+        <RelativeLayout
+            android:id="@+id/background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingBottom="@dimen/_14dp">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/ad_notification_view"
+                android:layout_marginTop="@dimen/_10dp"
+                android:layout_marginStart="@dimen/_15dp"
+                android:layout_marginLeft="@dimen/_10dp"
+                android:layout_marginEnd="@dimen/_15dp"
+                style="@style/AdsNotificationViewStyle"
+                />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/primary"
+                style="@style/AdsTitleTextStyle"
+                android:layout_width="match_parent"
+                android:textSize="@dimen/_14dp"
+                android:layout_toEndOf="@+id/ad_notification_view"
+                android:layout_height="wrap_content"
+                android:layout_alignEnd="@+id/layout_cta"
+                android:layout_marginTop="@dimen/_10dp"
+                tools:text="Test AD : Flood-It!" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/body"
+                style="@style/AdsBodyTextStyle"
+                android:layout_width="0dp"
+                android:textSize="@dimen/_12dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/primary"
+                android:layout_alignStart="@+id/primary"
+                android:layout_alignEnd="@+id/primary"
+                android:gravity="center_vertical"
+                android:lines="2"
+                tools:text="Install Flood-It App for free! Free Popurlar Casual Game " />
+
+            <com.google.android.gms.ads.nativead.MediaView
+                android:id="@+id/media_view"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_120dp"
+                android:layout_below="@+id/body"
+                android:layout_alignStart="@+id/layout_cta"
+                android:layout_alignEnd="@+id/primary"
+                android:layout_marginTop="@dimen/_7dp"
+                app:layout_constraintTop_toBottomOf="@id/body" />
+
+            <FrameLayout
+                android:id="@+id/layout_cta"
+                style="@style/CtaCardViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/media_view"
+                android:layout_marginStart="@dimen/_14dp"
+                android:layout_marginTop="@dimen/_10dp"
+                android:layout_marginEnd="@dimen/_14dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/cta"
+                    style="@style/CtaViewStyle"
+                    tools:text="Cài đặt" />
+
+            </FrameLayout>
+        </RelativeLayout>
+    </com.google.android.gms.ads.nativead.NativeAdView>
+</merge>

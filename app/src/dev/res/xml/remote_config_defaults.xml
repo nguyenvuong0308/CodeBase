@@ -113,7 +113,7 @@
     <!--ad_type: banner - native-->
     <!--native_template_size:
     small - small_cta_top - small_cta_bottom - small_cta_right -
-    small_long - small_for_popup - medium - medium_cta_top - medium_cta_bottom -
+    small_long - small_for_popup - medium - medium_cta_top - medium_cta_bottom - medium_short_cta_bottom -
     medium_cta_right_top - medium_cta_right - medium_media_right - medium_collapsible_cta_bottom
     medium_media_left - full_cta_bottom - full_cta_top - full_cta_right - full_cta_bottom_onboarding
     hoặc custom key
@@ -307,7 +307,7 @@
             "ad_type": "native",
             "is_tracking_click": true,
             "is_tutorial_flow": true,
-            "native_template_size": "medium_cta_bottom",
+            "native_template_size": "medium_short_cta_bottom",
             "is_enable": true,
             "background_color": "#FCFAFF",
             "primary_text_color": "#141218",
@@ -324,7 +324,7 @@
             ],
             "ad_type": "native",
             "is_tracking_click": true,
-            "native_template_size": "medium_cta_bottom",
+            "native_template_size": "medium_short_cta_bottom",
             "is_enable": true,
             "is_tutorial_flow": true,
             "background_color": "#FCFAFF",
@@ -361,7 +361,7 @@
             ],
             "ad_type": "native",
             "is_tracking_click": true,
-            "native_template_size": "medium_cta_bottom",
+            "native_template_size": "medium_short_cta_bottom",
             "is_enable": true,
             "is_tutorial_flow": true,
             "background_color": "#FCFAFF",
