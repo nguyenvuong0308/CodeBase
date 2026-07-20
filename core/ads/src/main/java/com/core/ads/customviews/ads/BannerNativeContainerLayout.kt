@@ -108,7 +108,7 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
                     NativeTemplateSize.MediumCtaBottom -> R.layout.gnt_medium_cta_bottom_template_view_shimmer
 
-                    NativeTemplateSize.MediumShortCtaBottom -> R.layout.gnt_medium_cta_bottom_template_view_shimmer
+                    NativeTemplateSize.MediumShortCtaBottom -> R.layout.gnt_medium_short_cta_bottom_template_view_shimmer
 
                     NativeTemplateSize.MediumCtaRightTop -> R.layout.gnt_medium_cta_right_top_shimmer
 
