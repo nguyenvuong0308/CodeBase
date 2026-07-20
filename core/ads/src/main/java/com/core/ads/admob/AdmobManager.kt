@@ -38,6 +38,7 @@ import com.core.preference.PurchasePreferences
 import com.core.utilities.getBannerAdWidth
 import com.core.utilities.getCountryCode
 import com.core.utilities.getCurrentTimeInSecond
+import com.core.utilities.isDebug
 import com.core.utilities.manager.isNetworkConnected
 import com.core.utilities.removeLoader
 import com.core.utilities.removeLoaderNew
@@ -2046,11 +2047,14 @@ class AdmobManager @Inject constructor(
             }
         }
         MobileAds.initialize(context) { initializationStatus ->
-            val statusMap =
-                initializationStatus.adapterStatusMap
-            for (adapterClass in statusMap.keys) {
-                val status = statusMap[adapterClass]
-                Log.d(TAG, "Adapter name: $adapterClass, Description: ${status!!.description}, Latency: ${status.initializationState}")
+            Log.d(TAG, "MobileAds.initialize done")
+            if(context.isDebug()) {
+                val statusMap =
+                    initializationStatus.adapterStatusMap
+                for (adapterClass in statusMap.keys) {
+                    val status = statusMap[adapterClass]
+                    Log.d(TAG, "Adapter name: $adapterClass, Description: ${status!!.description}, Latency: ${status.initializationState}")
+                }
             }
             adsSdkInitializer.onAdInitCompleted()
             notifyConsentCompleteOnce()
