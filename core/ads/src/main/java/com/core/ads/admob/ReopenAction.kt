@@ -4,5 +4,5 @@ import android.app.Activity
 
 interface ReopenAction {
     fun reopenAction(activity: Activity)
-    fun isCustomAction(): Boolean
+    fun isCustomAction(activity: Activity): Boolean
 }

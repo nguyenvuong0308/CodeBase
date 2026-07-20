@@ -109,7 +109,7 @@ class AppOpenAdManager @Inject constructor(
         currentActivity?.let { activity ->
             applicationScope.launch {
                 delay(remoteConfigRepository.getAppOpenAdConfig().timeMillisDelayBeforeShow)
-                if(!reopenAction.isCustomAction()) {
+                if(!reopenAction.isCustomAction(activity)) {
                     showAdIfAvailable(activity, CoreAdPlaceName.APP_REOPEN)
                 } else {
                     if(!adManager.isHasFullscreenAdShowing()) {
@@ -142,7 +142,7 @@ class AppOpenAdManager @Inject constructor(
     }
 
     fun fetchAd(activity: Activity, adPlaceName: IAdPlaceName, waterfallIndex: Int = 0) {
-        if(reopenAction.isCustomAction() && adPlaceName == CoreAdPlaceName.APP_REOPEN) return
+        if(reopenAction.isCustomAction(activity) && adPlaceName == CoreAdPlaceName.APP_REOPEN) return
 
         if (adManager.isNotAbleToVisibleAdsToUser(adPlaceName)) {
             notifyAdNotValidOrLoadFailed(adPlaceName)

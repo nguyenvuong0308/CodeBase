@@ -24,7 +24,7 @@ class ReopenActionImpl @Inject constructor(
 
     }
 
-    override fun isCustomAction(): Boolean {
+    override fun isCustomAction(activity: Activity): Boolean {
         return remoteConfigRepository.getAppOpenAdConfig().reopenMode == AppOpenAdTypeConfig.REOPEN_MODE_CUSTOM_ACTIVITY
     }
 }
