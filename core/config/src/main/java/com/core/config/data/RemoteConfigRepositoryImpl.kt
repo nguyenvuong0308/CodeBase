@@ -21,13 +21,13 @@ import com.core.config.data.mapper.TutorialConfigModelMapper
 import com.core.config.domain.GetDataFromRemoteConfigUseCase
 import com.core.config.domain.RemoteConfigRepository
 import com.core.config.domain.data.AdPlace
-import com.core.config.domain.data.IAdPlaceName
 import com.core.config.domain.data.AdType
 import com.core.config.domain.data.AppConfig
 import com.core.config.domain.data.AppConfig.Companion.DEFINE_INTRO_HAVE_ADS
 import com.core.config.domain.data.AppConfig.Companion.DEFINE_INTRO_NO_ADS
 import com.core.config.domain.data.AppOpenAdTypeConfig
 import com.core.config.domain.data.BannerAdTypeConfig
+import com.core.config.domain.data.IAdPlaceName
 import com.core.config.domain.data.IapConfig
 import com.core.config.domain.data.InterstitialAdTypeConfig
 import com.core.config.domain.data.NativeAdTypeConfig
@@ -304,6 +304,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
             NativeAdTypeConfig(
                 isEnableRetry = ConfigParam.RETRY_IS_ENABLE_RETRY,
                 maxRetryCount = ConfigParam.RETRY_MAX_RETRY_COUNT,
+                isHideWhenError = ConfigParam.IS_HIDE_WHEN_ERROR,
                 retryIntervalSecondList = ConfigParam.RETRY_INTERVAL_LIST,
                 expiredTimeSecond = ConfigParam.EXPIRED_NATIVE_TIME_DEFAULT
             )
@@ -318,6 +319,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
             BannerAdTypeConfig(
                 isEnableRetry = ConfigParam.RETRY_IS_ENABLE_RETRY,
                 maxRetryCount = ConfigParam.RETRY_MAX_RETRY_COUNT,
+                isHideWhenError = ConfigParam.IS_HIDE_WHEN_ERROR,
                 retryIntervalSecondList = ConfigParam.RETRY_INTERVAL_LIST,
             )
         } else {

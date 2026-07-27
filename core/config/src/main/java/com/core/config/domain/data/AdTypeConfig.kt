@@ -3,12 +3,14 @@ package com.core.config.domain.data
 class BannerAdTypeConfig(
     val isEnableRetry: Boolean,
     val maxRetryCount: Int,
+    val isHideWhenError: Boolean,
     val retryIntervalSecondList: List<Long>,
 )
 
 class NativeAdTypeConfig(
     val isEnableRetry: Boolean,
     val maxRetryCount: Int,
+    val isHideWhenError: Boolean,
     val expiredTimeSecond: Int,
     val retryIntervalSecondList: List<Long>,
 )

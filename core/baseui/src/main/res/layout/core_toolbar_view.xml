@@ -14,16 +14,27 @@
         app:layout_constraintTop_toTopOf="parent"
         app:riv_icon_ripple="@drawable/core_selector_ic_back"/>
 
+    <com.core.baseui.toolbar.RippleImageView
+        android:id="@+id/rivHelp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/rivBack"
+        app:layout_constraintStart_toEndOf="@id/rivBack"
+        app:layout_constraintTop_toTopOf="@id/rivBack"
+        app:riv_icon_ripple="@drawable/core_selector_ic_back"/>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clTitle"
         android:layout_width="0dp"
-        android:background="?attr/selectableItemBackground"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="12dp"
+        android:background="?attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/tvAction"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@id/rivBack"
+        app:layout_constraintStart_toEndOf="@id/rivHelp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_default="wrap">
 
