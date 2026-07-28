@@ -134,7 +134,7 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
                     NativeTemplateSize.MiniCtaRight -> R.layout.gnt_mini_cta_right_shimmer
 
-                    NativeTemplateSize.FullCtaBottomOnboarding, NativeTemplateSize.FullCtaBottom, NativeTemplateSize.FullCtaTop, NativeTemplateSize.FullCtaRight, NativeTemplateSize.FullInterstitialV1, NativeTemplateSize.FullInterstitialV2 -> R.layout.gnt_full_cta_bottom_template_view_shimmer
+                    NativeTemplateSize.FullCtaBottomOnboarding, NativeTemplateSize.FullCtaBottom, NativeTemplateSize.FullCtaTop, NativeTemplateSize.FullCtaRight, NativeTemplateSize.FullInterstitialV1, NativeTemplateSize.FullInterstitialV2, NativeTemplateSize.FullInterstitialV3 -> R.layout.gnt_full_cta_bottom_template_view_shimmer
 
                     else -> customNativeAds.createShimmerLayoutPlaceHolder(nativeTemplateSize = nativeTemplateSize)
                 }
@@ -264,6 +264,7 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
             .withHideTextSkipCountDown(nativeAdPlace.hideTextSkipCountDown)
             .withHideProgressCountDown(nativeAdPlace.hideProgressCountDown)
             .withProgressBarTint(nativeAdPlace.progressBarTint)
+            .withControlClosePosition(nativeAdPlace.controlClosePosition)
             .build()
 
         val nativeTemplateView = when (nativeAdPlace.nativeTemplateSize) {
@@ -311,6 +312,8 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
             NativeTemplateSize.FullInterstitialV1 -> NativeInterstitialV1View(context)
 
             NativeTemplateSize.FullInterstitialV2 -> NativeInterstitialV2View(context)
+
+            NativeTemplateSize.FullInterstitialV3 -> NativeInterstitialV3View(context)
 
             is NativeTemplateSize.CustomKey -> customNativeAds.createNativeAds(context, nativeAdPlace)
         }

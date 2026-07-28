@@ -149,6 +149,22 @@
                     android:text="Show Interstitial 2" />
             </androidx.appcompat.widget.LinearLayoutCompat>
 
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/showNativeInterstitial"
+                style="@style/MenuItemStyle"
+                android:background="@drawable/bg_transparent_ripple_media_shape">
+
+                <ImageView
+                    style="@style/MenuIconStyle"
+                    android:contentDescription="load Interstitial"
+                    android:src="@drawable/ic_fullscreen"
+                    app:tint="@color/red_500" />
+
+                <TextView
+                    style="@style/MenuTextStyle"
+                    android:text="Native Interstitial" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
 
         </androidx.appcompat.widget.LinearLayoutCompat>
     </androidx.core.widget.NestedScrollView>

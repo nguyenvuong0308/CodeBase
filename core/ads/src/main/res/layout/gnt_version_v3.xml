@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.gms.ads.nativead.NativeAdView
+        android:id="@+id/native_ad_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.google.android.gms.ads.nativead.MediaView
+                android:id="@+id/media_view"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@color/white"
+                app:layout_constraintBottom_toTopOf="@+id/background"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <FrameLayout
+                android:id="@+id/controlClose"
+                android:layout_width="@dimen/_27dp"
+                android:layout_height="@dimen/_27dp"
+                android:layout_marginTop="@dimen/_10dp"
+                android:layout_marginEnd="@dimen/_16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/actionProgress"
+                    android:layout_width="@dimen/_25dp"
+                    android:layout_height="@dimen/_25dp"
+                    android:layout_gravity="center"
+                    android:indeterminate="false"
+                    android:max="1000"
+                    android:progress="0"
+                    app:indicatorColor="#6F6F6F"
+                    app:indicatorInset="0dp"
+                    app:indicatorSize="@dimen/_25dp"
+                    app:trackColor="#DADADA"
+                    app:trackThickness="@dimen/_2dp" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/tvNext"
+                    android:layout_width="@dimen/_20dp"
+                    android:layout_height="@dimen/_20dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_native_interstitial_action"
+                    android:padding="@dimen/_4dp"
+                    android:rotation="-90"
+                    android:src="@drawable/ic_arrow_down_24px"
+                    android:tint="@color/white" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/tvClose"
+                    android:layout_width="@dimen/_20dp"
+                    android:layout_height="@dimen/_20dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/bg_native_interstitial_action"
+                    android:padding="@dimen/_4dp"
+                    android:src="@drawable/ic_close_ads_v"
+                    android:tint="@color/white"
+                    android:visibility="gone" />
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:id="@+id/lnCountDown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/tvCountDownTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ads_countdown_title" />
+
+                    <TextView
+                        android:id="@+id/tvCountDownTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ads_countdown_time_default" />
+                </androidx.appcompat.widget.LinearLayoutCompat>
+            </FrameLayout>
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="match_parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:background="@color/black"
+                android:layout_height="@dimen/_105dp"/>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/background"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_8dp"
+                android:layout_marginBottom="@dimen/_10dp"
+                android:background="@drawable/bg_native_interstitial_bottom"
+                android:paddingTop="@dimen/_10dp"
+                android:paddingBottom="@dimen/_14dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/icon"
+                    android:layout_width="@dimen/_64dp"
+                    android:layout_height="@dimen/_64dp"
+                    android:layout_marginStart="@dimen/_16dp"
+                    android:layout_marginTop="@dimen/_8dp"
+                    android:scaleType="fitCenter"
+                    android:visibility="visible"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:src="@tools:sample/avatars" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/ad_notification_view"
+                    style="@style/AdsNotificationViewStyle"
+                    android:background="@drawable/bg_native_interstitial_ad_badge"
+                    android:layout_marginTop="@dimen/_2dp"
+                    android:layout_marginEnd="@dimen/_6dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/primary"
+                    style="@style/AdsTitleTextStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_12dp"
+                    android:layout_marginTop="@dimen/_8dp"
+                    android:layout_marginEnd="@dimen/_12dp"
+                    android:ellipsize="end"
+                    android:gravity="start"
+                    android:maxLines="1"
+                    android:textColor="@color/white"
+                    app:layout_constraintEnd_toStartOf="@id/ad_notification_view"
+                    app:layout_constraintStart_toEndOf="@id/icon"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="ShopeePay - Tài Chính Dễ Dàng" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/body"
+                    style="@style/AdsBodyTextStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_12dp"
+                    android:layout_marginTop="@dimen/_4dp"
+                    android:layout_marginEnd="@dimen/_16dp"
+                    android:ellipsize="end"
+                    android:gravity="start"
+                    android:maxLines="2"
+                    android:textColor="#BDBDBD"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/icon"
+                    app:layout_constraintTop_toBottomOf="@id/primary"
+                    tools:text="ShopeePay - Tài Chính Dễ Dàng, Dành Riêng Cho Bạn" />
+
+                <androidx.constraintlayout.widget.Barrier
+                    android:id="@+id/infoBottomBarrier"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:barrierDirection="bottom"
+                    app:constraint_referenced_ids="icon,body" />
+
+                <FrameLayout
+                    android:id="@+id/layout_cta"
+                    style="@style/CtaCardViewStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_16dp"
+                    android:layout_marginTop="@dimen/_18dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/infoBottomBarrier">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/cta"
+                        style="@style/CtaViewStyle"
+                        android:textSize="@dimen/_18dp"
+                        tools:background="@color/colorPrimary"
+                        tools:text="Mở" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:id="@+id/progressContainer"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/_8dp"
+                    android:layout_marginHorizontal="@dimen/_16dp"
+                    android:layout_marginTop="@dimen/_16dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/layout_cta">
+
+                    <ProgressBar
+                        android:id="@+id/progressCountDown"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/_9dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="@dimen/_4dp"
+                        android:layout_weight="1"
+                        android:indeterminate="false"
+                        android:max="1000"
+                        android:progress="0"
+                        android:progressBackgroundTint="#BDBDBD"
+                        android:progressTint="@color/white" />
+
+                    <ProgressBar
+                        android:id="@+id/progressCountDownSecond"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/_9dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="@dimen/_4dp"
+                        android:layout_weight="1"
+                        android:indeterminate="false"
+                        android:max="1000"
+                        android:progress="0"
+                        android:progressBackgroundTint="#BDBDBD"
+                        android:progressTint="@color/white" />
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.gms.ads.nativead.NativeAdView>
+</merge>

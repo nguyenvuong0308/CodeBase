@@ -114,6 +114,9 @@ internal data class AdPlaceModel(
     @Json(name = "progress_bar_tint")
     val progressBarTint: String?,
 
+    @Json(name = "control_close_position")
+    val controlClosePosition: String?,
+
      @Json(name = "text_color_ads_notify_view")
     val textColorAdsNotifyView: String?,
 

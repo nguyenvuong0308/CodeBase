@@ -32,6 +32,7 @@ sealed class NativeTemplateSize {
                 MiniCtaRight.key -> MiniCtaRight
                 FullInterstitialV1.key -> FullInterstitialV1
                 FullInterstitialV2.key -> FullInterstitialV2
+                FullInterstitialV3.key -> FullInterstitialV3
                 else -> CustomKey(key)
             }
         }
@@ -123,6 +124,10 @@ sealed class NativeTemplateSize {
 
     object FullInterstitialV2: NativeTemplateSize() {
         override val key = "full_interstitial_v2"
+    }
+
+    object FullInterstitialV3: NativeTemplateSize() {
+        override val key = "full_interstitial_v3"
     }
 
     class CustomKey(val customKey: String) : NativeTemplateSize() {

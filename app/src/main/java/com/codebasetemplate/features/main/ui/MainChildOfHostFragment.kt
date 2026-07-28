@@ -66,6 +66,12 @@ class MainChildOfHostFragment : BaseChildOfHostFragment<CoreFragmentMainBinding,
                 }
             }
 
+            showNativeInterstitial.setOnSingleClick {
+                showInterAd(AppAdPlaceName.FULLSCREEN_NATIVE_INTERSTITIAL) {
+                    toast("Show inter native ad completed")
+                }
+            }
+
             loadInterstitialLayout.setOnSingleClick {
                 loadInterstitialAds(AppAdPlaceName.FULLSCREEN_TEST_LAZY_LOAD, oneTimeLoad = true)
             }
@@ -87,7 +93,9 @@ class MainChildOfHostFragment : BaseChildOfHostFragment<CoreFragmentMainBinding,
         return listOf(
             AppAdPlaceName.ANCHORED_NATIVE_IN_LIST_TEST,
             AppAdPlaceName.ANCHORED_BANNER_TEST,
-            AppAdPlaceName.ANCHORED_NATIVE_TEST
+            AppAdPlaceName.ANCHORED_NATIVE_TEST,
+            AppAdPlaceName.FULLSCREEN_NATIVE_INTERSTITIAL,
+
         )
     }
 

@@ -133,6 +133,9 @@ class NativeTemplateStyle {
     var progressBarTint: String? = null
         private set
 
+    var controlClosePosition: String? = null
+        private set
+
 
     /** A class that provides helper methods to build a style object.  */
     class Builder {
@@ -170,6 +173,11 @@ class NativeTemplateStyle {
 
         fun withProgressBarTint(progressBarTint: String?): Builder {
             styles.progressBarTint = progressBarTint
+            return this
+        }
+
+        fun withControlClosePosition(controlClosePosition: String?): Builder {
+            styles.controlClosePosition = controlClosePosition
             return this
         }
 

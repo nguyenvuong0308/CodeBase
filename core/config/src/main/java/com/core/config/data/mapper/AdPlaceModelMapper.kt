@@ -117,6 +117,7 @@ internal class AdPlaceModelMapper @Inject constructor(
                 hideProgressCountDown = model.hideProgressCountDown,
                 hideTextSkipCountDown = model.hideTextSkipCountDown,
                 progressBarTint = model.progressBarTint,
+                controlClosePosition = model.controlClosePosition,
                 textColorAdsNotifyView = model.textColorAdsNotifyView,
                 backgroundColorAdsNotifyView = model.backgroundColorAdsNotifyView
             )

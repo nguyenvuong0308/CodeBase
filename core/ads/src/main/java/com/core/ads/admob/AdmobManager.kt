@@ -184,11 +184,11 @@ class AdmobManager @Inject constructor(
             }
         }
 
-//        adHolderBannerNativeMap.values.forEach { adHolder ->
-//            if (adHolder.isShowing) {
-//                return true
-//            }
-//        }
+        adHolderBannerNativeMap.values.forEach { adHolder ->
+            if (adHolder.isShowing) {
+                return true
+            }
+        }
         return isHasAppOpenAdShowing()
     }
 

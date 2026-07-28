@@ -15,6 +15,7 @@ sealed class AppAdPlaceName(override val name: String): IAdPlaceName {
     object ANCHORED_EXIT : AppAdPlaceName("anchored_exit")
     object FULLSCREEN_TEST : AppAdPlaceName("fullscreen_test")
     object FULLSCREEN_TEST_LAZY_LOAD : AppAdPlaceName("fullscreen_test_lazy_load")
+    object FULLSCREEN_NATIVE_INTERSTITIAL : AppAdPlaceName("fullscreen_native_interstitial")
     object REWARD_TEST : AppAdPlaceName("reward_test")
     object FULLSCREEN_BACK_LANGUAGE_SETTING : AppAdPlaceName("fullscreen_back_language_setting")
 
