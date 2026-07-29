@@ -35,6 +35,15 @@ class NativeTemplateStyle {
     var countDownSecond: Int? = null
         private set
 
+    var closeStepCount: Int? = null
+        private set
+
+    var step1CountDownSecond: Int? = null
+        private set
+
+    var step2CountDownSecond: Int? = null
+        private set
+
     var mediaBackgroundColor: String? = null
         private set
 
@@ -208,6 +217,21 @@ class NativeTemplateStyle {
 
         fun withCountDownSecond(times: Int?): Builder {
             styles.countDownSecond = times
+            return this
+        }
+
+        fun withCloseStepCount(closeStepCount: Int?): Builder {
+            styles.closeStepCount = closeStepCount
+            return this
+        }
+
+        fun withStep1CountDownSecond(times: Int?): Builder {
+            styles.step1CountDownSecond = times
+            return this
+        }
+
+        fun withStep2CountDownSecond(times: Int?): Builder {
+            styles.step2CountDownSecond = times
             return this
         }
 

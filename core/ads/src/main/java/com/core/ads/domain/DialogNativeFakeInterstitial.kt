@@ -23,6 +23,7 @@ import com.core.config.domain.data.CoreAdPlaceName.NONE
 import com.core.config.domain.data.IAdPlaceName
 import com.core.config.domain.data.IAppProviderAdPlaceName
 import com.core.config.domain.data.NativeAdPlace
+import com.core.config.domain.data.RemoteAdPlaceName
 import com.core.utilities.isAppDebuggable
 import com.core.utilities.util.Timber
 import com.core.utilities.util.toast.Toasty
@@ -84,7 +85,8 @@ class DialogNativeFakeInterstitial : DialogFragment() {
             dismissAllowingStateLoss()
             return
         }
-        val placeName = placeNameApp ?: placeNameCore
+        val placeName = placeNameApp ?: placeNameCore.takeIf { it != NONE }
+        ?: RemoteAdPlaceName(adPlaceNameString)
         if (placeName == NONE) {
             onClose?.invoke()
             dismissAllowingStateLoss()

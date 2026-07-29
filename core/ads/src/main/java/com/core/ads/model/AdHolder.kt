@@ -2,6 +2,7 @@ package com.core.ads.model
 
 import android.os.SystemClock
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentManager
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -66,11 +67,15 @@ internal data class RewardedInterstitialAdHolder(
 internal data class InterstitialAdHolder(
     override var adPlace: AdPlace,
     var interstitialAd: InterstitialAd? = null,
+    var fragmentManager: FragmentManager? = null,
+    var identifier: String = "",
 ): AdHolder() {
     override fun reset() {
         isLoading = false
         isWaitLoadToShow = false
         interstitialAd = null
+        fragmentManager = null
+        identifier = ""
         retryCount = 0
         needRetry = true
     }
@@ -113,10 +118,15 @@ data class NativeAdHolder(
     override fun reset() {
         isLoading = false
         isWaitLoadToShow = false
+        clearNativeAd()
+        retryCount = 0
+//        needRetry = true // Quyền retry của native do flow gọi load quyết định.
+    }
+
+    fun clearNativeAd() {
         nativeAd?.destroy()
         nativeAd = null
-        retryCount = 0
-//        needRetry = true // native don't need reset this field
+        loadedAtMs = 0L
     }
 
     fun isAdExpired(ttlMs: Long): Boolean {

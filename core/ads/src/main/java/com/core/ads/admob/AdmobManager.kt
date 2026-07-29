@@ -31,6 +31,8 @@ import com.core.config.domain.data.AdType
 import com.core.config.domain.data.BannerAdPlace
 import com.core.config.domain.data.BannerSize
 import com.core.config.domain.data.IAdPlaceName
+import com.core.config.domain.data.InterstitialAdPlace
+import com.core.config.domain.data.NativeAfterInterstitialLoadStrategy
 import com.core.config.domain.data.NativeAdPlace
 import com.core.config.domain.data.NativeTemplateSize
 import com.core.preference.AppPreferences
@@ -244,6 +246,48 @@ class AdmobManager @Inject constructor(
         return false
     }
 
+    private fun isNotAbleToVisibleResolvedAdPlace(adPlace: AdPlace): Boolean {
+        if (!remoteConfigRepository.getAppConfig().isEnableAds) {
+            Log.d(TAG, "isNotAbleToVisibleResolvedAdPlace: isEnableAds = false")
+            return true
+        }
+
+        if (isDisableByTestAd(adPlace.placeName.name)) {
+            Log.d(
+                TAG,
+                "isNotAbleToVisibleResolvedAdPlace: disabled by detected test ad ${adPlace.placeName.name}"
+            )
+            return true
+        }
+
+        if (purchasePreferences.isUserVip()) {
+            Log.d(TAG, "isNotAbleToVisibleResolvedAdPlace: isUserVip")
+            return true
+        }
+
+        if (isCountryNotAvailableToShowAd()) {
+            Log.d(TAG, "isNotAbleToVisibleResolvedAdPlace: isCountryNotAvailableToShowAd")
+            return true
+        }
+
+        if (isPreventShowAdsDueManyAdsClicked()) {
+            Log.d(TAG, "isNotAbleToVisibleResolvedAdPlace: isPreventShowAdsDueManyAdsClicked")
+            return true
+        }
+
+        if (adPlace.isDisabledByTutorialConfig()) {
+            Log.d(TAG, "isNotAbleToVisibleResolvedAdPlace: disabled by tutorial_config ${adPlace.placeName.name}")
+            return true
+        }
+
+        if (adPlace.isNotValidToLoad()) {
+            Log.d(TAG, "isNotAbleToVisibleResolvedAdPlace: isNotValidToLoad")
+            return true
+        }
+
+        return false
+    }
+
     override fun increaseAdClickedCount() {
         val preventAdClickConfig = remoteConfigRepository.getPreventAdClickConfig()
         val currentTimeInSecond = getCurrentTimeInSecond()
@@ -449,9 +493,11 @@ class AdmobManager @Inject constructor(
             adHolder.isWaitLoadToShow =
                 remoteConfigRepository.getInterstitialAdConfig().isWaitLoadToShow || isWaitLoadToShow
             adHolder.adPlace = adPlace
+            (adHolder as InterstitialAdHolder).fragmentManager = fragmentManager
+            adHolder.identifier = identifier
             showInterstitial(
                 activity = activity,
-                adHolder = adHolder as InterstitialAdHolder,
+                adHolder = adHolder,
             )
             return
         }
@@ -560,6 +606,14 @@ class AdmobManager @Inject constructor(
         }
 
         if (adPlace.isInterstitialType()) {
+            val interstitialPlace = adPlace as? InterstitialAdPlace
+            if (interstitialPlace?.nativeAfterLoadStrategy is NativeAfterInterstitialLoadStrategy.WithInterstitial) {
+                Log.w(
+                    TAG,
+                    "Native after interstitial preload with interstitial ${interstitialPlace.placeName}"
+                )
+                preloadNativeAfterInterstitialIfNeed(activity, interstitialPlace)
+            }
             loadInterstitialIfNeed(
                 activity = activity,
                 adHolder = adHolder as InterstitialAdHolder,
@@ -660,9 +714,27 @@ class AdmobManager @Inject constructor(
                         }
                     }
 
+                    override fun onAdImpression() {
+                        super.onAdImpression()
+                        val interstitialPlace = adHolder.adPlace as? InterstitialAdPlace
+                        // Có thể trì hoãn việc load native đến khi interstitial ghi nhận impression
+                        // để hạn chế load thừa nếu interstitial không show thành công.
+                        if (interstitialPlace?.nativeAfterLoadStrategy is NativeAfterInterstitialLoadStrategy.OnInterstitialImpression) {
+                            Log.w(
+                                TAG,
+                                "Native after interstitial preload on impression ${interstitialPlace.placeName}"
+                            )
+                            preloadNativeAfterInterstitialIfNeed(activity, interstitialPlace)
+                        }
+                    }
+
                     override fun onAdDismissedFullScreenContent() {
                         super.onAdDismissedFullScreenContent()
                         val placeName = adHolder.adPlace.placeName
+                        val interstitialPlace = adHolder.adPlace as? InterstitialAdPlace
+                        val nativeAfterFragmentManager = adHolder.fragmentManager
+                        val nativeAfterIdentifier = adHolder.identifier
+                        val isAutoLoadAfterDismiss = adHolder.adPlace.isAutoLoadAfterDismiss
                         Log.i(TAG, "Interstitial dismissed $placeName")
                         adHolder.isShowing = false
                         PreventShowManyInterstitialAds.increaseNumberOfShowingInterAdInSession()
@@ -674,16 +746,30 @@ class AdmobManager @Inject constructor(
 
                         adHolder.reset()
 
-                        if (adHolder.adPlace.isAutoLoadAfterDismiss) {
+                        if (isAutoLoadAfterDismiss) {
                             loadInterstitialIfNeed(activity, adHolder)
                         }
 
-                        notifyAdFullScreenDismissed(
-                            adPlaceName = placeName,
-                            isEarnedReward = true,
-                            amount = 0
+                        // Giữ cả AdDismissed và AdCompleted đến khi native đóng để listener không
+                        // điều hướng khỏi Activity trong lúc màn native sau interstitial đang show.
+                        val completeInterstitialFlow = {
+                            notifyAdFullScreenDismissed(
+                                adPlaceName = placeName,
+                                isEarnedReward = true,
+                                amount = 0
+                            )
+                            notifyAdFullScreenCompleted(placeName, true)
+                        }
+                        val isNativeAfterShown = showNativeAfterInterstitialIfReady(
+                            activity = activity,
+                            fragmentManager = nativeAfterFragmentManager,
+                            interstitialPlace = interstitialPlace,
+                            identifier = nativeAfterIdentifier,
+                            onCompleted = completeInterstitialFlow
                         )
-                        notifyAdFullScreenCompleted(placeName, true)
+                        if (!isNativeAfterShown) {
+                            completeInterstitialFlow()
+                        }
 
                     }
 
@@ -896,6 +982,105 @@ class AdmobManager @Inject constructor(
                 notifyAdFullScreenCompleted(placeName, false)
             }
         }
+    }
+
+    private fun preloadNativeAfterInterstitialIfNeed(
+        activity: Activity,
+        interstitialAdPlace: InterstitialAdPlace?
+    ) {
+        val nativePlace = interstitialAdPlace
+            ?.takeIf { it.isShowNativeAfter }
+            ?.nativeAfterInterstitial
+            ?: return
+        if (isNotAbleToVisibleResolvedAdPlace(nativePlace)) return
+
+        val nativeHolder = getOrCreateAdBannerNativeHolderBy(nativePlace) as? NativeAdHolder ?: return
+        nativeHolder.needRetry = false
+        // Đây là flow nối tiếp nên native phải được load trước; không mở dialog rỗng để chờ ad.
+        loadNativeAdIfNeed(
+            activity = activity,
+            adHolder = nativeHolder,
+            isReload = false
+        )
+    }
+
+    private fun showNativeAfterInterstitialIfReady(
+        activity: Activity,
+        fragmentManager: FragmentManager?,
+        interstitialPlace: InterstitialAdPlace?,
+        identifier: String,
+        onCompleted: () -> Unit
+    ): Boolean {
+        val nativePlace = interstitialPlace
+            ?.takeIf { it.isShowNativeAfter }
+            ?.nativeAfterInterstitial
+            ?: return false
+        val nativeHolder = getOrCreateAdBannerNativeHolderBy(nativePlace) as? NativeAdHolder
+            ?: return false
+        val nativeAd = nativeHolder.nativeAd
+        val nativeTtlMillis = (nativePlace.expiredTimeSecond
+            ?: remoteConfigRepository.getNativeAdConfig().expiredTimeSecond)
+            .toLong() * 1_000L
+        val isNativeExpired = nativeAd != null && nativeHolder.isAdExpired(nativeTtlMillis)
+
+        // Native hết hạn không còn được phép show. Chỉ hủy ad hiện tại, giữ nguyên trạng thái
+        // isLoading để không tạo thêm một request song song nếu ad thay thế đang được load.
+        if (isNativeExpired) {
+            nativeHolder.clearNativeAd()
+        }
+
+        // Nếu native bị tắt, chưa load xong, hết hạn hoặc Activity không còn hợp lệ thì bỏ qua
+        // native và tiếp tục flow ngay; tuyệt đối không giữ user trong một dialog rỗng.
+        if (
+            isNotAbleToVisibleResolvedAdPlace(nativePlace) ||
+            nativeAd == null ||
+            isNativeExpired ||
+            fragmentManager == null ||
+            fragmentManager.isStateSaved ||
+            activity.isFinishing ||
+            activity.isDestroyed
+        ) {
+            if (nativeHolder.nativeAd == null && !nativeHolder.isLoading) {
+                preloadNativeAfterInterstitialIfNeed(activity, interstitialPlace)
+            }
+            return false
+        }
+
+        nativeHolder.isShowing = true
+        activity.showLoaderNew(backgroundColor = nativePlace.backgroundFullColor?.toColorInt())
+        var isCompleted = false
+        fun completeOnce() {
+            if (isCompleted) return
+            isCompleted = true
+            nativeHolder.isShowing = false
+            activity.removeLoaderNew()
+            // Native sau interstitial chỉ được dùng một lần. Hủy ad vừa show và bắt đầu load ad
+            // mới trước khi phát callback để lần show kế tiếp không thể lấy lại ad cũ.
+            nativeHolder.needRetry = false
+            nativeHolder.reset()
+//            preloadNativeAfterInterstitialIfNeed(activity, interstitialPlace)
+            onCompleted()
+        }
+
+        return runCatching {
+            DialogNativeFakeInterstitial.newInstance(nativePlace.placeName).apply {
+                onClose = {
+                    // Chỉ hoàn tất action gốc sau khi user đóng native sau interstitial.
+                    completeOnce()
+                }
+            }.show(fragmentManager, "DialogNativeAfterInterstitial_$identifier")
+        }.fold(
+            onSuccess = { true },
+            onFailure = { error ->
+                Log.i(
+                    TAG,
+                    "Native after interstitial failed to show ${nativePlace.placeName}: ${error.message}"
+                )
+                nativeHolder.isShowing = false
+                activity.removeLoaderNew()
+                false
+            }
+        )
     }
 
     private fun loadInterstitialIfNeed(
@@ -1348,7 +1533,7 @@ class AdmobManager @Inject constructor(
         waterfallIndex: Int = 0
     ) {
         val placeName = adHolder.adPlace.placeName
-        if (isNotAbleToVisibleAdsToUser(placeName)) {
+        if (isNotAbleToVisibleResolvedAdPlace(adHolder.adPlace)) {
             notifyBannerNativeFailedToLoad(placeName)
             adHolder.reset()
             return
@@ -1418,7 +1603,7 @@ class AdmobManager @Inject constructor(
                             )
                         }
 
-                        if (isNotAbleToVisibleAdsToUser(placeName)) {
+                        if (isNotAbleToVisibleResolvedAdPlace(adHolder.adPlace)) {
                             notifyBannerNativeFailedToLoad(placeName)
                             adHolder.reset()
                         } else {

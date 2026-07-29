@@ -552,6 +552,14 @@
     <!--action_app_open = từ lần thứ 2 vào app->-->
     <!--is_auto_load_after_dismiss = false app dụng cho màn splash->-->
     <!--ad_type = interstitial - rewarded-->
+    <!--Cấu hình native sau interstitial / native interstitial v3-->
+    <!--is_show_native_after = true thì show native_config sau khi interstitial dismiss; false thì chỉ show interstitial như cũ-->
+    <!--native_after_load_strategy = with_interstitial để load native cùng lúc load interstitial; on_interstitial_impression để load native khi interstitial bắt đầu show/impression-->
+    <!--native_config = cấu hình native ad sẽ được show sau interstitial; place_name có thể là remote place name riêng cho native-->
+    <!--control_close_position = left hoặc right, quyết định vị trí nút next/close của native interstitial v3-->
+    <!--close_step_count = 1 hoặc 2; 1 thì countdown xong cho close luôn với 1 progress bar; 2 thì step 1 next và step 2 close với 2 progress bar-->
+    <!--step_1_count_down_timer = số giây countdown cho step đầu tiên; nếu không có thì fallback về count_down_timer-->
+    <!--step_2_count_down_timer = số giây countdown cho step close trong chế độ 2-step; nếu không có thì fallback về count_down_timer-->
 
     <entry>
         <key>rewarded_rewardedinter_inter_ad_places</key>
@@ -564,14 +572,14 @@
             "high_floor_ad_ids": [
                 "ca-app-pub-3940256099942544/1033173719"
             ],
-            "is_enable": true,
+            "is_enable": false,
             "is_auto_load_after_dismiss": true
             },
             {
             "place_name": "action_app_open",
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "ad_type": "interstitial",
-            "is_enable": true,
+            "is_enable": false,
             "is_auto_load_after_dismiss": true
             },
             {
@@ -579,7 +587,29 @@
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "ad_type": "interstitial",
             "is_enable": true,
-            "plus_interval": 10
+            "is_show_native_after": true,
+            "native_after_load_strategy": "on_interstitial_impression",
+            "native_config": {
+                    "place_name": "fullscreen_test_native",
+                    "ad_id": "ca-app-pub-3940256099942544/2247696110",
+                    "ad_type": "native",
+                    "native_template_size": "full_interstitial_v3",
+                    "is_tracking_click": true,
+                    "is_enable": true,
+                    "background_color": "#CD121212",
+                    "background_full_color": "#FFFFFF",
+                    "cta_radius_dp": 5,
+                    "primary_text_color": "#1F2937",
+                    "body_text_color": "#6B7280",
+                    "cta_text_color": "#FFFFFF",
+                    "background_cta": "#22C55E",
+                    "border_color": "#00000000",
+                    "control_close_position": "left",
+                    "count_down_timer": 5,
+                    "close_step_count": 1,
+                    "step_1_count_down_timer": 2,
+                    "step_2_count_down_timer": 2
+                }
             },
             {
             "place_name": "fullscreen_show_to_home",
@@ -689,7 +719,7 @@
         <value>
             {
             "is_wait_load_to_show": false,
-            "ads_per_session": 5,
+            "ads_per_session": 99,
             "time_per_session": 600,
             "time_interval": 3,
             "time_interval_after_show_open_ad": 3,

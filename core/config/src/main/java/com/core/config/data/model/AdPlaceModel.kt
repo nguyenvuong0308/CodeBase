@@ -25,6 +25,15 @@ internal data class AdPlaceModel(
     @Json(name = "is_enable")
     val isEnable: Boolean?,
 
+    @Json(name = "is_show_native_after")
+    val isShowNativeAfter: Boolean?,
+
+    @Json(name = "native_after_load_strategy")
+    val nativeAfterLoadStrategy: String?,
+
+    @Json(name = "native_config")
+    val nativeConfig: AdPlaceModel?,
+
     @Json(name = "is_auto_load_after_dismiss")
     val isAutoLoadAfterDismiss: Boolean?,
 
@@ -51,6 +60,15 @@ internal data class AdPlaceModel(
 
     @Json(name = "count_down_timer")
     val countDownTimer: Int?,
+
+    @Json(name = "close_step_count")
+    val closeStepCount: Int?,
+
+    @Json(name = "step_1_count_down_timer")
+    val step1CountDownTimer: Int?,
+
+    @Json(name = "step_2_count_down_timer")
+    val step2CountDownTimer: Int?,
 
     @Json(name = "background_cta")
     val backgroundCta: String?,

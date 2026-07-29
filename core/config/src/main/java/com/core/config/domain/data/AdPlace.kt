@@ -85,6 +85,9 @@ data class InterstitialAdPlace(
     override val isIgnoreInterval: Boolean,
     override val isTutorialFlow: Boolean,
     val plusInterval: Int,
+    val isShowNativeAfter: Boolean,
+    val nativeAfterLoadStrategy: NativeAfterInterstitialLoadStrategy,
+    val nativeAfterInterstitial: NativeAdPlace?,
 ): AdPlace()
 
 data class NativeAdPlace(
@@ -98,6 +101,9 @@ data class NativeAdPlace(
     val borderColor: String?,
     val backgroundColor: String?,
     val countDownTimer: Int?,
+    val closeStepCount: Int?,
+    val step1CountDownTimer: Int?,
+    val step2CountDownTimer: Int?,
     val backgroundFullColor: String?,
     val backgroundColorAdsNotifyView: String?,
     val textColorAdsNotifyView: String?,

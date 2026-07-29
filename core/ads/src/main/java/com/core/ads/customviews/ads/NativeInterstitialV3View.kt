@@ -11,6 +11,7 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
@@ -44,10 +45,12 @@ class NativeInterstitialV3View @JvmOverloads constructor(
 
     private var isEnableImmersive: Boolean = false
     private var closeCountDownTimer: CountDownTimer? = null
-    private var closeCountDownSeconds: Long = DEFAULT_CLOSE_COUNTDOWN_SECONDS
-    private var remainCloseMillis: Long = closeCountDownSeconds * 1000L
+    private var step1CountDownSeconds: Long = DEFAULT_CLOSE_COUNTDOWN_SECONDS
+    private var step2CountDownSeconds: Long = DEFAULT_CLOSE_COUNTDOWN_SECONDS
+    private var remainCloseMillis: Long = step1CountDownSeconds * 1000L
     private var isCloseCountdownFinished: Boolean = false
     private var closeStep: CloseStep = CloseStep.NEXT
+    private var closeStepCount: Int = DEFAULT_CLOSE_STEP_COUNT
     private var isStepActionEnabled: Boolean = false
     private var countDownTheme: CountDownTheme = CountDownTheme.DARK
 
@@ -60,6 +63,7 @@ class NativeInterstitialV3View @JvmOverloads constructor(
 
     companion object {
         private const val DEFAULT_CLOSE_COUNTDOWN_SECONDS = 5L
+        private const val DEFAULT_CLOSE_STEP_COUNT = 2
         private const val PROGRESS_MAX = 1000
         private const val COUNTDOWN_INTERVAL_MILLIS = 50L
     }
@@ -255,7 +259,7 @@ class NativeInterstitialV3View @JvmOverloads constructor(
             }
 
             styles.primaryTextTypefaceColor?.let {
-                // V2 uses a dark bottom panel; legacy remote colors are often tuned for white cards.
+                // V3 luôn dùng panel dưới màu tối nên không lấy màu chữ cũ vốn dành cho card sáng.
                 binding.primary.setTextColor(ContextCompat.getColor(context, R.color.white))
             }
 
@@ -327,10 +331,20 @@ class NativeInterstitialV3View @JvmOverloads constructor(
             styles.isEnableImmersive?.let {
                 isEnableImmersive = it
             }
-            closeCountDownSeconds = styles.countDownSecond
+            // Template chỉ hỗ trợ 1 bước (close) hoặc 2 bước (next rồi close).
+            // Giá trị ngoài miền hợp lệ sẽ dùng mặc định 2 bước để tránh vô tình bỏ qua step next.
+            closeStepCount = styles.closeStepCount
+                ?.takeIf { it in 1..2 }
+                ?: DEFAULT_CLOSE_STEP_COUNT
+            val fallbackCountDownSeconds = styles.countDownSecond
                 ?.takeIf { it >= 0 }
-                ?.toLong()
-                ?: DEFAULT_CLOSE_COUNTDOWN_SECONDS
+                ?: DEFAULT_CLOSE_COUNTDOWN_SECONDS.toInt()
+            step1CountDownSeconds = (styles.step1CountDownSecond
+                ?.takeIf { it >= 0 }
+                ?: fallbackCountDownSeconds).toLong()
+            step2CountDownSeconds = (styles.step2CountDownSecond
+                ?.takeIf { it >= 0 }
+                ?: fallbackCountDownSeconds).toLong()
             hideTextCountDownUi = styles.hideTextCountDown == true
             hideTextSkipCountDownUi = styles.hideTextSkipCountDown == true
             hideProgressCountDownUi = styles.hideProgressCountDown == true
@@ -410,10 +424,11 @@ class NativeInterstitialV3View @JvmOverloads constructor(
 
     private fun resetCloseCountDown() {
         stopCloseCountDownTimer()
-        closeStep = CloseStep.NEXT
+        // Chế độ 1 bước đếm ngược trực tiếp cho nút close; chế độ 2 bước bắt đầu bằng next.
+        closeStep = if (closeStepCount == 1) CloseStep.CLOSE else CloseStep.NEXT
         isStepActionEnabled = false
         isCloseCountdownFinished = false
-        remainCloseMillis = closeCountDownSeconds * 1000L
+        remainCloseMillis = getCurrentStepCountDownSeconds() * 1000L
         binding.actionProgress.progress = 0
         binding.progressCountDown.progress = 0
         binding.progressCountDownSecond.progress = 0
@@ -421,9 +436,9 @@ class NativeInterstitialV3View @JvmOverloads constructor(
         binding.tvCountDownTitle.visibility = GONE
         binding.tvCountDownTime.visibility = GONE
         updateCountDownText(remainCloseMillis)
-        updateCountDownProgress(remainCloseMillis, CloseStep.NEXT)
+        updateCountDownProgress(remainCloseMillis, closeStep)
         applyCountDownVisibility()
-        if (closeCountDownSeconds == 0L) {
+        if (getCurrentStepCountDownSeconds() == 0L) {
             completeCurrentStep()
         }
     }
@@ -462,14 +477,14 @@ class NativeInterstitialV3View @JvmOverloads constructor(
         closeStep = CloseStep.CLOSE
         isStepActionEnabled = false
         isCloseCountdownFinished = false
-        remainCloseMillis = closeCountDownSeconds * 1000L
+        remainCloseMillis = getCurrentStepCountDownSeconds() * 1000L
         binding.actionProgress.progress = 0
         binding.progressCountDown.progress = PROGRESS_MAX
         binding.progressCountDownSecond.progress = 0
         updateCountDownText(remainCloseMillis)
         updateCountDownProgress(remainCloseMillis, CloseStep.CLOSE)
         applyCountDownVisibility()
-        if (closeCountDownSeconds == 0L) {
+        if (getCurrentStepCountDownSeconds() == 0L) {
             completeCurrentStep()
         } else {
             startCloseCountDown()
@@ -483,10 +498,16 @@ class NativeInterstitialV3View @JvmOverloads constructor(
     }
 
     private fun updateCountDownProgress(millis: Long, step: CloseStep) {
-        val totalMillis = (closeCountDownSeconds * 1000L).coerceAtLeast(1L)
+        val totalMillis = (getCurrentStepCountDownSeconds() * 1000L).coerceAtLeast(1L)
         val elapsedMillis = (totalMillis - millis.coerceAtLeast(0L)).coerceAtLeast(0L)
         val progress = ((elapsedMillis * PROGRESS_MAX) / totalMillis).toInt().coerceIn(0, PROGRESS_MAX)
         binding.actionProgress.progress = progress
+        // Chế độ 1 bước chỉ cập nhật progress đầu; progress thứ hai dành cho bước close của chế độ 2 bước.
+        if (closeStepCount == 1) {
+            binding.progressCountDown.progress = progress
+            binding.progressCountDownSecond.progress = 0
+            return
+        }
         when (step) {
             CloseStep.NEXT -> {
                 binding.progressCountDown.progress = progress
@@ -497,6 +518,13 @@ class NativeInterstitialV3View @JvmOverloads constructor(
                 binding.progressCountDown.progress = PROGRESS_MAX
                 binding.progressCountDownSecond.progress = progress
             }
+        }
+    }
+
+    private fun getCurrentStepCountDownSeconds(): Long {
+        return when (closeStep) {
+            CloseStep.NEXT -> step1CountDownSeconds
+            CloseStep.CLOSE -> if (closeStepCount == 1) step1CountDownSeconds else step2CountDownSeconds
         }
     }
 
@@ -550,6 +578,17 @@ class NativeInterstitialV3View @JvmOverloads constructor(
         binding.tvCountDownTime.visibility = GONE
         binding.actionProgress.visibility = if (hideProgressCountDownUi) GONE else VISIBLE
         binding.progressContainer.visibility = if (hideProgressCountDownUi) GONE else VISIBLE
+        // Chế độ 1 bước ẩn progress thứ hai và bỏ luôn khoảng cách giữa hai progress.
+        binding.progressCountDownSecond.visibility =
+            if (hideProgressCountDownUi || closeStepCount == 1) GONE else VISIBLE
+        (binding.progressCountDown.layoutParams as? LinearLayout.LayoutParams)?.let { params ->
+            params.marginEnd = if (closeStepCount == 1) {
+                0
+            } else {
+                resources.getDimensionPixelSize(com.core.dimens.R.dimen._4dp)
+            }
+            binding.progressCountDown.layoutParams = params
+        }
 
         val isNextStep = closeStep == CloseStep.NEXT
         binding.tvNext.visibility = if (isNextStep) VISIBLE else GONE

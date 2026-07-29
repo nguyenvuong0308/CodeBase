@@ -4,6 +4,11 @@ interface IAdPlaceName {
     val name: String
 }
 
+// Dùng cho native_config lồng trong interstitial khi place_name chỉ tồn tại trên Firebase.
+data class RemoteAdPlaceName(
+    override val name: String
+) : IAdPlaceName
+
 sealed class CoreAdPlaceName(
     override val name: String
 ) : IAdPlaceName {
