@@ -114,6 +114,8 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
                     NativeTemplateSize.MediumCollapsibleCtaBottom -> R.layout.gnt_mini_cta_right_shimmer
 
+                    NativeTemplateSize.MediumCollapsibleCtaBottomV2 -> R.layout.gnt_small_cta_bottom_template_view_shimmer
+
                     NativeTemplateSize.MediumCtaTop -> R.layout.gnt_medium_cta_top_template_view_shimmer
 
                     NativeTemplateSize.MediumMediaLeft -> R.layout.gnt_medium_media_left_shimmer
@@ -291,6 +293,8 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
             NativeTemplateSize.MediumMediaLeft -> NativeMediumMediaLeftTemplateView(context)
 
             NativeTemplateSize.MediumCollapsibleCtaBottom -> NativeCollapsibleMediumCtaBottomTemplateView(context)
+
+            NativeTemplateSize.MediumCollapsibleCtaBottomV2 -> NativeCollapsibleMediumCtaBottomTemplateViewV2(context)
 
             NativeTemplateSize.Small -> NativeSmallTemplateView(context)
 
