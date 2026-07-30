@@ -113,6 +113,7 @@ data class NativeAdPlace(
     val bodyTextColor: String?,
     val isEnableFullScreenImmersive: Boolean?,
     val expiredTimeSecond: Int?,
+    val refreshTimeSecond: Int,
     val hideTextSkipCountDown: Boolean?,
     val hideTextCountDown: Boolean?,
     val hideProgressCountDown: Boolean?,

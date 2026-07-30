@@ -58,6 +58,9 @@ internal data class AdPlaceModel(
     @Json(name = "expired_time_second")
     val expiredTimeSecond: Int?,
 
+    @Json(name = "refresh_time_second")
+    val refreshTimeSecond: Int?,
+
     @Json(name = "count_down_timer")
     val countDownTimer: Int?,
 

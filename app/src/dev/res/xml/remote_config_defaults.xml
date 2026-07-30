@@ -124,6 +124,7 @@
     <!--background_cta: -->
     <!--cta_text_color: -->
     <!--border_color: -->
+    <!--refresh_time_second: native reload interval in seconds, <= 0 disables refresh-->
 
     <!--chung-->
     <!--is_enable: bật tắt ví trí quảng cáo-->
@@ -508,11 +509,19 @@
             },
             {
             "place_name": "anchored_bottom_home",
-            "ad_id": "ca-app-pub-3940256099942544/9214589741",
-            "ad_type": "banner",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "native_template_size": "medium_collapsible_cta_bottom",
             "is_tracking_click": true,
-            "banner_size": "anchored",
-            "is_enable": true
+            "is_enable": true,
+            "background_color": "#242424",
+            "cta_radius_dp": 5,
+            "primary_text_color": "#F0F0F0",
+            "body_text_color": "#8A8A8A",
+            "cta_text_color": "#000000",
+            "background_cta": "#5E56F5",
+            "border_color": "#242424",
+            "expired_time_second": 10
             }
             ]
         </value>

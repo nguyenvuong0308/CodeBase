@@ -108,6 +108,7 @@
     <!--background_cta: -->
     <!--cta_text_color: -->
     <!--border_color: -->
+    <!--refresh_time_second: native reload interval in seconds, <= 0 disables refresh-->
 
     <!--chung-->
     <!--is_enable: bật tắt ví trí quảng cáo-->

@@ -171,6 +171,7 @@ internal class AdPlaceModelMapper @Inject constructor(
             ctaBorderColor = model.ctaBorderColor,
             backgroundFullColor = model.backgroundFullColor,
             expiredTimeSecond = model.expiredTimeSecond,
+            refreshTimeSecond = model.refreshTimeSecond ?: 0,
             countDownTimer = model.countDownTimer,
             closeStepCount = model.closeStepCount,
             step1CountDownTimer = model.step1CountDownTimer,
