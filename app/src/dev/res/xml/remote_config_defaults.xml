@@ -522,6 +522,7 @@
             "background_cta": "#5E56F5",
             "border_color": "#E5E7EB",
             "control_close_position": "left",
+            "collapsible_expand_cooldown_second": 10,
             "expired_time_second": 10
             }
             ]

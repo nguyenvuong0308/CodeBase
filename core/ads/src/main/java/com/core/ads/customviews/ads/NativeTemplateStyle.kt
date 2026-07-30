@@ -145,6 +145,12 @@ class NativeTemplateStyle {
     var controlClosePosition: String? = null
         private set
 
+    var collapsibleExpandCooldownSecond: Int? = null
+        private set
+
+    var adPlaceName: String? = null
+        private set
+
 
     /** A class that provides helper methods to build a style object.  */
     class Builder {
@@ -187,6 +193,16 @@ class NativeTemplateStyle {
 
         fun withControlClosePosition(controlClosePosition: String?): Builder {
             styles.controlClosePosition = controlClosePosition
+            return this
+        }
+
+        fun withCollapsibleExpandCooldownSecond(collapsibleExpandCooldownSecond: Int?): Builder {
+            styles.collapsibleExpandCooldownSecond = collapsibleExpandCooldownSecond
+            return this
+        }
+
+        fun withAdPlaceName(adPlaceName: String?): Builder {
+            styles.adPlaceName = adPlaceName
             return this
         }
 

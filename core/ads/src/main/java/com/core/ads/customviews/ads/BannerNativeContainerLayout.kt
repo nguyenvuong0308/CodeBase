@@ -112,9 +112,9 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
                     NativeTemplateSize.MediumCtaRightTop -> R.layout.gnt_medium_cta_right_top_shimmer
 
-                    NativeTemplateSize.MediumCollapsibleCtaBottom -> R.layout.gnt_mini_cta_right_shimmer
+                    NativeTemplateSize.MediumCollapsibleCtaBottom -> R.layout.gnt_medium_collapsible_cta_bottom_template_view_shimmer
 
-                    NativeTemplateSize.MediumCollapsibleCtaBottomV2 -> R.layout.gnt_small_cta_bottom_template_view_shimmer
+                    NativeTemplateSize.MediumCollapsibleCtaBottomV2 -> R.layout.gnt_medium_collapsible_cta_bottom_template_view_v2_shimmer
 
                     NativeTemplateSize.MediumCtaTop -> R.layout.gnt_medium_cta_top_template_view_shimmer
 
@@ -270,6 +270,8 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
             .withHideProgressCountDown(nativeAdPlace.hideProgressCountDown)
             .withProgressBarTint(nativeAdPlace.progressBarTint)
             .withControlClosePosition(nativeAdPlace.controlClosePosition)
+            .withCollapsibleExpandCooldownSecond(nativeAdPlace.collapsibleExpandCooldownSecond)
+            .withAdPlaceName(nativeAdPlace.placeName.name)
             .build()
 
         val nativeTemplateView = when (nativeAdPlace.nativeTemplateSize) {

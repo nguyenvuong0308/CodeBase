@@ -1,27 +1,35 @@
 package com.core.ads.customviews.ads
 
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
+import android.os.SystemClock
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.widget.ImageView
+import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.PopupWindow
 import androidx.core.graphics.toColorInt
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
 import com.core.ads.databinding.GntMediumCollapsibleCtaBottomTemplateViewV2Binding
 import com.core.ads.extensions.updateBackgroundColor
 import com.core.ads.extensions.updateRadius
-import com.core.ads.glidetransformation.RoundedCornersTransformation
 import com.core.dimens.R
 import com.google.android.gms.ads.nativead.NativeAd
+import java.util.Collections
+import java.util.WeakHashMap
 
 class NativeCollapsibleMediumCtaBottomTemplateViewV2 @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : BaseNativeTemplateView(context, attrs, defStyleAttr) {
+
+    private companion object {
+        val lastExpandedCloseTimes = mutableMapOf<String, Long>()
+        val expandedShownNativeAds: MutableSet<NativeAd> = Collections.newSetFromMap(WeakHashMap<NativeAd, Boolean>())
+    }
 
     private enum class ControlClosePosition {
         LEFT,
@@ -32,7 +40,15 @@ class NativeCollapsibleMediumCtaBottomTemplateViewV2 @JvmOverloads constructor(
         GntMediumCollapsibleCtaBottomTemplateViewV2Binding.inflate(LayoutInflater.from(context), this, true)
     }
 
+    private var popupWindow: PopupWindow? = null
+    private var popupBinding: GntMediumCollapsibleCtaBottomTemplateViewV2Binding? = null
+    private var expandedPopupNativeAd: NativeAd? = null
+    private var currentNativeAd: NativeAd? = null
+    private var currentStyles: NativeTemplateStyle? = null
     private var controlClosePosition: ControlClosePosition = ControlClosePosition.RIGHT
+    private var collapsibleExpandCooldownSecond: Int = 0
+    private var collapsibleExpandCooldownKey: String = javaClass.name
+    private var popupRequestVersion = 0
 
     init {
         initView()
@@ -45,170 +61,334 @@ class NativeCollapsibleMediumCtaBottomTemplateViewV2 @JvmOverloads constructor(
     }
 
     override fun setNativeAd(nativeAd: NativeAd) {
-        showFullLayout()
-
-        binding.nativeAdView.callToActionView = binding.cta
-        binding.nativeAdView.headlineView = binding.primary
-        binding.nativeAdView.mediaView = binding.mediaView
-
-        binding.primary.text = nativeAd.headline
-        binding.primaryMini.text = nativeAd.headline
-        binding.cta.text = nativeAd.callToAction
-        binding.ctaMini.text = nativeAd.callToAction
-
-        nativeAd.body?.let {
-            binding.body.text = it
-            binding.bodyMini.text = it
-            binding.nativeAdView.bodyView = binding.body
+        val isSameShowingExpandedNativeAd = popupWindow?.isShowing == true && expandedPopupNativeAd === nativeAd
+        currentNativeAd = nativeAd
+        prepareCollapsedContent(binding, nativeAd)
+        if (isSameShowingExpandedNativeAd) {
+            showExpandedPopup(nativeAd)
+        } else if (isExpandCooldownActive() || hasNativeAdShownExpanded(nativeAd)) {
+            showCollapsedInline()
+        } else {
+            showExpandedPopup(nativeAd)
         }
-
-        binding.nativeAdView.setNativeAd(nativeAd)
     }
 
-    private fun loadIcon(imageView: ImageView, drawable: Any?) {
-        Glide.with(this)
-            .load(drawable)
-            .override(resources.getDimensionPixelSize(R.dimen._44dp))
-            .skipMemoryCache(true)
-            .diskCacheStrategy(DiskCacheStrategy.NONE)
-            .apply(
-                RequestOptions.bitmapTransform(
-                    RoundedCornersTransformation(
-                        context.resources.getDimensionPixelSize(
-                            R.dimen._8dp
-                        ), 0, RoundedCornersTransformation.CornerType.ALL
+    private fun prepareExpandedContent(
+        targetBinding: GntMediumCollapsibleCtaBottomTemplateViewV2Binding,
+        nativeAd: NativeAd
+    ) {
+        targetBinding.nativeAdView.visibility = VISIBLE
+        targetBinding.background.visibility = VISIBLE
+        targetBinding.backgroundMini.visibility = GONE
+        targetBinding.mediaView.visibility = VISIBLE
+        targetBinding.icCloseCollapse.visibility = VISIBLE
+
+        targetBinding.nativeAdView.callToActionView = targetBinding.cta
+        targetBinding.nativeAdView.headlineView = targetBinding.primary
+        targetBinding.nativeAdView.mediaView = targetBinding.mediaView
+        targetBinding.nativeAdView.bodyView = targetBinding.body
+
+        targetBinding.primary.text = nativeAd.headline.orEmpty()
+        targetBinding.cta.text = nativeAd.callToAction.orEmpty()
+        targetBinding.body.text = nativeAd.body.orEmpty()
+
+        targetBinding.nativeAdView.setNativeAd(nativeAd)
+    }
+
+    private fun prepareCollapsedContent(
+        targetBinding: GntMediumCollapsibleCtaBottomTemplateViewV2Binding,
+        nativeAd: NativeAd
+    ) {
+        targetBinding.primaryMini.text = nativeAd.headline.orEmpty()
+        targetBinding.ctaMini.text = nativeAd.callToAction.orEmpty()
+        targetBinding.bodyMini.text = nativeAd.body.orEmpty()
+    }
+
+    private fun showExpandedPopup(nativeAd: NativeAd) {
+        val requestVersion = ++popupRequestVersion
+        hideInlineViewWhileExpanded()
+
+        post {
+            if (requestVersion != popupRequestVersion) return@post
+
+            if (!isAttachedToWindow || windowToken == null) {
+                showCollapsedInline()
+                return@post
+            }
+
+            val showingPopupBinding = popupBinding
+            if (popupWindow?.isShowing == true && showingPopupBinding != null) {
+                prepareExpandedContent(showingPopupBinding, nativeAd)
+                currentStyles?.let { styles ->
+                    applyStylesToBinding(showingPopupBinding, styles)
+                    applyAdsNotifyViewStyles(
+                        styles,
+                        binding.adNotificationView,
+                        binding.adNotificationViewMini,
+                        showingPopupBinding.adNotificationView,
+                        showingPopupBinding.adNotificationViewMini
                     )
-                )
+                }
+                applyControlClosePosition(showingPopupBinding)
+                return@post
+            }
+
+            dismissExpandedPopup()
+            val expandedBinding = GntMediumCollapsibleCtaBottomTemplateViewV2Binding.inflate(
+                LayoutInflater.from(context)
             )
-            .into(imageView)
+            popupBinding = expandedBinding
+
+            expandedBinding.icCloseCollapse.setOnClickListener {
+                collapseToMini()
+            }
+            prepareExpandedContent(expandedBinding, nativeAd)
+            currentStyles?.let { styles ->
+                applyStylesToBinding(expandedBinding, styles)
+                applyAdsNotifyViewStyles(
+                    styles,
+                    binding.adNotificationView,
+                    binding.adNotificationViewMini,
+                    expandedBinding.adNotificationView,
+                    expandedBinding.adNotificationViewMini
+                )
+            }
+            applyControlClosePosition(expandedBinding)
+
+            val popup = PopupWindow(
+                expandedBinding.root,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                false
+            ).apply {
+                isOutsideTouchable = false
+                isClippingEnabled = true
+                setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                runCatching {
+                    elevation = resources.getDimensionPixelSize(R.dimen._8dp).toFloat()
+                }
+            }
+
+            popupWindow = popup
+            popup.setOnDismissListener {
+                if (popupWindow === popup) {
+                    popupWindow = null
+                    popupBinding = null
+                    expandedPopupNativeAd = null
+                }
+            }
+            runCatching {
+                popup.showAsDropDown(this, 0, -resolvePopupHeight(expandedBinding.root))
+                expandedPopupNativeAd = nativeAd
+                markNativeAdExpandedShown(nativeAd)
+            }.onFailure {
+                if (popupWindow === popup) {
+                    dismissExpandedPopup()
+                }
+                showCollapsedInline()
+            }
+        }
     }
 
-    private fun showFullLayout() {
-        binding.background.visibility = VISIBLE
-        binding.backgroundMini.visibility = GONE
-        binding.mediaView.visibility = VISIBLE
-        binding.icCloseCollapse.visibility = VISIBLE
-        binding.nativeAdView.callToActionView = binding.cta
-        binding.nativeAdView.headlineView = binding.primary
-        binding.nativeAdView.bodyView = binding.body
+    private fun hideInlineViewWhileExpanded() {
+        binding.nativeAdView.visibility = INVISIBLE
+        binding.background.visibility = GONE
+        binding.backgroundMini.visibility = VISIBLE
+        binding.icCloseCollapse.visibility = GONE
+    }
+
+    private fun resolvePopupHeight(view: View): Int {
+        if (view.minimumHeight > 0) return view.minimumHeight
+
+        val measuredWidth = width.takeIf { it > 0 } ?: resources.displayMetrics.widthPixels
+        val widthSpec = View.MeasureSpec.makeMeasureSpec(measuredWidth, View.MeasureSpec.EXACTLY)
+        val heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        view.measure(widthSpec, heightSpec)
+        return view.measuredHeight
     }
 
     private fun collapseToMini() {
+        if (isCollapsedInlineVisible()) return
+        showCollapsedInline(markExpandedClosed = true)
+    }
+
+    private fun showCollapsedInline(markExpandedClosed: Boolean = false) {
+        if (markExpandedClosed) {
+            markExpandedClosed()
+        }
+        popupRequestVersion++
+        dismissExpandedPopup()
+
+        binding.nativeAdView.visibility = VISIBLE
         binding.mediaView.visibility = GONE
         binding.background.visibility = GONE
         binding.backgroundMini.visibility = VISIBLE
         binding.icCloseCollapse.visibility = GONE
+
         binding.nativeAdView.callToActionView = binding.ctaMini
         binding.nativeAdView.headlineView = binding.primaryMini
         binding.nativeAdView.bodyView = binding.bodyMini
+        currentNativeAd?.let { nativeAd ->
+            prepareCollapsedContent(binding, nativeAd)
+            binding.nativeAdView.setNativeAd(nativeAd)
+        }
+    }
+
+    private fun isCollapsedInlineVisible(): Boolean {
+        return binding.nativeAdView.visibility == VISIBLE &&
+            binding.backgroundMini.visibility == VISIBLE &&
+            popupWindow?.isShowing != true
+    }
+
+    private fun dismissExpandedPopup() {
+        popupRequestVersion++
+        popupWindow?.dismiss()
+        popupWindow = null
+        popupBinding = null
+        expandedPopupNativeAd = null
     }
 
     override fun destroyNativeAd() {
+        dismissExpandedPopup()
         binding.nativeAdView.destroy()
     }
 
+    override fun onDetachedFromWindow() {
+        dismissExpandedPopup()
+        super.onDetachedFromWindow()
+    }
+
     override fun applyStyles(styles: NativeTemplateStyle) {
+        currentStyles = styles
+        collapsibleExpandCooldownSecond = styles.collapsibleExpandCooldownSecond?.coerceAtLeast(0) ?: 0
+        collapsibleExpandCooldownKey = styles.adPlaceName?.takeIf { it.isNotBlank() } ?: javaClass.name
+        applyStylesToBinding(binding, styles)
+        popupBinding?.let { applyStylesToBinding(it, styles) }
+
+        styles.backgroundAdsNotifyView?.let {
+            binding.adNotificationView.setBackgroundResource(it)
+            binding.adNotificationViewMini.setBackgroundResource(it)
+            popupBinding?.adNotificationView?.setBackgroundResource(it)
+            popupBinding?.adNotificationViewMini?.setBackgroundResource(it)
+        }
+
+        popupBinding?.let { expandedBinding ->
+            applyAdsNotifyViewStyles(
+                styles,
+                binding.adNotificationView,
+                binding.adNotificationViewMini,
+                expandedBinding.adNotificationView,
+                expandedBinding.adNotificationViewMini
+            )
+        } ?: applyAdsNotifyViewStyles(styles, binding.adNotificationView, binding.adNotificationViewMini)
+
+        controlClosePosition = resolveControlClosePosition(styles.controlClosePosition)
+        applyControlClosePosition(binding)
+        popupBinding?.let { applyControlClosePosition(it) }
+
+        invalidate()
+        requestLayout()
+    }
+
+    private fun applyStylesToBinding(
+        targetBinding: GntMediumCollapsibleCtaBottomTemplateViewV2Binding,
+        styles: NativeTemplateStyle
+    ) {
         styles.mainBackgroundColor?.let {
-            binding.background.background = it
-            binding.backgroundMini.background = it
-            binding.primary.background = it
-            binding.primaryMini.background = it
-            binding.body.background = it
-            binding.bodyMini.background = it
+            targetBinding.background.background = it
+            targetBinding.backgroundMini.background = it
+            targetBinding.primary.background = it
+            targetBinding.primaryMini.background = it
+            targetBinding.body.background = it
+            targetBinding.bodyMini.background = it
         }
 
         styles.primaryTextTypeface?.let {
-            binding.primary.typeface = it
-            binding.primaryMini.typeface = it
+            targetBinding.primary.typeface = it
+            targetBinding.primaryMini.typeface = it
         }
 
         styles.tertiaryTextTypeface?.let {
-            binding.body.typeface = it
-            binding.bodyMini.typeface = it
+            targetBinding.body.typeface = it
+            targetBinding.bodyMini.typeface = it
         }
 
         styles.callToActionTextTypeface?.let {
-            binding.cta.typeface = it
-            binding.ctaMini.typeface = it
+            targetBinding.cta.typeface = it
+            targetBinding.ctaMini.typeface = it
         }
 
         styles.primaryTextTypefaceColor?.let {
-            binding.primary.setTextColor(it.toColorInt())
-            binding.primaryMini.setTextColor(it.toColorInt())
+            targetBinding.primary.setTextColor(it.toColorInt())
+            targetBinding.primaryMini.setTextColor(it.toColorInt())
         }
 
         styles.tertiaryTextTypefaceColor?.let {
-            binding.body.setTextColor(it.toColorInt())
-            binding.bodyMini.setTextColor(it.toColorInt())
+            targetBinding.body.setTextColor(it.toColorInt())
+            targetBinding.bodyMini.setTextColor(it.toColorInt())
         }
 
         styles.callToActionTypefaceColor?.let {
-            binding.cta.setTextColor(it)
-            binding.ctaMini.setTextColor(it)
+            targetBinding.cta.setTextColor(it)
+            targetBinding.ctaMini.setTextColor(it)
         }
 
         val ctaTextSize = styles.callToActionTextSize
         if (ctaTextSize > 0) {
-            binding.cta.textSize = ctaTextSize
-            binding.ctaMini.textSize = ctaTextSize
+            targetBinding.cta.textSize = ctaTextSize
+            targetBinding.ctaMini.textSize = ctaTextSize
         }
 
         val primaryTextSize = styles.primaryTextSize
         if (primaryTextSize > 0) {
-            binding.primary.textSize = primaryTextSize
-            binding.primaryMini.textSize = primaryTextSize
+            targetBinding.primary.textSize = primaryTextSize
+            targetBinding.primaryMini.textSize = primaryTextSize
         }
 
         val tertiaryTextSize = styles.tertiaryTextSize
         if (tertiaryTextSize > 0) {
-            binding.body.textSize = tertiaryTextSize
-            binding.bodyMini.textSize = tertiaryTextSize
+            targetBinding.body.textSize = tertiaryTextSize
+            targetBinding.bodyMini.textSize = tertiaryTextSize
         }
 
         styles.callToActionBackgroundColor?.let {
-            binding.layoutCta.updateBackgroundColor(it)
-            binding.layoutCtaMini.updateBackgroundColor(it)
+            targetBinding.layoutCta.updateBackgroundColor(it)
+            targetBinding.layoutCtaMini.updateBackgroundColor(it)
         }
 
         styles.callToActionRadius?.let {
-            binding.layoutCta.updateRadius(it.toFloat())
-            binding.layoutCtaMini.updateRadius(it.toFloat())
+            targetBinding.layoutCta.updateRadius(it.toFloat())
+            targetBinding.layoutCtaMini.updateRadius(it.toFloat())
         }
 
         styles.borderColor?.let {
-            (binding.nativeAdView.background as GradientDrawable).setStroke(
+            (targetBinding.nativeAdView.background as? GradientDrawable)?.setStroke(
                 resources.getDimensionPixelSize(R.dimen._1dp),
                 it.toColorInt()
             )
         }
 
         styles.backgroundColor?.let {
-            (binding.nativeAdView.background as GradientDrawable).setColor(it.toColorInt())
+            (targetBinding.nativeAdView.background as? GradientDrawable)?.setColor(it.toColorInt())
         }
 
         styles.backgroundResource?.let {
-            binding.background.setBackgroundResource(it)
-            binding.backgroundMini.setBackgroundResource(it)
+            targetBinding.background.setBackgroundResource(it)
+            targetBinding.backgroundMini.setBackgroundResource(it)
         }
-
-        styles.backgroundAdsNotifyView?.let {
-            binding.adNotificationView.setBackgroundResource(it)
-            binding.adNotificationViewMini.setBackgroundResource(it)
-        }
-        applyAdsNotifyViewStyles(styles, binding.adNotificationView, binding.adNotificationViewMini)
 
         styles.primaryTextBackgroundColor?.let {
-            binding.primary.background = it
-            binding.primaryMini.background = it
+            targetBinding.primary.background = it
+            targetBinding.primaryMini.background = it
         }
 
         styles.tertiaryTextBackgroundColor?.let {
-            binding.body.background = it
-            binding.bodyMini.background = it
+            targetBinding.body.background = it
+            targetBinding.bodyMini.background = it
         }
 
         styles.backgroundRadius?.let { radius ->
-            val bg = binding.nativeAdView.background
+            val bg = targetBinding.nativeAdView.background
             if (bg is GradientDrawable) {
                 val radiusPx = TypedValue.applyDimension(
                     TypedValue.COMPLEX_UNIT_DIP,
@@ -220,19 +400,15 @@ class NativeCollapsibleMediumCtaBottomTemplateViewV2 @JvmOverloads constructor(
         }
 
         styles.callToActionBorderColor?.let {
-            (binding.layoutCta.background as? GradientDrawable)?.setStroke(
+            (targetBinding.layoutCta.background as? GradientDrawable)?.setStroke(
                 resources.getDimensionPixelSize(R.dimen._1dp),
                 it.toColorInt()
             )
-            (binding.layoutCtaMini.background as? GradientDrawable)?.setStroke(
+            (targetBinding.layoutCtaMini.background as? GradientDrawable)?.setStroke(
                 resources.getDimensionPixelSize(R.dimen._1dp),
                 it.toColorInt()
             )
         }
-        controlClosePosition = resolveControlClosePosition(styles.controlClosePosition)
-        applyControlClosePosition()
-        invalidate()
-        requestLayout()
     }
 
     private fun resolveControlClosePosition(position: String?): ControlClosePosition {
@@ -243,12 +419,34 @@ class NativeCollapsibleMediumCtaBottomTemplateViewV2 @JvmOverloads constructor(
         }
     }
 
-    private fun applyControlClosePosition() {
-        val params = binding.icCloseCollapse.layoutParams as? FrameLayout.LayoutParams ?: return
+    private fun applyControlClosePosition(targetBinding: GntMediumCollapsibleCtaBottomTemplateViewV2Binding) {
+        val params = targetBinding.icCloseCollapse.layoutParams as? FrameLayout.LayoutParams ?: return
         params.gravity = when (controlClosePosition) {
             ControlClosePosition.LEFT -> Gravity.START
             ControlClosePosition.RIGHT -> Gravity.END
         }
-        binding.icCloseCollapse.layoutParams = params
+        targetBinding.icCloseCollapse.layoutParams = params
+    }
+
+    private fun isExpandCooldownActive(): Boolean {
+        val cooldownMillis = collapsibleExpandCooldownSecond
+            .takeIf { it > 0 }
+            ?.times(1_000L)
+            ?: return false
+        val lastCloseTime = lastExpandedCloseTimes[collapsibleExpandCooldownKey] ?: return false
+        return SystemClock.elapsedRealtime() - lastCloseTime < cooldownMillis
+    }
+
+    private fun markExpandedClosed() {
+        if (collapsibleExpandCooldownSecond <= 0) return
+        lastExpandedCloseTimes[collapsibleExpandCooldownKey] = SystemClock.elapsedRealtime()
+    }
+
+    private fun hasNativeAdShownExpanded(nativeAd: NativeAd): Boolean {
+        return expandedShownNativeAds.contains(nativeAd)
+    }
+
+    private fun markNativeAdExpandedShown(nativeAd: NativeAd) {
+        expandedShownNativeAds.add(nativeAd)
     }
 }

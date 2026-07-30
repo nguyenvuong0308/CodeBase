@@ -192,6 +192,7 @@
         android:background="@drawable/bg_close_collapsible"
         android:src="@drawable/ic_arrow_down_24px"
         android:tint="@color/black"
+        android:elevation="@dimen/_5dp"
         android:id="@+id/icCloseCollapse"
         android:layout_gravity="right"
         android:layout_margin="@dimen/_10dp"

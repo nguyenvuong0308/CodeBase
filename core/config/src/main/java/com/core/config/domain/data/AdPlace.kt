@@ -119,6 +119,7 @@ data class NativeAdPlace(
     val hideProgressCountDown: Boolean?,
     val progressBarTint: String?,
     val controlClosePosition: String?,
+    val collapsibleExpandCooldownSecond: Int?,
     override val placeName: IAdPlaceName,
     override val adId: String,
     override val highFloorAdIds: List<String>,

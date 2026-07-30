@@ -182,6 +182,7 @@ internal class AdPlaceModelMapper @Inject constructor(
             hideTextSkipCountDown = model.hideTextSkipCountDown,
             progressBarTint = model.progressBarTint,
             controlClosePosition = model.controlClosePosition,
+            collapsibleExpandCooldownSecond = model.collapsibleExpandCooldownSecond,
             textColorAdsNotifyView = model.textColorAdsNotifyView,
             backgroundColorAdsNotifyView = model.backgroundColorAdsNotifyView
         )

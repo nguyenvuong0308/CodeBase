@@ -138,6 +138,9 @@ internal data class AdPlaceModel(
     @Json(name = "control_close_position")
     val controlClosePosition: String?,
 
+    @Json(name = "collapsible_expand_cooldown_second")
+    val collapsibleExpandCooldownSecond: Int?,
+
      @Json(name = "text_color_ads_notify_view")
     val textColorAdsNotifyView: String?,
 
