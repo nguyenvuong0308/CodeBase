@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Firebase Ads Config Guide</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #647084;
+      --line: #dfe5ee;
+      --accent: #0f766e;
+      --code: #0f172a;
+      --code-bg: #eef2f7;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      line-height: 1.55;
+    }
+
+    header {
+      background: #0f172a;
+      color: #fff;
+      padding: 32px 24px;
+    }
+
+    header .wrap, main {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    h1, h2, h3 { line-height: 1.2; }
+    h1 { margin: 0 0 8px; font-size: 32px; }
+    h2 { margin: 36px 0 14px; font-size: 24px; }
+    h3 { margin: 26px 0 10px; font-size: 18px; }
+    p { margin: 8px 0 14px; }
+
+    main { padding: 24px; }
+
+    .note {
+      background: #ecfeff;
+      border: 1px solid #bae6fd;
+      border-left: 4px solid var(--accent);
+      padding: 14px 16px;
+      margin: 16px 0;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      margin: 16px 0;
+    }
+
+    code {
+      color: var(--code);
+      background: var(--code-bg);
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 0.95em;
+    }
+
+    pre {
+      overflow: auto;
+      background: #111827;
+      color: #e5e7eb;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      margin: 12px 0 22px;
+      border: 1px solid var(--line);
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    tbody tr:last-child td { border-bottom: 0; }
+
+    .toc {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .toc a {
+      display: block;
+      color: var(--accent);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-decoration: none;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+    }
+
+    figure {
+      margin: 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    figure img {
+      width: 100%;
+      max-height: 520px;
+      object-fit: contain;
+      display: block;
+      background: #eef2f7;
+      border-radius: 6px;
+    }
+
+    figcaption {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      word-break: break-word;
+    }
+
+    .pill {
+      display: inline-block;
+      color: #075985;
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      margin: 2px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Firebase Ads Config Guide</h1>
+      <p>Hướng dẫn cấu hình quảng cáo cho project CodeBaseTemplate, dựa trên logic trong <code>core:config</code>, <code>core:ads</code> và defaults tại <code>app/src/dev/res/xml/remote_config_defaults.xml</code>.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Nguồn logic đã kiểm tra</h2>
+      <p>Remote Config được khai báo qua <code>RemoteConfigService</code>, gọi <code>setDefaultsAsync(R.xml.remote_config_defaults)</code>, fetch bằng <code>fetchAndActivate()</code>, sau đó <code>RemoteConfigRepositoryImpl</code> parse và cache các nhóm config.</p>
+      <p>Các vị trí quảng cáo được gom theo thứ tự: <code>banner_native_ad_places</code>, <code>app_open_ad_places</code>, <code>rewarded_rewardedinter_inter_ad_places</code>. Mỗi nhóm có thể bị override bởi <code>ad_places_version_config</code> hoặc key fallback <code>*_2</code>.</p>
+    </section>
+
+    <ul class="toc">
+      <li><a href="#keys">Danh sách key Firebase</a></li>
+      <li><a href="#ad-place">Schema ad place</a></li>
+      <li><a href="#native">Native ads</a></li>
+      <li><a href="#banner">Banner ads</a></li>
+      <li><a href="#fullscreen">Interstitial, Rewarded, Rewarded Interstitial</a></li>
+      <li><a href="#app-open">App open ads</a></li>
+      <li><a href="#other">Config khác</a></li>
+      <li><a href="#gallery">Native UI gallery</a></li>
+    </ul>
+
+    <section id="keys">
+      <h2>Danh sách key Firebase Remote Config</h2>
+      <table>
+        <thead><tr><th>Key</th><th>Kiểu</th><th>Mục đích</th></tr></thead>
+        <tbody>
+          <tr><td><code>application_config</code></td><td>JSON object</td><td>Cờ bật/tắt ads toàn app, intro/language/shortcut và dữ liệu onboarding ads.</td></tr>
+          <tr><td><code>prevent_ad_click_config</code></td><td>JSON object</td><td>Chặn hiển thị ads khi user click quảng cáo quá nhiều trong một session.</td></tr>
+          <tr><td><code>tutorial_config</code></td><td>JSON object</td><td>Bật/tắt nhóm ad trong tutorial flow, gồm high-floor và fallback ad unit.</td></tr>
+          <tr><td><code>ads_disabled_by_country</code></td><td>JSON array string</td><td>Danh sách mã quốc gia tắt toàn bộ quảng cáo.</td></tr>
+          <tr><td><code>ad_places_disable_when_detect_test_ad</code></td><td>JSON array string</td><td>Danh sách place bị ẩn khi SDK phát hiện test ad.</td></tr>
+          <tr><td><code>is_turn_on_ad_places_disabled_when_detect_test_ad</code></td><td>Boolean</td><td>Bật/tắt logic ẩn place khi detect test ad.</td></tr>
+          <tr><td><code>splash_screen_config</code></td><td>JSON object</td><td>Điều khiển loại ads trên splash và timeout chờ load.</td></tr>
+          <tr><td><code>banner_native_ad_places</code></td><td>JSON array object</td><td>Các vị trí banner/native.</td></tr>
+          <tr><td><code>banner_native_ad_places_2</code></td><td>JSON array object</td><td>Override fallback cho banner/native nếu không có versioned key.</td></tr>
+          <tr><td><code>app_open_ad_places</code></td><td>JSON array object</td><td>Các vị trí app open.</td></tr>
+          <tr><td><code>app_open_ad_places_2</code></td><td>JSON array object</td><td>Override fallback cho app open.</td></tr>
+          <tr><td><code>rewarded_rewardedinter_inter_ad_places</code></td><td>JSON array object</td><td>Các vị trí interstitial, rewarded, rewarded interstitial và native interstitial.</td></tr>
+          <tr><td><code>rewarded_rewardedinter_inter_ad_places_2</code></td><td>JSON array object</td><td>Override fallback cho fullscreen ads.</td></tr>
+          <tr><td><code>ad_places_version_config</code></td><td>JSON array object</td><td>Map versionCode sang key ad places riêng.</td></tr>
+          <tr><td><code>interstitial_ad_config</code></td><td>JSON object</td><td>Retry, interval và giới hạn session cho interstitial.</td></tr>
+          <tr><td><code>rewarded_ad_config</code></td><td>JSON object</td><td>Retry và wait-to-show cho rewarded video.</td></tr>
+          <tr><td><code>rewarded_interstitial_ad_config</code></td><td>JSON object</td><td>Retry và wait-to-show cho rewarded interstitial. Defaults hiện tại chưa khai báo key này, code sẽ dùng default nội bộ.</td></tr>
+          <tr><td><code>app_open_ad_config</code></td><td>JSON object</td><td>Interval, retry và mode reopen app.</td></tr>
+          <tr><td><code>native_ad_config</code></td><td>JSON object</td><td>Retry, hide-on-error và TTL mặc định cho native.</td></tr>
+          <tr><td><code>banner_ad_config</code></td><td>JSON object</td><td>Retry và hide-on-error cho banner.</td></tr>
+          <tr><td><code>request_consent_config</code></td><td>JSON object</td><td>UMP consent và debug EEA/test device.</td></tr>
+          <tr><td><code>onboarding_config</code></td><td>JSON object</td><td>Version UI onboarding và close/swipe behavior.</td></tr>
+          <tr><td><code>language_activity_config</code></td><td>JSON object</td><td>Version UI language và thời gian loading LFO.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="ad-place">
+      <h2>Schema ad place chung</h2>
+      <p>Mỗi object trong các list ad place dùng các field chung sau. Nếu <code>ad_id</code> rỗng, <code>is_enable=false</code>, hoặc <code>ad_type</code> không hợp lệ thì place không được load.</p>
+      <table>
+        <thead><tr><th>Field</th><th>Kiểu</th><th>Áp dụng</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>place_name</code></td><td>String</td><td>Tất cả</td><td>Tên vị trí. Nên khai báo trong <code>AppAdPlaceName</code>. Riêng <code>native_config</code> lồng trong interstitial có thể dùng remote place name mới.</td></tr>
+          <tr><td><code>ad_id</code></td><td>String</td><td>Tất cả</td><td>AdMob ad unit id chính, thường là fallback cuối.</td></tr>
+          <tr><td><code>high_floor_ad_ids</code></td><td>Array string</td><td>Tất cả</td><td>Danh sách ad unit ưu tiên, load trước <code>ad_id</code> theo waterfall.</td></tr>
+          <tr><td><code>ad_type</code></td><td>String</td><td>Tất cả</td><td><span class="pill">banner</span><span class="pill">native</span><span class="pill">interstitial</span><span class="pill">rewarded</span><span class="pill">rewarded_interstitial</span><span class="pill">app_open</span></td></tr>
+          <tr><td><code>is_enable</code></td><td>Boolean</td><td>Tất cả</td><td>Bật/tắt riêng vị trí quảng cáo.</td></tr>
+          <tr><td><code>is_tracking_click</code></td><td>Boolean</td><td>Tất cả</td><td>Bật tracking click.</td></tr>
+          <tr><td><code>is_tracking_show</code></td><td>Boolean</td><td>Tất cả</td><td>Bật tracking show/impression theo flow nội bộ.</td></tr>
+          <tr><td><code>is_auto_load_after_dismiss</code></td><td>Boolean</td><td>Fullscreen</td><td>Sau khi dismiss, tự load lại ad mới. Default code: <code>true</code>.</td></tr>
+          <tr><td><code>is_ignore_interval</code></td><td>Boolean</td><td>Interstitial</td><td>Bỏ qua interval khi show interstitial ở place này.</td></tr>
+          <tr><td><code>is_tutorial_flow</code></td><td>Boolean</td><td>Tất cả</td><td>Place thuộc tutorial flow, chịu ảnh hưởng của <code>tutorial_config</code>.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Versioned ad places</h3>
+      <p>Nếu cần thay danh sách place theo versionCode, khai báo <code>ad_places_version_config</code>. Với mỗi nhóm, app đọc key versioned trước; nếu list rỗng mới đọc <code>*_2</code>, sau đó fallback về key mặc định.</p>
+      <pre><code>[
+  {
+    "version_codes": [12, 13],
+    "key": {
+      "banner_native": "banner_native_ad_places_v12",
+      "app_open": "app_open_ad_places_v12",
+      "reward_inter": "rewarded_rewardedinter_inter_ad_places_v12"
+    }
+  }
+]</code></pre>
+    </section>
+
+    <section id="native">
+      <h2>Native ads</h2>
+      <p>Native có thể nằm trong <code>banner_native_ad_places</code> hoặc trong <code>rewarded_rewardedinter_inter_ad_places</code> khi dùng native interstitial. Field quan trọng nhất là <code>native_template_size</code>.</p>
+      <table>
+        <thead><tr><th>Field</th><th>Kiểu</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>native_template_size</code></td><td>String</td><td>Template UI. Xem gallery bên dưới.</td></tr>
+          <tr><td><code>background_color</code></td><td>String</td><td>Màu nền card/native. Có thể dùng hex hoặc chuỗi gradient theo pattern hiện có.</td></tr>
+          <tr><td><code>background_full_color</code></td><td>String</td><td>Màu nền full screen phía sau media/native.</td></tr>
+          <tr><td><code>primary_text_color</code></td><td>String</td><td>Màu headline.</td></tr>
+          <tr><td><code>body_text_color</code></td><td>String</td><td>Màu body/description.</td></tr>
+          <tr><td><code>background_cta</code></td><td>String</td><td>Màu nền nút CTA. Có thể dùng 1 màu hoặc gradient dạng <code>#F59E0B,#EF4444</code>.</td></tr>
+          <tr><td><code>cta_text_color</code></td><td>String</td><td>Màu text CTA.</td></tr>
+          <tr><td><code>cta_border_color</code></td><td>String</td><td>Màu viền CTA.</td></tr>
+          <tr><td><code>cta_radius_dp</code></td><td>Int</td><td>Bo góc CTA theo dp.</td></tr>
+          <tr><td><code>border_color</code></td><td>String</td><td>Màu viền card/native.</td></tr>
+          <tr><td><code>background_radius</code></td><td>Int</td><td>Bo góc nền/card native.</td></tr>
+          <tr><td><code>media_background_color</code></td><td>String</td><td>Màu nền media view.</td></tr>
+          <tr><td><code>background_color_ads_notify_view</code></td><td>String</td><td>Màu nền nhãn "Ad".</td></tr>
+          <tr><td><code>text_color_ads_notify_view</code></td><td>String</td><td>Màu chữ nhãn "Ad".</td></tr>
+          <tr><td><code>expired_time_second</code></td><td>Int</td><td>TTL riêng cho native holder. Nếu thiếu dùng <code>native_ad_config.expired_time_second</code>.</td></tr>
+          <tr><td><code>refresh_time_second</code></td><td>Int</td><td>Reload interval cho native; <code>&lt;=0</code> là không refresh.</td></tr>
+          <tr><td><code>is_enable_fullscreen_immersive</code></td><td>Boolean</td><td>Với full native, bật mode immersive/transparent theo logic template.</td></tr>
+          <tr><td><code>count_down_timer</code></td><td>Int</td><td>Thời gian countdown cho native interstitial/fullscreen close.</td></tr>
+          <tr><td><code>close_step_count</code></td><td>Int</td><td><code>1</code> close một bước; <code>2</code> next rồi close, dùng cho native interstitial v3.</td></tr>
+          <tr><td><code>step_1_count_down_timer</code></td><td>Int</td><td>Countdown bước đầu khi <code>close_step_count=2</code>.</td></tr>
+          <tr><td><code>step_2_count_down_timer</code></td><td>Int</td><td>Countdown bước close khi <code>close_step_count=2</code>.</td></tr>
+          <tr><td><code>hide_text_skip_count_down</code></td><td>Boolean</td><td>Ẩn text skip countdown.</td></tr>
+          <tr><td><code>hide_text_count_down</code></td><td>Boolean</td><td>Ẩn text countdown.</td></tr>
+          <tr><td><code>hide_progress_count_down</code></td><td>Boolean</td><td>Ẩn progress countdown.</td></tr>
+          <tr><td><code>progress_bar_tint</code></td><td>String</td><td>Màu progress countdown.</td></tr>
+          <tr><td><code>control_close_position</code></td><td>String</td><td><code>left</code> hoặc <code>right</code>, vị trí nút next/close ở native interstitial v3 và collapsible.</td></tr>
+          <tr><td><code>collapsible_expand_cooldown_second</code></td><td>Int</td><td>Thời gian cooldown mở rộng lại của template collapsible.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Native global config</h3>
+      <pre><code>{
+  "is_enable_retry": true,
+  "max_retry_count": 5,
+  "is_hide_when_error": true,
+  "expired_time_second": 60,
+  "retry_interval_second_list": [1, 2, 3]
+}</code></pre>
+
+      <h3>Ví dụ native place</h3>
+      <pre><code>{
+  "place_name": "anchored_bottom_home",
+  "ad_id": "ca-app-pub-xxxxxxxxxxxxxxxx/yyyyyyyyyy",
+  "high_floor_ad_ids": ["ca-app-pub-xxxxxxxxxxxxxxxx/highfloor"],
+  "ad_type": "native",
+  "native_template_size": "medium_collapsible_cta_bottom_v2",
+  "is_enable": true,
+  "is_tracking_click": true,
+  "background_color": "#FFFFFF",
+  "primary_text_color": "#1F2937",
+  "body_text_color": "#6B7280",
+  "background_cta": "#5E56F5",
+  "cta_text_color": "#FFFFFF",
+  "border_color": "#E5E7EB",
+  "cta_radius_dp": 8,
+  "control_close_position": "left",
+  "collapsible_expand_cooldown_second": 10,
+  "expired_time_second": 60
+}</code></pre>
+    </section>
+
+    <section id="banner">
+      <h2>Banner ads</h2>
+      <table>
+        <thead><tr><th>Field</th><th>Giá trị</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>ad_type</code></td><td><code>banner</code></td><td>Chọn BannerAdPlace.</td></tr>
+          <tr><td><code>banner_size</code></td><td><code>anchored</code>, <code>anchored_large</code>, <code>inline</code>, <code>standard_medium</code>, <code>standard_large</code></td><td>Map sang AdMob adaptive/standard size.</td></tr>
+          <tr><td><code>is_collapsible</code></td><td>Boolean</td><td>Bật collapsible banner request.</td></tr>
+          <tr><td><code>auto_reload_collapsible</code></td><td>Boolean</td><td>Nếu <code>false</code>, collapsible đã load cùng identifier sẽ không auto reload lại ngay.</td></tr>
+        </tbody>
+      </table>
+      <pre><code>{
+  "place_name": "anchored_banner_test",
+  "ad_id": "ca-app-pub-xxxxxxxxxxxxxxxx/yyyyyyyyyy",
+  "ad_type": "banner",
+  "banner_size": "anchored",
+  "is_collapsible": true,
+  "auto_reload_collapsible": false,
+  "is_enable": true,
+  "is_tracking_click": true
+}</code></pre>
+
+      <h3>Banner global config</h3>
+      <pre><code>{
+  "is_enable_retry": true,
+  "max_retry_count": 5,
+  "is_hide_when_error": true,
+  "retry_interval_second_list": [1, 2, 3]
+}</code></pre>
+    </section>
+
+    <section id="fullscreen">
+      <h2>Interstitial, Rewarded, Rewarded Interstitial</h2>
+      <p>Các loại fullscreen dùng chung list <code>rewarded_rewardedinter_inter_ad_places</code>. Chọn type bằng <code>ad_type</code>.</p>
+      <table>
+        <thead><tr><th>ad_type</th><th>Loại ad</th><th>Config global</th></tr></thead>
+        <tbody>
+          <tr><td><code>interstitial</code></td><td>Interstitial</td><td><code>interstitial_ad_config</code></td></tr>
+          <tr><td><code>rewarded</code></td><td>Rewarded video</td><td><code>rewarded_ad_config</code></td></tr>
+          <tr><td><code>rewarded_interstitial</code></td><td>Rewarded interstitial</td><td><code>rewarded_interstitial_ad_config</code></td></tr>
+          <tr><td><code>native</code> + <code>full_interstitial_*</code></td><td>Native fake interstitial</td><td><code>native_ad_config</code> + native place fields</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Interstitial place fields</h3>
+      <table>
+        <thead><tr><th>Field</th><th>Kiểu</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>plus_interval</code></td><td>Int</td><td>Cộng thêm vào <code>interstitial_ad_config.time_interval</code> riêng cho place.</td></tr>
+          <tr><td><code>is_ignore_interval</code></td><td>Boolean</td><td>Bỏ qua interval khi kiểm tra show.</td></tr>
+          <tr><td><code>is_show_native_after</code></td><td>Boolean</td><td>Sau khi interstitial dismiss, show thêm native interstitial từ <code>native_config</code>.</td></tr>
+          <tr><td><code>native_after_load_strategy</code></td><td>String</td><td><code>with_interstitial</code> load native cùng lúc interstitial; <code>on_interstitial_impression</code> load native khi interstitial impression.</td></tr>
+          <tr><td><code>native_config</code></td><td>Object</td><td>NativeAdPlace lồng, thường dùng <code>native_template_size=full_interstitial_v3</code>.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Interstitial global config</h3>
+      <pre><code>{
+  "is_wait_load_to_show": false,
+  "ads_per_session": 99,
+  "time_per_session": 600,
+  "time_interval": 3,
+  "time_interval_after_show_open_ad": 3,
+  "is_enable_retry": true,
+  "max_retry_count": 5,
+  "retry_interval_second_list": [1, 2, 3]
+}</code></pre>
+
+      <h3>Rewarded global config</h3>
+      <pre><code>{
+  "is_wait_load_to_show": false,
+  "is_enable_retry": true,
+  "max_retry_count": 5,
+  "max_retry_on_context": 2,
+  "time_wait_retry_on_context": 5,
+  "retry_interval_second_list": [1, 2, 3]
+}</code></pre>
+
+      <h3>Rewarded interstitial global config</h3>
+      <pre><code>{
+  "is_wait_load_to_show": false,
+  "is_enable_retry": true,
+  "max_retry_count": 5,
+  "retry_interval_second_list": [1, 2, 3]
+}</code></pre>
+
+      <h3>Ví dụ interstitial có native sau dismiss</h3>
+      <pre><code>{
+  "place_name": "fullscreen_test",
+  "ad_id": "ca-app-pub-xxxxxxxxxxxxxxxx/inter",
+  "ad_type": "interstitial",
+  "is_enable": true,
+  "is_show_native_after": true,
+  "native_after_load_strategy": "on_interstitial_impression",
+  "native_config": {
+    "place_name": "fullscreen_test_native",
+    "ad_id": "ca-app-pub-xxxxxxxxxxxxxxxx/native",
+    "ad_type": "native",
+    "native_template_size": "full_interstitial_v3",
+    "is_enable": true,
+    "background_color": "#CD121212",
+    "background_full_color": "#FFFFFF",
+    "primary_text_color": "#1F2937",
+    "body_text_color": "#6B7280",
+    "background_cta": "#22C55E",
+    "control_close_position": "left",
+    "count_down_timer": 5,
+    "close_step_count": 2,
+    "step_1_count_down_timer": 2,
+    "step_2_count_down_timer": 2
+  }
+}</code></pre>
+    </section>
+
+    <section id="app-open">
+      <h2>Open app ads</h2>
+      <p>Open app place nằm trong <code>app_open_ad_places</code>, type là <code>app_open</code>. Project đang dùng các place phổ biến: <code>open_app_first_open</code>, <code>open_app</code>, <code>reopen_app</code>.</p>
+      <table>
+        <thead><tr><th>Field</th><th>Kiểu</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>limit_show</code></td><td>Int</td><td>Giới hạn show của place. Nếu thiếu, code default <code>10000</code>.</td></tr>
+          <tr><td><code>ad_type</code></td><td>String</td><td>Luôn là <code>app_open</code>.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>App open global config</h3>
+      <table>
+        <thead><tr><th>Field</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>time_interval</code></td><td>Khoảng cách tối thiểu giữa app open với interstitial/app open gần nhất.</td></tr>
+          <tr><td><code>reopen_mode</code></td><td><code>app_open_ad</code> show AdMob AppOpen; <code>custom_activity</code> chạy custom reopen action.</td></tr>
+          <tr><td><code>time_millis_delay_before_show</code></td><td>Delay trước khi show reopen ad sau khi app foreground.</td></tr>
+          <tr><td><code>is_enable_retry</code>, <code>max_retry_count</code>, <code>retry_interval_second_list</code></td><td>Retry load app open.</td></tr>
+        </tbody>
+      </table>
+      <pre><code>{
+  "time_interval": 3,
+  "reopen_mode": "app_open_ad",
+  "time_millis_delay_before_show": 200,
+  "is_enable_retry": true,
+  "max_retry_count": 5,
+  "retry_interval_second_list": [1, 2, 3]
+}</code></pre>
+    </section>
+
+    <section id="other">
+      <h2>Config khác</h2>
+
+      <h3>application_config</h3>
+      <table>
+        <thead><tr><th>Field</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>is_hide_navigation_bar</code></td><td>Ẩn navigation bar khi app/dialog fullscreen cần immersive.</td></tr>
+          <tr><td><code>is_enable_ads</code></td><td>Bật/tắt toàn bộ quảng cáo.</td></tr>
+          <tr><td><code>is_preload_banner_native_exit</code></td><td>Preload quảng cáo dùng cho dialog exit.</td></tr>
+          <tr><td><code>is_always_preload_banner_native_ads_when_start</code></td><td>Preload banner/native khi vào app.</td></tr>
+          <tr><td><code>is_hide_native_banner_when_network_error</code></td><td>Ẩn native/banner container khi network error.</td></tr>
+          <tr><td><code>is_always_show_intro_and_language_screen</code></td><td>Luôn show language + onboarding.</td></tr>
+          <tr><td><code>is_always_show_intro_and_language_screen_with_interval</code></td><td>Luôn show language + onboarding theo chu kỳ ngày.</td></tr>
+          <tr><td><code>interval_day_always_show_intro_and_language</code></td><td>Số ngày cho chu kỳ show lại intro/language.</td></tr>
+          <tr><td><code>is_enable_introduction_screen</code></td><td>Bật/tắt onboarding.</td></tr>
+          <tr><td><code>is_enable_change_language_screen</code></td><td>Bật/tắt màn chọn ngôn ngữ.</td></tr>
+          <tr><td><code>is_enable_app_shortcut</code></td><td>Bật shortcut.</td></tr>
+          <tr><td><code>is_enable_app_shortcut_uninstall</code></td><td>Bật shortcut uninstall.</td></tr>
+          <tr><td><code>is_enable_open_app_ads_from_uninstall_shortcut</code></td><td>Cho phép open app ads khi mở từ uninstall shortcut.</td></tr>
+          <tr><td><code>is_enable_open_app_ads_from_shortcut</code></td><td>Cho phép open app ads khi mở từ shortcut thường.</td></tr>
+          <tr><td><code>intro_data</code>, <code>intro_data_v2</code>, <code>intro_data_v3</code></td><td>Mảng trạng thái từng page onboarding: <code>0</code> không ads, <code>1</code> native/banner, <code>2</code> full native.</td></tr>
+          <tr><td><code>intro_action_show_type</code></td><td>Kiểu show action intro, code default <code>1</code>.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>splash_screen_config</h3>
+      <table>
+        <thead><tr><th>Field</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>max_time_to_wait_app_open_ad</code></td><td>Thời gian tối đa chờ app open trên splash.</td></tr>
+          <tr><td><code>time_skip_app_open_ad_when_not_available</code></td><td>Thời gian skip khi app open chưa có sẵn.</td></tr>
+          <tr><td><code>ad_type_first_open</code></td><td><code>interstitial</code> hoặc <code>app_open</code> cho lần mở đầu tiên.</td></tr>
+          <tr><td><code>ad_type</code></td><td><code>interstitial</code> hoặc <code>app_open</code> từ lần mở thứ hai.</td></tr>
+          <tr><td><code>min_time_wait_progress_before_show_ad</code></td><td>Thời gian progress tối thiểu trước khi show ad.</td></tr>
+          <tr><td><code>is_enable_retry</code>, <code>max_retry_count</code>, <code>retry_fixed_delay</code></td><td>Retry load splash ad.</td></tr>
+          <tr><td><code>is_load_before_eu_consent</code></td><td>Cho phép load trước khi hoàn tất EU consent.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>prevent_ad_click_config</h3>
+      <pre><code>{
+  "max_ad_click_per_session": 6,
+  "time_per_session": 120,
+  "time_disable_ads_when_reached_max_ad_click": 20
+}</code></pre>
+
+      <h3>tutorial_config</h3>
+      <p>Áp dụng cho place có <code>is_tutorial_flow=true</code>. <code>enable_ad_1=false</code> loại <code>high_floor_ad_ids</code>; <code>enable_ad_2=false</code> loại <code>ad_id</code> fallback; <code>enable_all_ads=false</code> tắt nhóm tutorial theo mapper config.</p>
+      <pre><code>{
+  "enable_all_ads": true,
+  "enable_ad_1": true,
+  "enable_ad_2": true
+}</code></pre>
+
+      <h3>request_consent_config</h3>
+      <pre><code>{
+  "is_enable": true,
+  "debug_is_eea": true,
+  "debug_list_test_device_hashed_id": [
+    "460E79ECA70EF328A2F505FFB68470B9"
+  ]
+}</code></pre>
+
+      <h3>onboarding_config và language_activity_config</h3>
+      <pre><code>{
+  "version": 3,
+  "position_next": "top",
+  "is_show_close": true,
+  "is_show_swipe": false,
+  "delay_show_close_swipe_seconds": 1
+}</code></pre>
+      <pre><code>{
+  "version": 2,
+  "time_show_loading_lfo": 3
+}</code></pre>
+    </section>
+
+    <section id="gallery">
+      <h2>Native UI gallery</h2>
+      <p>Các ảnh dưới đây được chụp bằng <code>adb shell screencap</code> từ debug preview Activity, sử dụng AdMob test native id <code>ca-app-pub-3940256099942544/2247696110</code>.</p>
+      <div class="grid">
+        <figure><img src="native-screenshots/small.png" alt="small"><figcaption><code>small</code></figcaption></figure>
+        <figure><img src="native-screenshots/small_cta_top.png" alt="small_cta_top"><figcaption><code>small_cta_top</code></figcaption></figure>
+        <figure><img src="native-screenshots/small_cta_bottom.png" alt="small_cta_bottom"><figcaption><code>small_cta_bottom</code></figcaption></figure>
+        <figure><img src="native-screenshots/small_cta_right.png" alt="small_cta_right"><figcaption><code>small_cta_right</code></figcaption></figure>
+        <figure><img src="native-screenshots/mini_cta_right.png" alt="mini_cta_right"><figcaption><code>mini_cta_right</code></figcaption></figure>
+        <figure><img src="native-screenshots/small_long.png" alt="small_long"><figcaption><code>small_long</code></figcaption></figure>
+        <figure><img src="native-screenshots/small_for_popup.png" alt="small_for_popup"><figcaption><code>small_for_popup</code></figcaption></figure>
+        <figure><img src="native-screenshots/medium.png" alt="medium"><figcaption><code>medium</code></figcaption></figure>
+        <figure><img src="native-screenshots/medium_cta_top.png" alt="medium_cta_top"><figcaption><code>medium_cta_top</code></figcaption></figure>
+        <figure><img src="native-screenshots/medium_cta_bottom.png" alt="medium_cta_bottom"><figcaption><code>medium_cta_bottom</code></figcaption></figure>
+        <figure><img src="native-screenshots/medium_short_cta_bottom.png" alt="medium_short_cta_bottom"><figcaption><code>medium_short_cta_bottom</code></figcaption></figure>
+        <figure><img src="native-screenshots/medium_collapsible_cta_bottom.png" alt="medium_collapsible_cta_bottom"><figcaption><code>medium_collapsible_cta_bottom</code></figcaption></figure>
+        <figure><img src="native-screenshots/medium_collapsible_cta_bottom_v2.png" alt="medium_collapsible_cta_bottom_v2"><figcaption><code>medium_collapsible_cta_bottom_v2</code></figcaption></figure>
+        <figure><img src="native-screenshots/medium_cta_right_top.png" alt="medium_cta_right_top"><figcaption><code>medium_cta_right_top</code></figcaption></figure>
+        <figure><img src="native-screenshots/medium_cta_right.png" alt="medium_cta_right"><figcaption><code>medium_cta_right</code></figcaption></figure>
+        <figure><img src="native-screenshots/medium_media_right.png" alt="medium_media_right"><figcaption><code>medium_media_right</code></figcaption></figure>
+        <figure><img src="native-screenshots/medium_media_left.png" alt="medium_media_left"><figcaption><code>medium_media_left</code></figcaption></figure>
+        <figure><img src="native-screenshots/full_cta_bottom.png" alt="full_cta_bottom"><figcaption><code>full_cta_bottom</code></figcaption></figure>
+        <figure><img src="native-screenshots/full_cta_bottom_onboarding.png" alt="full_cta_bottom_onboarding"><figcaption><code>full_cta_bottom_onboarding</code></figcaption></figure>
+        <figure><img src="native-screenshots/full_cta_top.png" alt="full_cta_top"><figcaption><code>full_cta_top</code></figcaption></figure>
+        <figure><img src="native-screenshots/full_cta_right.png" alt="full_cta_right"><figcaption><code>full_cta_right</code></figcaption></figure>
+        <figure><img src="native-screenshots/full_interstitial_v1.png" alt="full_interstitial_v1"><figcaption><code>full_interstitial_v1</code></figcaption></figure>
+        <figure><img src="native-screenshots/full_interstitial_v2.png" alt="full_interstitial_v2"><figcaption><code>full_interstitial_v2</code></figcaption></figure>
+        <figure><img src="native-screenshots/full_interstitial_v3.png" alt="full_interstitial_v3"><figcaption><code>full_interstitial_v3</code></figcaption></figure>
+      </div>
+      <div class="note">
+        <p><strong>Custom native:</strong> key không nằm trong danh sách built-in sẽ thành <code>NativeTemplateSize.CustomKey</code> và được chuyển sang <code>CustomNativeProvider.getInstance().getCustomNativeAds()</code>. Muốn dùng custom key phải implement provider tương ứng; tài liệu này chỉ minh họa các template built-in.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
