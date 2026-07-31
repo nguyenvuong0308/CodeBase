@@ -667,7 +667,7 @@ abstract class BaseActivity<T : ViewBinding> : AppCompatActivity(), CoroutineSco
      *
      * abstract class BaseAdsActivity<VM : BaseViewModel, B : ViewBinding> : BaseActivity<VM, B>() {
      *
-     *     fun unlock(callbackSuccess: () -> Unit, callbackFailed: () -> Unit) {
+     *     fun unlock(callbackSuccess: () -> Unit, callbackFailed: (isNoAds: Boolean) -> Unit) {
      *         unlockWithRewarded(
      *             adPlaceName = AppAdPlaceName.REWARDED,
      *             callbackSuccess = callbackSuccess,
@@ -675,10 +675,10 @@ abstract class BaseActivity<T : ViewBinding> : AppCompatActivity(), CoroutineSco
      *                 cancelRewarded()
      *             },
      *             callbackNoAds = {
-     *                 callbackFailed.invoke()
+     *                 callbackFailed.invoke(true)
      *             },
      *             callbackRetry = {
-     *                 callbackFailed.invoke()
+     *                 callbackFailed.invoke(false)
      *             })
      *     }
      *

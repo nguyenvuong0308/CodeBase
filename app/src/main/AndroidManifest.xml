@@ -40,6 +40,8 @@
 
         <activity android:name=".features.feature_demo_frame_mvvm.frame_detail.ui.FrameDetailActivity" />
 
+        <activity android:name=".features.feature_reward.RewardTestActivity" />
+
         <service
             android:name=".required.firebase.MyFirebaseMessagingService"
             android:exported="false">
