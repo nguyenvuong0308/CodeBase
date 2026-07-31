@@ -29,10 +29,7 @@ Use the modules you need:
 
 ```kotlin
 dependencies {
-    implementation("com.github.nguyenvuong0308:CodeBase:2.1.1")
-
-    // khi nâng target 36
-    implementation("com.github.nguyenvuong0308:CodeBase:beta.3.0.0")
+    implementation("com.github.nguyenvuong0308:CodeBase:3.0.1")
 }
 ```
 

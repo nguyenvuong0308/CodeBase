@@ -3,7 +3,7 @@
 
 [versions]
 #----------------- Android & Gradle Build -----------------#
-agp = "8.13.0"
+agp = "8.13.2"
 appUpdateVersion = "2.1.0"
 appUpdateKtxVersion = "2.1.0"
 flexboxVersion = "3.0.0"
@@ -11,13 +11,13 @@ kotlin = "2.2.21"
 lifecycleExtensionsVersion = "2.2.0"
 minSdk = "24"
 reviewKtxVersion = "2.0.2"
-targetSdk = "35"
+targetSdk = "36"
 
 #----------------- AndroidX Core & Jetpack -----------------#
-coreKtx = "1.16.0"
+coreKtx = "1.18.0"
 appcompat = "1.7.1"
-lifecycleRuntimeKtx = "2.9.4"
-activityKtxVersion = "1.10.0"
+lifecycleRuntimeKtx = "2.11.0"
+activityKtxVersion = "1.13.0"
 fragmentKtxVersion = "1.8.9"
 coreSplashscreen = "1.2.0"
 exifinterface = "1.4.2"
@@ -26,27 +26,27 @@ windowVersion = "1.5.1"
 roomKtx = "2.8.4"
 
 #----------------- Google & Firebase Services -----------------#
-firebaseBom = "34.13.0"
-playServicesAds = "25.2.0"
-playServicesAdsIdentifier = "18.2.0"
-playServicesBase = "18.5.0"
-playServicesBasement = "18.5.0"
-billingKtx = "9.0.0"
+firebaseBom = "34.16.0"
+playServicesAds = "25.4.0"
+playServicesAdsIdentifier = "18.3.0"
+playServicesBase = "18.10.0"
+playServicesBasement = "18.10.0"
+billingKtx = "9.1.0"
 userMessagingPlatform = "4.0.0"
-googleService = "4.4.4"
+googleService = "4.5.0"
 crashlytics = "3.0.7"
 firebasePerf = "2.0.2"
 
 #----------------- UI & Graphics -----------------#
-material = "1.13.0"
+material = "1.14.0"
 shimmer = "0.5.0"
 lottie = "6.7.1"
 glide = "5.0.7"
 
 #----------------- Networking & Serialization -----------------#
 retrofit = "3.0.0"
-okhttp = "5.3.2"
-loggingInterceptor = "5.3.2"
+okhttp = "5.4.0"
+loggingInterceptor = "5.4.0"
 gson = "2.14.0"
 moshi = "1.15.2"
 

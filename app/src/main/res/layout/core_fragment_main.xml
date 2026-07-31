@@ -91,7 +91,7 @@
                 <ImageView
                     style="@style/MenuIconStyle"
                     android:contentDescription="Show Reward"
-                    android:src="@drawable/ic_card_giftcard"
+                    android:src="@drawable/ic_card_gift_card"
                     app:tint="@color/amber_500" />
 
                 <TextView

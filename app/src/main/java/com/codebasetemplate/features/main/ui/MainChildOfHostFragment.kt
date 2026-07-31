@@ -1,10 +1,12 @@
 package com.codebasetemplate.features.main.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import com.codebasetemplate.databinding.CoreFragmentMainBinding
+import com.codebasetemplate.features.feature_reward.RewardTestActivity
 import com.codebasetemplate.features.main.ui.host.MainHostEvent
 import com.codebasetemplate.features.main.ui.host.MainHostViewModel
 import com.codebasetemplate.required.ads.AppAdPlaceName
@@ -55,9 +57,11 @@ class MainChildOfHostFragment : BaseChildOfHostFragment<CoreFragmentMainBinding,
             }
 
             showRewardLayout.setOnSingleClick {
-                showRewardAd(AppAdPlaceName.REWARD_TEST) { isShown, isEarnedReward, isNoAds ->
-                    toast("Show reward ad completed $isEarnedReward")
-                }
+//                showRewardAd(AppAdPlaceName.REWARD_TEST) { isShown, isEarnedReward, isNoAds ->
+//                    toast("Show reward ad completed $isEarnedReward")
+//                }
+                val ct = context ?: return@setOnSingleClick
+                startActivity(Intent(ct, RewardTestActivity::class.java))
             }
 
             showInterstitialLayoutLazyLoad.setOnSingleClick {
