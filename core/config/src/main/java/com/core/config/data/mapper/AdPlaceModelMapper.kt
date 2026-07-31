@@ -183,6 +183,9 @@ internal class AdPlaceModelMapper @Inject constructor(
             progressBarTint = model.progressBarTint,
             controlClosePosition = model.controlClosePosition,
             collapsibleExpandCooldownSecond = model.collapsibleExpandCooldownSecond,
+            pipAnchorMode = model.pipAnchorMode,
+            pipMarginDp = model.pipMarginDp,
+            pipTopMarginDp = model.pipTopMarginDp,
             textColorAdsNotifyView = model.textColorAdsNotifyView,
             backgroundColorAdsNotifyView = model.backgroundColorAdsNotifyView
         )

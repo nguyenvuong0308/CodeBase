@@ -141,6 +141,15 @@ internal data class AdPlaceModel(
     @Json(name = "collapsible_expand_cooldown_second")
     val collapsibleExpandCooldownSecond: Int?,
 
+    @Json(name = "pip_anchor_mode")
+    val pipAnchorMode: String?,
+
+    @Json(name = "pip_margin_dp")
+    val pipMarginDp: Float?,
+
+    @Json(name = "pip_top_margin_dp")
+    val pipTopMarginDp: Float?,
+
      @Json(name = "text_color_ads_notify_view")
     val textColorAdsNotifyView: String?,
 

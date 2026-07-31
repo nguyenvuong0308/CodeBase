@@ -289,6 +289,36 @@
         </tbody>
       </table>
 
+      <h3>Native picture-in-picture config</h3>
+      <p>Native PIP dung <code>native_template_size=native_pip</code>, kich thuoc UI 180dp x 180dp. Khi user dang drag, margin PIP khong gioi han vung keo; margin chi duoc ap dung khi show ban dau hoac khi tha tay de snap/validate lai vi tri.</p>
+      <table>
+        <thead><tr><th>Field</th><th>Kieu</th><th>Y nghia</th></tr></thead>
+        <tbody>
+          <tr><td><code>pip_anchor_mode</code></td><td>String</td><td><code>flexible</code> snap ve canh trai/phai; <code>fixed</code> snap ve goc tren/duoi gan vi tri tha tay.</td></tr>
+          <tr><td><code>pip_margin_dp</code></td><td>Float</td><td>Margin start/end/bottom theo dp khi show va khi validate sau khi tha tay. Neu thieu, code default <code>20</code>.</td></tr>
+          <tr><td><code>pip_top_margin_dp</code></td><td>Float</td><td>Margin top theo dp khi show va khi validate sau khi tha tay. Neu thieu, code default <code>20</code>.</td></tr>
+        </tbody>
+      </table>
+      <pre><code>{
+  "place_name": "anchored_native_pip_home",
+  "ad_id": "ca-app-pub-xxxxxxxxxxxxxxxx/yyyyyyyyyy",
+  "ad_type": "native",
+  "native_template_size": "native_pip",
+  "is_enable": true,
+  "is_tracking_click": true,
+  "background_color": "#FFFFFF",
+  "primary_text_color": "#1F2937",
+  "body_text_color": "#111827",
+  "cta_text_color": "#FFFFFF",
+  "background_cta": "#FFC21A,#FF7A00",
+  "border_color": "#000000",
+  "expired_time_second": 60,
+  "count_down_timer": 3,
+  "pip_anchor_mode": "flexible",
+  "pip_margin_dp": 20,
+  "pip_top_margin_dp": 20
+}</code></pre>
+
       <h3>Native global config</h3>
       <pre><code>{
   "is_enable_retry": true,

@@ -1,10 +1,12 @@
 package com.codebasetemplate.features.main.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import com.codebasetemplate.databinding.CoreFragmentMainBinding
+import com.codebasetemplate.features.feature_demo_native_pip.ui.NativePipTestActivity
 import com.codebasetemplate.features.main.ui.host.MainHostEvent
 import com.codebasetemplate.features.main.ui.host.MainHostViewModel
 import com.codebasetemplate.required.ads.AppAdPlaceName
@@ -46,6 +48,10 @@ class MainChildOfHostFragment : BaseChildOfHostFragment<CoreFragmentMainBinding,
 
             nativeInListLayout.setOnSingleClick {
                 hostViewModel.navigateTo(MainHostEvent.OpenNativeInList)
+            }
+
+            nativePipTestLayout.setOnSingleClick {
+                startActivity(Intent(requireContext(), NativePipTestActivity::class.java))
             }
 
             showInterstitialLayout.setOnSingleClick {
@@ -111,10 +117,14 @@ class MainChildOfHostFragment : BaseChildOfHostFragment<CoreFragmentMainBinding,
     }
 
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
-        viewBinding.layoutBannerNative.processAdResource(
-            adResource,
-            AppAdPlaceName.ANCHORED_BOTTOM_HOME
-        )
+        when (adResource.commonAdPlaceName) {
+            AppAdPlaceName.ANCHORED_BOTTOM_HOME -> {
+                viewBinding.layoutBannerNative.processAdResource(
+                    adResource,
+                    AppAdPlaceName.ANCHORED_BOTTOM_HOME
+                )
+            }
+        }
     }
 
 }

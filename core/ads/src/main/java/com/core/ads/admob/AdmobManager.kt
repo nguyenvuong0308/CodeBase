@@ -2506,6 +2506,14 @@ class AdmobManager @Inject constructor(
         adHolderBannerNativeMap.remove(adPlaceName)
     }
 
+    override fun markNativeAdConsumed(adPlaceName: IAdPlaceName, nativeAd: NativeAd) {
+        val nativeHolder = adHolderBannerNativeMap[adPlaceName] as? NativeAdHolder ?: return
+        if (nativeHolder.nativeAd !== nativeAd) return
+
+        nativeHolder.nativeAd = null
+        nativeHolder.loadedAtMs = 0L
+    }
+
     fun isDisableByTestAd(adName: String): Boolean {
         Log.d(TAG, "isDisableByTestAd: isTurnOnAdPlacesDisabledWhenDetectTestAd $isTurnOnAdPlacesDisabledWhenDetectTestAd isTestAd $isTestAd adPlacesDisabledWhenDetectTestAd $adPlacesDisabledWhenDetectTestAd ")
         return isTurnOnAdPlacesDisabledWhenDetectTestAd && isTestAd && adPlacesDisabledWhenDetectTestAd.contains(
