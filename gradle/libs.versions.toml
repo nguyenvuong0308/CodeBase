@@ -16,7 +16,7 @@ targetSdk = "36"
 #----------------- AndroidX Core & Jetpack -----------------#
 coreKtx = "1.18.0"
 appcompat = "1.7.1"
-lifecycleRuntimeKtx = "2.11.0"
+lifecycleRuntimeKtx = "2.10.0"
 activityKtxVersion = "1.13.0"
 fragmentKtxVersion = "1.8.9"
 coreSplashscreen = "1.2.0"
@@ -26,7 +26,7 @@ windowVersion = "1.5.1"
 roomKtx = "2.8.4"
 
 #----------------- Google & Firebase Services -----------------#
-firebaseBom = "34.16.0"
+firebaseBom = "34.17.0"
 playServicesAds = "25.4.0"
 playServicesAdsIdentifier = "18.3.0"
 playServicesBase = "18.10.0"

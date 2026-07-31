@@ -29,7 +29,7 @@ Use the modules you need:
 
 ```kotlin
 dependencies {
-    implementation("com.github.nguyenvuong0308:CodeBase:3.0.1")
+    implementation("com.github.nguyenvuong0308:CodeBase:3.0.2")
 }
 ```
 
