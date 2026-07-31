@@ -489,9 +489,9 @@ class NativePictureInPicture @JvmOverloads constructor(
             binding.background.setBackgroundResource(it)
         }
 
-        styles.backgroundAdsNotifyView?.let {
-            binding.adNotificationView.setBackgroundResource(it)
-        }
+//        styles.backgroundAdsNotifyView?.let {
+//            binding.adNotificationView.setBackgroundResource(it)
+//        }
         applyAdsNotifyViewStyles(styles, binding.adNotificationView)
 
         styles.primaryTextBackgroundColor?.let {

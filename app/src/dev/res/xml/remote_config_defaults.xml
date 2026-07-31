@@ -541,6 +541,8 @@
             "expired_time_second": 60,
             "count_down_timer": 3,
             "pip_anchor_mode": "fixed",
+            "background_color_ads_notify_view": "#898989",
+            "text_color_ads_notify_view": "#ffffff",
             "pip_margin_dp": 20,
             "pip_top_margin_dp": 40
             }

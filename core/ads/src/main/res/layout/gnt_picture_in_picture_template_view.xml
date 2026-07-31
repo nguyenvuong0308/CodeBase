@@ -104,6 +104,10 @@
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/ad_notification_view"
                         style="@style/AdsNotificationViewStyle"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="2dp"
+                        android:minHeight="0dp"
+                        android:background="@drawable/gnt_rounded_corners_shape_round"
                         android:layout_gravity="end|bottom"
                         android:layout_marginEnd="@dimen/_2dp"
                         android:layout_marginBottom="@dimen/_2dp"
