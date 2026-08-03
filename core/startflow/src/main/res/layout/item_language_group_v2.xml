@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/languageGroupCard"
+        android:layout_width="0dp"
+        android:layout_height="62dp"
+        android:background="@drawable/bg_language_group_card"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <FrameLayout
+            android:id="@+id/languageGroupFlags"
+            android:layout_width="81dp"
+            android:layout_height="40dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/languageGroupFlagOne"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_language_flag_circle"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:textSize="22dp"
+                tools:text="🇫🇷" />
+
+            <TextView
+                android:id="@+id/languageGroupFlagTwo"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="22dp"
+                android:background="@drawable/bg_language_flag_circle"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:textSize="22dp"
+                tools:text="🇨🇦" />
+
+            <TextView
+                android:id="@+id/languageGroupFlagThree"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="44dp"
+                android:background="@drawable/bg_language_flag_circle"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:textSize="22dp"
+                tools:text="🇧🇪" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/languageGroupTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_medium"
+            android:maxLines="1"
+            android:textSize="14dp"
+            android:layout_marginStart="@dimen/_10dp"
+            android:textColor="@color/language_v2_text"
+            app:layout_constraintBottom_toTopOf="@id/languageGroupSubtitle"
+            app:layout_constraintEnd_toStartOf="@id/languageExpandIcon"
+            app:layout_constraintStart_toEndOf="@id/languageGroupFlags"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="French" />
+
+        <TextView
+            android:id="@+id/languageGroupSubtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="12dp"
+            android:textColor="@color/language_v2_subtitle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/languageExpandIcon"
+            app:layout_constraintStart_toStartOf="@id/languageGroupTitle"
+            app:layout_constraintTop_toBottomOf="@id/languageGroupTitle"
+            tools:text="Français" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/languageExpandIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_language_v2_chevron_down"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

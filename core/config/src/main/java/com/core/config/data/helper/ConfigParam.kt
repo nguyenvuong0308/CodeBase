@@ -6,7 +6,9 @@ import com.core.config.data.model.AppOpenAdConfigModel
 import com.core.config.data.model.BannerAdConfigModel
 import com.core.config.data.model.IapConfigModel
 import com.core.config.data.model.InterstitialAdConfigModel
+import com.core.config.data.model.LanguageActivityConfigModel
 import com.core.config.data.model.NativeAdConfigModel
+import com.core.config.data.model.OnBoardingConfigModel
 import com.core.config.data.model.PreventAdClickConfigModel
 import com.core.config.data.model.RequestConsentConfigModel
 import com.core.config.data.model.RewardedAdConfigModel
@@ -87,6 +89,18 @@ internal sealed class ConfigParam<T : Any> {
     internal object SplashScreenConfigParam: ConfigParam<SplashScreenConfigModel>() {
 
         override val key = "splash_screen_config"
+
+    }
+
+    internal object LanguageActivityConfigParam: ConfigParam<LanguageActivityConfigModel>() {
+
+        override val key = "language_activity_config"
+
+    }
+
+    internal object OnBoardingConfigParam: ConfigParam<OnBoardingConfigModel>() {
+
+        override val key = "onboarding_config"
 
     }
 

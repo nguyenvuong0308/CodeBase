@@ -5,14 +5,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import androidx.activity.viewModels
-import com.codebasetemplate.databinding.CoreActivitySplashBinding
+import com.core.startflow.databinding.CoreActivitySplashBinding
 import com.codebasetemplate.features.feature_language.ui.LanguageActivityNavigator
 import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
-import com.codebasetemplate.features.feature_uninstall.ui.UninstallActivityHost
-import com.codebasetemplate.features.main.ui.MainActivityHost
-import com.codebasetemplate.required.ads.AppAdPlaceName
-import com.codebasetemplate.required.shortcut.AppScreenType
-import com.codebasetemplate.required.shortcut.AppShortCut
+import com.core.config.domain.data.CoreAdPlaceName
+import com.core.startflow.StartFlowScreenType
+import com.core.startflow.StartFlowShortcut
 import com.core.ads.domain.AdLoadBannerNativeUiResource
 import com.core.baseui.R
 import com.core.baseui.ext.bindLiveData
@@ -31,7 +29,7 @@ private const val TAG = "SplashActivity"
 class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
 
     companion object {
-        private const val EARLY_PROGRESS_RATIO = 0.2f
+        private const val EARLY_PROGRESS_RATIO = 0.4f
         private const val EARLY_PROGRESS_DURATION_MS = 1_200L
     }
 
@@ -153,14 +151,14 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
 
     override fun providerBannerNativeAdPlaceName(): List<IAdPlaceName> {
         return listOf(
-            AppAdPlaceName.ANCHORED_BOTTOM_SPLASH
+            CoreAdPlaceName.ANCHORED_BOTTOM_SPLASH
         )
     }
 
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
         viewBinding.bannerNative.processAdResource(
             adResource,
-            AppAdPlaceName.ANCHORED_BOTTOM_SPLASH
+            CoreAdPlaceName.ANCHORED_BOTTOM_SPLASH
         )
     }
 
@@ -169,28 +167,31 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
             timeShowIntro = System.currentTimeMillis()
             LanguageActivityNavigator.intentStart(
                 this@SplashActivity,
-                config = getDataFromRemoteUseCase.languageActivityConfig,
+                config = remoteConfigRepository.getLanguageActivityConfig(),
                 fromSplash = true
             )
         } else if (!isEnableLanguageScreen && isEnableIntroductionScreen) {
             timeShowIntro = System.currentTimeMillis()
             Intent(
                 this@SplashActivity,
-                OnBoardingConfigFactory.getOnBoardingClass(getDataFromRemoteUseCase.onBoardingConfig)
+                OnBoardingConfigFactory.getOnBoardingClass(remoteConfigRepository.getOnBoardingConfig())
             )
         } else {
-            Intent(this@SplashActivity, MainActivityHost::class.java)
+            Intent(this@SplashActivity, startFlowNavigator.mainClass())
         }
     }
 
     override fun openNextScreen() {
         val intentNext =
             when {
-                targetScreenFromShortCut == AppScreenType.Uninstall.screenName -> {
-                    Intent(this@SplashActivity, UninstallActivityHost::class.java).apply {
+                targetScreenFromShortCut == StartFlowScreenType.Uninstall.screenName -> {
+                    Intent(
+                        this@SplashActivity,
+                        startFlowNavigator.uninstallClass() ?: startFlowNavigator.mainClass()
+                    ).apply {
                         val bundle = Bundle().apply {
                             putString(
-                                AppShortCut.KEY_SHORTCUT_TARGET_SCREEN,
+                                StartFlowShortcut.KEY_SHORTCUT_TARGET_SCREEN,
                                 targetScreenFromShortCut
                             )
                         }
@@ -200,10 +201,10 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
 
                 /**Những case shortcut khác*/
                 targetScreenFromShortCut?.isNotBlank() == true -> {
-                    Intent(this@SplashActivity, MainActivityHost::class.java).apply {
+                    Intent(this@SplashActivity, startFlowNavigator.mainClass()).apply {
                         val bundle = Bundle().apply {
                             putString(
-                                AppShortCut.KEY_SHORTCUT_TARGET_SCREEN,
+                                StartFlowShortcut.KEY_SHORTCUT_TARGET_SCREEN,
                                 targetScreenFromShortCut
                             )
                         }
@@ -225,7 +226,7 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
                 }
 
                 else -> {
-                    Intent(this@SplashActivity, MainActivityHost::class.java)
+                    Intent(this@SplashActivity, startFlowNavigator.mainClass())
                 }
             }
         intentNext.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK

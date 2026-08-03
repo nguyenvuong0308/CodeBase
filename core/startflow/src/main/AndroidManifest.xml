@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity android:name="com.codebasetemplate.features.feature_language.ui.LanguageActivity" />
+        <activity android:name="com.codebasetemplate.features.feature_language.ui.v2.LanguageActivityV2FromSetting" />
+        <activity android:name="com.codebasetemplate.features.feature_language.ui.v2.LanguageActivityV21" />
+        <activity android:name="com.codebasetemplate.features.feature_language.ui.v2.LanguageActivityV22" />
+        <activity android:name="com.codebasetemplate.features.feature_language.ui.v2.LanguageActivityV23" />
+        <activity android:name="com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingActivity" />
+        <activity android:name="com.codebasetemplate.features.feature_onboarding.ui.v2.OnBoardingActivity2" />
+        <activity android:name="com.codebasetemplate.features.feature_onboarding.ui.v3.OnBoardingActivityV3" />
+    </application>
+</manifest>

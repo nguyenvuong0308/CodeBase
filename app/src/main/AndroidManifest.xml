@@ -26,7 +26,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <activity android:name=".features.main.ui.MainActivityHost" />
@@ -37,16 +36,6 @@
             android:label="Native PIP Test" />
 
         <activity android:name=".features.feature_uninstall.ui.UninstallActivityHost" />
-
-        <activity android:name=".features.feature_language.ui.LanguageActivity" />
-        <activity android:name=".features.feature_language.ui.v2.LanguageActivityV21" />
-        <activity android:name=".features.feature_language.ui.v2.LanguageActivityV22" />
-        <activity android:name=".features.feature_language.ui.v2.LanguageActivityV23" />
-        <activity android:name=".features.feature_language.ui.v2.LanguageActivityV2FromSetting" />
-
-        <activity android:name=".features.feature_onboarding.ui.v3.OnBoardingActivityV3" />
-        <activity android:name=".features.feature_onboarding.ui.v2.OnBoardingActivity2" />
-        <activity android:name=".features.feature_onboarding.ui.v1.OnBoardingActivity" />
 
         <activity android:name=".features.feature_demo_frame_mvvm.frame_detail.ui.FrameDetailActivity" />
 

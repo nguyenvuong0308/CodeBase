@@ -2,8 +2,6 @@ package com.codebasetemplate.required.ads
 
 import android.app.Activity
 import android.util.Log
-import com.codebasetemplate.BuildConfig
-import com.codebasetemplate.required.firebase.GetDataFromRemoteUseCaseImpl
 import com.core.ads.admob.ReopenAction
 import com.core.config.domain.RemoteConfigRepository
 import com.core.config.domain.data.AppOpenAdTypeConfig

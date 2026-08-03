@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Đây là background cho Splash Screen trên các phiên bản Android 11 trở về trước.
+Nó sử dụng một layer-list để đặt logo ở giữa trên một màu nền.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Lớp 1: Màu nền -->
+    <item android:drawable="@color/splash_background_color" />
+
+    <!-- Lớp 2: Logo của bạn từ thư mục mipmap -->
+    <!-- Thay @mipmap/ic_launcher bằng tên chính xác của file logo trong mipmap -->
+    <item
+        android:width="120dp"
+        android:height="120dp"
+        android:drawable="@mipmap/ic_launcher"
+        android:gravity="center" />
+
+</layer-list>
