@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_onboarding_title_1" translatable="false">Đây là dòng hướng dẫn 1</string>
+    <string name="core_onboarding_title_2" translatable="false">Đây là dòng hướng dẫn 2</string>
+    <string name="core_onboarding_title_3" translatable="false">Đây là dòng hướng dẫn 3</string>
+    <string name="core_back_button_desc">Quay lại</string>
+    <string name="core_screen_language">Ngôn ngữ</string>
+    <string name="core_apply_language">Đang áp dụng ngôn ngữ…</string>
+    <string name="core_common_save">Lưu</string>
+    <string name="core_common_skip">Bỏ qua</string>
+    <string name="core_common_continue">Tiếp tục</string>
+    <string name="core_onboarding_action_get_start">Bắt đầu</string>
+    <string name="core_onboarding_action_next">Tiếp theo</string>
+    <string name="common_next">Tiếp theo</string>
+</resources>

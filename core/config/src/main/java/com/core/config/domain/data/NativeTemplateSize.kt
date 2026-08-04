@@ -88,7 +88,7 @@ sealed class NativeTemplateSize {
     }
 
     object MediumCollapsibleCtaBottomV2 : NativeTemplateSize() {
-        override val key = "medium_collapsible_cta_bottom_v2"
+        override val key = "medium_collapsible_banner"
     }
 
     object MediumCtaRightTop: NativeTemplateSize() {

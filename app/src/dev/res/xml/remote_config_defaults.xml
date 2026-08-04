@@ -511,7 +511,7 @@
             "place_name": "anchored_bottom_home",
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
-            "native_template_size": "medium_collapsible_cta_bottom_v2",
+            "native_template_size": "medium_collapsible_banner",
             "is_tracking_click": true,
             "is_enable": true,
             "background_color": "#FFFFFF",
