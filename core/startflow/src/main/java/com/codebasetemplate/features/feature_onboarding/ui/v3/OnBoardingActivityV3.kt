@@ -16,7 +16,7 @@ import com.core.startflow.StartFlowActivity
 import com.core.startflow.StartFlowNavigator
 import com.core.startflow.StartFlowShortcut
 import com.core.startflow.databinding.ActivityOnboardingV3Binding
-import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
+import com.core.startflow.OnBoardingConfigFactory
 import com.codebasetemplate.features.feature_onboarding.ui.model.OnBoardingItem
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingEvent
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingViewModel
@@ -154,7 +154,7 @@ class OnBoardingActivityV3 : StartFlowActivity<ActivityOnboardingV3Binding>() {
         currentTrackingStartedAtMs = SystemClock.elapsedRealtime()
         when (item) {
             is OnBoardingItem.FullNativeItem -> {
-                EventTracking.logEvent(EVENT_ONBOARD_INTER_VIEW)
+                EventTracking.logEvent(EventTracking.EVENT_ONBOARD_INTER_VIEW)
             }
 
             is OnBoardingItem.Item -> {
@@ -165,7 +165,7 @@ class OnBoardingActivityV3 : StartFlowActivity<ActivityOnboardingV3Binding>() {
                     EventTracking.VALUE_REVISIT
                 }
                 EventTracking.logEvent(
-                    onboardingViewEvent(screenNumber),
+                    EventTracking.onboardingViewEvent(screenNumber),
                     Bundle().apply {
                         putString(EventTracking.PARAM_VIEW_TYPE, viewType)
                     }
@@ -181,7 +181,7 @@ class OnBoardingActivityV3 : StartFlowActivity<ActivityOnboardingV3Binding>() {
         when (item) {
             is OnBoardingItem.FullNativeItem -> {
                 EventTracking.logEngagementComplete(
-                    EVENT_ONBOARD_INTER_COMPLETE,
+                    EventTracking.EVENT_ONBOARD_INTER_COMPLETE,
                     currentTrackingStartedAtMs,
                     nowMs
                 )
@@ -195,7 +195,7 @@ class OnBoardingActivityV3 : StartFlowActivity<ActivityOnboardingV3Binding>() {
                 }
                 val screenNumber = item.position + 1
                 EventTracking.logEvent(
-                    onboardingCompleteEvent(screenNumber),
+                    EventTracking.onboardingCompleteEvent(screenNumber),
                     Bundle().apply {
                         putLong(
                             EventTracking.PARAM_ENGAGEMENT_TIME,
@@ -219,10 +219,6 @@ class OnBoardingActivityV3 : StartFlowActivity<ActivityOnboardingV3Binding>() {
             is OnBoardingItem.Item -> "onb${item.position + 1}"
         }
     }
-
-    private fun onboardingViewEvent(screenNumber: Int) = "onb${screenNumber}_view"
-
-    private fun onboardingCompleteEvent(screenNumber: Int) = "onb${screenNumber}_complete"
 
     override fun providerInterAdPlaceName(): List<IAdPlaceName> {
         return listOf(
@@ -256,8 +252,4 @@ class OnBoardingActivityV3 : StartFlowActivity<ActivityOnboardingV3Binding>() {
         // nothing
     }
 
-    private companion object {
-        const val EVENT_ONBOARD_INTER_VIEW = "onb_inter_view"
-        const val EVENT_ONBOARD_INTER_COMPLETE = "onb_inter_complete"
-    }
 }

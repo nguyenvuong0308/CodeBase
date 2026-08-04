@@ -5,7 +5,8 @@ import android.content.Intent
 import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageGroup
-import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
+import com.core.startflow.OnBoardingConfigFactory
+import com.codebasetemplate.util.EventTracking
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -15,10 +16,10 @@ class LanguageActivityV21 : BaseLanguageActivityV2FlowActivity() {
         get() = CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V2_NATIVE_1
 
     override val trackingViewEventName: String
-        get() = "lfo1_view"
+        get() = EventTracking.EVENT_LFO1_VIEW
 
     override val trackingCompleteEventName: String
-        get() = "lfo1_complete"
+        get() = EventTracking.EVENT_LFO1_COMPLETE
 
     override fun onGroupClick(group: LanguageGroup): Boolean {
         logTrackingComplete()

@@ -5,16 +5,16 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import androidx.activity.viewModels
-import com.core.startflow.databinding.CoreActivitySplashBinding
 import com.codebasetemplate.features.feature_language.ui.LanguageActivityNavigator
-import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
-import com.core.config.domain.data.CoreAdPlaceName
-import com.core.startflow.StartFlowScreenType
-import com.core.startflow.StartFlowShortcut
 import com.core.ads.domain.AdLoadBannerNativeUiResource
 import com.core.baseui.R
 import com.core.baseui.ext.bindLiveData
+import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
+import com.core.startflow.OnBoardingConfigFactory
+import com.core.startflow.StartFlowScreenType
+import com.core.startflow.StartFlowShortcut
+import com.core.startflow.databinding.CoreActivitySplashBinding
 import com.core.utilities.getCurrentLanguageCode
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -43,10 +43,17 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
     private var messageHashMap = HashMap<Int, Int>()
 
     private val viewModel by viewModels<SplashLoadDataViewModel>()
+
+    /**
+     * Tạo ViewBinding cho màn Splash từ layout trong module core:startflow.
+     */
     override fun bindingProvider(inflater: LayoutInflater): CoreActivitySplashBinding {
         return CoreActivitySplashBinding.inflate(inflater)
     }
 
+    /**
+     * Khởi tạo dữ liệu nhẹ của app, chạy progress sớm và chờ ViewModel báo sẵn sàng.
+     */
     override fun initData() {
         viewModel.initData()
         startEarlyProgress()
@@ -60,14 +67,23 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
         }
     }
 
+    /**
+     * Không hiển thị loading phụ vì màn Splash đã có progress riêng.
+     */
     override fun hideLoadingX() {
     }
 
+    /**
+     * Nhận trạng thái mới từ BaseSplashActivity và cập nhật message tương ứng trên UI.
+     */
     override fun onSplashStatusChanged(status: SplashStatus) {
         currentSplashStatus = status
         updateSplashMessage(status)
     }
 
+    /**
+     * Đánh dấu countdown chính thức đã bắt đầu và chuyển progress sang vùng sau mốc khởi động sớm.
+     */
     override fun onSplashCountdownStarted(max: Int) {
         splashCountdownStarted = true
         splashProgressMax = max
@@ -76,6 +92,9 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
         applySplashProgress((max * EARLY_PROGRESS_RATIO).toInt(), max)
     }
 
+    /**
+     * Tăng progress ban đầu trong lúc Splash đang chờ remote config, consent hoặc dữ liệu local.
+     */
     private fun startEarlyProgress() {
         if (earlyProgressJob?.isActive == true) return
         val targetProgress = (splashProgressMax * EARLY_PROGRESS_RATIO).toInt()
@@ -95,11 +114,17 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
         }
     }
 
+    /**
+     * Gán giá trị progress lên thanh loading và giới hạn giá trị trong khoảng hợp lệ.
+     */
     private fun applySplashProgress(progress: Int, max: Int) {
         viewBinding.progressSplash.max = max
         viewBinding.progressSplash.progress = progress.coerceIn(0, max)
     }
 
+    /**
+     * Hiển thị message theo trạng thái hiện tại của Splash và tránh lặp lại message đã hiển thị.
+     */
     private fun updateSplashMessage(status: SplashStatus) {
         val messageRes = when (status) {
             SplashStatus.FetchingRemoteConfig -> R.string.splash_fetching_remote_config
@@ -116,6 +141,9 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
         viewBinding.tvMascotMessage.text = getString(messageRes)
     }
 
+    /**
+     * Cập nhật message theo tiến độ countdown để nội dung loading thay đổi tự nhiên hơn.
+     */
     private fun updateCountdownMessage(progress: Int, max: Int) {
         if (currentSplashStatus != SplashStatus.CountdownRunning &&
             currentSplashStatus != SplashStatus.AdLoaded
@@ -133,6 +161,9 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
         viewBinding.tvMascotMessage.text = getString(messageRes)
     }
 
+    /**
+     * Quy đổi progress thật của countdown sang progress hiển thị, giữ lại phần progress đã chạy sớm.
+     */
     override fun updateSplashProgress(progress: Int, max: Int) {
         splashProgressMax = max
         val displayProgress = if (splashCountdownStarted) {
@@ -149,12 +180,18 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
         }
     }
 
+    /**
+     * Cung cấp vị trí quảng cáo banner/native cần preload và hiển thị trên màn Splash.
+     */
     override fun providerBannerNativeAdPlaceName(): List<IAdPlaceName> {
         return listOf(
             CoreAdPlaceName.ANCHORED_BOTTOM_SPLASH
         )
     }
 
+    /**
+     * Nhận kết quả load quảng cáo và bind vào view banner/native của Splash.
+     */
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
         viewBinding.bannerNative.processAdResource(
             adResource,
@@ -162,6 +199,9 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
         )
     }
 
+    /**
+     * Tạo Intent đến màn tiếp theo theo cấu hình language/onboarding hiện tại.
+     */
     private fun createSplashIntent(): Intent {
         return if (isEnableLanguageScreen) {
             timeShowIntro = System.currentTimeMillis()
@@ -181,6 +221,9 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
         }
     }
 
+    /**
+     * Xác định màn cần mở sau Splash, ưu tiên shortcut rồi mới xét luồng language/onboarding/main.
+     */
     override fun openNextScreen() {
         val intentNext =
             when {
@@ -199,7 +242,7 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
                     }
                 }
 
-                /**Những case shortcut khác*/
+                /** Những case shortcut khác. */
                 targetScreenFromShortCut?.isNotBlank() == true -> {
                     Intent(this@SplashActivity, startFlowNavigator.mainClass()).apply {
                         val bundle = Bundle().apply {
@@ -212,7 +255,7 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
                     }
                 }
 
-                /**Case chưa vào màn main lần nào*/
+                /** Case chưa vào màn main lần nào. */
                 getCurrentLanguageCode().isBlank() && !appPreferences.isShowIntro -> {
                     Log.d(
                         TAG,
@@ -232,5 +275,4 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
         intentNext.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
         this@SplashActivity.startActivity(intentNext)
     }
-
 }

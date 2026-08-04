@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import com.core.startflow.StartFlowActivity
 import com.core.startflow.databinding.CoreActivityLanguageBinding
 import com.codebasetemplate.features.feature_language.ui.adapter.SupportedLanguageAdapter
-import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
 import com.core.config.domain.data.CoreAdPlaceName
+import com.core.startflow.OnBoardingConfigFactory
 import com.core.startflow.StartFlowNavigator
 import com.core.startflow.StartFlowShortcut
 import com.core.ads.BaseAdmobApplication
@@ -126,9 +126,11 @@ class LanguageActivity : StartFlowActivity<CoreActivityLanguageBinding>() {
                 intent.putExtras(bundle)
                 this@LanguageActivity.startActivity(intent)
             } else {
+                val otherCase = startFlowNavigator.otherLanguageEnd()
+
                 val intent = Intent(
                     this@LanguageActivity,
-                    if (isEnableIntroductionScreen) {
+                    otherCase ?: if (isEnableIntroductionScreen) {
                         OnBoardingConfigFactory.getOnBoardingClass(remoteConfigRepository.getOnBoardingConfig())
                     } else {
                         startFlowNavigator.mainClass()

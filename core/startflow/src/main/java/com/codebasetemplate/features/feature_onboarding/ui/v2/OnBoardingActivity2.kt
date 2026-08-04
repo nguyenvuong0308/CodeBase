@@ -2,6 +2,7 @@ package com.codebasetemplate.features.feature_onboarding.ui.v2
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.activity.viewModels
@@ -27,6 +28,7 @@ import com.core.utilities.getStatusBarHeight
 import com.core.utilities.gone
 import com.core.utilities.setCurrentItemFixCrash
 import com.core.utilities.visibleIf
+import com.codebasetemplate.util.EventTracking
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -65,6 +67,10 @@ class OnBoardingActivity2 : StartFlowActivity<CoreActivityOnboardingBinding>() {
     }
 
     val itemsOnboarding = ArrayList<OnBoardingItem>()
+    private val viewedOnboardingScreens = mutableSetOf<Int>()
+    private var currentTrackingPosition = 0
+    private var currentTrackingStartedAtMs = 0L
+    private var pendingSwipeNavigation = false
 
     override fun initViews(savedInstanceState: Bundle?) {
         itemsOnboarding.apply {
@@ -123,11 +129,31 @@ class OnBoardingActivity2 : StartFlowActivity<CoreActivityOnboardingBinding>() {
             viewPager.adapter = adapter
             viewPager.offscreenPageLimit = adapter.itemCount
             viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageScrollStateChanged(state: Int) {
+                    pendingSwipeNavigation = state == ViewPager2.SCROLL_STATE_DRAGGING
+                }
+
                 override fun onPageSelected(position: Int) {
+                    if (position != currentTrackingPosition && pendingSwipeNavigation) {
+                        logCurrentPageComplete(
+                            toPosition = position,
+                            actionMethod = EventTracking.VALUE_SWIPE
+                        )
+                    }
+                    currentTrackingPosition = position
+                    logPageView(position)
+                    pendingSwipeNavigation = false
+
                     val itemOnBoarding = itemsOnboarding[position]
                     layoutAds.visibleIf(itemOnBoarding.isShowAds && !purchasePreferences.isUserVip())
                 }
             })
+            viewPager.post {
+                if (currentTrackingStartedAtMs == 0L) {
+                    currentTrackingPosition = viewPager.currentItem
+                    logPageView(currentTrackingPosition)
+                }
+            }
         }
     }
 
@@ -191,26 +217,122 @@ class OnBoardingActivity2 : StartFlowActivity<CoreActivityOnboardingBinding>() {
                 }
 
                 OnBoardingEvent.NextEvent, is OnBoardingEvent.NextAction -> {
-                    viewBinding.viewPager.setCurrentItemFixCrash(
-                        viewBinding.viewPager.currentItem + 1,
-                        true
-                    )
+                    val actionMethod = if (event is OnBoardingEvent.NextAction) {
+                        event.actionMethod
+                    } else {
+                        EventTracking.VALUE_CLICK
+                    }
+                    moveToNextOnboardingPage(actionMethod)
                 }
 
                 OnBoardingEvent.FinishStep, is OnBoardingEvent.FinishAction -> {
-                    if (BaseAdmobApplication.isFirstSaveLanguage) {
-                        BaseAdmobApplication.isFirstSaveLanguage = false
-                        analyticsManager.logEvent(AnalyticsEvent.EVENT_ACTION_PASS_INTRO)
+                    val actionMethod = if (event is OnBoardingEvent.FinishAction) {
+                        event.actionMethod
+                    } else {
+                        EventTracking.VALUE_CLICK
                     }
-                    showInterAd(
-                        CoreAdPlaceName.ACTION_NEXT_IN_INTRODUCTION
-                    ) {
-                        openMain()
-                    }
+                    finishOnboarding(actionMethod)
                 }
             }
         }
 
+    }
+
+    private fun moveToNextOnboardingPage(actionMethod: String) {
+        val nextPosition = viewBinding.viewPager.currentItem + 1
+        pendingSwipeNavigation = false
+        logCurrentPageComplete(
+            toPosition = nextPosition,
+            actionMethod = actionMethod
+        )
+        viewBinding.viewPager.setCurrentItemFixCrash(nextPosition, true)
+    }
+
+    private fun finishOnboarding(actionMethod: String) {
+        logCurrentPageComplete(
+            toPosition = null,
+            actionMethod = actionMethod
+        )
+        if (BaseAdmobApplication.isFirstSaveLanguage) {
+            BaseAdmobApplication.isFirstSaveLanguage = false
+            analyticsManager.logEvent(AnalyticsEvent.EVENT_ACTION_PASS_INTRO)
+        }
+        showInterAd(
+            CoreAdPlaceName.ACTION_NEXT_IN_INTRODUCTION
+        ) {
+            openMain()
+        }
+    }
+
+    private fun logPageView(position: Int) {
+        val item = itemsOnboarding.getOrNull(position) ?: return
+        currentTrackingStartedAtMs = SystemClock.elapsedRealtime()
+        when (item) {
+            is OnBoardingItem.FullNativeItem -> {
+                EventTracking.logEvent(EventTracking.EVENT_ONBOARD_INTER_VIEW)
+            }
+
+            is OnBoardingItem.Item -> {
+                val screenNumber = item.position + 1
+                val viewType = if (viewedOnboardingScreens.add(screenNumber)) {
+                    EventTracking.VALUE_FIRST_VIEW
+                } else {
+                    EventTracking.VALUE_REVISIT
+                }
+                EventTracking.logEvent(
+                    EventTracking.onboardingViewEvent(screenNumber),
+                    Bundle().apply {
+                        putString(EventTracking.PARAM_VIEW_TYPE, viewType)
+                    }
+                )
+            }
+        }
+    }
+
+    private fun logCurrentPageComplete(toPosition: Int?, actionMethod: String) {
+        val fromPosition = currentTrackingPosition
+        val item = itemsOnboarding.getOrNull(fromPosition) ?: return
+        val nowMs = SystemClock.elapsedRealtime()
+        when (item) {
+            is OnBoardingItem.FullNativeItem -> {
+                EventTracking.logEngagementComplete(
+                    EventTracking.EVENT_ONBOARD_INTER_COMPLETE,
+                    currentTrackingStartedAtMs,
+                    nowMs
+                )
+            }
+
+            is OnBoardingItem.Item -> {
+                val direction = when {
+                    toPosition == null -> EventTracking.VALUE_FORWARD
+                    toPosition > fromPosition -> EventTracking.VALUE_FORWARD
+                    else -> EventTracking.VALUE_BACKWARD
+                }
+                val screenNumber = item.position + 1
+                EventTracking.logEvent(
+                    EventTracking.onboardingCompleteEvent(screenNumber),
+                    Bundle().apply {
+                        putLong(
+                            EventTracking.PARAM_ENGAGEMENT_TIME,
+                            (nowMs - currentTrackingStartedAtMs).coerceAtLeast(0L)
+                        )
+                        putString(EventTracking.PARAM_ACTION_METHOD, actionMethod)
+                        putString(EventTracking.PARAM_NAV_DIRECTION, direction)
+                        putString(EventTracking.PARAM_TO_SCREEN, toScreenName(toPosition))
+                    }
+                )
+            }
+        }
+    }
+
+    private fun toScreenName(position: Int?): String {
+        if (position == null || position !in itemsOnboarding.indices) {
+            return EventTracking.VALUE_NEXT_SCREEN
+        }
+        return when (val item = itemsOnboarding[position]) {
+            is OnBoardingItem.FullNativeItem -> "onb_inter"
+            is OnBoardingItem.Item -> "onb${item.position + 1}"
+        }
     }
 
     override fun providerBannerNativeAdPlaceName(): List<IAdPlaceName> {

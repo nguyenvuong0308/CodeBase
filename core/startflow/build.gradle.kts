@@ -62,6 +62,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.lottie)
     implementation(libs.play.services.ads)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)

@@ -3,14 +3,16 @@ package com.codebasetemplate.features.feature_splash.ui
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.viewbinding.ViewBinding
-import com.core.startflow.StartFlowActivity
-import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
+import com.codebasetemplate.util.EventTracking
 import com.core.config.domain.data.CoreAdPlaceName
+import com.core.startflow.OnBoardingConfigFactory
+import com.core.startflow.StartFlowActivity
 import com.core.startflow.StartFlowNavigator
 import com.core.startflow.StartFlowScreenType
 import com.core.startflow.StartFlowShortcut
@@ -56,6 +58,11 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
 
     protected var countDownTimer: JsgCountDownTimer? = null
     protected var delayedShowAdJob: Job? = null
+    private var splashTrackingStartedAtMs = 0L
+    private var splashBeforeAdLogged = false
+    private var splashCompleteLogged = false
+    private var interSplashTrackingStartedAtMs = 0L
+    private var interSplashCompleteLogged = false
 
     private val appOpenPlaceName by lazy {
         if (baseViewModel.isFirstOpenApp) {
@@ -120,6 +127,8 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        splashTrackingStartedAtMs = SystemClock.elapsedRealtime()
+        EventTracking.logEvent(EventTracking.EVENT_SPLASH_VIEW)
         installSplashScreen()
 
         appOpenAdManager.setupDefaultValue()
@@ -431,6 +440,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
         val nextScreen = {
             countDownTimer?.pauseTimer()
             appOpenAdManager.isFirstOpenApp = false
+            logSplashCompleteIfNeeded()
             openNextScreen()
             finish()
         }
@@ -455,6 +465,8 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
 
     private fun handleWhenAdShowing() {
         Log.d(TAG, "handleWhenAdShowing: ")
+        logSplashBeforeAdIfNeeded()
+        logInterSplashViewIfNeeded()
         onSplashStatusChanged(SplashStatus.ShowingAd)
         hideLoadingX()
         baseViewModel.handleWhenAdShowing()
@@ -462,6 +474,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
 
     private fun handleWhenAdDismissed() {
         Log.d(TAG, "handleWhenAdDismissed: ")
+        logInterSplashCompleteIfNeeded()
         onSplashStatusChanged(SplashStatus.ReadyToEnterApp)
         baseViewModel.handleWhenAdDismissed()
         checkAbleToNextScreen()
@@ -603,6 +616,42 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
             onCancel = {
                 startSplashPrerequisites()
             }
+        )
+    }
+
+    private fun logSplashBeforeAdIfNeeded() {
+        if (splashBeforeAdLogged) return
+        splashBeforeAdLogged = true
+        EventTracking.logEngagementComplete(
+            EventTracking.EVENT_SPLASH_BEFORE_AD,
+            splashTrackingStartedAtMs,
+            SystemClock.elapsedRealtime()
+        )
+    }
+
+    private fun logSplashCompleteIfNeeded() {
+        if (splashCompleteLogged) return
+        splashCompleteLogged = true
+        EventTracking.logEngagementComplete(
+            EventTracking.EVENT_SPLASH_COMPLETE,
+            splashTrackingStartedAtMs,
+            SystemClock.elapsedRealtime()
+        )
+    }
+
+    private fun logInterSplashViewIfNeeded() {
+        if (interSplashTrackingStartedAtMs != 0L) return
+        interSplashTrackingStartedAtMs = SystemClock.elapsedRealtime()
+        EventTracking.logEvent(EventTracking.EVENT_INTER_SPLASH_VIEW)
+    }
+
+    private fun logInterSplashCompleteIfNeeded() {
+        if (interSplashCompleteLogged || interSplashTrackingStartedAtMs == 0L) return
+        interSplashCompleteLogged = true
+        EventTracking.logEngagementComplete(
+            EventTracking.EVENT_INTER_SPLASH_COMPLETE,
+            interSplashTrackingStartedAtMs,
+            SystemClock.elapsedRealtime()
         )
     }
 

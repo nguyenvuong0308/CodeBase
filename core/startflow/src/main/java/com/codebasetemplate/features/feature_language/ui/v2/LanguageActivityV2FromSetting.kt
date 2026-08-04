@@ -31,8 +31,8 @@ import com.codebasetemplate.features.feature_language.ui.LanguageViewModel
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageGroup
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageOption
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageV2Adapter
-import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
 import com.core.config.domain.data.CoreAdPlaceName
+import com.core.startflow.OnBoardingConfigFactory
 import com.core.startflow.StartFlowShortcut
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale

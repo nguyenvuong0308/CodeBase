@@ -6,6 +6,7 @@ import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageGroup
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageOption
+import com.codebasetemplate.util.EventTracking
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -15,10 +16,10 @@ class LanguageActivityV23 : BaseLanguageActivityV2FlowActivity() {
         get() = CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V2_NATIVE_3
 
     override val trackingViewEventName: String
-        get() = "lfo3_view"
+        get() = EventTracking.EVENT_LFO3_VIEW
 
     override val trackingCompleteEventName: String
-        get() = "lfo3_complete"
+        get() = EventTracking.EVENT_LFO3_COMPLETE
 
     override val shouldHandleLanguageApplyNavigation: Boolean
         get() = true

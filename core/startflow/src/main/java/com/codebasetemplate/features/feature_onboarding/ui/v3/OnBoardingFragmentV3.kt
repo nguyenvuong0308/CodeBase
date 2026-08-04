@@ -9,7 +9,7 @@ import androidx.fragment.app.activityViewModels
 import com.core.startflow.R
 import com.core.startflow.StartFlowScreenType
 import com.core.startflow.databinding.FragmentOnboardingV3Binding
-import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
+import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory as IntroConfigFactory
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingEvent
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingViewModel
 import com.codebasetemplate.util.EventTracking
@@ -19,6 +19,7 @@ import com.core.baseui.fragment.ScreenType
 import com.core.baseui.fragment.argument
 import com.core.config.domain.data.IAdPlaceName
 import com.core.config.domain.data.OnBoardingConfig
+import com.core.startflow.OnBoardingConfigFactory as StartFlowOnBoardingConfigFactory
 import com.core.startflow.onboarding.OnBoardingUiCustomizer
 import com.core.utilities.setOnSingleClick
 import com.core.utilities.visibleIf
@@ -61,12 +62,12 @@ class OnBoardingFragmentV3 : BaseFragment<FragmentOnboardingV3Binding>() {
         super.initViews(savedInstanceState)
 
         viewBinding.ivIntroduction.setImageResource(
-            OnBoardingConfigFactory.getImageResIntro(
+            IntroConfigFactory.getImageResIntro(
                 realPosition
             )
         )
         viewBinding.tvTitle.text =
-            getString(OnBoardingConfigFactory.getStringIntro(realPosition))
+            getString(IntroConfigFactory.getStringIntro(realPosition))
         val onBoardingConfig = remoteConfigRepository.getOnBoardingConfig()
         val positionNext = onBoardingConfig.positionNext
         viewBinding.topNext.visibleIf(positionNext == OnBoardingConfig.POSITION_NEXT_TOP)
@@ -124,14 +125,14 @@ class OnBoardingFragmentV3 : BaseFragment<FragmentOnboardingV3Binding>() {
 
     override fun providerBannerNativeAdPlaceName(): List<IAdPlaceName> {
         if (!isShowAd) return listOf()
-        return OnBoardingConfigFactory.getOnboardingV3AdPlaceNames(introductionPosition)
+        return StartFlowOnBoardingConfigFactory.getOnboardingV3AdPlaceNames(introductionPosition)
     }
 
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
         super.onBannerNativeResult(adResource)
         viewBinding.layoutBannerNative.processAdResource(
             adResource,
-            OnBoardingConfigFactory.getOnboardingV3AdPlaceName(introductionPosition)
+            StartFlowOnBoardingConfigFactory.getOnboardingV3AdPlaceName(introductionPosition)
         )
     }
 

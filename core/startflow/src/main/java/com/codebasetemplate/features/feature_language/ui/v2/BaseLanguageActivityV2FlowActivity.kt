@@ -26,6 +26,7 @@ import com.core.config.domain.data.IAdPlaceName
 import com.core.utilities.getCurrentLanguageCode
 import com.core.utilities.gone
 import com.core.utilities.visible
+import com.core.startflow.OnBoardingConfigFactory
 import com.core.startflow.StartFlowActivity
 import com.core.startflow.StartFlowNavigator
 import com.core.startflow.StartFlowShortcut
@@ -278,7 +279,10 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<ActivityLa
         if (isOpenFromSlash || backFromIntroduction) {
             if (
                 BaseAdmobApplication.isFirstSaveLanguage &&
-                !LanguageV2Adapter.languageMatches(option.languageTag, appPreferences.systemLanguageCode)
+                !LanguageV2Adapter.languageMatches(
+                    option.languageTag,
+                    appPreferences.systemLanguageCode
+                )
             ) {
                 analyticsManager.logEvent(AnalyticsEvent.CHANGE_LANGUAGE_NOT_DEFAULT)
                 BaseAdmobApplication.isUserSelectLanguageNotDefault = true
@@ -312,10 +316,14 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<ActivityLa
 
         val destination = if (isFromSetting) {
             startFlowNavigator.mainClass()
-        } else if (isEnableIntroductionScreen) {
-            startFlowNavigator.onBoardingClass(remoteConfigRepository.getOnBoardingConfig())
         } else {
-            startFlowNavigator.mainClass()
+            //other case
+            val otherCase = startFlowNavigator.otherLanguageEnd()
+            otherCase ?: if (isEnableIntroductionScreen) {
+                OnBoardingConfigFactory.getOnBoardingClass(remoteConfigRepository.getOnBoardingConfig())
+            } else {
+                startFlowNavigator.mainClass()
+            }
         }
         val nextIntent = Intent(this, destination).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK

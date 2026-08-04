@@ -6,6 +6,7 @@ import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageGroup
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageOption
+import com.codebasetemplate.util.EventTracking
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -15,10 +16,10 @@ class LanguageActivityV22 : BaseLanguageActivityV2FlowActivity() {
         get() = CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V2_NATIVE_2
 
     override val trackingViewEventName: String
-        get() = "lfo2_view"
+        get() = EventTracking.EVENT_LFO2_VIEW
 
     override val trackingCompleteEventName: String
-        get() = "lfo2_complete"
+        get() = EventTracking.EVENT_LFO2_COMPLETE
 
     override fun initialExpandedGroupId(languageGroups: List<LanguageGroup>): String? {
         return selectedGroupIdArg ?: languageGroups.firstOrNull()?.id

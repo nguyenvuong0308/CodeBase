@@ -14,7 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.core.startflow.StartFlowScreenType
 import com.core.startflow.databinding.CoreFragmentOnboardingFullNativeBinding
-import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
+import com.core.startflow.OnBoardingConfigFactory
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingEvent
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingViewModel
 import com.core.ads.domain.AdLoadBannerNativeUiResource
