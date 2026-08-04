@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">Kubwerera</string>
+        
+    <string name="core_screen_language">Chiyankhulo</string>
+        
+    <string name="core_apply_language">Ikani chilankhulo…</string>
+        
+    <string name="core_common_save">Sungani</string>
+        
+    <string name="core_common_skip">Dumphani</string>
+        
+    <string name="core_common_continue">Pitirizani</string>
+        
+    <string name="core_onboarding_action_get_start">Yambanipo</string>
+        
+    <string name="core_onboarding_action_next">Ena</string>
+        
+    <string name="common_next">Ena</string>
+    
+</resources>

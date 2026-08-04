@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">ব্যাক</string>
+        
+    <string name="core_screen_language">ভাষা</string>
+        
+    <string name="core_apply_language">ভাষা প্রয়োগ করুন...</string>
+        
+    <string name="core_common_save">সংরক্ষণ করুন</string>
+        
+    <string name="core_common_skip">এড়িয়ে যান</string>
+        
+    <string name="core_common_continue">চালিয়ে যান</string>
+        
+    <string name="core_onboarding_action_get_start">শুরু করুন</string>
+        
+    <string name="core_onboarding_action_next">পরবর্তী</string>
+        
+    <string name="common_next">পরবর্তী</string>
+    
+</resources>

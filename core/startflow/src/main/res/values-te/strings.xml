@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">వెనుకకు</string>
+        
+    <string name="core_screen_language">భాష</string>
+        
+    <string name="core_apply_language">భాషను వర్తింపజేయి...</string>
+        
+    <string name="core_common_save">సేవ్ చేయండి</string>
+        
+    <string name="core_common_skip">దాటవేయి</string>
+        
+    <string name="core_common_continue">కొనసాగించు</string>
+        
+    <string name="core_onboarding_action_get_start">ప్రారంభించండి</string>
+        
+    <string name="core_onboarding_action_next">తదుపరి</string>
+        
+    <string name="common_next">తదుపరి</string>
+    
+</resources>

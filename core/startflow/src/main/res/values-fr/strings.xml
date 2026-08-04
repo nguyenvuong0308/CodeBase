@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">Dos</string>
+        
+    <string name="core_screen_language">Langue</string>
+        
+    <string name="core_apply_language">Appliquer la langue…</string>
+        
+    <string name="core_common_save">Sauvegarder</string>
+        
+    <string name="core_common_skip">Sauter</string>
+        
+    <string name="core_common_continue">Continuer</string>
+        
+    <string name="core_onboarding_action_get_start">Commencer</string>
+        
+    <string name="core_onboarding_action_next">Suivant</string>
+        
+    <string name="common_next">Suivant</string>
+    
+</resources>

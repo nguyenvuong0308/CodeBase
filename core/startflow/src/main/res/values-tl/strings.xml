@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">Bumalik</string>
+        
+    <string name="core_screen_language">Wika</string>
+        
+    <string name="core_apply_language">Ilapat ang wika…</string>
+        
+    <string name="core_common_save">I-save</string>
+        
+    <string name="core_common_skip">Laktawan</string>
+        
+    <string name="core_common_continue">Magpatuloy</string>
+        
+    <string name="core_onboarding_action_get_start">Magsimula</string>
+        
+    <string name="core_onboarding_action_next">Susunod</string>
+        
+    <string name="common_next">Susunod</string>
+    
+</resources>

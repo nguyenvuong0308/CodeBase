@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">തിരികെ</string>
+        
+    <string name="core_screen_language">ഭാഷ</string>
+        
+    <string name="core_apply_language">ഭാഷ പ്രയോഗിക്കുക...</string>
+        
+    <string name="core_common_save">സംരക്ഷിക്കുക</string>
+        
+    <string name="core_common_skip">ഒഴിവാക്കുക</string>
+        
+    <string name="core_common_continue">തുടരുക</string>
+        
+    <string name="core_onboarding_action_get_start">ആരംഭിക്കുക</string>
+        
+    <string name="core_onboarding_action_next">അടുത്തത്</string>
+        
+    <string name="common_next">അടുത്തത്</string>
+    
+</resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">戻る</string>
+        
+    <string name="core_screen_language">言語</string>
+        
+    <string name="core_apply_language">言語を適用…</string>
+        
+    <string name="core_common_save">保存</string>
+        
+    <string name="core_common_skip">スキップ</string>
+        
+    <string name="core_common_continue">続く</string>
+        
+    <string name="core_onboarding_action_get_start">始めましょう</string>
+        
+    <string name="core_onboarding_action_next">次</string>
+        
+    <string name="common_next">次</string>
+    
+</resources>

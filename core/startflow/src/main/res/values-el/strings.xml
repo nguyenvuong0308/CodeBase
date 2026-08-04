@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">Πίσω</string>
+        
+    <string name="core_screen_language">Γλώσσα</string>
+        
+    <string name="core_apply_language">Εφαρμογή γλώσσας…</string>
+        
+    <string name="core_common_save">Εκτός</string>
+        
+    <string name="core_common_skip">Παραλείπω</string>
+        
+    <string name="core_common_continue">Συνεχίζω</string>
+        
+    <string name="core_onboarding_action_get_start">Ξεκινήστε</string>
+        
+    <string name="core_onboarding_action_next">Επόμενος</string>
+        
+    <string name="common_next">Επόμενος</string>
+    
+</resources>

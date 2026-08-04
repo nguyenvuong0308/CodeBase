@@ -62,7 +62,7 @@
 
                 <TextView
                     android:layout_width="wrap_content"
-                    android:textColor="#9747FF"
+                    android:textColor="@color/onboarding_primary_color"
                     android:layout_gravity="end|bottom"
                     android:layout_marginBottom="@dimen/_17dp"
                     android:layout_marginEnd="@dimen/_10dp"
@@ -122,7 +122,7 @@
 
                 <TextView
                     android:layout_width="wrap_content"
-                    android:textColor="#9747FF"
+                    android:textColor="@color/onboarding_primary_color"
                     android:layout_gravity="end|bottom"
                     android:layout_marginBottom="@dimen/_17dp"
                     android:layout_marginEnd="@dimen/_10dp"

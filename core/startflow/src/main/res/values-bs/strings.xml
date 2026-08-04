@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">Nazad</string>
+        
+    <string name="core_screen_language">Jezik</string>
+        
+    <string name="core_apply_language">Primijeni jezik…</string>
+        
+    <string name="core_common_save">Sačuvaj</string>
+        
+    <string name="core_common_skip">Skip</string>
+        
+    <string name="core_common_continue">Nastavi</string>
+        
+    <string name="core_onboarding_action_get_start">Započnite</string>
+        
+    <string name="core_onboarding_action_next">Sledeći</string>
+        
+    <string name="common_next">Sledeći</string>
+    
+</resources>

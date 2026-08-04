@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
     <string name="core_back_button_desc">Back</string>
     <string name="core_screen_language">Language</string>
-    <string name="core_apply_language">Dang ap dung ngon ngu...</string>
+    <string name="core_apply_language">Apply language…</string>
     <string name="core_common_save">Save</string>
     <string name="core_common_skip">Skip</string>
     <string name="core_common_continue">Continue</string>
-    <string name="core_onboarding_title_1">Day la dong tutorial 1</string>
-    <string name="core_onboarding_title_2">Day la dong tutorial 2</string>
-    <string name="core_onboarding_title_3">Day la dong tutorial 3</string>
     <string name="core_onboarding_action_get_start">Get started</string>
     <string name="core_onboarding_action_next">Next</string>
     <string name="common_next">Next</string>

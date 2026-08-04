@@ -81,7 +81,7 @@
             <ProgressBar
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:indeterminateTint="@color/home_accent" />
+                android:indeterminateTint="@color/language_v2_primary_color" />
 
             <TextView
                 android:layout_width="wrap_content"
