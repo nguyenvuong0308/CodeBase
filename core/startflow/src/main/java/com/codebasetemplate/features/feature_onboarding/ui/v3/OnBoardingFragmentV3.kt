@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import com.codebasetemplate.features.feature_onboarding.ui.model.OnBoardingItem
 import com.core.startflow.R
 import com.core.startflow.StartFlowScreenType
 import com.core.startflow.databinding.FragmentOnboardingV3Binding
@@ -22,6 +23,7 @@ import com.core.startflow.OnBoardingConfigFactory as StartFlowOnBoardingConfigFa
 import com.core.startflow.onboarding.OnBoardingContentProvider
 import com.core.startflow.onboarding.OnBoardingUiCustomizer
 import com.core.startflow.onboarding.activeOnBoardingContentProvider
+import com.core.utilities.gone
 import com.core.utilities.setOnSingleClick
 import com.core.utilities.visibleIf
 import dagger.hilt.android.AndroidEntryPoint
@@ -76,6 +78,7 @@ class OnBoardingFragmentV3 : BaseFragment<FragmentOnboardingV3Binding>() {
         val onBoardingConfig = remoteConfigRepository.getOnBoardingConfig()
         val positionNext = onBoardingConfig.positionNext
         viewBinding.topNext.visibleIf(positionNext == OnBoardingConfig.POSITION_NEXT_TOP)
+        viewBinding.topNextV2.visibleIf(positionNext == OnBoardingConfig.POSITION_NEXT_TOP_V2)
         viewBinding.bottomNext.visibleIf(positionNext == OnBoardingConfig.POSITION_NEXT_BOTTOM)
         if (positionNext == OnBoardingConfig.POSITION_NEXT_TOP) {
             viewBinding.frameAds.setBackgroundColor(Color.WHITE)
@@ -83,19 +86,30 @@ class OnBoardingFragmentV3 : BaseFragment<FragmentOnboardingV3Binding>() {
             viewBinding.frameAds.setBackgroundResource(R.drawable.bg_white_round_top)
         }
 
-        val indicators = listOf(
-            viewBinding.indicator1,
-            viewBinding.indicator2,
-            viewBinding.indicator3
-        )
-        indicators.updateSelectedIndicator(realPosition)
-
         val indicators2 = listOf(
-            viewBinding.indicator11,
-            viewBinding.indicator22,
-            viewBinding.indicator33
+            viewBinding.indicatorTopV11,
+            viewBinding.indicatorTopV12,
+            viewBinding.indicatorTopV13,
+            viewBinding.indicatorTopV14,
         )
         indicators2.updateSelectedIndicator(realPosition)
+
+        val indicators1 = listOf(
+            viewBinding.indicatorTopV21,
+            viewBinding.indicatorTopV22,
+            viewBinding.indicatorTopV23,
+            viewBinding.indicatorTopV24,
+
+        )
+        indicators1.updateSelectedIndicator(realPosition)
+
+        val indicators0 = listOf(
+            viewBinding.indicatorBottom1,
+            viewBinding.indicatorBottom2,
+            viewBinding.indicatorBottom3,
+            viewBinding.indicatorBottom4
+        )
+        indicators0.updateSelectedIndicator(realPosition)
 
         viewBinding.tvNextTop.setOnSingleClick {
             if (isPageEnd) {
@@ -150,6 +164,10 @@ class OnBoardingFragmentV3 : BaseFragment<FragmentOnboardingV3Binding>() {
             view.isSelected = isSelected
             view.layoutParams = view.layoutParams.apply {
                 width = if (isSelected) selectedWidth else normalWidth
+            }
+
+            if(index > sharedViewModel.itemsOnboarding.filterIsInstance<OnBoardingItem.Item>().size - 1) {
+                view.gone()
             }
         }
     }

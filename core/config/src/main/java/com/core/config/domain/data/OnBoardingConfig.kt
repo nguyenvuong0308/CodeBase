@@ -14,6 +14,7 @@ data class OnBoardingConfig(
         const val ONBOARDING_VERSION_2 = 2
         const val ONBOARDING_VERSION_3 = 3
         const val POSITION_NEXT_TOP = "top"
+        const val POSITION_NEXT_TOP_V2 = "top_v2"
         const val POSITION_NEXT_BOTTOM = "bottom"
         const val DEFAULT_DELAY_SHOW_CLOSE_SWIPE_SECONDS = 1L
 
@@ -21,6 +22,7 @@ data class OnBoardingConfig(
             val positionNext = when (model?.positionNext?.lowercase()) {
                 POSITION_NEXT_BOTTOM -> POSITION_NEXT_BOTTOM
                 POSITION_NEXT_TOP -> POSITION_NEXT_TOP
+                POSITION_NEXT_TOP_V2 -> POSITION_NEXT_TOP_V2
                 else -> POSITION_NEXT_TOP
             }
             return OnBoardingConfig(

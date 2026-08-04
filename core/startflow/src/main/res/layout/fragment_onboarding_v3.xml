@@ -28,6 +28,94 @@
             android:orientation="vertical"
             android:layout_gravity="bottom"
             android:layout_height="wrap_content">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/topNextV2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_10dp"
+                android:layout_marginBottom="@dimen/_10dp"
+                android:background="@drawable/bg_white_round"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:paddingBottom="@dimen/_5dp">
+
+                <TextView
+                    android:id="@+id/tvTitleTop"
+                    style="@style/Body14Bold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center"
+                    android:text="@string/core_onboarding_title_2"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/tvSubTitleTop"
+                    style="@style/Body12Regular"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_5dp"
+                    android:gravity="center"
+                    android:text="@string/core_onboarding_title_2"
+                    android:textColor="@color/black" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginTop="10dp"
+                    android:visibility="visible">
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical|start"
+                        android:layout_marginHorizontal="@dimen/_15dp">
+
+                        <View
+                            android:id="@+id/indicatorTopV21"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+
+                        <View
+                            android:id="@+id/indicatorTopV22"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:layout_marginHorizontal="@dimen/_10dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+
+                        <View
+                            android:id="@+id/indicatorTopV23"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+
+                        <View
+                            android:id="@+id/indicatorTopV24"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:layout_marginHorizontal="@dimen/_10dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+                    <TextView
+                        android:id="@+id/tvNextTopV1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginEnd="@dimen/_10dp"
+                        android:background="@drawable/bg_transparent_ripple_media_shape"
+                        android:fontFamily="@font/roboto_medium"
+                        android:paddingHorizontal="@dimen/_12dp"
+                        android:paddingVertical="@dimen/_3dp"
+                        android:text="@string/common_next"
+                        android:textColor="@color/onboarding_primary_color"
+                        android:textSize="@dimen/_14dp" />
+                </FrameLayout>
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_alignParentBottom="true"
@@ -42,19 +130,26 @@
                     android:layout_height="wrap_content">
                     <View
                         android:layout_width="@dimen/_8dp"
-                        android:id="@+id/indicator11"
+                        android:id="@+id/indicatorTopV11"
                         android:layout_height="@dimen/_8dp"
                         android:background="@drawable/bg_intro_dot_selected"/>
 
                     <View
-                        android:id="@+id/indicator22"
+                        android:id="@+id/indicatorTopV12"
                         android:layout_width="@dimen/_8dp"
                         android:layout_height="@dimen/_8dp"
                         android:layout_marginHorizontal="@dimen/_10dp"
                         android:background="@drawable/bg_intro_dot_selected"/>
 
                     <View
-                        android:id="@+id/indicator33"
+                        android:id="@+id/indicatorTopV13"
+                        android:layout_width="@dimen/_8dp"
+                        android:layout_height="@dimen/_8dp"
+                        android:layout_marginEnd="@dimen/_10dp"
+                        android:background="@drawable/bg_intro_dot_selected"/>
+
+                    <View
+                        android:id="@+id/indicatorTopV14"
                         android:layout_width="@dimen/_8dp"
                         android:layout_height="@dimen/_8dp"
                         android:background="@drawable/bg_intro_dot_selected"/>
@@ -102,19 +197,26 @@
                     android:layout_height="wrap_content">
                     <View
                         android:layout_width="@dimen/_8dp"
-                        android:id="@+id/indicator1"
+                        android:id="@+id/indicatorBottom1"
                         android:layout_height="@dimen/_8dp"
                         android:background="@drawable/bg_intro_dot_selected"/>
 
                     <View
-                        android:id="@+id/indicator2"
+                        android:id="@+id/indicatorBottom2"
                         android:layout_width="@dimen/_8dp"
                         android:layout_height="@dimen/_8dp"
                         android:layout_marginHorizontal="@dimen/_10dp"
                         android:background="@drawable/bg_intro_dot_selected"/>
 
                     <View
-                        android:id="@+id/indicator3"
+                        android:id="@+id/indicatorBottom3"
+                        android:layout_width="@dimen/_8dp"
+                        android:layout_height="@dimen/_8dp"
+                        android:layout_marginEnd="@dimen/_10dp"
+                        android:background="@drawable/bg_intro_dot_selected"/>
+
+                    <View
+                        android:id="@+id/indicatorBottom4"
                         android:layout_width="@dimen/_8dp"
                         android:layout_height="@dimen/_8dp"
                         android:background="@drawable/bg_intro_dot_selected"/>
@@ -138,6 +240,7 @@
         </androidx.appcompat.widget.LinearLayoutCompat>
 
         <View
+            android:id="@+id/viewBlur"
             android:background="@drawable/bg_intro_text_dark"
             android:layout_width="match_parent"
             android:layout_height="180dp"/>
