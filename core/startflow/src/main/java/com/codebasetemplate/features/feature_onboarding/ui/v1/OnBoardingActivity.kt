@@ -23,6 +23,8 @@ import com.core.config.domain.data.AppConfig.Companion.DEFINE_INTRO_FULL_AD
 import com.core.config.domain.data.AppConfig.Companion.DEFINE_INTRO_HAVE_ADS
 import com.core.config.domain.data.AppConfig.Companion.DEFINE_INTRO_NO_ADS
 import com.core.config.domain.data.IAdPlaceName
+import com.core.startflow.onboarding.OnBoardingContentProvider
+import com.core.startflow.onboarding.activeOnBoardingContentProvider
 import com.core.utilities.getStatusBarHeight
 import com.core.utilities.gone
 import com.core.utilities.setCurrentItemFixCrash
@@ -48,6 +50,9 @@ class OnBoardingActivity : StartFlowActivity<CoreActivityOnboardingBinding>() {
     @Inject
     lateinit var startFlowNavigator: StartFlowNavigator
 
+    @Inject
+    lateinit var contentProviders: Set<@JvmSuppressWildcards OnBoardingContentProvider>
+
     override fun bindingProvider(inflater: LayoutInflater): CoreActivityOnboardingBinding {
         return CoreActivityOnboardingBinding.inflate(inflater)
     }
@@ -58,11 +63,10 @@ class OnBoardingActivity : StartFlowActivity<CoreActivityOnboardingBinding>() {
 
 
     private val introData by lazy {
-        remoteConfigRepository.getAppConfig().introData.takeIf { it.isNotEmpty() } ?: arrayListOf(
-            DEFINE_INTRO_HAVE_ADS,
-            DEFINE_INTRO_HAVE_ADS,
-            DEFINE_INTRO_HAVE_ADS
-        )
+        remoteConfigRepository.getAppConfig().introData.takeIf { it.isNotEmpty() }
+            ?: List(contentProviders.activeOnBoardingContentProvider().introPageCount.coerceAtLeast(1)) {
+                DEFINE_INTRO_HAVE_ADS
+            }
     }
 
     val itemsOnboarding = ArrayList<OnBoardingItem>()

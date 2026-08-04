@@ -6,10 +6,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import com.core.startflow.R
 import com.core.startflow.databinding.CoreFragmentOnboardingBinding
-import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
-import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory.INTRO_PAGE_COUNT
 import com.core.startflow.StartFlowScreenType
+import com.core.startflow.onboarding.OnBoardingContentProvider
 import com.core.startflow.onboarding.OnBoardingUiCustomizer
+import com.core.startflow.onboarding.activeOnBoardingContentProvider
 import com.core.baseui.fragment.BaseFragment
 import com.core.baseui.fragment.ScreenType
 import com.core.baseui.fragment.argument
@@ -24,6 +24,9 @@ class OnBoardingFragment: BaseFragment<CoreFragmentOnboardingBinding>() {
 
     @Inject
     lateinit var uiCustomizers: Set<@JvmSuppressWildcards OnBoardingUiCustomizer>
+
+    @Inject
+    lateinit var contentProviders: Set<@JvmSuppressWildcards OnBoardingContentProvider>
 
     companion object {
         fun newInstance(position: Int) = OnBoardingFragment().apply {
@@ -46,20 +49,23 @@ class OnBoardingFragment: BaseFragment<CoreFragmentOnboardingBinding>() {
     override fun initViews(savedInstanceState: Bundle?) {
         super.initViews(savedInstanceState)
 
-        viewBinding.ivIntroduction.setImageResource(OnBoardingConfigFactory.getImageResIntro(introductionPosition))
-        viewBinding.tvTitle.text = getString(OnBoardingConfigFactory.getStringIntro(introductionPosition))
+        val contentProvider = contentProviders.activeOnBoardingContentProvider()
+        val introPageCount = contentProvider.introPageCount.coerceAtLeast(1)
 
-        viewBinding.dotsIndicator.setCountPage(INTRO_PAGE_COUNT)
+        viewBinding.ivIntroduction.setImageResource(contentProvider.getImageResIntro(introductionPosition))
+        viewBinding.tvTitle.text = getString(contentProvider.getStringIntro(introductionPosition))
+
+        viewBinding.dotsIndicator.setCountPage(introPageCount)
         viewBinding.dotsIndicator.setPage(introductionPosition)
 
-        viewBinding.tvNext.text =  if(introductionPosition == INTRO_PAGE_COUNT - 1) {
+        viewBinding.tvNext.text =  if(introductionPosition == introPageCount - 1) {
             getString(R.string.core_onboarding_action_get_start)
         } else {
             getString(R.string.core_onboarding_action_next)
         }
 
         viewBinding.tvNext.setOnSingleClick {
-            if(introductionPosition == INTRO_PAGE_COUNT - 1) {
+            if(introductionPosition == introPageCount - 1) {
                 sharedViewModel.navigateTo(OnBoardingEvent.FinishStep)
             } else {
                 sharedViewModel.navigateTo(OnBoardingEvent.NextEvent)
@@ -71,7 +77,7 @@ class OnBoardingFragment: BaseFragment<CoreFragmentOnboardingBinding>() {
                 fragment = this,
                 binding = viewBinding,
                 position = introductionPosition,
-                isLastPage = introductionPosition == INTRO_PAGE_COUNT - 1
+                isLastPage = introductionPosition == introPageCount - 1
             )
         }
     }

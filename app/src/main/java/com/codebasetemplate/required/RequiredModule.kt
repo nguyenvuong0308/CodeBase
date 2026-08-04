@@ -12,6 +12,7 @@ import com.codebasetemplate.required.ads.ReopenActionImpl
 import com.codebasetemplate.required.firebase.GetDataFromRemoteUseCaseImpl
 import com.codebasetemplate.required.inapp.ProductIdProviderImpl
 import com.codebasetemplate.required.shortcut.AppShortCut
+import com.codebasetemplate.required.startflow.AppOnBoardingContentProvider
 import com.codebasetemplate.required.startflow.AppOnBoardingUiCustomizer
 import com.codebasetemplate.required.update.InAppUpdateImpl
 import com.core.ads.AdsSdkInitializer
@@ -22,6 +23,7 @@ import com.core.config.domain.GetDataFromRemoteConfigUseCase
 import com.core.config.domain.RemoteConfigRepository
 import com.core.config.domain.data.IAppProviderAdPlaceName
 import com.core.startflow.StartFlowNavigator
+import com.core.startflow.onboarding.OnBoardingContentProvider
 import com.core.startflow.onboarding.OnBoardingUiCustomizer
 import dagger.Module
 import dagger.Provides
@@ -96,6 +98,13 @@ class RequiredModule {
     fun provideAppOnBoardingUiCustomizer(
         customizer: AppOnBoardingUiCustomizer
     ): OnBoardingUiCustomizer = customizer
+
+    @Provides
+    @IntoSet
+    @Singleton
+    fun provideAppOnBoardingContentProvider(
+        provider: AppOnBoardingContentProvider
+    ): OnBoardingContentProvider = provider
 
     /**
      * Bind StartFlowNavigator để core:startflow biết các Activity cụ thể nằm trong module app.

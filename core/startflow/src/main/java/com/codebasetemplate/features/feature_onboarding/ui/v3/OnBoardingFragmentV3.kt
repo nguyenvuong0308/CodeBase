@@ -9,7 +9,6 @@ import androidx.fragment.app.activityViewModels
 import com.core.startflow.R
 import com.core.startflow.StartFlowScreenType
 import com.core.startflow.databinding.FragmentOnboardingV3Binding
-import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory as IntroConfigFactory
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingEvent
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingViewModel
 import com.codebasetemplate.util.EventTracking
@@ -20,7 +19,9 @@ import com.core.baseui.fragment.argument
 import com.core.config.domain.data.IAdPlaceName
 import com.core.config.domain.data.OnBoardingConfig
 import com.core.startflow.OnBoardingConfigFactory as StartFlowOnBoardingConfigFactory
+import com.core.startflow.onboarding.OnBoardingContentProvider
 import com.core.startflow.onboarding.OnBoardingUiCustomizer
+import com.core.startflow.onboarding.activeOnBoardingContentProvider
 import com.core.utilities.setOnSingleClick
 import com.core.utilities.visibleIf
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,6 +34,9 @@ class OnBoardingFragmentV3 : BaseFragment<FragmentOnboardingV3Binding>() {
 
     @Inject
     lateinit var uiCustomizers: Set<@JvmSuppressWildcards OnBoardingUiCustomizer>
+
+    @Inject
+    lateinit var contentProviders: Set<@JvmSuppressWildcards OnBoardingContentProvider>
 
     companion object {
         fun newInstance(position: Int, isPageEnd: Boolean, isShowAd: Boolean, realPosition: Int) = OnBoardingFragmentV3().apply {
@@ -61,13 +65,14 @@ class OnBoardingFragmentV3 : BaseFragment<FragmentOnboardingV3Binding>() {
     override fun initViews(savedInstanceState: Bundle?) {
         super.initViews(savedInstanceState)
 
+        val contentProvider = contentProviders.activeOnBoardingContentProvider()
         viewBinding.ivIntroduction.setImageResource(
-            IntroConfigFactory.getImageResIntro(
+            contentProvider.getImageResIntro(
                 realPosition
             )
         )
         viewBinding.tvTitle.text =
-            getString(IntroConfigFactory.getStringIntro(realPosition))
+            getString(contentProvider.getStringIntro(realPosition))
         val onBoardingConfig = remoteConfigRepository.getOnBoardingConfig()
         val positionNext = onBoardingConfig.positionNext
         viewBinding.topNext.visibleIf(positionNext == OnBoardingConfig.POSITION_NEXT_TOP)

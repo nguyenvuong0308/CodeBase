@@ -8,6 +8,8 @@ import com.core.config.domain.RemoteConfigRepository
 import com.core.config.domain.data.AppConfig
 import com.core.config.domain.data.CoreAdPlaceName
 import com.core.preference.PurchasePreferences
+import com.core.startflow.onboarding.OnBoardingContentProvider
+import com.core.startflow.onboarding.activeOnBoardingContentProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -15,6 +17,7 @@ import javax.inject.Inject
 class OnBoardingViewModel @Inject constructor(
     remoteConfigRepository: RemoteConfigRepository,
     handle: SavedStateHandle,
+    contentProviders: Set<@JvmSuppressWildcards OnBoardingContentProvider>,
 ) : BaseSharedViewModel<OnBoardingEvent>(
     remoteConfigRepository, handle
 ) {
@@ -24,11 +27,10 @@ class OnBoardingViewModel @Inject constructor(
     @Inject
     lateinit var adsManager: AdsManager
     private val introData by lazy {
-        remoteConfigRepository.getAppConfig().introDataV3.takeIf { it.isNotEmpty() } ?: arrayListOf(
-            AppConfig.DEFINE_INTRO_HAVE_ADS,
-            AppConfig.DEFINE_INTRO_HAVE_ADS,
-            AppConfig.DEFINE_INTRO_HAVE_ADS
-        )
+        remoteConfigRepository.getAppConfig().introDataV3.takeIf { it.isNotEmpty() }
+            ?: List(contentProviders.activeOnBoardingContentProvider().introPageCount.coerceAtLeast(1)) {
+                AppConfig.DEFINE_INTRO_HAVE_ADS
+            }
     }
     val itemsOnboarding = ArrayList<OnBoardingItem>()
 

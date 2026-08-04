@@ -8,12 +8,12 @@ import androidx.core.graphics.toColorInt
 import androidx.fragment.app.activityViewModels
 import com.core.startflow.R
 import com.core.startflow.databinding.CoreFragmentOnboardingV2Binding
-import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory
-import com.codebasetemplate.features.feature_onboarding.ui.helper.OnBoardingConfigFactory.INTRO_PAGE_COUNT
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingEvent
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingViewModel
 import com.core.startflow.StartFlowScreenType
+import com.core.startflow.onboarding.OnBoardingContentProvider
 import com.core.startflow.onboarding.OnBoardingUiCustomizer
+import com.core.startflow.onboarding.activeOnBoardingContentProvider
 import com.core.baseui.fragment.BaseFragment
 import com.core.baseui.fragment.ScreenType
 import com.core.baseui.fragment.argument
@@ -29,6 +29,9 @@ class OnBoardingFragment2: BaseFragment<CoreFragmentOnboardingV2Binding>() {
 
     @Inject
     lateinit var uiCustomizers: Set<@JvmSuppressWildcards OnBoardingUiCustomizer>
+
+    @Inject
+    lateinit var contentProviders: Set<@JvmSuppressWildcards OnBoardingContentProvider>
 
     companion object {
         fun newInstance(position: Int) = OnBoardingFragment2().apply {
@@ -51,16 +54,19 @@ class OnBoardingFragment2: BaseFragment<CoreFragmentOnboardingV2Binding>() {
     override fun initViews(savedInstanceState: Bundle?) {
         super.initViews(savedInstanceState)
 
-        viewBinding.ivIntroduction.setImageResource(OnBoardingConfigFactory.getImageResIntro(introductionPosition))
-        viewBinding.tvTitle.text = getString(OnBoardingConfigFactory.getStringIntro(introductionPosition))
-        OnBoardingConfigFactory.getSubtitleIntro(introductionPosition)?.let {
+        val contentProvider = contentProviders.activeOnBoardingContentProvider()
+        val introPageCount = contentProvider.introPageCount.coerceAtLeast(1)
+
+        viewBinding.ivIntroduction.setImageResource(contentProvider.getImageResIntro(introductionPosition))
+        viewBinding.tvTitle.text = getString(contentProvider.getStringIntro(introductionPosition))
+        contentProvider.getSubtitleIntro(introductionPosition)?.let {
             viewBinding.tvTitle2.text = getString(it)
         } ?: run {
             viewBinding.tvTitle2.gone()
         }
 
 
-        viewBinding.tvNext.text =  if(introductionPosition == INTRO_PAGE_COUNT - 1) {
+        viewBinding.tvNext.text =  if(introductionPosition == introPageCount - 1) {
             /**Set gradient cho button start*/
             viewBinding.tvNext.setGradientStrokeBackground(
                 Color.RED,
@@ -86,7 +92,7 @@ class OnBoardingFragment2: BaseFragment<CoreFragmentOnboardingV2Binding>() {
         }
 
         viewBinding.tvNext.setOnSingleClick {
-            if(introductionPosition == INTRO_PAGE_COUNT - 1) {
+            if(introductionPosition == introPageCount - 1) {
                 sharedViewModel.navigateTo(OnBoardingEvent.FinishStep)
             } else {
                 sharedViewModel.navigateTo(OnBoardingEvent.NextEvent)
@@ -98,7 +104,7 @@ class OnBoardingFragment2: BaseFragment<CoreFragmentOnboardingV2Binding>() {
                 fragment = this,
                 binding = viewBinding,
                 position = introductionPosition,
-                isLastPage = introductionPosition == INTRO_PAGE_COUNT - 1
+                isLastPage = introductionPosition == introPageCount - 1
             )
         }
     }

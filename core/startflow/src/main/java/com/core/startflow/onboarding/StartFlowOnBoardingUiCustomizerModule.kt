@@ -10,4 +10,7 @@ import dagger.hilt.components.SingletonComponent
 abstract class StartFlowOnBoardingUiCustomizerModule {
     @Multibinds
     abstract fun bindOnBoardingUiCustomizers(): Set<OnBoardingUiCustomizer>
+
+    @Multibinds
+    abstract fun bindOnBoardingContentProviders(): Set<OnBoardingContentProvider>
 }

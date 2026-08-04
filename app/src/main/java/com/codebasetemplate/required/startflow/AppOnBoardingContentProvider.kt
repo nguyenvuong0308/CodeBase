@@ -1,12 +1,15 @@
-package com.codebasetemplate.features.feature_onboarding.ui.helper
+package com.codebasetemplate.required.startflow
 
-import com.core.startflow.R
+import com.codebasetemplate.R
+import com.core.startflow.onboarding.OnBoardingContentProvider
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object OnBoardingConfigFactory {
+@Singleton
+class AppOnBoardingContentProvider @Inject constructor() : OnBoardingContentProvider {
+    override val introPageCount: Int = 3
 
-    const val INTRO_PAGE_COUNT = 3
-
-    fun getImageResIntro(position: Int): Int {
+    override fun getImageResIntro(position: Int): Int {
         return when (position) {
             0 -> R.drawable.intro_11
             1 -> R.drawable.intro_21
@@ -15,7 +18,7 @@ object OnBoardingConfigFactory {
         }
     }
 
-    fun getStringIntro(position: Int): Int {
+    override fun getStringIntro(position: Int): Int {
         return when (position) {
             0 -> R.string.core_onboarding_title_1
             1 -> R.string.core_onboarding_title_2
@@ -24,7 +27,7 @@ object OnBoardingConfigFactory {
         }
     }
 
-    fun getSubtitleIntro(position: Int): Int? {
+    override fun getSubtitleIntro(position: Int): Int? {
         return when (position) {
             0 -> R.string.core_onboarding_title_1
             1 -> R.string.core_onboarding_title_2
@@ -32,5 +35,4 @@ object OnBoardingConfigFactory {
             else -> R.string.core_onboarding_title_1
         }
     }
-
 }
