@@ -30,6 +30,7 @@ val jitpackPublishVariants = mapOf(
     ":core:baseui" to "prodRelease",
     ":core:config" to "prodRelease",
     ":core:rate" to "prodRelease",
+    ":core:startflow" to "prodRelease",
 )
 
 subprojects {

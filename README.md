@@ -44,4 +44,5 @@ Available artifacts:
 - `dimens`
 - `preference`
 - `rate`
+- `startflow`
 - `utilities`
