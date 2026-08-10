@@ -112,10 +112,6 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
                     NativeTemplateSize.MediumCtaRightTop -> R.layout.gnt_medium_cta_right_top_shimmer
 
-                    NativeTemplateSize.MediumCollapsibleCtaBottom -> R.layout.gnt_medium_collapsible_cta_bottom_template_view_shimmer
-
-                    NativeTemplateSize.MediumCollapsibleCtaBottomV2 -> R.layout.gnt_medium_collapsible_cta_bottom_template_view_v2_shimmer
-
                     NativeTemplateSize.MediumCtaTop -> R.layout.gnt_medium_cta_top_template_view_shimmer
 
                     NativeTemplateSize.MediumMediaLeft -> R.layout.gnt_medium_media_left_shimmer
@@ -271,10 +267,11 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
             .withProgressBarTint(nativeAdPlace.progressBarTint)
             .withControlClosePosition(nativeAdPlace.controlClosePosition)
             .withCollapsibleExpandCooldownSecond(nativeAdPlace.collapsibleExpandCooldownSecond)
+            .withNativeExpandTemplate(nativeAdPlace.nativeExpandTemplate)
             .withAdPlaceName(nativeAdPlace.placeName.name)
             .build()
 
-        val nativeTemplateView = when (nativeAdPlace.nativeTemplateSize) {
+        val inlineTemplateView = when (nativeAdPlace.nativeTemplateSize) {
 
             NativeTemplateSize.Medium -> NativeMediumTemplateView(context)
 
@@ -293,10 +290,6 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
             NativeTemplateSize.MediumMediaRight -> NativeMediumMediaRightTemplateView(context)
 
             NativeTemplateSize.MediumMediaLeft -> NativeMediumMediaLeftTemplateView(context)
-
-            NativeTemplateSize.MediumCollapsibleCtaBottom -> NativeCollapsibleMediumCtaBottomTemplateView(context)
-
-            NativeTemplateSize.MediumCollapsibleCtaBottomV2 -> NativeCollapsibleMediumCtaBottomTemplateViewV2(context)
 
             NativeTemplateSize.Small -> NativeSmallTemplateView(context)
 
@@ -325,6 +318,14 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
             NativeTemplateSize.FullInterstitialV3 -> NativeInterstitialV3View(context)
 
             is NativeTemplateSize.CustomKey -> customNativeAds.createNativeAds(context, nativeAdPlace)
+        }
+        val nativeTemplateView = if (nativeAdPlace.isNativeCollapsible) {
+            CollapsibleNativeHostView(
+                context = context,
+                inlineTemplateView = inlineTemplateView,
+            )
+        } else {
+            inlineTemplateView
         }
         runCatching {
             addView(nativeTemplateView)

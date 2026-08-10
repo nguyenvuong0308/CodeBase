@@ -284,10 +284,38 @@
           <tr><td><code>hide_text_count_down</code></td><td>Boolean</td><td>Ẩn text countdown.</td></tr>
           <tr><td><code>hide_progress_count_down</code></td><td>Boolean</td><td>Ẩn progress countdown.</td></tr>
           <tr><td><code>progress_bar_tint</code></td><td>String</td><td>Màu progress countdown.</td></tr>
+          <tr><td><code>is_native_collapsible</code></td><td>Boolean</td><td>Bật host collapsible generic cho native template thông thường. Default <code>false</code>. Không dùng <code>is_collapsible</code> của banner.</td></tr>
+          <tr><td><code>native_expand_template</code></td><td>String</td><td>Giao diện popup mở rộng: <code>native_expand_v1</code> hoặc <code>native_expand_v2</code>. Thiếu hoặc sai giá trị sẽ fallback về V1.</td></tr>
           <tr><td><code>control_close_position</code></td><td>String</td><td><code>left</code> hoặc <code>right</code>, vị trí nút next/close ở native interstitial v3 và collapsible.</td></tr>
           <tr><td><code>collapsible_expand_cooldown_second</code></td><td>Int</td><td>Thời gian cooldown mở rộng lại của template collapsible.</td></tr>
         </tbody>
       </table>
+
+      <h3>Native collapsible generic</h3>
+      <p><code>is_native_collapsible=true</code> giữ <code>native_template_size</code> làm giao diện thu gọn và dùng một popup riêng cho trạng thái mở rộng. <code>native_expand_template</code> chỉ có hiệu lực khi native collapsible được bật.</p>
+      <table>
+        <thead><tr><th><code>native_template_size</code></th><th><code>is_native_collapsible</code></th><th><code>native_expand_template</code></th><th>Kết quả</th></tr></thead>
+        <tbody>
+          <tr><td>Template thông thường</td><td><code>false</code> hoặc thiếu</td><td>Bất kỳ</td><td>Chỉ hiển thị native template thông thường.</td></tr>
+          <tr><td>Template thông thường</td><td><code>true</code></td><td><code>native_expand_v1</code></td><td>Popup dùng <code>NativeExpandView</code> V1.</td></tr>
+          <tr><td>Template thông thường</td><td><code>true</code></td><td><code>native_expand_v2</code></td><td>Popup dùng <code>NativeExpandViewV2</code>.</td></tr>
+          <tr><td>Template thông thường</td><td><code>true</code></td><td>Thiếu hoặc không hợp lệ</td><td>Fallback về <code>NativeExpandView</code> V1.</td></tr>
+        </tbody>
+      </table>
+      <pre><code>{
+  "place_name": "anchored_bottom_home",
+  "ad_id": "ca-app-pub-xxxxxxxxxxxxxxxx/yyyyyyyyyy",
+  "ad_type": "native",
+  "native_template_size": "small_cta_bottom",
+  "is_native_collapsible": true,
+  "native_expand_template": "native_expand_v2",
+  "control_close_position": "left",
+  "collapsible_expand_cooldown_second": 10,
+  "is_enable": true
+}</code></pre>
+      <div class="note">
+        <strong>Migration:</strong> <code>medium_collapsible_cta_bottom</code> và <code>medium_collapsible_banner</code> đã bị loại bỏ. Hãy đổi sang template thông thường kết hợp với <code>is_native_collapsible=true</code>.
+      </div>
 
       <h3>Native picture-in-picture config</h3>
       <p>Native PIP dung <code>native_template_size=native_pip</code>, kich thuoc UI 180dp x 180dp. Khi user dang drag, margin PIP khong gioi han vung keo; margin chi duoc ap dung khi show ban dau hoac khi tha tay de snap/validate lai vi tri.</p>
@@ -328,26 +356,6 @@
   "retry_interval_second_list": [1, 2, 3]
 }</code></pre>
 
-      <h3>Ví dụ native place</h3>
-      <pre><code>{
-  "place_name": "anchored_bottom_home",
-  "ad_id": "ca-app-pub-xxxxxxxxxxxxxxxx/yyyyyyyyyy",
-  "high_floor_ad_ids": ["ca-app-pub-xxxxxxxxxxxxxxxx/highfloor"],
-  "ad_type": "native",
-  "native_template_size": "medium_collapsible_banner",
-  "is_enable": true,
-  "is_tracking_click": true,
-  "background_color": "#FFFFFF",
-  "primary_text_color": "#1F2937",
-  "body_text_color": "#6B7280",
-  "background_cta": "#5E56F5",
-  "cta_text_color": "#FFFFFF",
-  "border_color": "#E5E7EB",
-  "cta_radius_dp": 8,
-  "control_close_position": "left",
-  "collapsible_expand_cooldown_second": 10,
-  "expired_time_second": 60
-}</code></pre>
     </section>
 
     <section id="banner">
@@ -588,8 +596,6 @@
         <figure><img src="native-screenshots/medium_cta_top.png" alt="medium_cta_top"><figcaption><code>medium_cta_top</code></figcaption></figure>
         <figure><img src="native-screenshots/medium_cta_bottom.png" alt="medium_cta_bottom"><figcaption><code>medium_cta_bottom</code></figcaption></figure>
         <figure><img src="native-screenshots/medium_short_cta_bottom.png" alt="medium_short_cta_bottom"><figcaption><code>medium_short_cta_bottom</code></figcaption></figure>
-        <figure><img src="native-screenshots/medium_collapsible_cta_bottom.png" alt="medium_collapsible_cta_bottom"><figcaption><code>medium_collapsible_cta_bottom</code></figcaption></figure>
-        <figure><img src="native-screenshots/medium_collapsible_banner.png" alt="medium_collapsible_banner"><figcaption><code>medium_collapsible_banner</code></figcaption></figure>
         <figure><img src="native-screenshots/medium_cta_right_top.png" alt="medium_cta_right_top"><figcaption><code>medium_cta_right_top</code></figcaption></figure>
         <figure><img src="native-screenshots/medium_cta_right.png" alt="medium_cta_right"><figcaption><code>medium_cta_right</code></figcaption></figure>
         <figure><img src="native-screenshots/medium_media_right.png" alt="medium_media_right"><figcaption><code>medium_media_right</code></figcaption></figure>

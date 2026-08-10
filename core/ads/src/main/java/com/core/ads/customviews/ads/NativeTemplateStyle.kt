@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import androidx.core.graphics.toColorInt
+import com.core.config.domain.data.NativeExpandTemplate
 
 /** A class containing the optional styling options for the Native Template.  */
 class NativeTemplateStyle {
@@ -148,6 +149,9 @@ class NativeTemplateStyle {
     var collapsibleExpandCooldownSecond: Int? = null
         private set
 
+    var nativeExpandTemplate: NativeExpandTemplate = NativeExpandTemplate.V1
+        private set
+
     var adPlaceName: String? = null
         private set
 
@@ -198,6 +202,11 @@ class NativeTemplateStyle {
 
         fun withCollapsibleExpandCooldownSecond(collapsibleExpandCooldownSecond: Int?): Builder {
             styles.collapsibleExpandCooldownSecond = collapsibleExpandCooldownSecond
+            return this
+        }
+
+        fun withNativeExpandTemplate(nativeExpandTemplate: NativeExpandTemplate): Builder {
+            styles.nativeExpandTemplate = nativeExpandTemplate
             return this
         }
 

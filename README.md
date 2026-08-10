@@ -47,4 +47,7 @@ Available artifacts:
 - `startflow`
 - `utilities`
 
-Tài liệu custom màu màn Language V1/V2: [docs/startflow-language-ui-customization.md](docs/startflow-language-ui-customization.md)
+## Documentation
+
+- [Native collapsible remote config](docs/native-collapsible-config.md)
+- [StartFlow Language V1/V2 UI customization](docs/startflow-language-ui-customization.md)

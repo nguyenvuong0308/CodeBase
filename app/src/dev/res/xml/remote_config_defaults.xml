@@ -114,10 +114,12 @@
     <!--native_template_size:
     small - small_cta_top - small_cta_bottom - small_cta_right -
     small_long - small_for_popup - medium - medium_cta_top - medium_cta_bottom - medium_short_cta_bottom -
-    medium_cta_right_top - medium_cta_right - medium_media_right - medium_collapsible_cta_bottom
+    medium_cta_right_top - medium_cta_right - medium_media_right -
     medium_media_left - full_cta_bottom - full_cta_top - full_cta_right - full_cta_bottom_onboarding
     hoặc custom key
     -->
+    <!--is_native_collapsible: true - false, bật popup collapsible cho native template thường-->
+    <!--native_expand_template: native_expand_v1 - native_expand_v2-->
     <!--background_color: màu nền-->
     <!--primary_text_color: màu text primary-->
     <!--body_text_color: màu text body-->
@@ -511,7 +513,9 @@
             "place_name": "anchored_bottom_home",
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
-            "native_template_size": "medium_collapsible_banner",
+            "native_template_size": "small_cta_bottom",
+            "is_native_collapsible": true,
+            "native_expand_template": "native_expand_v2",
             "is_tracking_click": true,
             "is_enable": true,
             "background_color": "#FFFFFF",

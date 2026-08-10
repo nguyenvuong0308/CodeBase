@@ -93,6 +93,8 @@ data class InterstitialAdPlace(
 data class NativeAdPlace(
     override val isTrackingShow: Boolean,
     override val isTrackingClick: Boolean,
+    val isNativeCollapsible: Boolean,
+    val nativeExpandTemplate: NativeExpandTemplate,
     val nativeTemplateSize: NativeTemplateSize,
     val backgroundCta: String?,
     val ctaRadius: Int?,

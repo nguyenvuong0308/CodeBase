@@ -14,6 +14,7 @@ import com.core.config.domain.data.IAppProviderAdPlaceName
 import com.core.config.domain.data.InterstitialAdPlace
 import com.core.config.domain.data.NativeAfterInterstitialLoadStrategy
 import com.core.config.domain.data.NativeAdPlace
+import com.core.config.domain.data.NativeExpandTemplate
 import com.core.config.domain.data.NativeTemplateSize
 import com.core.config.domain.data.NoneAdPlace
 import com.core.config.domain.data.RemoteAdPlaceName
@@ -156,6 +157,8 @@ internal class AdPlaceModelMapper @Inject constructor(
             isAutoLoadAfterDismiss = model.isAutoLoadAfterDismiss ?: true,
             isIgnoreInterval = model.isIgnoreInterval ?: false,
             isTutorialFlow = model.isTutorialFlow ?: false,
+            isNativeCollapsible = model.isNativeCollapsible == true,
+            nativeExpandTemplate = NativeExpandTemplate.getBy(model.nativeExpandTemplate),
             nativeTemplateSize = NativeTemplateSize.getSizeBy(model.nativeTemplateSize ?: ""),
             backgroundCta = model.backgroundCta,
             borderColor = model.borderColor,

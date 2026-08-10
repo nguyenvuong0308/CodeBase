@@ -47,6 +47,12 @@ internal data class AdPlaceModel(
     @Json(name = "is_collapsible")
     val isCollapsible: Boolean?,
 
+    @Json(name = "is_native_collapsible")
+    val isNativeCollapsible: Boolean?,
+
+    @Json(name = "native_expand_template")
+    val nativeExpandTemplate: String?,
+
     @Json(name = "auto_reload_collapsible")
     val autoReloadCollapsible: Boolean?,
 
