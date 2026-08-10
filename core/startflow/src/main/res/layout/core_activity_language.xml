@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#DCEDFF"
+    android:background="@color/startflow_language_v1_background"
     android:orientation="vertical">
 
     <com.core.baseui.toolbar.CoreToolbarView
@@ -15,6 +15,8 @@
         app:ctv_tv_action_enable="false"
         app:ctv_tv_action_show="true"
         app:ctv_tv_action_text="@string/core_common_save"
+        app:ctv_tv_action_text_color="@color/startflow_language_v1_toolbar_action"
+        app:ctv_tv_title_text_color="@color/startflow_language_v1_toolbar_title"
         app:ctv_tv_title="@string/core_screen_language" />
 
     <FrameLayout
@@ -40,11 +42,11 @@
             android:layout_height="wrap_content">
             <ProgressBar
                 android:layout_width="@dimen/_60dp"
-                android:indeterminateTint="#2196F3"
+                android:indeterminateTint="@color/startflow_language_v1_loading_indicator"
                 android:layout_height="@dimen/_60dp"/>
 
             <TextView
-                android:textColor="@color/black"
+                android:textColor="@color/startflow_language_v1_loading_text"
                 android:text="@string/core_apply_language"
                 style="@style/Title16Medium"
                 android:layout_marginTop="@dimen/_10dp"
@@ -65,7 +67,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:background="@color/black" />
+            android:background="@color/startflow_language_v1_ad_background" />
     </FrameLayout>
 
 </androidx.appcompat.widget.LinearLayoutCompat>

@@ -205,7 +205,11 @@ class LanguageV2Adapter : ListAdapter<LanguageRow, RecyclerView.ViewHolder>(DIFF
             )
             binding.languageOptionName.setTextColor(
                 binding.root.context.getColor(
-                    if (row.isSelected) R.color.white else R.color.language_v2_text
+                    if (row.isSelected) {
+                        R.color.startflow_language_v2_item_selected_text
+                    } else {
+                        R.color.startflow_language_v2_item_text
+                    }
                 )
             )
             binding.languageOptionRadio.setImageResource(

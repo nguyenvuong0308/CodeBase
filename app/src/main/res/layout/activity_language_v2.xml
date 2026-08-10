@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/startflow_language_v2_background"
     android:orientation="vertical">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -20,7 +20,7 @@
             style="@style/AppHeaderBack"
             android:src="@drawable/ic_back_dark"
             android:visibility="gone"
-            android:tint="@color/black"
+            android:tint="@color/startflow_language_v2_back_icon"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -32,6 +32,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/core_screen_language"
+            android:textColor="@color/startflow_language_v2_title"
             android:layout_marginStart="@dimen/app_header_title_margin_start"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/languageApply"
@@ -81,14 +82,14 @@
             <ProgressBar
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:indeterminateTint="@color/home_accent" />
+                android:indeterminateTint="@color/startflow_language_v2_loading_indicator" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="@string/core_apply_language"
-                android:textColor="@color/black"
+                android:textColor="@color/startflow_language_v2_loading_text"
                 android:textSize="16dp" />
         </androidx.appcompat.widget.LinearLayoutCompat>
     </FrameLayout>
@@ -104,6 +105,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:background="@color/black" />
+            android:background="@color/startflow_language_v2_ad_background" />
     </FrameLayout>
 </androidx.appcompat.widget.LinearLayoutCompat>

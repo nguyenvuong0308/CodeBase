@@ -46,3 +46,5 @@ Available artifacts:
 - `rate`
 - `startflow`
 - `utilities`
+
+Tài liệu custom màu màn Language V1/V2: [docs/startflow-language-ui-customization.md](docs/startflow-language-ui-customization.md)

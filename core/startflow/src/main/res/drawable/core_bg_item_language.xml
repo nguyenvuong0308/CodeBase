@@ -3,8 +3,8 @@
     <item android:state_selected="true">
         <shape android:shape="rectangle">
             <corners android:radius="@dimen/_13dp"/>
-            <solid android:color="@color/white"/>
-            <stroke android:color="@color/core_appColor" android:width="@dimen/_1_5dp"/>
+            <solid android:color="@color/startflow_language_v1_item_selected_background"/>
+            <stroke android:color="@color/startflow_language_v1_item_selected_border" android:width="@dimen/_1_5dp"/>
         </shape>
 
     </item>
@@ -12,7 +12,7 @@
     <item >
         <shape android:shape="rectangle">
             <corners android:radius="@dimen/_13dp"/>
-            <solid android:color="@color/core_item_language_unselected"/>
+            <solid android:color="@color/startflow_language_v1_item_unselected_background"/>
         </shape>
     </item>
 

@@ -8,7 +8,7 @@
         android:fillColor="@android:color/transparent"
         android:pathData="M6,14.5L11.2,19.5L22,8.5"
         android:strokeWidth="2"
-        android:strokeColor="@color/language_v2_primary_color"
+        android:strokeColor="@color/startflow_language_v2_apply_icon"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
 </vector>

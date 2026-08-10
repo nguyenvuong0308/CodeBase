@@ -22,7 +22,7 @@ class LanguageBranchView @JvmOverloads constructor(
         }
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.language_v2_branch)
+        color = ContextCompat.getColor(context, R.color.startflow_language_v2_branch)
         strokeWidth = resources.displayMetrics.density
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
