@@ -51,3 +51,4 @@ Available artifacts:
 
 - [Native collapsible remote config](docs/native-collapsible-config.md)
 - [StartFlow Language V1/V2 UI customization](docs/startflow-language-ui-customization.md)
+- [StartFlow Onboarding UI customization](docs/startflow-onboarding-ui-customization.md)

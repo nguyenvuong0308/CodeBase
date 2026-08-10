@@ -185,6 +185,7 @@
       <li><a href="#fullscreen">Interstitial, Rewarded, Rewarded Interstitial</a></li>
       <li><a href="#app-open">App open ads</a></li>
       <li><a href="#other">Config khác</a></li>
+      <li><a href="#onboarding-ui">Custom UI Onboarding flow</a></li>
       <li><a href="#gallery">Native UI gallery</a></li>
     </ul>
 
@@ -579,6 +580,125 @@
   "version": 2,
   "time_show_loading_lfo": 3
 }</code></pre>
+    </section>
+
+    <section id="onboarding-ui">
+      <h2>Custom UI Onboarding flow</h2>
+      <p><code>core:startflow</code> giữ logic điều hướng, quảng cáo và tracking. App custom nội dung/giao diện qua hai API, không cần copy layout hoặc sửa code trong module core.</p>
+
+      <table>
+        <thead><tr><th>API</th><th>Vai trò</th><th>Lưu ý</th></tr></thead>
+        <tbody>
+          <tr><td><code>OnBoardingContentProvider</code></td><td>Cung cấp số trang, ảnh, title và subtitle.</td><td>Chỉ nên đăng ký một provider; nếu không có sẽ dùng nội dung mặc định.</td></tr>
+          <tr><td><code>OnBoardingUiCustomizer</code></td><td>Chỉnh trực tiếp View Binding của V1, V2, V3 và V3 end-tab.</td><td>Callback chạy sau khi core bind UI mặc định; tất cả customizer trong set đều được gọi.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Callback theo onboarding version</h3>
+      <table>
+        <thead><tr><th><code>onboarding_config.version</code></th><th>Callback</th><th>Binding</th></tr></thead>
+        <tbody>
+          <tr><td><code>1</code></td><td><code>customizeOnBoardingV1</code></td><td><code>CoreFragmentOnboardingBinding</code></td></tr>
+          <tr><td><code>2</code></td><td><code>customizeOnBoardingV2</code></td><td><code>CoreFragmentOnboardingV2Binding</code></td></tr>
+          <tr><td><code>3</code></td><td><code>customizeOnBoardingV3</code></td><td><code>FragmentOnboardingV3Binding</code></td></tr>
+          <tr><td><code>3</code>, end-tab không ads</td><td><code>customizeOnBoardingV3EndTab</code></td><td><code>FragmentOnboardingV3EndTabBinding</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3>Cung cấp content</h3>
+      <pre><code>@Singleton
+class AppOnBoardingContentProvider @Inject constructor() : OnBoardingContentProvider {
+    override val introPageCount = 3
+
+    override fun getImageResIntro(position: Int) = when (position) {
+        0 -&gt; R.drawable.intro_1
+        1 -&gt; R.drawable.intro_2
+        else -&gt; R.drawable.intro_3
+    }
+
+    override fun getStringIntro(position: Int) = when (position) {
+        0 -&gt; R.string.onboarding_title_1
+        1 -&gt; R.string.onboarding_title_2
+        else -&gt; R.string.onboarding_title_3
+    }
+
+    override fun getSubtitleIntro(position: Int): Int? = when (position) {
+        0 -&gt; R.string.onboarding_subtitle_1
+        1 -&gt; R.string.onboarding_subtitle_2
+        2 -&gt; R.string.onboarding_subtitle_3
+        else -&gt; null
+    }
+}</code></pre>
+      <p><code>getSubtitleIntro()</code> được UI V2 sử dụng; trả về <code>null</code> để ẩn subtitle. V1/V3 dùng ảnh và title từ cùng provider.</p>
+
+      <h3>Custom View Binding</h3>
+      <pre><code>@Singleton
+class AppOnBoardingUiCustomizer @Inject constructor() : OnBoardingUiCustomizer {
+    override fun customizeOnBoardingV1(
+        fragment: Fragment,
+        binding: CoreFragmentOnboardingBinding,
+        position: Int,
+        isLastPage: Boolean,
+    ) {
+        binding.tvTitle.setTextColor(fragment.requireContext().getColor(R.color.onboarding_text))
+        binding.tvNext.setTextColor(fragment.requireContext().getColor(R.color.onboarding_primary))
+    }
+
+    override fun customizeOnBoardingV2(
+        fragment: Fragment,
+        binding: CoreFragmentOnboardingV2Binding,
+        position: Int,
+        isLastPage: Boolean,
+    ) {
+        binding.layoutContent.setBackgroundResource(R.drawable.bg_onboarding_content)
+        binding.tvNext.setBackgroundResource(R.drawable.bg_onboarding_primary_button)
+    }
+
+    override fun customizeOnBoardingV3(
+        fragment: Fragment,
+        binding: FragmentOnboardingV3Binding,
+        introductionPosition: Int,
+        realPosition: Int,
+        isPageEnd: Boolean,
+        isShowAd: Boolean,
+        onBoardingConfig: OnBoardingConfig,
+    ) {
+        binding.tvNextTop.isAllCaps = false
+        binding.tvNextBottom.isAllCaps = false
+        if (isPageEnd) {
+            binding.tvNextTop.setText(R.string.onboarding_start)
+            binding.tvNextBottom.setText(R.string.onboarding_start)
+        }
+    }
+
+    override fun customizeOnBoardingV3EndTab(
+        fragment: Fragment,
+        binding: FragmentOnboardingV3EndTabBinding,
+        position: Int,
+    ) {
+        binding.btGetStart.setBackgroundResource(R.drawable.bg_onboarding_primary_button)
+    }
+}</code></pre>
+
+      <h3>Đăng ký Hilt</h3>
+      <pre><code>@Provides
+@IntoSet
+@Singleton
+fun provideOnBoardingContentProvider(
+    provider: AppOnBoardingContentProvider,
+): OnBoardingContentProvider = provider
+
+@Provides
+@IntoSet
+@Singleton
+fun provideOnBoardingUiCustomizer(
+    customizer: AppOnBoardingUiCustomizer,
+): OnBoardingUiCustomizer = customizer</code></pre>
+
+      <div class="note">
+        <p><strong>Quan trọng:</strong> không giữ <code>binding</code>/<code>fragment</code> trong singleton và không thay listener Next/Get Started nếu chỉ đổi UI. Hãy đồng bộ <code>introPageCount</code> với <code>intro_data</code>, <code>intro_data_v2</code> hoặc <code>intro_data_v3</code>. Với V3, <code>introductionPosition</code> là vị trí logic có tính full-native ad, còn <code>realPosition</code> là vị trí content dùng để lấy ảnh/title.</p>
+      </div>
+      <p>Xem hướng dẫn đầy đủ và ví dụ theo từng version tại <a href="../startflow-onboarding-ui-customization.md"><code>docs/startflow-onboarding-ui-customization.md</code></a>.</p>
     </section>
 
     <section id="gallery">
