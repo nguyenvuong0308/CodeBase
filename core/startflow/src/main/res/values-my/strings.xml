@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">ကျော</string>
+        
+    <string name="core_screen_language">ဘာသာစကား</string>
+        
+    <string name="core_apply_language">ဘာသာစကားကို အသုံးပြုပါ...</string>
+        
+    <string name="core_common_save">သိမ်းဆည်းပါ။</string>
+        
+    <string name="core_common_skip">ကျော်သွားပါ။</string>
+        
+    <string name="core_common_continue">ဆက်ရန်</string>
+        
+    <string name="core_onboarding_action_get_start">စတင်လိုက်ပါ။</string>
+        
+    <string name="core_onboarding_action_next">နောက်တစ်ခု</string>
+        
+    <string name="common_next">နောက်တစ်ခု</string>
+    
+</resources>

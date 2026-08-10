@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">Артқа</string>
+        
+    <string name="core_screen_language">Тіл</string>
+        
+    <string name="core_apply_language">Тілді қолдану…</string>
+        
+    <string name="core_common_save">Сақтау</string>
+        
+    <string name="core_common_skip">Өткізіп жіберу</string>
+        
+    <string name="core_common_continue">Жалғастыру</string>
+        
+    <string name="core_onboarding_action_get_start">Жұмысты бастаңыз</string>
+        
+    <string name="core_onboarding_action_next">Келесі</string>
+        
+    <string name="common_next">Келесі</string>
+    
+</resources>

@@ -154,6 +154,7 @@ class NativeSmallCtaTopTemplateView @JvmOverloads constructor(
         styles.backgroundAdsNotifyView?.let {
             binding.adNotificationView.setBackgroundResource(it)
         }
+        applyAdsNotifyViewStyles(styles, binding.adNotificationView)
 
         styles.primaryTextBackgroundColor?.let {
             binding.primary.background = it

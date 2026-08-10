@@ -11,6 +11,9 @@ sealed class AdPlace {
 
     abstract val adId: String
 
+    // Higher-priority ad unit ids used as a waterfall before falling back to adId.
+    abstract val highFloorAdIds: List<String>
+
     abstract val isEnable: Boolean
 
     abstract val adType: AdType
@@ -18,6 +21,8 @@ sealed class AdPlace {
     abstract val isAutoLoadAfterDismiss: Boolean
 
     abstract val isIgnoreInterval: Boolean
+
+    abstract val isTutorialFlow: Boolean
 
 
     fun isNotValidToLoad(): Boolean {
@@ -46,10 +51,12 @@ data class RewardedVideoAdPlace(
     override val isTrackingShow: Boolean,
     override val isTrackingClick: Boolean,
     override val adId: String,
+    override val highFloorAdIds: List<String>,
     override val isEnable: Boolean,
     override val adType: AdType,
     override val isAutoLoadAfterDismiss: Boolean,
     override val isIgnoreInterval: Boolean,
+    override val isTutorialFlow: Boolean,
 ): AdPlace() {
 }
 
@@ -58,10 +65,12 @@ data class RewardedInterstitialAdPlace(
     override val isTrackingClick: Boolean,
     override val placeName: IAdPlaceName,
     override val adId: String,
+    override val highFloorAdIds: List<String>,
     override val isEnable: Boolean,
     override val adType: AdType,
     override val isAutoLoadAfterDismiss: Boolean,
     override val isIgnoreInterval: Boolean,
+    override val isTutorialFlow: Boolean,
 ): AdPlace()
 
 data class InterstitialAdPlace(
@@ -69,16 +78,23 @@ data class InterstitialAdPlace(
     override val isTrackingClick: Boolean,
     override val placeName: IAdPlaceName,
     override val adId: String,
+    override val highFloorAdIds: List<String>,
     override val isEnable: Boolean,
     override val adType: AdType,
     override val isAutoLoadAfterDismiss: Boolean,
     override val isIgnoreInterval: Boolean,
+    override val isTutorialFlow: Boolean,
     val plusInterval: Int,
+    val isShowNativeAfter: Boolean,
+    val nativeAfterLoadStrategy: NativeAfterInterstitialLoadStrategy,
+    val nativeAfterInterstitial: NativeAdPlace?,
 ): AdPlace()
 
 data class NativeAdPlace(
     override val isTrackingShow: Boolean,
     override val isTrackingClick: Boolean,
+    val isNativeCollapsible: Boolean,
+    val nativeExpandTemplate: NativeExpandTemplate,
     val nativeTemplateSize: NativeTemplateSize,
     val backgroundCta: String?,
     val ctaRadius: Int?,
@@ -87,23 +103,36 @@ data class NativeAdPlace(
     val borderColor: String?,
     val backgroundColor: String?,
     val countDownTimer: Int?,
+    val closeStepCount: Int?,
+    val step1CountDownTimer: Int?,
+    val step2CountDownTimer: Int?,
     val backgroundFullColor: String?,
+    val backgroundColorAdsNotifyView: String?,
+    val textColorAdsNotifyView: String?,
     val mediaBackgroundColor: String?,
     val backgroundRadius: Int?,
     val primaryTextColor: String?,
     val bodyTextColor: String?,
     val isEnableFullScreenImmersive: Boolean?,
     val expiredTimeSecond: Int?,
+    val refreshTimeSecond: Int,
     val hideTextSkipCountDown: Boolean?,
     val hideTextCountDown: Boolean?,
     val hideProgressCountDown: Boolean?,
     val progressBarTint: String?,
+    val controlClosePosition: String?,
+    val collapsibleExpandCooldownSecond: Int?,
+    val pipAnchorMode: String?,
+    val pipMarginDp: Float?,
+    val pipTopMarginDp: Float?,
     override val placeName: IAdPlaceName,
     override val adId: String,
+    override val highFloorAdIds: List<String>,
     override val isEnable: Boolean,
     override val adType: AdType,
     override val isAutoLoadAfterDismiss: Boolean,
     override val isIgnoreInterval: Boolean,
+    override val isTutorialFlow: Boolean,
 ): AdPlace()
 
 data class BannerAdPlace(
@@ -114,10 +143,12 @@ data class BannerAdPlace(
     val autoReloadCollapsible: Boolean,
     override val placeName: IAdPlaceName,
     override val adId: String,
+    override val highFloorAdIds: List<String>,
     override val isEnable: Boolean,
     override val adType: AdType,
     override val isAutoLoadAfterDismiss: Boolean,
     override val isIgnoreInterval: Boolean,
+    override val isTutorialFlow: Boolean,
 ): AdPlace()
 
 data class AppOpenAdPlace(
@@ -126,10 +157,12 @@ data class AppOpenAdPlace(
     val limitShow: Int,
     override val placeName: IAdPlaceName,
     override val adId: String,
+    override val highFloorAdIds: List<String>,
     override val isEnable: Boolean,
     override val adType: AdType,
     override val isAutoLoadAfterDismiss: Boolean,
     override val isIgnoreInterval: Boolean,
+    override val isTutorialFlow: Boolean,
 ): AdPlace()
 
 data class NoneAdPlace(
@@ -137,9 +170,11 @@ data class NoneAdPlace(
     override val isTrackingClick: Boolean = false,
     override val placeName: IAdPlaceName = CoreAdPlaceName.NONE,
     override val adId: String = "",
+    override val highFloorAdIds: List<String> = emptyList(),
     override val isEnable: Boolean = false,
     override val adType: AdType = AdType.None,
     override val isAutoLoadAfterDismiss: Boolean = false,
     override val isIgnoreInterval: Boolean = false,
+    override val isTutorialFlow: Boolean = false,
 ): AdPlace()
 

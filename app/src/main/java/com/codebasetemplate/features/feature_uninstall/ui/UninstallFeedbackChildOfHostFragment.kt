@@ -10,6 +10,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.codebasetemplate.databinding.CoreFragmentUninstallFeedbackBinding
 import com.codebasetemplate.features.feature_uninstall.ui.navigate.UninstallNavigateEvent
+import com.codebasetemplate.required.ads.AppAdPlaceName
 import com.codebasetemplate.required.shortcut.AppScreenType
 import com.core.ads.domain.AdLoadBannerNativeUiResource
 import com.core.baseui.InsetsViewModel
@@ -17,7 +18,6 @@ import com.core.baseui.fragment.BaseChildOfHostFragment
 import com.core.baseui.fragment.ScreenType
 import com.core.baseui.fragment.collectFlowOn
 import com.core.baseui.toolbar.CoreToolbarView
-import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -71,11 +71,11 @@ class UninstallFeedbackChildOfHostFragment:
 
     override fun providerBannerNativeAdPlaceName(): List<IAdPlaceName> {
         return listOf(
-            CoreAdPlaceName.ANCHORED_UNINSTALL_BOTTOM_STEP_2
+            AppAdPlaceName.ANCHORED_UNINSTALL_BOTTOM_STEP_2
         )
     }
 
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
-        viewBinding.layoutBannerNative.processAdResource(adResource, CoreAdPlaceName.ANCHORED_UNINSTALL_BOTTOM_STEP_2)
+        viewBinding.layoutBannerNative.processAdResource(adResource, AppAdPlaceName.ANCHORED_UNINSTALL_BOTTOM_STEP_2)
     }
 }

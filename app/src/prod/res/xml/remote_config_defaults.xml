@@ -97,7 +97,7 @@
     <!--ad_type: banner - native-->
     <!--native_template_size:
     small - small_cta_top - small_cta_bottom - small_cta_right -
-    small_long - small_for_popup - medium - medium_cta_top - medium_cta_bottom -
+    small_long - small_for_popup - medium - medium_cta_top - medium_cta_bottom - medium_short_cta_bottom -
     medium_cta_right_top - medium_cta_right - medium_media_right -
     medium_media_left - full_cta_bottom - full_cta_top - full_cta_right
     hoặc custom key
@@ -108,6 +108,7 @@
     <!--background_cta: -->
     <!--cta_text_color: -->
     <!--border_color: -->
+    <!--refresh_time_second: native reload interval in seconds, <= 0 disables refresh-->
 
     <!--chung-->
     <!--is_enable: bật tắt ví trí quảng cáo-->
@@ -306,6 +307,26 @@
             "is_tracking_click": true,
             "banner_size": "anchored",
             "is_enable": true
+            },
+            {
+            "place_name": "anchored_native_pip_home",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "native_template_size": "small",
+            "is_tracking_click": true,
+            "is_enable": true,
+            "background_color": "#FFFFFF",
+            "cta_radius_dp": 0,
+            "primary_text_color": "#1F2937",
+            "body_text_color": "#111827",
+            "cta_text_color": "#FFFFFF",
+            "background_cta": "#FFC21A,#FF7A00",
+            "border_color": "#E5E7EB",
+            "expired_time_second": 10,
+            "count_down_timer": 3,
+            "pip_anchor_mode": "flexible",
+            "pip_margin_dp": 20,
+            "pip_top_margin_dp": 20
             }
             ]
         </value>

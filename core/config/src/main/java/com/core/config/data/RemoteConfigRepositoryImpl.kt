@@ -17,6 +17,7 @@ import com.core.config.data.mapper.PreventAdClickConfigModelMapper
 import com.core.config.data.mapper.RequestConsentConfigModelMapper
 import com.core.config.data.mapper.RewardedAdConfigModelMapper
 import com.core.config.data.mapper.SplashScreenConfigModelMapper
+import com.core.config.data.mapper.TutorialConfigModelMapper
 import com.core.config.domain.GetDataFromRemoteConfigUseCase
 import com.core.config.domain.RemoteConfigRepository
 import com.core.config.domain.data.AdPlace
@@ -29,13 +30,17 @@ import com.core.config.domain.data.BannerAdTypeConfig
 import com.core.config.domain.data.IAdPlaceName
 import com.core.config.domain.data.IapConfig
 import com.core.config.domain.data.InterstitialAdTypeConfig
+import com.core.config.domain.data.LanguageActivityConfig
 import com.core.config.domain.data.NativeAdTypeConfig
 import com.core.config.domain.data.NoneAdPlace
+import com.core.config.domain.data.OnBoardingConfig
 import com.core.config.domain.data.PreventAdClickConfig
 import com.core.config.domain.data.RequestConsentConfig
 import com.core.config.domain.data.RewardedAdTypeConfig
 import com.core.config.domain.data.RewardedInterstitialAdTypeConfig
 import com.core.config.domain.data.SplashScreenConfig
+import com.core.config.domain.data.StartFlowConfig
+import com.core.config.domain.data.TutorialConfig
 import com.core.preference.AppPreferences
 import com.core.utilities.isAppDebuggable
 import com.core.utilities.toast
@@ -69,6 +74,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
     private val rewardedAdConfigModelMapper: RewardedAdConfigModelMapper,
     private val appOpenAdConfigModelMapper: AppOpenAdConfigModelMapper,
     private val requestConsentConfigModelMapper: RequestConsentConfigModelMapper,
+    private val tutorialConfigModelMapper: TutorialConfigModelMapper,
     private val remoteConfigService: RemoteConfigService,
     private val getRemoteConfigUseCase: GetDataFromRemoteConfigUseCase,
 ) : RemoteConfigRepository {
@@ -138,6 +144,8 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
             val isTurnOnAdPlacesDisabledWhenDetectTestAdDeferred =
                 async { isTurnOnAdPlacesDisabledWhenDetectTestAdRaw() }
             val splashScreenConfigDeferred = async { getSplashScreenConfigRaw() }
+            val languageActivityConfigDeferred = async { getLanguageActivityConfigRaw() }
+            val onBoardingConfigDeferred = async { getOnBoardingConfigRaw() }
             val adPlacesDeferred = async { getAdPlacesRaw() }
             val bannerAdConfigDeferred = async { getBannerAdConfigRaw() }
             val nativeAdConfigDeferred = async { getNativeAdConfigRaw() }
@@ -147,6 +155,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
             val rewardedAdConfigDeferred = async { getRewardedAdConfigRaw() }
             val appOpenAdConfigDeferred = async { getAppOpenAdConfigRaw() }
             val requestConsentConfigDeferred = async { getRequestConsentConfigRaw() }
+            val tutorialConfigDeferred = async { getTutorialConfigRaw() }
             val getOtherConfig = async {
                 getRemoteConfigUseCase.invoke(remoteConfigService)
             }
@@ -158,6 +167,13 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
             isTurnOnAdPlacesDisabledWhenDetectTestAdCache =
                 isTurnOnAdPlacesDisabledWhenDetectTestAdDeferred.await()
             splashScreenConfigCache = splashScreenConfigDeferred.await()
+            languageActivityConfigCache = languageActivityConfigDeferred.await()
+            onBoardingConfigCache = onBoardingConfigDeferred.await()
+            startFlowConfigCache = StartFlowConfig(
+                splashScreenConfig = requireNotNull(splashScreenConfigCache),
+                languageActivityConfig = requireNotNull(languageActivityConfigCache),
+                onBoardingConfig = requireNotNull(onBoardingConfigCache),
+            )
             adPlacesCache = adPlacesDeferred.await()
             bannerAdConfigCache = bannerAdConfigDeferred.await()
             nativeAdConfigCache = nativeAdConfigDeferred.await()
@@ -166,6 +182,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
             rewardedAdConfigCache = rewardedAdConfigDeferred.await()
             appOpenAdConfigCache = appOpenAdConfigDeferred.await()
             requestConsentConfigCache = requestConsentConfigDeferred.await()
+            tutorialConfigCache = tutorialConfigDeferred.await()
             getOtherConfig.await()
 
             if (isNotifyComplete) {
@@ -181,6 +198,9 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
     private var adPlacesDisableWhenDetectTestAdCache: List<String>? = null
     private var isTurnOnAdPlacesDisabledWhenDetectTestAdCache: Boolean? = null
     private var splashScreenConfigCache: SplashScreenConfig? = null
+    private var languageActivityConfigCache: LanguageActivityConfig? = null
+    private var onBoardingConfigCache: OnBoardingConfig? = null
+    private var startFlowConfigCache: StartFlowConfig? = null
     private var adPlacesCache: List<AdPlace>? = null
     private var nativeAdConfigCache: NativeAdTypeConfig? = null
     private var bannerAdConfigCache: BannerAdTypeConfig? = null
@@ -189,6 +209,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
     private var rewardedAdConfigCache: RewardedAdTypeConfig? = null
     private var appOpenAdConfigCache: AppOpenAdTypeConfig? = null
     private var requestConsentConfigCache: RequestConsentConfig? = null
+    private var tutorialConfigCache: TutorialConfig? = null
 
     private fun getAppConfigRaw(): AppConfig {
         val model = remoteConfigService.getAppConfig()
@@ -279,6 +300,14 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
         } else {
             splashScreenConfigModelMapper.toData(model)
         }
+    }
+
+    private fun getLanguageActivityConfigRaw(): LanguageActivityConfig {
+        return LanguageActivityConfig.from(remoteConfigService.getLanguageActivityConfig())
+    }
+
+    private fun getOnBoardingConfigRaw(): OnBoardingConfig {
+        return OnBoardingConfig.from(remoteConfigService.getOnBoardingConfig())
     }
 
     private fun getAdPlacesRaw(): List<AdPlace> {
@@ -398,6 +427,19 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
         }
     }
 
+    private fun getTutorialConfigRaw(): TutorialConfig {
+        val model = remoteConfigService.getTutorialConfig()
+        return if (model == null) {
+            TutorialConfig(
+                enableAllAds = true,
+                enableAd1 = true,
+                enableAd2 = true,
+            )
+        } else {
+            tutorialConfigModelMapper.toData(model)
+        }
+    }
+
     override fun getAppConfig(): AppConfig {
         return appConfigCache ?: getAppConfigRaw()
     }
@@ -407,7 +449,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
     }
 
     override fun getAdPlaceBy(adPlaceName: IAdPlaceName): AdPlace {
-        return getAdPlaces().find { it.placeName == adPlaceName } ?: NoneAdPlace()
+        return getAdPlaces().find { it.placeName.name == adPlaceName.name } ?: NoneAdPlace()
     }
 
     override fun getPreventAdClickConfig(): PreventAdClickConfig {
@@ -429,6 +471,22 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
 
     override fun getSplashScreenConfig(): SplashScreenConfig {
         return splashScreenConfigCache ?: getSplashScreenConfigRaw()
+    }
+
+    override fun getLanguageActivityConfig(): LanguageActivityConfig {
+        return languageActivityConfigCache ?: getLanguageActivityConfigRaw()
+    }
+
+    override fun getOnBoardingConfig(): OnBoardingConfig {
+        return onBoardingConfigCache ?: getOnBoardingConfigRaw()
+    }
+
+    override fun getStartFlowConfig(): StartFlowConfig {
+        return startFlowConfigCache ?: StartFlowConfig(
+            splashScreenConfig = getSplashScreenConfig(),
+            languageActivityConfig = getLanguageActivityConfig(),
+            onBoardingConfig = getOnBoardingConfig(),
+        )
     }
 
     override fun getAdPlaces(): List<AdPlace> {
@@ -461,5 +519,9 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
 
     override fun getRequestConsentConfig(): RequestConsentConfig {
         return requestConsentConfigCache ?: getRequestConsentConfigRaw()
+    }
+
+    override fun getTutorialConfig(): TutorialConfig {
+        return tutorialConfigCache ?: getTutorialConfigRaw()
     }
 }

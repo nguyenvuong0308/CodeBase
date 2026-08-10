@@ -4,8 +4,8 @@ import android.view.LayoutInflater
 import androidx.activity.viewModels
 import com.codebasetemplate.databinding.CoreActivityBaseBinding
 import com.codebasetemplate.features.feature_uninstall.ui.navigate.UninstallNavigateEvent
+import com.codebasetemplate.required.ads.AppAdPlaceName
 import com.core.baseui.HostBaseActivity
-import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -38,8 +38,8 @@ class UninstallActivityHost :
 
     override fun providerPreloadBannerNativeAdPlaceName(): List<IAdPlaceName> {
         return listOf(
-            CoreAdPlaceName.ANCHORED_UNINSTALL_BOTTOM_STEP_1,
-            CoreAdPlaceName.ANCHORED_UNINSTALL_BOTTOM_STEP_2
+            AppAdPlaceName.ANCHORED_UNINSTALL_BOTTOM_STEP_1,
+            AppAdPlaceName.ANCHORED_UNINSTALL_BOTTOM_STEP_2
         )
     }
 }

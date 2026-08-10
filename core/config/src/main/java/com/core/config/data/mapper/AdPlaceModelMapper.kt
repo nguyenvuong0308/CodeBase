@@ -9,11 +9,15 @@ import com.core.config.domain.data.BannerAdPlace
 import com.core.config.domain.data.BannerSize
 import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.CoreAdPlaceName.NONE
+import com.core.config.domain.data.IAdPlaceName
 import com.core.config.domain.data.IAppProviderAdPlaceName
 import com.core.config.domain.data.InterstitialAdPlace
+import com.core.config.domain.data.NativeAfterInterstitialLoadStrategy
 import com.core.config.domain.data.NativeAdPlace
+import com.core.config.domain.data.NativeExpandTemplate
 import com.core.config.domain.data.NativeTemplateSize
 import com.core.config.domain.data.NoneAdPlace
+import com.core.config.domain.data.RemoteAdPlaceName
 import com.core.config.domain.data.RewardedInterstitialAdPlace
 import com.core.config.domain.data.RewardedVideoAdPlace
 import com.core.utilities.isAppDebuggable
@@ -31,89 +35,72 @@ internal class AdPlaceModelMapper @Inject constructor(
 ): ModelMapper<AdPlaceModel, AdPlace> {
 
     override fun toData(model: AdPlaceModel): AdPlace {
-        val placeNameApp = appAdPlaceName.findAdPlaceName(model.adPlace ?: "")
-        val placeNameCore =  CoreAdPlaceName.fromKey(model.adPlace ?: "")
-        if(placeNameApp != null && placeNameCore != NONE && context.isAppDebuggable()) {
-            Toasty.error(context, "Conflict adPlaname core and app ${placeNameCore.name}, please remove it from app module").show()
-            Timber.e("Conflict adPlaname core and app ${placeNameCore.name}, please remove it from app module")
-        }
-        val placeName = placeNameApp?: placeNameCore
+        val placeName = resolvePlaceName(model.adPlace ?: "", allowRemotePlaceName = false)
         val adId = model.adId ?: ""
+        // Keep only configured high-floor ids that can be loaded by the ads SDK.
+        val highFloorAdIds = model.highFloorAdIds.orEmpty().filter { it.isNotBlank() }
         val adType = AdType.getAdTypeBy(model.adType ?: "")
         val isEnable = model.isEnable ?: false
         val isAutoLoadAfterDismiss = model.isAutoLoadAfterDismiss ?: true
         val isIgnoreInterval = model.isIgnoreInterval ?: false
+        val isTutorialFlow = model.isTutorialFlow ?: false
         val isTrackingClick = model.isTrackingClick ?: false
         val isTrackingShow = model.isTrackingShow ?: false
-        val ctaRadius = model.ctaRadius
         return when(adType) {
             AdType.RewardedVideo -> RewardedVideoAdPlace(
                 placeName = placeName,
                 adId = adId,
+                highFloorAdIds = highFloorAdIds,
                 adType = adType,
                 isEnable = isEnable,
                 isAutoLoadAfterDismiss = isAutoLoadAfterDismiss,
                 isIgnoreInterval = isIgnoreInterval,
+                isTutorialFlow = isTutorialFlow,
                 isTrackingClick = isTrackingClick,
                 isTrackingShow = isTrackingShow
             )
             AdType.RewardedInterstitial -> RewardedInterstitialAdPlace(
                 placeName = placeName,
                 adId = adId,
+                highFloorAdIds = highFloorAdIds,
                 adType = adType,
                 isEnable = isEnable,
                 isAutoLoadAfterDismiss = isAutoLoadAfterDismiss,
                 isIgnoreInterval = isIgnoreInterval,
+                isTutorialFlow = isTutorialFlow,
                 isTrackingClick = isTrackingClick,
                 isTrackingShow = isTrackingShow
             )
             AdType.Interstitial -> InterstitialAdPlace(
                 placeName = placeName,
                 adId = adId,
+                highFloorAdIds = highFloorAdIds,
                 adType = adType,
                 isEnable = isEnable,
                 isAutoLoadAfterDismiss = isAutoLoadAfterDismiss,
                 isIgnoreInterval = isIgnoreInterval,
+                isTutorialFlow = isTutorialFlow,
                 isTrackingClick = isTrackingClick,
                 isTrackingShow = isTrackingShow,
-                plusInterval = model.plusInterval ?: 0
+                plusInterval = model.plusInterval ?: 0,
+                isShowNativeAfter = model.isShowNativeAfter == true,
+                nativeAfterLoadStrategy = NativeAfterInterstitialLoadStrategy.getBy(
+                    model.nativeAfterLoadStrategy ?: NativeAfterInterstitialLoadStrategy.WithInterstitial.key
+                ),
+                nativeAfterInterstitial = model.nativeConfig
+                    ?.takeIf { model.isShowNativeAfter == true }
+                    ?.let { toNativeAdPlace(it, allowRemotePlaceName = true) }
             )
-            AdType.Native -> NativeAdPlace(
-                placeName = placeName,
-                adId = adId,
-                adType = adType,
-                isEnable = isEnable,
-                isAutoLoadAfterDismiss = isAutoLoadAfterDismiss,
-                isIgnoreInterval = isIgnoreInterval,
-                nativeTemplateSize = NativeTemplateSize.getSizeBy(model.nativeTemplateSize ?: ""),
-                backgroundCta = model.backgroundCta,
-                borderColor = model.borderColor,
-                backgroundColor = model.backgroundColor,
-                primaryTextColor = model.primaryTextColor,
-                bodyTextColor = model.bodyTextColor,
-                isEnableFullScreenImmersive = model.isEnableFullScreenImmersive,
-                isTrackingClick = isTrackingClick,
-                ctaTextColor = model.ctaTextColor,
-                isTrackingShow = isTrackingShow,
-                ctaRadius = ctaRadius,
-                backgroundRadius = model.backgroundRadius,
-                ctaBorderColor = model.ctaBorderColor,
-                backgroundFullColor = model.backgroundFullColor,
-                expiredTimeSecond = model.expiredTimeSecond,
-                countDownTimer = model.countDownTimer,
-                mediaBackgroundColor = model.mediaBackgroundColor,
-                hideTextCountDown = model.hideTextCountDown,
-                hideProgressCountDown = model.hideProgressCountDown,
-                hideTextSkipCountDown = model.hideTextSkipCountDown,
-                progressBarTint = model.progressBarTint
-            )
+            AdType.Native -> toNativeAdPlace(model, allowRemotePlaceName = false) ?: NoneAdPlace()
             AdType.Banner -> BannerAdPlace(
                 placeName = placeName,
                 adId = adId,
+                highFloorAdIds = highFloorAdIds,
                 adType = adType,
                 isEnable = isEnable,
                 isAutoLoadAfterDismiss = isAutoLoadAfterDismiss,
                 isIgnoreInterval = isIgnoreInterval,
+                isTutorialFlow = isTutorialFlow,
                 bannerSize = BannerSize.getSizeBy(model.bannerSize ?: ""),
                 isCollapsible = model.isCollapsible ?: false,
                 isTrackingClick = isTrackingClick,
@@ -123,16 +110,88 @@ internal class AdPlaceModelMapper @Inject constructor(
             AdType.AppOpen -> AppOpenAdPlace(
                 placeName = placeName,
                 adId = adId,
+                highFloorAdIds = highFloorAdIds,
                 adType = adType,
                 isEnable = isEnable,
                 isAutoLoadAfterDismiss = isAutoLoadAfterDismiss,
                 isIgnoreInterval = isIgnoreInterval,
+                isTutorialFlow = isTutorialFlow,
                 limitShow = model.limitShow ?: 10000,
                 isTrackingClick = isTrackingClick,
                 isTrackingShow = isTrackingShow
             )
             AdType.None -> NoneAdPlace()
         }
+    }
+
+    private fun resolvePlaceName(key: String, allowRemotePlaceName: Boolean): IAdPlaceName {
+        val placeNameApp = appAdPlaceName.findAdPlaceName(key)
+        val placeNameCore = CoreAdPlaceName.fromKey(key)
+        if (placeNameApp != null && placeNameCore != NONE && context.isAppDebuggable()) {
+            Toasty.error(
+                context,
+                "Conflict adPlaname core and app ${placeNameCore.name}, please remove it from app module"
+            ).show()
+            Timber.e("Conflict adPlaname core and app ${placeNameCore.name}, please remove it from app module")
+        }
+        return placeNameApp ?: placeNameCore.takeIf { it != NONE }
+        ?: if (allowRemotePlaceName && key.isNotBlank()) RemoteAdPlaceName(key) else NONE
+    }
+
+    private fun toNativeAdPlace(
+        model: AdPlaceModel,
+        allowRemotePlaceName: Boolean
+    ): NativeAdPlace? {
+        val adType = AdType.getAdTypeBy(model.adType ?: "")
+        if (adType != AdType.Native) return null
+        val placeName = resolvePlaceName(model.adPlace ?: "", allowRemotePlaceName)
+        // Native lồng trong interstitial có thể dùng tên khai báo trực tiếp từ Firebase,
+        // nhưng tên rỗng/không resolve được phải bị loại để tránh dùng chung holder NONE.
+        if (placeName == NONE) return null
+        return NativeAdPlace(
+            placeName = placeName,
+            adId = model.adId ?: "",
+            highFloorAdIds = model.highFloorAdIds.orEmpty().filter { it.isNotBlank() },
+            adType = adType,
+            isEnable = model.isEnable ?: false,
+            isAutoLoadAfterDismiss = model.isAutoLoadAfterDismiss ?: true,
+            isIgnoreInterval = model.isIgnoreInterval ?: false,
+            isTutorialFlow = model.isTutorialFlow ?: false,
+            isNativeCollapsible = model.isNativeCollapsible == true,
+            nativeExpandTemplate = NativeExpandTemplate.getBy(model.nativeExpandTemplate),
+            nativeTemplateSize = NativeTemplateSize.getSizeBy(model.nativeTemplateSize ?: ""),
+            backgroundCta = model.backgroundCta,
+            borderColor = model.borderColor,
+            backgroundColor = model.backgroundColor,
+            primaryTextColor = model.primaryTextColor,
+            bodyTextColor = model.bodyTextColor,
+            isEnableFullScreenImmersive = model.isEnableFullScreenImmersive,
+            isTrackingClick = model.isTrackingClick ?: false,
+            ctaTextColor = model.ctaTextColor,
+            isTrackingShow = model.isTrackingShow ?: false,
+            ctaRadius = model.ctaRadius,
+            backgroundRadius = model.backgroundRadius,
+            ctaBorderColor = model.ctaBorderColor,
+            backgroundFullColor = model.backgroundFullColor,
+            expiredTimeSecond = model.expiredTimeSecond,
+            refreshTimeSecond = model.refreshTimeSecond ?: 0,
+            countDownTimer = model.countDownTimer,
+            closeStepCount = model.closeStepCount,
+            step1CountDownTimer = model.step1CountDownTimer,
+            step2CountDownTimer = model.step2CountDownTimer,
+            mediaBackgroundColor = model.mediaBackgroundColor,
+            hideTextCountDown = model.hideTextCountDown,
+            hideProgressCountDown = model.hideProgressCountDown,
+            hideTextSkipCountDown = model.hideTextSkipCountDown,
+            progressBarTint = model.progressBarTint,
+            controlClosePosition = model.controlClosePosition,
+            collapsibleExpandCooldownSecond = model.collapsibleExpandCooldownSecond,
+            pipAnchorMode = model.pipAnchorMode,
+            pipMarginDp = model.pipMarginDp,
+            pipTopMarginDp = model.pipTopMarginDp,
+            textColorAdsNotifyView = model.textColorAdsNotifyView,
+            backgroundColorAdsNotifyView = model.backgroundColorAdsNotifyView
+        )
     }
 
 }

@@ -22,6 +22,15 @@
     <color name="core_appColor">#006FFF</color>
     <color name="core_item_language_selected">@color/core_appColor</color>
     <color name="core_item_language_unselected">@color/white</color>
+    <color name="home_accent">#9747FF</color>
+    <color name="app_primary_color">@color/home_accent</color>
+    <color name="ripple">#1A000000</color>
+    <color name="language_v2_text">#202027</color>
+    <color name="language_v2_subtitle">#3F3B45</color>
+    <color name="language_v2_card">#F2F2F2</color>
+    <color name="language_v2_branch">#8D8D8D</color>
+    <color name="language_v2_icon">#858585</color>
+    <color name="language_v2_radio">#8C8C8C</color>
 
     <color name="indigo_500">#6366F1</color>
     <color name="green_500">#22C55E</color>

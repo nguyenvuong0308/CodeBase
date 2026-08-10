@@ -12,11 +12,27 @@ internal data class AdPlaceModel(
     @Json(name = "ad_id")
     val adId: String?,
 
+    // Optional higher-priority ad unit ids. They are tried before adId.
+    @Json(name = "high_floor_ad_ids")
+    val highFloorAdIds: List<String>?,
+
+    @Json(name = "is_tutorial_flow")
+    val isTutorialFlow: Boolean?,
+
     @Json(name = "ad_type")
     val adType: String?,
 
     @Json(name = "is_enable")
     val isEnable: Boolean?,
+
+    @Json(name = "is_show_native_after")
+    val isShowNativeAfter: Boolean?,
+
+    @Json(name = "native_after_load_strategy")
+    val nativeAfterLoadStrategy: String?,
+
+    @Json(name = "native_config")
+    val nativeConfig: AdPlaceModel?,
 
     @Json(name = "is_auto_load_after_dismiss")
     val isAutoLoadAfterDismiss: Boolean?,
@@ -31,6 +47,12 @@ internal data class AdPlaceModel(
     @Json(name = "is_collapsible")
     val isCollapsible: Boolean?,
 
+    @Json(name = "is_native_collapsible")
+    val isNativeCollapsible: Boolean?,
+
+    @Json(name = "native_expand_template")
+    val nativeExpandTemplate: String?,
+
     @Json(name = "auto_reload_collapsible")
     val autoReloadCollapsible: Boolean?,
 
@@ -42,8 +64,20 @@ internal data class AdPlaceModel(
     @Json(name = "expired_time_second")
     val expiredTimeSecond: Int?,
 
+    @Json(name = "refresh_time_second")
+    val refreshTimeSecond: Int?,
+
     @Json(name = "count_down_timer")
     val countDownTimer: Int?,
+
+    @Json(name = "close_step_count")
+    val closeStepCount: Int?,
+
+    @Json(name = "step_1_count_down_timer")
+    val step1CountDownTimer: Int?,
+
+    @Json(name = "step_2_count_down_timer")
+    val step2CountDownTimer: Int?,
 
     @Json(name = "background_cta")
     val backgroundCta: String?,
@@ -106,4 +140,26 @@ internal data class AdPlaceModel(
 
     @Json(name = "progress_bar_tint")
     val progressBarTint: String?,
+
+    @Json(name = "control_close_position")
+    val controlClosePosition: String?,
+
+    @Json(name = "collapsible_expand_cooldown_second")
+    val collapsibleExpandCooldownSecond: Int?,
+
+    @Json(name = "pip_anchor_mode")
+    val pipAnchorMode: String?,
+
+    @Json(name = "pip_margin_dp")
+    val pipMarginDp: Float?,
+
+    @Json(name = "pip_top_margin_dp")
+    val pipTopMarginDp: Float?,
+
+     @Json(name = "text_color_ads_notify_view")
+    val textColorAdsNotifyView: String?,
+
+    @Json(name = "background_color_ads_notify_view")
+    val backgroundColorAdsNotifyView: String?,
+
 )

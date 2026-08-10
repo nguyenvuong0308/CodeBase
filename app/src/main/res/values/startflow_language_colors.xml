@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        App-owned StartFlow Language palette.
+        Change only the values in this file to skin Language V1 and V2.
+    -->
+
+    <!-- Language V1 -->
+    <color name="startflow_language_v1_background">#DCEDFF</color>
+    <color name="startflow_language_v1_toolbar_title">#FF000000</color>
+    <color name="startflow_language_v1_toolbar_action">#FF000000</color>
+    <color name="startflow_language_v1_loading_indicator">#2196F3</color>
+    <color name="startflow_language_v1_loading_text">#FF000000</color>
+    <color name="startflow_language_v1_ad_background">#FF000000</color>
+    <color name="startflow_language_v1_item_selected_background">#FFFFFFFF</color>
+    <color name="startflow_language_v1_item_unselected_background">#FFFFFFFF</color>
+    <color name="startflow_language_v1_item_selected_border">#006FFF</color>
+    <color name="startflow_language_v1_item_selected_text">#006FFF</color>
+    <color name="startflow_language_v1_item_unselected_text">#FF000000</color>
+    <color name="startflow_language_v1_radio_selected">#006FFF</color>
+    <color name="startflow_language_v1_radio_unselected">#C6C6C6</color>
+
+    <!-- Language V2 -->
+    <color name="startflow_language_v2_background">#FFFFFFFF</color>
+    <color name="startflow_language_v2_back_icon">#FF000000</color>
+    <color name="startflow_language_v2_title">#FF000000</color>
+    <color name="startflow_language_v2_apply_icon">@color/home_accent</color>
+    <color name="startflow_language_v2_loading_indicator">@color/home_accent</color>
+    <color name="startflow_language_v2_loading_text">#FF000000</color>
+    <color name="startflow_language_v2_ad_background">#FF000000</color>
+    <color name="startflow_language_v2_group_background">#F2F2F2</color>
+    <color name="startflow_language_v2_group_title">#202027</color>
+    <color name="startflow_language_v2_group_subtitle">#3F3B45</color>
+    <color name="startflow_language_v2_flag_background">#FFFFFFFF</color>
+    <color name="startflow_language_v2_expand_icon">#858585</color>
+    <color name="startflow_language_v2_branch">#8D8D8D</color>
+    <color name="startflow_language_v2_item_background">#F2F2F2</color>
+    <color name="startflow_language_v2_item_selected_background">@color/home_accent</color>
+    <color name="startflow_language_v2_item_text">#202027</color>
+    <color name="startflow_language_v2_item_selected_text">#FFFFFFFF</color>
+    <color name="startflow_language_v2_radio_unselected">#8C8C8C</color>
+    <color name="startflow_language_v2_radio_selected">#FFFFFFFF</color>
+</resources>

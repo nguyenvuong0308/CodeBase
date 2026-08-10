@@ -67,6 +67,22 @@
 
             <!-- Mục 3: Shop -->
             <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/nativePipTestLayout"
+                style="@style/MenuItemStyle"
+                android:background="@drawable/bg_transparent_ripple_media_shape">
+
+                <ImageView
+                    style="@style/MenuIconStyle"
+                    android:contentDescription="Native PIP Test"
+                    android:src="@drawable/ic_view_carousel"
+                    app:tint="@color/blue_500" />
+
+                <TextView
+                    style="@style/MenuTextStyle"
+                    android:text="Native PIP Test" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
                 android:id="@+id/shopLayout"
                 style="@style/MenuItemStyle"
                 android:background="@drawable/bg_transparent_ripple_media_shape">
@@ -147,6 +163,22 @@
                 <TextView
                     style="@style/MenuTextStyle"
                     android:text="Show Interstitial 2" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/showNativeInterstitial"
+                style="@style/MenuItemStyle"
+                android:background="@drawable/bg_transparent_ripple_media_shape">
+
+                <ImageView
+                    style="@style/MenuIconStyle"
+                    android:contentDescription="load Interstitial"
+                    android:src="@drawable/ic_fullscreen"
+                    app:tint="@color/red_500" />
+
+                <TextView
+                    style="@style/MenuTextStyle"
+                    android:text="Native Interstitial" />
             </androidx.appcompat.widget.LinearLayoutCompat>
 
 

@@ -49,11 +49,10 @@
             1
             ],
             "intro_data_v3": [
-            0,
+            1,
+            1,
             2,
-            0,
-            2,
-            1
+            0
             ]
             }
         </value>
@@ -65,6 +64,16 @@
             "max_ad_click_per_session": 6,
             "time_per_session": 120,
             "time_disable_ads_when_reached_max_ad_click": 20
+            }
+        </value>
+    </entry>
+    <entry>
+        <key>tutorial_config</key>
+        <value>
+            {
+            "enable_all_ads": true,
+            "enable_ad_1": true,
+            "enable_ad_2": true
             }
         </value>
     </entry>
@@ -87,7 +96,7 @@
             "max_time_to_wait_app_open_ad": 10,
             "time_skip_app_open_ad_when_not_available": 6,
             "ad_type_first_open": "interstitial",
-            "ad_type": "app_open",
+            "ad_type": "interstitial",
             "is_enable_retry": true,
             "is_load_before_eu_consent": true,
             "min_time_wait_progress_before_show_ad": 3,
@@ -104,17 +113,20 @@
     <!--ad_type: banner - native-->
     <!--native_template_size:
     small - small_cta_top - small_cta_bottom - small_cta_right -
-    small_long - small_for_popup - medium - medium_cta_top - medium_cta_bottom -
-    medium_cta_right_top - medium_cta_right - medium_media_right - medium_collapsible_cta_bottom
+    small_long - small_for_popup - medium - medium_cta_top - medium_cta_bottom - medium_short_cta_bottom -
+    medium_cta_right_top - medium_cta_right - medium_media_right -
     medium_media_left - full_cta_bottom - full_cta_top - full_cta_right - full_cta_bottom_onboarding
     hoặc custom key
     -->
+    <!--is_native_collapsible: true - false, bật popup collapsible cho native template thường-->
+    <!--native_expand_template: native_expand_v1 - native_expand_v2-->
     <!--background_color: màu nền-->
     <!--primary_text_color: màu text primary-->
     <!--body_text_color: màu text body-->
     <!--background_cta: -->
     <!--cta_text_color: -->
     <!--border_color: -->
+    <!--refresh_time_second: native reload interval in seconds, <= 0 disables refresh-->
 
     <!--chung-->
     <!--is_enable: bật tắt ví trí quảng cáo-->
@@ -177,6 +189,7 @@
             "ad_type": "native",
             "is_tracking_click": true,
             "native_template_size": "small_cta_bottom",
+            "is_tutorial_flow": true,
             "is_enable": true,
             "background_color": "#242424",
             "primary_text_color": "#F0F0F0",
@@ -187,9 +200,11 @@
             {
             "place_name": "anchored_onboarding_bottom_v2",
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": ["ca-app-pub-3940256099942544/2247696110"],
             "ad_type": "native",
             "is_tracking_click": true,
             "native_template_size": "small_cta_bottom",
+            "is_tutorial_flow": true,
             "is_enable": true,
             "background_color": "#ffffff",
             "primary_text_color": "#1D1D1D",
@@ -201,8 +216,10 @@
             {
             "place_name": "anchored_full_onboarding",
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": ["ca-app-pub-3940256099942544/2247696110"],
             "ad_type": "native",
             "native_template_size": "full_cta_bottom_onboarding",
+            "is_tutorial_flow": true,
             "is_enable": true,
             "background_color": "#FFFFFF",
             "background_full_color": "#FFFFFF",
@@ -216,8 +233,10 @@
             {
             "place_name": "anchored_full_onboarding_v2",
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": ["ca-app-pub-3940256099942544/2247696110"],
             "ad_type": "native",
             "native_template_size": "full_cta_bottom_onboarding",
+            "is_tutorial_flow": true,
             "is_enable": true,
             "background_color": "#767676,#00000000",
             "background_full_color": "#000",
@@ -227,6 +246,189 @@
             "background_cta": "#F59E0B,#EF4444",
             "border_color": "#00000000",
             "cta_radius_dp": 12
+            },
+            {
+            "place_name": "flow_tutorial_201_language_1_n_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/2247696110"
+            ],
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "is_tutorial_flow": true,
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "flow_tutorial_201_language_2_n_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/2247696110"
+            ],
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "is_tutorial_flow": true,
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "flow_tutorial_201_language_3_n_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/2247696110"
+            ],
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "is_tutorial_flow": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "flow_tutorial_301_onb1_n_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/2247696110"
+            ],
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "is_tutorial_flow": true,
+            "native_template_size": "medium_short_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "flow_tutorial_302_onb2_n_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/2247696110"
+            ],
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_short_cta_bottom",
+            "is_enable": true,
+            "is_tutorial_flow": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "flow_tutorial_303_onb3_n_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/2247696110"
+            ],
+            "ad_type": "native",
+            "native_template_size": "full_cta_bottom",
+            "is_enable": true,
+            "is_tutorial_flow": true,
+            "background_color": "#FFFFFF",
+            "background_full_color": "#000",
+            "is_tracking_click": true,
+            "primary_text_color": "#1D1D1D",
+            "body_text_color": "#404040",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "flow_tutorial_303_onb4_n_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/2247696110"
+            ],
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_short_cta_bottom",
+            "is_enable": true,
+            "is_tutorial_flow": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "anchored_change_language_v2_native_1",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "anchored_change_language_v2_native_2",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "anchored_change_language_v2_native_3",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
+            },
+            {
+            "place_name": "anchored_change_language_v2_from_setting_native",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "is_tracking_click": true,
+            "native_template_size": "medium_cta_bottom",
+            "is_enable": true,
+            "background_color": "#FCFAFF",
+            "primary_text_color": "#141218",
+            "body_text_color": "#938f96",
+            "background_cta": "#9747ff",
+            "border_color": "#eaddff",
+            "cta_radius_dp": 99
             },
             {
             "place_name": "anchored_uninstall_bottom_step_1",
@@ -309,11 +511,44 @@
             },
             {
             "place_name": "anchored_bottom_home",
-            "ad_id": "ca-app-pub-3940256099942544/9214589741",
-            "ad_type": "banner",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "native_template_size": "small_cta_bottom",
+            "is_native_collapsible": true,
+            "native_expand_template": "native_expand_v2",
             "is_tracking_click": true,
-            "banner_size": "anchored",
-            "is_enable": true
+            "is_enable": true,
+            "background_color": "#FFFFFF",
+            "cta_radius_dp": 5,
+            "primary_text_color": "#1F2937",
+            "body_text_color": "#6B7280",
+            "cta_text_color": "#FFFFFF",
+            "background_cta": "#5E56F5",
+            "border_color": "#E5E7EB",
+            "control_close_position": "left",
+            "collapsible_expand_cooldown_second": 10,
+            "expired_time_second": 10
+            },
+            {
+            "place_name": "anchored_native_pip_home",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "native_template_size": "native_pip",
+            "is_tracking_click": true,
+            "is_enable": true,
+            "background_color": "#FFFFFF",
+            "primary_text_color": "#1F2937",
+            "body_text_color": "#111827",
+            "cta_text_color": "#FFFFFF",
+            "background_cta": "#FFC21A,#FF7A00",
+            "border_color": "#000000",
+            "expired_time_second": 60,
+            "count_down_timer": 3,
+            "pip_anchor_mode": "fixed",
+            "background_color_ads_notify_view": "#898989",
+            "text_color_ads_notify_view": "#ffffff",
+            "pip_margin_dp": 20,
+            "pip_top_margin_dp": 40
             }
             ]
         </value>
@@ -331,19 +566,19 @@
             "place_name": "open_app_first_open",
             "ad_id": "ca-app-pub-3940256099942544/9257395921",
             "ad_type": "app_open",
-            "is_enable": false
+            "is_enable": true
             },
             {
             "place_name": "open_app",
             "ad_id": "ca-app-pub-3940256099942544/9257395921",
             "ad_type": "app_open",
-            "is_enable": false
+            "is_enable": true
             },
             {
             "place_name": "reopen_app",
             "ad_id": "ca-app-pub-3940256099942544/9257395921",
             "ad_type": "app_open",
-            "is_enable": false
+            "is_enable": true
             }
             ]
         </value>
@@ -353,6 +588,14 @@
     <!--action_app_open = từ lần thứ 2 vào app->-->
     <!--is_auto_load_after_dismiss = false app dụng cho màn splash->-->
     <!--ad_type = interstitial - rewarded-->
+    <!--Cấu hình native sau interstitial / native interstitial v3-->
+    <!--is_show_native_after = true thì show native_config sau khi interstitial dismiss; false thì chỉ show interstitial như cũ-->
+    <!--native_after_load_strategy = with_interstitial để load native cùng lúc load interstitial; on_interstitial_impression để load native khi interstitial bắt đầu show/impression-->
+    <!--native_config = cấu hình native ad sẽ được show sau interstitial; place_name có thể là remote place name riêng cho native-->
+    <!--control_close_position = left hoặc right, quyết định vị trí nút next/close của native interstitial v3-->
+    <!--close_step_count = 1 hoặc 2; 1 thì countdown xong cho close luôn với 1 progress bar; 2 thì step 1 next và step 2 close với 2 progress bar-->
+    <!--step_1_count_down_timer = số giây countdown cho step đầu tiên; nếu không có thì fallback về count_down_timer-->
+    <!--step_2_count_down_timer = số giây countdown cho step close trong chế độ 2-step; nếu không có thì fallback về count_down_timer-->
 
     <entry>
         <key>rewarded_rewardedinter_inter_ad_places</key>
@@ -362,22 +605,47 @@
             "place_name": "action_app_open_first_open",
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "ad_type": "interstitial",
+            "high_floor_ad_ids": [
+                "ca-app-pub-3940256099942544/1033173719"
+            ],
             "is_enable": false,
-            "is_auto_load_after_dismiss": false
+            "is_auto_load_after_dismiss": true
             },
             {
             "place_name": "action_app_open",
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "ad_type": "interstitial",
             "is_enable": false,
-            "is_auto_load_after_dismiss": false
+            "is_auto_load_after_dismiss": true
             },
             {
             "place_name": "fullscreen_test",
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "ad_type": "interstitial",
             "is_enable": true,
-            "plus_interval": 10
+            "is_show_native_after": true,
+            "native_after_load_strategy": "on_interstitial_impression",
+            "native_config": {
+                    "place_name": "fullscreen_test_native",
+                    "ad_id": "ca-app-pub-3940256099942544/2247696110",
+                    "ad_type": "native",
+                    "native_template_size": "full_interstitial_v3",
+                    "is_tracking_click": true,
+                    "is_enable": true,
+                    "background_color": "#CD121212",
+                    "background_full_color": "#FFFFFF",
+                    "cta_radius_dp": 5,
+                    "primary_text_color": "#1F2937",
+                    "body_text_color": "#6B7280",
+                    "cta_text_color": "#FFFFFF",
+                    "background_cta": "#22C55E",
+                    "border_color": "#00000000",
+                    "control_close_position": "left",
+                    "count_down_timer": 5,
+                    "close_step_count": 1,
+                    "step_1_count_down_timer": 2,
+                    "step_2_count_down_timer": 2
+                }
             },
             {
             "place_name": "fullscreen_show_to_home",
@@ -407,6 +675,24 @@
             "cta_text_color": "#FFFFFF",
             "background_cta": "#22C55E",
             "border_color": "#E5E7EB",
+            "count_down_timer": 5
+            },
+            {
+            "place_name": "fullscreen_native_interstitial",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "native_template_size": "full_interstitial_v3",
+            "is_tracking_click": true,
+            "is_enable": true,
+            "background_color": "#CD121212",
+            "background_full_color": "#FFFFFF",
+            "cta_radius_dp": 5,
+            "primary_text_color": "#1F2937",
+            "body_text_color": "#6B7280",
+            "cta_text_color": "#FFFFFF",
+            "background_cta": "#22C55E",
+            "border_color": "#00000000",
+            "control_close_position": "left",
             "count_down_timer": 5
             },
             {
@@ -444,10 +730,20 @@
             "count_down_timer": 30
             },
             {
+            "place_name": "fullscreen_back_language_setting",
+            "ad_id": "ca-app-pub-3940256099942544/1033173712",
+            "ad_type": "interstitial",
+            "is_enable": true
+            },
+            {
             "place_name": "action_next_in_introduction",
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "is_ignore_interval": true,
+            "high_floor_ad_ids": [
+                "ca-app-pub-3940256099942544/1033173719"
+            ],
             "ad_type": "interstitial",
+            "is_tutorial_flow": true,
             "is_auto_load_after_dismiss": false,
             "is_enable": true
             }
@@ -459,7 +755,7 @@
         <value>
             {
             "is_wait_load_to_show": false,
-            "ads_per_session": 5,
+            "ads_per_session": 99,
             "time_per_session": 600,
             "time_interval": 3,
             "time_interval_after_show_open_ad": 3,
@@ -550,12 +846,27 @@
             }
         </value>
     </entry>
-
+    <!--position_next:bottom/top-->
     <entry>
         <key>onboarding_config</key>
         <value>
             {
-            "version": 2
+            "version": 3,
+            "position_next": "top",
+            "is_show_close": true,
+            "is_show_swipe": false,
+            "delay_show_close_swipe_seconds": 1,
+            "background_top_next": "#000000"
+            }
+        </value>
+    </entry>
+
+    <entry>
+        <key>language_activity_config</key>
+        <value>
+            {
+            "version": 2,
+            "time_show_loading_lfo": 3
             }
         </value>
     </entry>

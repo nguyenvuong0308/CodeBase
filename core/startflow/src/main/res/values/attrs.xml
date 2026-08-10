@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="OutlineTextView">
+        <attr name="OutlineTextView_stroke_color" format="color" />
+        <attr name="OutlineTextView_stroke_size" format="dimension" />
+        <attr name="OutlineTextView_gradient" format="boolean" />
+    </declare-styleable>
+</resources>

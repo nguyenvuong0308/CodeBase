@@ -1,6 +1,7 @@
 package com.core.baseui
 
 import android.app.Activity
+import android.os.SystemClock
 import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
@@ -14,16 +15,22 @@ import com.core.ads.domain.AdsManager
 import com.core.baseui.ext.collectFlowOn
 import com.core.config.domain.RemoteConfigRepository
 import com.core.config.domain.data.IAdPlaceName
+import com.core.config.domain.data.NativeAdPlace
 import com.core.utilities.isAppDebuggable
 import com.core.utilities.manager.isNetworkConnected
 import com.core.utilities.toast
 import com.core.utilities.util.Timber
 import com.core.utilities.util.postDelayLifecycle
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 import java.util.UUID
 import kotlin.math.max
 
 private const val TAG = "ContextAds"
+private const val NATIVE_REFRESH_HOLDER_DELAY_MS = 2_000L
 
 abstract class ContextAds(
     var adsManager: AdsManager,
@@ -78,6 +85,10 @@ abstract class ContextAds(
     private var listHandleFullAds: HashMap<IAdPlaceName, (isShown: Boolean) -> Unit> = hashMapOf()
     private var listHandleRewardAds: HashMap<IAdPlaceName, (isShown: Boolean, isEarnedReward: Boolean, isNoAds: Boolean) -> Unit> =
         hashMapOf()
+    private val bannerNativeRefreshJobs = mutableMapOf<IAdPlaceName, Job>()
+    private val bannerNativeRefreshIntervals = mutableMapOf<IAdPlaceName, Int>()
+    private val nativeRefreshLoadingStartedAtMs = mutableMapOf<IAdPlaceName, Long>()
+    private val delayedNativeRefreshApplyJobs = mutableMapOf<IAdPlaceName, Job>()
 
     init {
         adBannerOrNativePreload.addAll(initPreloadBannerNativeAdPlaceName)
@@ -117,6 +128,7 @@ abstract class ContextAds(
             adRewardAll.clear()
             adRewardAll.addAll(initRewardAdPlaceName)
         }
+        syncNativeRefreshJobsWithAdPlaces()
     }
 
     fun onDestroy() {
@@ -139,6 +151,12 @@ abstract class ContextAds(
         adRewardLazyLoad.clear()
         adRewardAll.clear()
         adRewardWithoutAutoRetry.clear()
+        bannerNativeRefreshJobs.values.forEach { it.cancel() }
+        bannerNativeRefreshJobs.clear()
+        bannerNativeRefreshIntervals.clear()
+        delayedNativeRefreshApplyJobs.values.forEach { it.cancel() }
+        delayedNativeRefreshApplyJobs.clear()
+        nativeRefreshLoadingStartedAtMs.clear()
         _retryLoadReward = 0
         _isDisableAdDueManyClickFlow = null
         activityRef.clear()
@@ -176,9 +194,159 @@ abstract class ContextAds(
             lifecycleOwner = lifecycleOwner,
             lifecycleScope = lifecycleScope, sharedFlow = adsManager.adLoadBannerNativeFlow
         ) { adResource ->
-            onBannerNativeResult(adResource)
+            if (!handleNativeRefresh(adResource)) {
+                onBannerNativeResult(adResource)
+            }
         }
 
+    }
+
+    private fun handleNativeRefresh(adResource: AdLoadBannerNativeUiResource): Boolean {
+        if (!isContextBannerNativePlace(adResource.commonAdPlaceName)) return false
+        return when (adResource) {
+            is AdLoadBannerNativeUiResource.NativeAdLoaded -> {
+                startNativeRefreshIfNeed(adResource.adPlaceName)
+                if (nativeRefreshLoadingStartedAtMs.containsKey(adResource.adPlaceName)) {
+                    applyNativeRefreshAfterHolderDelay(adResource)
+                    true
+                } else {
+                    false
+                }
+            }
+            is AdLoadBannerNativeUiResource.AdFailed,
+            is AdLoadBannerNativeUiResource.AdNetworkError -> {
+                finishNativeRefreshTransition(adResource.commonAdPlaceName)
+                false
+            }
+            else -> false
+        }
+    }
+
+    private fun startNativeRefreshIfNeed(adPlaceName: IAdPlaceName) {
+        if (!isContextBannerNativePlace(adPlaceName)) {
+            cancelNativeRefresh(adPlaceName)
+            return
+        }
+
+        val refreshTimeSecond = ((remoteConfigRepository.getAdPlaceBy(adPlaceName) as? NativeAdPlace)
+            ?.refreshTimeSecond ?: 0).coerceAtLeast(0)
+        if (refreshTimeSecond <= 0) {
+            cancelNativeRefresh(adPlaceName)
+            return
+        }
+
+        val currentJob = bannerNativeRefreshJobs[adPlaceName]
+        if (currentJob?.isActive == true &&
+            bannerNativeRefreshIntervals[adPlaceName] == refreshTimeSecond
+        ) {
+            return
+        }
+
+        currentJob?.cancel()
+        bannerNativeRefreshIntervals[adPlaceName] = refreshTimeSecond
+        bannerNativeRefreshJobs[adPlaceName] = lifecycleScope.launch {
+            while (isActive) {
+                delay(refreshTimeSecond.toLong() * 1_000L)
+                if (isWaitingLoad ||
+                    !lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+                ) {
+                    continue
+                }
+
+                val activity = activityRef.get()
+                if (activity == null || activity.isFinishing || activity.isDestroyed) {
+                    cancelNativeRefresh(adPlaceName)
+                    break
+                }
+
+                val currentRefreshTimeSecond =
+                    ((remoteConfigRepository.getAdPlaceBy(adPlaceName) as? NativeAdPlace)
+                        ?.refreshTimeSecond ?: 0).coerceAtLeast(0)
+                if (currentRefreshTimeSecond <= 0) {
+                    cancelNativeRefresh(adPlaceName)
+                    break
+                }
+                if (currentRefreshTimeSecond != refreshTimeSecond) {
+                    startNativeRefreshIfNeed(adPlaceName)
+                    break
+                }
+
+                showNativeRefreshHolder(adPlaceName)
+                adsManager.loadBannerNativeAd(
+                    activity = activity,
+                    adPlaceName = adPlaceName,
+                    identifier = identifier,
+                    isPreload = false,
+                    isReload = true
+                )
+            }
+        }
+    }
+
+    private fun showNativeRefreshHolder(adPlaceName: IAdPlaceName) {
+        val nativeAdPlace = remoteConfigRepository.getAdPlaceBy(adPlaceName) as? NativeAdPlace
+            ?: return
+        nativeRefreshLoadingStartedAtMs[adPlaceName] = SystemClock.elapsedRealtime()
+        delayedNativeRefreshApplyJobs.remove(adPlaceName)?.cancel()
+        onBannerNativeResult(
+            AdLoadBannerNativeUiResource.Loading(
+                adPlaceName = adPlaceName,
+                adType = nativeAdPlace.adType,
+                bannerSize = com.core.config.domain.data.BannerSize.Anchored,
+                nativeTemplateSize = nativeAdPlace.nativeTemplateSize
+            )
+        )
+    }
+
+    private fun applyNativeRefreshAfterHolderDelay(
+        adResource: AdLoadBannerNativeUiResource.NativeAdLoaded
+    ) {
+        val adPlaceName = adResource.adPlaceName
+        val loadingStartedAtMs = nativeRefreshLoadingStartedAtMs[adPlaceName]
+            ?: SystemClock.elapsedRealtime()
+        val delayMs = max(
+            0L,
+            NATIVE_REFRESH_HOLDER_DELAY_MS - (SystemClock.elapsedRealtime() - loadingStartedAtMs)
+        )
+        delayedNativeRefreshApplyJobs.remove(adPlaceName)?.cancel()
+        delayedNativeRefreshApplyJobs[adPlaceName] = lifecycleScope.launch {
+            delay(delayMs)
+            finishNativeRefreshTransition(adPlaceName, cancelDelayedApply = false)
+            if (isContextBannerNativePlace(adPlaceName) &&
+                lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+            ) {
+                onBannerNativeResult(adResource)
+            }
+        }
+    }
+
+    private fun finishNativeRefreshTransition(
+        adPlaceName: IAdPlaceName,
+        cancelDelayedApply: Boolean = true
+    ) {
+        nativeRefreshLoadingStartedAtMs.remove(adPlaceName)
+        val delayedApplyJob = delayedNativeRefreshApplyJobs.remove(adPlaceName)
+        if (cancelDelayedApply) {
+            delayedApplyJob?.cancel()
+        }
+    }
+
+    private fun cancelNativeRefresh(adPlaceName: IAdPlaceName) {
+        bannerNativeRefreshJobs.remove(adPlaceName)?.cancel()
+        bannerNativeRefreshIntervals.remove(adPlaceName)
+        finishNativeRefreshTransition(adPlaceName)
+    }
+
+    private fun isContextBannerNativePlace(adPlaceName: IAdPlaceName): Boolean {
+        return adBannerOrNativeAll.contains(adPlaceName) ||
+                adBannerOrNativePreload.contains(adPlaceName)
+    }
+
+    private fun syncNativeRefreshJobsWithAdPlaces() {
+        val activeAdPlaceNames = adBannerOrNativeAll + adBannerOrNativePreload
+        bannerNativeRefreshJobs.keys
+            .filterNot { activeAdPlaceNames.contains(it) }
+            .forEach { cancelNativeRefresh(it) }
     }
 
     fun loadBannerOrNativeAds(adPlaceName: IAdPlaceName, oneTimeLoad: Boolean, isReload: Boolean) {

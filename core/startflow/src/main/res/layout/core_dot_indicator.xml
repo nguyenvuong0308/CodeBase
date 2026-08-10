@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/dot1"
+        style="@style/DotIndicator"/>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/dot2"
+        android:layout_marginStart="@dimen/_10dp"
+        style="@style/DotIndicator"/>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/dot3"
+        android:layout_marginStart="@dimen/_10dp"
+        style="@style/DotIndicator"/>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/dot4"
+        android:layout_marginStart="@dimen/_10dp"
+        style="@style/DotIndicator"/>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/dot5"
+        android:layout_marginStart="@dimen/_10dp"
+        style="@style/DotIndicator"/>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/dot6"
+        android:layout_marginStart="@dimen/_10dp"
+        style="@style/DotIndicator"/>
+
+</androidx.appcompat.widget.LinearLayoutCompat>

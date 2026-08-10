@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.LayoutRes
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isNotEmpty
 import com.core.ads.R
 import com.core.ads.admob.AdmobManager
@@ -107,9 +108,9 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
                     NativeTemplateSize.MediumCtaBottom -> R.layout.gnt_medium_cta_bottom_template_view_shimmer
 
-                    NativeTemplateSize.MediumCtaRightTop -> R.layout.gnt_medium_cta_right_top_shimmer
+                    NativeTemplateSize.MediumShortCtaBottom -> R.layout.gnt_medium_short_cta_bottom_template_view_shimmer
 
-                    NativeTemplateSize.MediumCollapsibleCtaBottom -> R.layout.gnt_mini_cta_right_shimmer
+                    NativeTemplateSize.MediumCtaRightTop -> R.layout.gnt_medium_cta_right_top_shimmer
 
                     NativeTemplateSize.MediumCtaTop -> R.layout.gnt_medium_cta_top_template_view_shimmer
 
@@ -131,7 +132,7 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
                     NativeTemplateSize.MiniCtaRight -> R.layout.gnt_mini_cta_right_shimmer
 
-                    NativeTemplateSize.FullCtaBottomOnboarding, NativeTemplateSize.FullCtaBottom, NativeTemplateSize.FullCtaTop, NativeTemplateSize.FullCtaRight, NativeTemplateSize.FullInterstitialV1, NativeTemplateSize.FullInterstitialV2 -> R.layout.gnt_full_cta_bottom_template_view_shimmer
+                    NativeTemplateSize.FullCtaBottomOnboarding, NativeTemplateSize.FullCtaBottom, NativeTemplateSize.FullCtaTop, NativeTemplateSize.FullCtaRight, NativeTemplateSize.FullInterstitialV1, NativeTemplateSize.FullInterstitialV2, NativeTemplateSize.FullInterstitialV3 -> R.layout.gnt_full_cta_bottom_template_view_shimmer
 
                     else -> customNativeAds.createShimmerLayoutPlaceHolder(nativeTemplateSize = nativeTemplateSize)
                 }
@@ -247,27 +248,38 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
             .withBorderColor(borderColor)
             .withBackgroundColor(nativeAdPlace.backgroundColor)
             .withCountDownSecond(nativeAdPlace.countDownTimer)
+            .withCloseStepCount(nativeAdPlace.closeStepCount)
+            .withStep1CountDownSecond(nativeAdPlace.step1CountDownTimer)
+            .withStep2CountDownSecond(nativeAdPlace.step2CountDownTimer)
             .withBackgroundFullColor(nativeAdPlace.backgroundFullColor)
             .withPrimaryTextTypefaceColor(nativeAdPlace.primaryTextColor)
             .withTertiaryTextTypefaceColor(nativeAdPlace.bodyTextColor)
             .withBackgroundResource(backgroundRes)
             .withMainBackgroundRadius(nativeAdPlace.backgroundRadius)
             .withBackgroundAdsNotifyView(backgroundAdsNotifyView)
+            .withBackgroundColorAdsNotifyView(nativeAdPlace.backgroundColorAdsNotifyView)
+            .withTextColorAdsNotifyView(nativeAdPlace.textColorAdsNotifyView)
             .withMediaBackgroundColor(nativeAdPlace.mediaBackgroundColor)
             .withIsEnableImmersive(nativeAdPlace.isEnableFullScreenImmersive)
             .withHideTextCountDown(nativeAdPlace.hideTextCountDown)
             .withHideTextSkipCountDown(nativeAdPlace.hideTextSkipCountDown)
             .withHideProgressCountDown(nativeAdPlace.hideProgressCountDown)
             .withProgressBarTint(nativeAdPlace.progressBarTint)
+            .withControlClosePosition(nativeAdPlace.controlClosePosition)
+            .withCollapsibleExpandCooldownSecond(nativeAdPlace.collapsibleExpandCooldownSecond)
+            .withNativeExpandTemplate(nativeAdPlace.nativeExpandTemplate)
+            .withAdPlaceName(nativeAdPlace.placeName.name)
             .build()
 
-        val nativeTemplateView = when (nativeAdPlace.nativeTemplateSize) {
+        val inlineTemplateView = when (nativeAdPlace.nativeTemplateSize) {
 
             NativeTemplateSize.Medium -> NativeMediumTemplateView(context)
 
             NativeTemplateSize.SmallCtaBottom -> NativeSmallCtaBottomTemplateView(context)
 
             NativeTemplateSize.MediumCtaBottom -> NativeMediumCtaBottomTemplateView(context)
+
+            NativeTemplateSize.MediumShortCtaBottom -> NativeMediumShortCtaBottomTemplateView(context)
 
             NativeTemplateSize.MediumCtaTop -> NativeMediumCtaTopTemplateView(context)
 
@@ -278,8 +290,6 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
             NativeTemplateSize.MediumMediaRight -> NativeMediumMediaRightTemplateView(context)
 
             NativeTemplateSize.MediumMediaLeft -> NativeMediumMediaLeftTemplateView(context)
-
-            NativeTemplateSize.MediumCollapsibleCtaBottom -> NativeCollapsibleMediumCtaBottomTemplateView(context)
 
             NativeTemplateSize.Small -> NativeSmallTemplateView(context)
 
@@ -305,7 +315,17 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
             NativeTemplateSize.FullInterstitialV2 -> NativeInterstitialV2View(context)
 
+            NativeTemplateSize.FullInterstitialV3 -> NativeInterstitialV3View(context)
+
             is NativeTemplateSize.CustomKey -> customNativeAds.createNativeAds(context, nativeAdPlace)
+        }
+        val nativeTemplateView = if (nativeAdPlace.isNativeCollapsible) {
+            CollapsibleNativeHostView(
+                context = context,
+                inlineTemplateView = inlineTemplateView,
+            )
+        } else {
+            inlineTemplateView
         }
         runCatching {
             addView(nativeTemplateView)

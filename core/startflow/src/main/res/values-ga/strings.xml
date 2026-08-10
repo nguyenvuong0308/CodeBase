@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">Ar ais</string>
+        
+    <string name="core_screen_language">Teanga</string>
+        
+    <string name="core_apply_language">Cuir teanga i bhfeidhm…</string>
+        
+    <string name="core_common_save">Sábháil</string>
+        
+    <string name="core_common_skip">Scipeáil</string>
+        
+    <string name="core_common_continue">Lean ort</string>
+        
+    <string name="core_onboarding_action_get_start">Cuir tús leis</string>
+        
+    <string name="core_onboarding_action_next">Ar aghaidh</string>
+        
+    <string name="common_next">Ar aghaidh</string>
+    
+</resources>

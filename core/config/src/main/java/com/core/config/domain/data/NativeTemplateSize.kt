@@ -17,8 +17,8 @@ sealed class NativeTemplateSize {
                 Medium.key -> Medium
                 MediumCtaTop.key -> MediumCtaTop
                 MediumCtaRightTop.key -> MediumCtaRightTop
-                MediumCollapsibleCtaBottom.key -> MediumCollapsibleCtaBottom
                 MediumCtaRight.key -> MediumCtaRight
+                MediumShortCtaBottom.key -> MediumShortCtaBottom
                 MediumMediaRight.key -> MediumMediaRight
                 MediumMediaLeft.key -> MediumMediaLeft
 
@@ -31,6 +31,7 @@ sealed class NativeTemplateSize {
                 MiniCtaRight.key -> MiniCtaRight
                 FullInterstitialV1.key -> FullInterstitialV1
                 FullInterstitialV2.key -> FullInterstitialV2
+                FullInterstitialV3.key -> FullInterstitialV3
                 else -> CustomKey(key)
             }
         }
@@ -76,8 +77,8 @@ sealed class NativeTemplateSize {
         override val key = "medium_cta_bottom"
     }
 
-    object MediumCollapsibleCtaBottom : NativeTemplateSize() {
-        override val key = "medium_collapsible_cta_bottom"
+    object MediumShortCtaBottom : NativeTemplateSize() {
+        override val key = "medium_short_cta_bottom"
     }
 
     object MediumCtaRightTop: NativeTemplateSize() {
@@ -118,6 +119,10 @@ sealed class NativeTemplateSize {
 
     object FullInterstitialV2: NativeTemplateSize() {
         override val key = "full_interstitial_v2"
+    }
+
+    object FullInterstitialV3: NativeTemplateSize() {
+        override val key = "full_interstitial_v3"
     }
 
     class CustomKey(val customKey: String) : NativeTemplateSize() {

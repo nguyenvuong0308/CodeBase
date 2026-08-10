@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import com.codebasetemplate.R
 import com.codebasetemplate.databinding.CoreFragmentSettingBinding
 import com.codebasetemplate.features.feature_language.ui.LanguageActivity
+import com.codebasetemplate.features.feature_language.ui.LanguageActivityNavigator
 import com.codebasetemplate.features.main.ui.host.MainHostEvent
 import com.codebasetemplate.features.main.ui.host.MainHostViewModel
 import com.codebasetemplate.required.shortcut.AppScreenType
@@ -24,6 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class SettingChildOfHostFragment :
     BaseChildOfHostFragment<CoreFragmentSettingBinding, MainHostEvent, MainHostViewModel>() {
+
     override fun bindingProvider(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -46,8 +48,9 @@ class SettingChildOfHostFragment :
 
             tvLanguage.setOnSingleClick {
                 startActivity(
-                    LanguageActivity.Companion.intentStart(
-                        requireActivity(),
+                    LanguageActivityNavigator.intentStart(
+                        context = requireActivity(),
+                        config = remoteConfigRepository.getLanguageActivityConfig(),
                         fromSetting = true
                     )
                 )

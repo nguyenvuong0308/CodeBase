@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">Tilbake</string>
+        
+    <string name="core_screen_language">Språk</string>
+        
+    <string name="core_apply_language">Bruk språk...</string>
+        
+    <string name="core_common_save">Spare</string>
+        
+    <string name="core_common_skip">Hopp over</string>
+        
+    <string name="core_common_continue">Fortsette</string>
+        
+    <string name="core_onboarding_action_get_start">Kom i gang</string>
+        
+    <string name="core_onboarding_action_next">Neste</string>
+        
+    <string name="common_next">Neste</string>
+    
+</resources>

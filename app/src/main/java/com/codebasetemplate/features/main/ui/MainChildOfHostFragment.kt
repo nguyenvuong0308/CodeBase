@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import com.codebasetemplate.databinding.CoreFragmentMainBinding
+import com.codebasetemplate.features.feature_demo_native_pip.ui.NativePipTestActivity
 import com.codebasetemplate.features.feature_reward.RewardTestActivity
 import com.codebasetemplate.features.main.ui.host.MainHostEvent
 import com.codebasetemplate.features.main.ui.host.MainHostViewModel
@@ -50,6 +51,10 @@ class MainChildOfHostFragment : BaseChildOfHostFragment<CoreFragmentMainBinding,
                 hostViewModel.navigateTo(MainHostEvent.OpenNativeInList)
             }
 
+            nativePipTestLayout.setOnSingleClick {
+                startActivity(Intent(requireContext(), NativePipTestActivity::class.java))
+            }
+
             showInterstitialLayout.setOnSingleClick {
                 showInterAd(AppAdPlaceName.FULLSCREEN_TEST) {
                     toast("Show inter ad completed")
@@ -67,6 +72,12 @@ class MainChildOfHostFragment : BaseChildOfHostFragment<CoreFragmentMainBinding,
             showInterstitialLayoutLazyLoad.setOnSingleClick {
                 showInterAd(AppAdPlaceName.FULLSCREEN_TEST_LAZY_LOAD) {
                     toast("Show inter ad completed")
+                }
+            }
+
+            showNativeInterstitial.setOnSingleClick {
+                showInterAd(AppAdPlaceName.FULLSCREEN_NATIVE_INTERSTITIAL) {
+                    toast("Show inter native ad completed")
                 }
             }
 
@@ -91,7 +102,9 @@ class MainChildOfHostFragment : BaseChildOfHostFragment<CoreFragmentMainBinding,
         return listOf(
             AppAdPlaceName.ANCHORED_NATIVE_IN_LIST_TEST,
             AppAdPlaceName.ANCHORED_BANNER_TEST,
-            AppAdPlaceName.ANCHORED_NATIVE_TEST
+            AppAdPlaceName.ANCHORED_NATIVE_TEST,
+            AppAdPlaceName.FULLSCREEN_NATIVE_INTERSTITIAL,
+
         )
     }
 
@@ -107,10 +120,14 @@ class MainChildOfHostFragment : BaseChildOfHostFragment<CoreFragmentMainBinding,
     }
 
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
-        viewBinding.layoutBannerNative.processAdResource(
-            adResource,
-            AppAdPlaceName.ANCHORED_BOTTOM_HOME
-        )
+        when (adResource.commonAdPlaceName) {
+            AppAdPlaceName.ANCHORED_BOTTOM_HOME -> {
+                viewBinding.layoutBannerNative.processAdResource(
+                    adResource,
+                    AppAdPlaceName.ANCHORED_BOTTOM_HOME
+                )
+            }
+        }
     }
 
 }

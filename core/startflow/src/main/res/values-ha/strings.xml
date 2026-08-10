@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">Baya</string>
+        
+    <string name="core_screen_language">Harshe</string>
+        
+    <string name="core_apply_language">Aiwatar da harshe…</string>
+        
+    <string name="core_common_save">Ajiye</string>
+        
+    <string name="core_common_skip">Tsallake</string>
+        
+    <string name="core_common_continue">Ci gaba</string>
+        
+    <string name="core_onboarding_action_get_start">Fara</string>
+        
+    <string name="core_onboarding_action_next">Na gaba</string>
+        
+    <string name="common_next">Na gaba</string>
+    
+</resources>

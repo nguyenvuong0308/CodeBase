@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">Tagasi</string>
+        
+    <string name="core_screen_language">Keel</string>
+        
+    <string name="core_apply_language">Rakenda keel…</string>
+        
+    <string name="core_common_save">Salvesta</string>
+        
+    <string name="core_common_skip">Jäta vahele</string>
+        
+    <string name="core_common_continue">Jätka</string>
+        
+    <string name="core_onboarding_action_get_start">Alustage</string>
+        
+    <string name="core_onboarding_action_next">Edasi</string>
+        
+    <string name="common_next">Edasi</string>
+    
+</resources>

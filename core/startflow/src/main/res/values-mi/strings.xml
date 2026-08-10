@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">Whakamuri</string>
+        
+    <string name="core_screen_language">Reo</string>
+        
+    <string name="core_apply_language">Hoatu reo…</string>
+        
+    <string name="core_common_save">Tiaki</string>
+        
+    <string name="core_common_skip">Tīpoka</string>
+        
+    <string name="core_common_continue">Haere tonu</string>
+        
+    <string name="core_onboarding_action_get_start">Tīmatahia</string>
+        
+    <string name="core_onboarding_action_next">Panuku</string>
+        
+    <string name="common_next">Panuku</string>
+    
+</resources>

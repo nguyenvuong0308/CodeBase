@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">Kembali</string>
+        
+    <string name="core_screen_language">Bahasa</string>
+        
+    <string name="core_apply_language">Terapkan bahasa…</string>
+        
+    <string name="core_common_save">Menyimpan</string>
+        
+    <string name="core_common_skip">Melewati</string>
+        
+    <string name="core_common_continue">Melanjutkan</string>
+        
+    <string name="core_onboarding_action_get_start">Mulailah</string>
+        
+    <string name="core_onboarding_action_next">Berikutnya</string>
+        
+    <string name="common_next">Berikutnya</string>
+    
+</resources>

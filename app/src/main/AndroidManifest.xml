@@ -26,17 +26,16 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <activity android:name=".features.main.ui.MainActivityHost" />
 
+        <activity
+            android:name=".features.feature_demo_native_pip.ui.NativePipTestActivity"
+            android:exported="true"
+            android:label="Native PIP Test" />
+
         <activity android:name=".features.feature_uninstall.ui.UninstallActivityHost" />
-
-        <activity android:name=".features.feature_language.ui.LanguageActivity" />
-
-        <activity android:name=".features.feature_onboarding.ui.v2.OnBoardingActivity2" />
-        <activity android:name=".features.feature_onboarding.ui.v1.OnBoardingActivity" />
 
         <activity android:name=".features.feature_demo_frame_mvvm.frame_detail.ui.FrameDetailActivity" />
 

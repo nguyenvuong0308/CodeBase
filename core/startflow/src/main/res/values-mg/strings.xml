@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+        
+    <string name="core_onboarding_title_1" translatable="false">Day la dong tutorial 1</string>
+        
+    <string name="core_onboarding_title_2" translatable="false">Day la dong tutorial 2</string>
+        
+    <string name="core_onboarding_title_3" translatable="false">Day la dong tutorial 3</string>
+        
+    <string name="core_back_button_desc">indray</string>
+        
+    <string name="core_screen_language">Fiteny</string>
+        
+    <string name="core_apply_language">Ampiharo ny fiteny…</string>
+        
+    <string name="core_common_save">afa-tsy</string>
+        
+    <string name="core_common_skip">Mifohaza</string>
+        
+    <string name="core_common_continue">FOANA</string>
+        
+    <string name="core_onboarding_action_get_start">Manomboha</string>
+        
+    <string name="core_onboarding_action_next">Manaraka</string>
+        
+    <string name="common_next">Manaraka</string>
+    
+</resources>

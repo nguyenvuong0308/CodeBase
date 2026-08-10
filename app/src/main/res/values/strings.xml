@@ -30,8 +30,9 @@
     <string name="core_onboarding_title_1">Đây là dòng tutorial 1</string>
     <string name="core_onboarding_title_2">Đây là dòng tutorial 2</string>
     <string name="core_onboarding_title_3">Đây là dòng tutorial 3</string>
-    <string name="core_onboarding_action_next">Next</string>
     <string name="core_onboarding_action_get_start">Get started</string>
+    <string name="common_next">Next</string>
+    <string name="core_onboarding_action_next">Next</string>
     <string name="core_apply_language">Đang áp dụng ngôn ngữ…</string>
     <string name="shortcut_short_label_screen_1">Screen 1</string>
     <string name="shortcut_long_label_screen_1">Screen 1</string>

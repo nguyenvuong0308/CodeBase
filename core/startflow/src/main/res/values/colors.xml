@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="ripple">#1A000000</color>
+    <color name="splash_background_color">#ffffff</color>
+    <color name="home_accent">#9747FF</color>
+    <color name="onboarding_primary_color">@color/home_accent</color>
+    <color name="core_text_primary">#202027</color>
+    <color name="language_v2_text">#202027</color>
+    <color name="language_v2_subtitle">#3F3B45</color>
+    <color name="language_v2_card">#F2F2F2</color>
+    <color name="language_v2_branch">#8D8D8D</color>
+    <color name="language_v2_icon">#858585</color>
+    <color name="language_v2_radio">#8C8C8C</color>
+    <color name="intro_blue">#03C6E2</color>
+    <color name="language_v2_primary_color">#9747FF</color>
+</resources>

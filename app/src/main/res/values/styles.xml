@@ -115,4 +115,30 @@
         <item name="android:textSize">@dimen/_16sp</item>
         <item name="android:lineSpacingExtra">@dimen/_5dp</item>
     </style>
+
+    <style name="AppHeaderBack">
+        <item name="android:layout_width">@dimen/app_header_back_size</item>
+        <item name="android:layout_height">@dimen/app_header_back_size</item>
+        <item name="android:background">@drawable/ripple_accent_rad40_gray</item>
+        <item name="android:contentDescription">@string/core_back_button_desc</item>
+        <item name="android:padding">@dimen/app_header_back_padding</item>
+        <item name="android:src">@drawable/ic_back_dark</item>
+        <item name="android:scaleX">@integer/locale_mirror_flip</item>
+    </style>
+
+    <style name="AppHeaderTitle">
+        <item name="android:ellipsize">end</item>
+        <item name="android:fontFamily">@font/roboto_medium</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textColor">@color/core_text_primary</item>
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <style name="RoundOnboardingV3">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">0dp</item>
+        <item name="cornerSizeBottomLeft">24dp</item>
+        <item name="cornerSizeBottomRight">24dp</item>
+    </style>
 </resources>

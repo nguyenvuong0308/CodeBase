@@ -19,7 +19,10 @@ import com.core.config.data.model.AdPlaceModel
 import com.core.config.data.model.AppConfigModel
 import com.core.config.data.model.BannerAdConfigModel
 import com.core.config.data.model.IapConfigModel
+import com.core.config.data.model.LanguageActivityConfigModel
 import com.core.config.data.model.RequestConsentConfigModel
+import com.core.config.data.model.OnBoardingConfigModel
+import com.core.config.data.model.TutorialConfigModel
 import com.google.firebase.Firebase
 import com.google.firebase.remoteconfig.remoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
@@ -144,6 +147,18 @@ class RemoteConfigService @Inject constructor(
     internal fun getSplashScreenConfig(): SplashScreenConfigModel? {
         return remoteConfig.read(
             moshi, ConfigParam.SplashScreenConfigParam
+        )
+    }
+
+    internal fun getLanguageActivityConfig(): LanguageActivityConfigModel? {
+        return remoteConfig.read(
+            moshi, ConfigParam.LanguageActivityConfigParam
+        )
+    }
+
+    internal fun getOnBoardingConfig(): OnBoardingConfigModel? {
+        return remoteConfig.read(
+            moshi, ConfigParam.OnBoardingConfigParam
         )
     }
 
@@ -278,6 +293,12 @@ class RemoteConfigService @Inject constructor(
     internal fun getRequestConsentConfig(): RequestConsentConfigModel? {
         return remoteConfig.read(
             moshi, ConfigParam.RequestConsentConfigParam
+        )
+    }
+
+    internal fun getTutorialConfig(): TutorialConfigModel? {
+        return remoteConfig.read(
+            moshi, ConfigParam.TutorialConfig
         )
     }
 

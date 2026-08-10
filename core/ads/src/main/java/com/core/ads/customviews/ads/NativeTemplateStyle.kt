@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import androidx.core.graphics.toColorInt
+import com.core.config.domain.data.NativeExpandTemplate
 
 /** A class containing the optional styling options for the Native Template.  */
 class NativeTemplateStyle {
@@ -35,6 +36,15 @@ class NativeTemplateStyle {
     var countDownSecond: Int? = null
         private set
 
+    var closeStepCount: Int? = null
+        private set
+
+    var step1CountDownSecond: Int? = null
+        private set
+
+    var step2CountDownSecond: Int? = null
+        private set
+
     var mediaBackgroundColor: String? = null
         private set
 
@@ -52,6 +62,13 @@ class NativeTemplateStyle {
 
     var backgroundAdsNotifyView: Int? = null
         private set
+
+    var textColorAdsNotifyView: String? = null
+        private set
+
+    var backgroundColorAdsNotifyView: String? = null
+        private set
+
 
     // All templates have a primary text area which is populated by the native ad's headline.
     // Primary text typeface.
@@ -126,6 +143,18 @@ class NativeTemplateStyle {
     var progressBarTint: String? = null
         private set
 
+    var controlClosePosition: String? = null
+        private set
+
+    var collapsibleExpandCooldownSecond: Int? = null
+        private set
+
+    var nativeExpandTemplate: NativeExpandTemplate = NativeExpandTemplate.V1
+        private set
+
+    var adPlaceName: String? = null
+        private set
+
 
     /** A class that provides helper methods to build a style object.  */
     class Builder {
@@ -166,6 +195,26 @@ class NativeTemplateStyle {
             return this
         }
 
+        fun withControlClosePosition(controlClosePosition: String?): Builder {
+            styles.controlClosePosition = controlClosePosition
+            return this
+        }
+
+        fun withCollapsibleExpandCooldownSecond(collapsibleExpandCooldownSecond: Int?): Builder {
+            styles.collapsibleExpandCooldownSecond = collapsibleExpandCooldownSecond
+            return this
+        }
+
+        fun withNativeExpandTemplate(nativeExpandTemplate: NativeExpandTemplate): Builder {
+            styles.nativeExpandTemplate = nativeExpandTemplate
+            return this
+        }
+
+        fun withAdPlaceName(adPlaceName: String?): Builder {
+            styles.adPlaceName = adPlaceName
+            return this
+        }
+
         fun withCallToActionBackgroundColor(callToActionBackgroundColor: String?): Builder {
             styles.callToActionBackgroundColor = callToActionBackgroundColor
             return this
@@ -196,6 +245,21 @@ class NativeTemplateStyle {
             return this
         }
 
+        fun withCloseStepCount(closeStepCount: Int?): Builder {
+            styles.closeStepCount = closeStepCount
+            return this
+        }
+
+        fun withStep1CountDownSecond(times: Int?): Builder {
+            styles.step1CountDownSecond = times
+            return this
+        }
+
+        fun withStep2CountDownSecond(times: Int?): Builder {
+            styles.step2CountDownSecond = times
+            return this
+        }
+
         fun withBackgroundFullColor(bgColor: String?): Builder {
             styles.backgroundFullColor = bgColor/* ?: "#FFFFFF"*/
             return this
@@ -212,6 +276,16 @@ class NativeTemplateStyle {
 
         fun withBackgroundAdsNotifyView(backgroundAdsNotifyView: Int?): Builder {
             styles.backgroundAdsNotifyView = backgroundAdsNotifyView
+            return this
+        }
+
+        fun withBackgroundColorAdsNotifyView(backgroundColorAdsNotifyView: String?): Builder {
+            styles.backgroundColorAdsNotifyView = backgroundColorAdsNotifyView
+            return this
+        }
+
+        fun withTextColorAdsNotifyView(textColorAdsNotifyView: String?): Builder {
+            styles.textColorAdsNotifyView = textColorAdsNotifyView
             return this
         }
 

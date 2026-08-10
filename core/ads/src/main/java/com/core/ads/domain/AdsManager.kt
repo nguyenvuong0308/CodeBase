@@ -7,6 +7,7 @@ import com.core.ads.model.NativeAdHolder
 import com.core.config.domain.data.AdPlace
 import com.core.config.domain.data.IAdPlaceName
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.nativead.NativeAd
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -77,6 +78,8 @@ interface AdsManager {
         Xóa quảng cáo native để ứng dụng có thể tải lại quảng cáo khi vào lại app (thường dùng cho các quảng cáo sử dụng oneTimeLoad = true
      */
     fun removeNativeAds(adPlaceName: IAdPlaceName)
+
+    fun markNativeAdConsumed(adPlaceName: IAdPlaceName, nativeAd: NativeAd)
 
     fun isRewardReady(adPlaceName: IAdPlaceName): Boolean
 }
