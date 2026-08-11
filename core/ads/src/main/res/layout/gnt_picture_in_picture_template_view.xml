@@ -34,7 +34,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/inter_regular"
                         android:layout_gravity="center_vertical"
-                        android:textSize="@dimen/_12sp"
+                        android:textSize="@dimen/_12dp"
                         tools:text="((5 Pieces) Electrical accessories" />
                 </FrameLayout>
 
@@ -85,7 +85,7 @@
                                 android:maxLines="2"
                                 android:fontFamily="@font/inter_medium"
                                 android:textColor="@color/black"
-                                android:textSize="@dimen/_16sp"
+                                android:textSize="@dimen/_16dp"
                                 tools:text="26.558d Flexible electronic parts" />
 
                             <com.google.android.material.textview.MaterialTextView
@@ -96,7 +96,7 @@
                                 android:layout_marginTop="@dimen/_2dp"
                                 android:ellipsize="end"
                                 android:maxLines="1"
-                                android:textSize="@dimen/_10sp"
+                                android:textSize="@dimen/_10dp"
                                 tools:text="Shopee" />
                         </LinearLayout>
                     </androidx.appcompat.widget.LinearLayoutCompat>
@@ -111,7 +111,7 @@
                         android:layout_gravity="end|bottom"
                         android:layout_marginEnd="@dimen/_2dp"
                         android:layout_marginBottom="@dimen/_2dp"
-                        android:textSize="@dimen/_8sp" />
+                        android:textSize="@dimen/_8dp" />
 
                 </FrameLayout>
 
@@ -130,7 +130,7 @@
                         android:gravity="center_vertical"
                         android:paddingStart="@dimen/_14dp"
                         android:paddingEnd="@dimen/_38dp"
-                        android:textSize="@dimen/_16sp"
+                        android:textSize="@dimen/_16dp"
                         tools:text="OPEN" />
 
                     <androidx.appcompat.widget.AppCompatImageView

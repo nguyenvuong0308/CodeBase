@@ -70,9 +70,9 @@ internal class NativeExpandViewV2 @JvmOverloads constructor(
         styles.tertiaryTextTypefaceColor?.let { binding.body.setTextColor(it.toColorInt()) }
         styles.callToActionTypefaceColor?.let(binding.cta::setTextColor)
 
-        styles.callToActionTextSize.takeIf { it > 0 }?.let { binding.cta.textSize = it }
-        styles.primaryTextSize.takeIf { it > 0 }?.let { binding.primary.textSize = it }
-        styles.tertiaryTextSize.takeIf { it > 0 }?.let { binding.body.textSize = it }
+        styles.callToActionTextSize.takeIf { it > 0 }?.let { binding.cta.applyTextSizeFromDpDimen(it) }
+        styles.primaryTextSize.takeIf { it > 0 }?.let { binding.primary.applyTextSizeFromDpDimen(it) }
+        styles.tertiaryTextSize.takeIf { it > 0 }?.let { binding.body.applyTextSizeFromDpDimen(it) }
 
         styles.callToActionBackgroundColor?.let(binding.layoutCta::updateBackgroundColor)
         styles.callToActionRadius?.let { binding.layoutCta.updateRadius(it.toFloat()) }

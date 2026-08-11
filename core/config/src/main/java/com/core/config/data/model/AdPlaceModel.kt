@@ -85,8 +85,8 @@ internal data class AdPlaceModel(
     @Json(name = "cta_text_color")
     val ctaTextColor: String?,
 
-    @Json(name = "cta_text_size_sp")
-    val ctaTextSizeSp: Float?,
+    @Json(name = "cta_text_size_dp")
+    val ctaTextSizeDp: Int?,
 
     @Json(name = "cta_border_color")
     val ctaBorderColor: String?,
@@ -109,14 +109,14 @@ internal data class AdPlaceModel(
     @Json(name = "primary_text_color")
     val primaryTextColor: String?,
 
-    @Json(name = "primary_text_size_sp")
-    val primaryTextSizeSp: Float?,
+    @Json(name = "primary_text_size_dp")
+    val primaryTextSizeDp: Int?,
 
     @Json(name = "body_text_color")
     val bodyTextColor: String?,
 
-    @Json(name = "body_text_size_sp")
-    val bodyTextSizeSp: Float?,
+    @Json(name = "body_text_size_dp")
+    val bodyTextSizeDp: Int?,
 
     // For AppOpenAD
     @Json(name = "limit_show")

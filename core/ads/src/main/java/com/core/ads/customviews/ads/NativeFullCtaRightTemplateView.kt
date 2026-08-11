@@ -178,18 +178,18 @@ class NativeFullCtaRightTemplateView @JvmOverloads constructor(
 
         val ctaTextSize = styles.callToActionTextSize
         if (ctaTextSize > 0) {
-            binding.cta.textSize = ctaTextSize
+            binding.cta.applyTextSizeFromDpDimen(ctaTextSize)
         }
 
         val primaryTextSize = styles.primaryTextSize
         if (primaryTextSize > 0) {
-            binding.primary.textSize = primaryTextSize
+            binding.primary.applyTextSizeFromDpDimen(primaryTextSize)
         }
 
 
         val tertiaryTextSize = styles.tertiaryTextSize
         if (tertiaryTextSize > 0) {
-            binding.body.textSize = tertiaryTextSize
+            binding.body.applyTextSizeFromDpDimen(tertiaryTextSize)
         }
 
         styles.callToActionBackgroundColor?.let {

@@ -29,7 +29,7 @@ Use the modules you need:
 
 ```kotlin
 dependencies {
-    implementation("com.github.nguyenvuong0308:CodeBase:3.0.6")
+    implementation("com.github.nguyenvuong0308:CodeBase:3.0.7")
 }
 ```
 
@@ -56,12 +56,12 @@ Available artifacts:
 
 ### Native ad text sizes
 
-Native placements support optional text sizes configured in Firebase Remote Config. Values use `sp`; omit a field or set it to `0` to keep the template layout default.
+Native placements support optional text sizes configured in Firebase Remote Config. Values from `1` to `35` map to the matching responsive `@dimen/_Ndp` resource; omit a field or use a value outside that range to keep the template layout default.
 
 ```json
 {
-  "primary_text_size_sp": 16,
-  "body_text_size_sp": 14,
-  "cta_text_size_sp": 14
+  "primary_text_size_dp": 16,
+  "body_text_size_dp": 14,
+  "cta_text_size_dp": 14
 }
 ```

@@ -12,7 +12,7 @@ class NativeTemplateStyle {
     var callToActionTextTypeface: Typeface? = null
         private set
 
-    // Size of call to action text.
+    // Responsive @dimen/_Ndp token used for the call to action text.
     var callToActionTextSize = 0f
         private set
 
@@ -75,7 +75,7 @@ class NativeTemplateStyle {
     var primaryTextTypeface: Typeface? = null
         private set
 
-    // Size of primary text.
+    // Responsive @dimen/_Ndp token used for primary text.
     var primaryTextSize = 0f
         private set
 
@@ -94,7 +94,7 @@ class NativeTemplateStyle {
     var secondaryTextTypeface: Typeface? = null
         private set
 
-    // Size of secondary text.
+    // Responsive @dimen/_Ndp token used for secondary text.
     var secondaryTextSize = 0f
         private set
 
@@ -112,7 +112,7 @@ class NativeTemplateStyle {
     var tertiaryTextTypeface: Typeface? = null
         private set
 
-    // Size of tertiary text.
+    // Responsive @dimen/_Ndp token used for tertiary text.
     var tertiaryTextSize = 0f
         private set
 
