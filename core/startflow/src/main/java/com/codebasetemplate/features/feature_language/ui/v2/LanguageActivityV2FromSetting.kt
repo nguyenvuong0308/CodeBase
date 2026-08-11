@@ -336,7 +336,6 @@ class LanguageActivityV2FromSetting : StartFlowActivity<ActivityLanguageV2Bindin
             singleLanguageGroup("is", "is-IS", "Iceland", "IS", SupportedLanguage.ICELANDIC),
             singleLanguageGroup("lv", "lv-LV", "Latvia", "LV", SupportedLanguage.LATVIAN),
             singleLanguageGroup("lt", "lt-LT", "Lithuania", "LT", SupportedLanguage.LITHUANIAN),
-            singleLanguageGroup("tl", "tl-PH", "Philippines", "PH", SupportedLanguage.FILIPINO),
             singleLanguageGroup("kk", "kk-KZ", "Kazakhstan", "KZ", SupportedLanguage.KAZAKH),
             singleLanguageGroup("ko", "ko-KR", "South Korea", "KR", SupportedLanguage.KOREAN),
             singleLanguageGroup("nl", "nl-NL", "Netherlands", "NL", SupportedLanguage.DUTCH),
