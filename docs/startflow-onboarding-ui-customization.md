@@ -1,19 +1,21 @@
 # Custom UI màn Onboarding của StartFlow
 
-Module `core:startflow` giữ logic điều hướng, quảng cáo và tracking của onboarding. App có thể thay nội dung và giao diện mà không cần copy hoặc sửa trực tiếp code trong module core thông qua hai extension point:
+Module `core:startflow` giữ logic điều hướng, quảng cáo và tracking của onboarding. App có thể thay nội dung và giao diện mà không cần copy hoặc sửa trực tiếp code trong module core thông qua các extension point:
 
 | API | Dùng để làm gì | Cách hoạt động |
 | --- | --- | --- |
 | `OnBoardingContentProvider` | Cung cấp số trang, ảnh, title và subtitle | StartFlow chọn một provider; nếu app không đăng ký thì dùng `DefaultOnBoardingContentProvider` |
-| `OnBoardingUiCustomizer` | Chỉnh màu, font, text, visibility, background hoặc thuộc tính view theo từng version | StartFlow gọi tất cả customizer đã đăng ký sau khi UI mặc định được bind |
+| `OnBoardingV1/V2/V3UiCustomizer` | Đổi branding bằng `state`/`UiSpec` typed, không truy cập View Binding của core | Các customizer chạy theo `priority` từ thấp đến cao |
+| `OnBoardingV1/V2/V3PageRenderer` | Thay toàn bộ UI của một số hoặc tất cả page | Renderer có priority cao nhất thỏa `supports(state)` được chọn; core vẫn giữ navigation và tracking |
+| `OnBoardingUiCustomizer` | API View Binding cũ | Callback của cả V1/V2/V3 đã deprecated và chỉ còn là bridge tương thích |
 
 Remote Config `onboarding_config.version` quyết định callback được gọi:
 
 | `version` | Callback |
 | --- | --- |
-| `1` | `customizeOnBoardingV1(...)` |
-| `2` | `customizeOnBoardingV2(...)` |
-| `3` | `customizeOnBoardingV3(...)`; trang cuối không có ads dùng `customizeOnBoardingV3EndTab(...)` |
+| `1` | `OnBoardingV1UiCustomizer`; UI riêng dùng `OnBoardingV1PageRenderer` |
+| `2` | `OnBoardingV2UiCustomizer`; UI riêng dùng `OnBoardingV2PageRenderer` |
+| `3` | `OnBoardingV3UiCustomizer`; nếu cần UI hoàn toàn riêng dùng `OnBoardingV3PageRenderer` |
 
 ## 1. Custom nội dung onboarding
 
@@ -52,26 +54,137 @@ class AppOnBoardingContentProvider @Inject constructor() : OnBoardingContentProv
 }
 ```
 
-`getSubtitleIntro()` hiện được UI V2 sử dụng. Trả về `null` nếu muốn ẩn subtitle. V1 và V3 lấy ảnh/title từ cùng provider nhưng không hiển thị subtitle mặc định.
+`getSubtitleIntro()` được UI V2 và card `top_v2` của V3 sử dụng. Trả về `null` nếu muốn ẩn subtitle.
 
 Nên đăng ký đúng một `OnBoardingContentProvider`. StartFlow lấy phần tử đầu tiên trong `Set`; nếu có nhiều provider thì thứ tự lựa chọn không được đảm bảo.
 
-## 2. Custom giao diện theo version
+## 2. Custom branding V1/V2/V3 bằng UiSpec
+
+Đây là API nên dùng cho phần lớn app. App nhận state bất biến và trả về một bản `UiSpec` mới; core vẫn sở hữu layout, click listener, ads và tracking. Mỗi version có contract riêng để chỉ expose đúng khả năng của layout đó:
+
+| Version | State | UiSpec | Customizer |
+| --- | --- | --- | --- |
+| V1 | `OnBoardingV1PageState` | `OnBoardingV1UiSpec` | `OnBoardingV1UiCustomizer` |
+| V2 | `OnBoardingV2PageState` | `OnBoardingV2UiSpec` | `OnBoardingV2UiCustomizer` |
+| V3 | `OnBoardingV3PageState` | `OnBoardingV3UiSpec` | `OnBoardingV3UiCustomizer` |
+
+Ví dụ V1:
+
+```kotlin
+class AppOnBoardingV1UiCustomizer @Inject constructor() : OnBoardingV1UiCustomizer {
+    override fun customize(
+        context: Context,
+        state: OnBoardingV1PageState,
+        current: OnBoardingV1UiSpec,
+    ) = current.copy(
+        actionTextColor = ContextCompat.getColor(context, R.color.onboarding_primary),
+        actionBackgroundRes = R.drawable.bg_onboarding_action,
+    )
+}
+```
+
+Ví dụ V2; đặt `isActionFillGradientEnabled = false` nếu app muốn dùng drawable CTA riêng:
+
+```kotlin
+class AppOnBoardingV2UiCustomizer @Inject constructor() : OnBoardingV2UiCustomizer {
+    override fun customize(
+        context: Context,
+        state: OnBoardingV2PageState,
+        current: OnBoardingV2UiSpec,
+    ) = current.copy(
+        contentBackgroundRes = R.drawable.bg_onboarding_content,
+        actionBackgroundRes = R.drawable.bg_onboarding_action,
+        isActionFillGradientEnabled = false,
+    )
+}
+```
+
+Ví dụ V3:
+
+```kotlin
+@Singleton
+class AppOnBoardingV3UiCustomizer @Inject constructor() : OnBoardingV3UiCustomizer {
+    override val priority: Int = 100
+
+    override fun customize(
+        context: Context,
+        state: OnBoardingV3PageState,
+        current: OnBoardingV3UiSpec,
+    ): OnBoardingV3UiSpec {
+        return current.copy(
+            titleTextColor = ContextCompat.getColor(context, R.color.onboarding_text),
+            actionTextColor = ContextCompat.getColor(context, R.color.onboarding_primary),
+            actionText = context.getString(
+                if (state.isPageEnd) R.string.onboarding_start else R.string.onboarding_next
+            ),
+            actionBackgroundRes = R.drawable.bg_onboarding_primary_button,
+        )
+    }
+}
+```
+
+`OnBoardingV3PageState` cung cấp loại page (`STANDARD`/`END_TAB`), vị trí logic và vị trí content, số page, ảnh/title/subtitle đã resolve, trạng thái page cuối, ads, vị trí action và `OnBoardingConfig` đầy đủ.
+
+## 3. Thay toàn bộ UI cho app đặc thù
+
+Không override XML của core bằng resource cùng tên. Hãy tạo layout trong app và dùng renderer tương ứng:
+
+| Version | Renderer | Render scope | Kết quả |
+| --- | --- | --- | --- |
+| V1 | `OnBoardingV1PageRenderer` | `OnBoardingV1RenderScope` | `OnBoardingV1RenderedPage` |
+| V2 | `OnBoardingV2PageRenderer` | `OnBoardingV2RenderScope` | `OnBoardingV2RenderedPage` |
+| V3 | `OnBoardingV3PageRenderer` | `OnBoardingV3RenderScope` | `OnBoardingV3RenderedPage` |
+
+Ví dụ V3:
+
+```kotlin
+@Singleton
+class SpecialOnBoardingV3Renderer @Inject constructor() : OnBoardingV3PageRenderer {
+    override val priority: Int = 100
+
+    override fun supports(state: OnBoardingV3PageState): Boolean {
+        // Có thể thay tất cả page hoặc chỉ một loại/vị trí cụ thể.
+        return state.pageType == OnBoardingV3PageType.STANDARD
+    }
+
+    override fun render(scope: OnBoardingV3RenderScope): OnBoardingV3RenderedPage {
+        val binding = AppOnboardingSpecialBinding.inflate(
+            scope.inflater,
+            scope.parent,
+            false,
+        )
+        binding.image.setImageResource(scope.state.imageRes)
+        binding.title.text = scope.state.title
+        binding.subtitle.text = scope.state.subtitle
+        binding.action.setOnClickListener { scope.actions.onPrimaryAction() }
+
+        return OnBoardingV3RenderedPage(
+            view = binding.root,
+            onBannerNativeResult = { resource, placeName ->
+                binding.layoutBannerNative.processAdResource(resource, placeName)
+            },
+            onDispose = {
+                // Hủy animation/listener thuộc riêng custom view nếu có.
+            },
+        )
+    }
+}
+```
+
+View trả về không được có parent. Dùng `scope.lifecycleOwner` cho observer/animation theo lifecycle. Gọi `scope.actions.onPrimaryAction()`, `onNext()` hoặc `onFinish()` để core tiếp tục đảm bảo tracking và flow. V1/V2 đặt ads ở Activity bên ngoài page; V3 đặt ads trong page nên renderer V3 cần forward callback vào ad container như ví dụ trên.
+
+## 4. API View Binding cũ (deprecated)
 
 Tạo một class implement `OnBoardingUiCustomizer`. Chỉ cần override callback của version app đang sử dụng; các hàm đều có implementation mặc định rỗng.
 
 ```kotlin
 package com.example.app.startflow
 
-import android.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.app.R
-import com.core.config.domain.data.OnBoardingConfig
 import com.core.startflow.databinding.CoreFragmentOnboardingBinding
 import com.core.startflow.databinding.CoreFragmentOnboardingV2Binding
-import com.core.startflow.databinding.FragmentOnboardingV3Binding
-import com.core.startflow.databinding.FragmentOnboardingV3EndTabBinding
 import com.core.startflow.onboarding.OnBoardingUiCustomizer
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -110,55 +223,21 @@ class AppOnBoardingUiCustomizer @Inject constructor() : OnBoardingUiCustomizer {
         }
     }
 
-    override fun customizeOnBoardingV3(
-        fragment: Fragment,
-        binding: FragmentOnboardingV3Binding,
-        introductionPosition: Int,
-        realPosition: Int,
-        isPageEnd: Boolean,
-        isShowAd: Boolean,
-        onBoardingConfig: OnBoardingConfig,
-    ) {
-        val context = fragment.requireContext()
-        val primaryColor = ContextCompat.getColor(context, R.color.onboarding_primary)
-
-        binding.tvTitle.setTextColor(Color.WHITE)
-        binding.tvNextTop.setTextColor(primaryColor)
-        binding.tvNextTopV1.setTextColor(primaryColor)
-        binding.tvNextBottom.setTextColor(primaryColor)
-
-        if (isPageEnd) {
-            binding.tvNextTop.setText(R.string.onboarding_start)
-            binding.tvNextTopV1.setText(R.string.onboarding_start)
-            binding.tvNextBottom.setText(R.string.onboarding_start)
-        }
-
-        // Có thể custom riêng page có ads hoặc theo vị trí action từ Remote Config.
-        binding.frameAds.setBackgroundColor(
-            if (isShowAd) Color.WHITE else Color.TRANSPARENT
-        )
-    }
-
-    override fun customizeOnBoardingV3EndTab(
-        fragment: Fragment,
-        binding: FragmentOnboardingV3EndTabBinding,
-        position: Int,
-    ) {
-        binding.btGetStart.setBackgroundResource(R.drawable.bg_onboarding_primary_button)
-        binding.btGetStart.setText(R.string.onboarding_start)
-    }
 }
 ```
 
-Customizer được gọi ở cuối `Fragment.initViews()`, sau khi StartFlow đã gán nội dung, trạng thái ads, vị trí action và listener điều hướng mặc định. Vì vậy giá trị gán trong customizer sẽ ghi đè phần UI mặc định.
+Các callback View Binding cũ vẫn được gọi để tương thích source, nhưng toàn bộ V1/V2/V3 đã deprecated. Code mới cần migrate sang `UiCustomizer` hoặc `PageRenderer` đúng version.
 
-## 3. Đăng ký với Hilt
+## 5. Đăng ký với Hilt
 
 Đăng ký provider và customizer bằng multibinding `@IntoSet` trong module app:
 
 ```kotlin
 import com.core.startflow.onboarding.OnBoardingContentProvider
-import com.core.startflow.onboarding.OnBoardingUiCustomizer
+import com.core.startflow.onboarding.v1.OnBoardingV1UiCustomizer
+import com.core.startflow.onboarding.v2.OnBoardingV2UiCustomizer
+import com.core.startflow.onboarding.v3.OnBoardingV3PageRenderer
+import com.core.startflow.onboarding.v3.OnBoardingV3UiCustomizer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -180,36 +259,59 @@ object StartFlowCustomizationModule {
     @Provides
     @IntoSet
     @Singleton
-    fun provideOnBoardingUiCustomizer(
-        customizer: AppOnBoardingUiCustomizer,
-    ): OnBoardingUiCustomizer = customizer
+    fun provideOnBoardingV1UiCustomizer(
+        customizer: AppOnBoardingV1UiCustomizer,
+    ): OnBoardingV1UiCustomizer = customizer
+
+    @Provides
+    @IntoSet
+    @Singleton
+    fun provideOnBoardingV2UiCustomizer(
+        customizer: AppOnBoardingV2UiCustomizer,
+    ): OnBoardingV2UiCustomizer = customizer
+
+    @Provides
+    @IntoSet
+    @Singleton
+    fun provideOnBoardingV3UiCustomizer(
+        customizer: AppOnBoardingV3UiCustomizer,
+    ): OnBoardingV3UiCustomizer = customizer
+
+    // Chỉ đăng ký renderer này ở những app cần thay toàn bộ UI.
+    @Provides
+    @IntoSet
+    @Singleton
+    fun provideOnBoardingV3PageRenderer(
+        renderer: SpecialOnBoardingV3Renderer,
+    ): OnBoardingV3PageRenderer = renderer
 }
 ```
 
-Module `core:startflow` đã khai báo `@Multibinds`, vì vậy app không cần sửa module core. Project mẫu hiện đăng ký hai implementation này trong `app/src/main/java/com/codebasetemplate/required/RequiredModule.kt`.
+Module `core:startflow` đã khai báo `@Multibinds`, vì vậy app không cần sửa module core. App chỉ cần đăng ký customizer của những version đang dùng; renderer là tùy chọn.
 
-## Ý nghĩa tham số callback
+## Ý nghĩa state/callback
 
 | Tham số | Ý nghĩa |
 | --- | --- |
-| `fragment` | Fragment đang hiển thị; dùng `requireContext()`, `getString()` hoặc truy cập lifecycle |
-| `binding` | View Binding đúng với layout của version hiện tại |
+| `fragment`, `binding` | Chỉ thuộc bridge cũ đã deprecated |
 | `position` | Vị trí content, bắt đầu từ `0` |
-| `isLastPage` | Trang content cuối của V1/V2 theo `introPageCount` |
+| `isLastPage` | Trang content cuối thực tế của V1/V2 sau khi parse Remote Config |
 | `introductionPosition` | Vị trí logic trong flow V3; có tính đến vị trí dành cho full-native ad |
 | `realPosition` | Vị trí content thực dùng để lấy ảnh/title trong V3 |
 | `isPageEnd` | Đây là trang content cuối có thể hoàn tất onboarding |
-| `isShowAd` | Trang V3 hiện tại có vùng banner/native ad hay không |
-| `onBoardingConfig` | Config đã parse, gồm `version`, `positionNext`, close/swipe và delay |
+| `isShowAd` | Page content hiện tại được cấu hình hiển thị ads hay không; V1/V2 render ads ở Activity, V3 render trong page |
+| `config` | Config đã parse, gồm `version`, `positionNext`, close/swipe và delay |
+| `pageType` | `STANDARD` hoặc `END_TAB`; dùng để renderer chọn đúng loại page |
+| `actions` | Callback `onPrimaryAction()`, `onNext()` và `onFinish()` do core xử lý |
 
 ## Các view thường custom
 
-| Version | View Binding | View chính |
+| Version | API mặc định | Khả năng chính |
 | --- | --- | --- |
-| V1 | `CoreFragmentOnboardingBinding` | `ivIntroduction`, `tvTitle`, `dotsIndicator`, `tvNext`, `layoutIndicator` |
-| V2 | `CoreFragmentOnboardingV2Binding` | `ivIntroduction`, `layoutContent`, `tvTitle`, `tvTitle2`, `tvNext` |
-| V3 | `FragmentOnboardingV3Binding` | `ivIntroduction`, `tvTitle`, `topNext`, `topNextV2`, `bottomNext`, các indicator, `frameAds`, `layoutBannerNative` |
-| V3 end-tab | `FragmentOnboardingV3EndTabBinding` | `ivIntroduction`, `tvTitle`, `btGetStart`, `layoutBannerNative` |
+| V1 | `OnBoardingV1UiSpec` | Title/action, visibility indicator, text appearance và background |
+| V2 | `OnBoardingV2UiSpec` | Title/subtitle/action, content background và fill-gradient CTA |
+| V3 mặc định | `OnBoardingV3UiSpec` | Text/color/text appearance/background/visibility/indicator |
+| App đặc thù | `OnBoardingV1/V2/V3PageRenderer` | Toàn bộ view của page, action callback, lifecycle; V3 có thêm callback ads |
 
 ## Đồng bộ với Remote Config
 
@@ -240,8 +342,10 @@ Ví dụ chọn V3, action ở dưới và ba content page:
 
 ## Lưu ý
 
-- Không giữ `binding` hoặc `fragment` trong singleton customizer; chúng chỉ hợp lệ theo vòng đời view hiện tại.
+- Không giữ `binding`, `fragment`, `RenderScope` hoặc view đã render trong singleton; chúng chỉ hợp lệ theo vòng đời view hiện tại.
 - Không thay click listener của nút Next/Get Started nếu chỉ đổi giao diện. Listener mặc định còn phụ trách chuyển trang, kết thúc flow, tracking và quảng cáo.
-- Nếu đăng ký nhiều `OnBoardingUiCustomizer`, tất cả đều được gọi và thứ tự của `Set` không được đảm bảo. Tránh để nhiều customizer cùng sửa một thuộc tính.
+- `OnBoardingUiCustomizer` chỉ là bridge cũ. Nếu vẫn đăng ký nhiều bridge, chúng chạy theo tên class để kết quả xác định nhưng không nên thêm code mới vào API này.
+- `OnBoardingV1/V2/V3UiCustomizer` chạy từ priority thấp đến cao. Mỗi version chỉ chọn `PageRenderer` hỗ trợ page có priority cao nhất; tên class là tie-breaker.
+- Không override XML của core bằng resource cùng tên; binding của core vẫn yêu cầu đầy đủ ID/type và có thể crash khi inflate.
 - Dùng resource trong module app cho ảnh, màu, string và drawable để từng app có theme riêng mà không thay đổi `core:startflow`.
 - Khi đổi `introPageCount`, cập nhật đủ ảnh/string và các mảng `intro_data*` tương ứng để tránh index ngoài phạm vi hoặc xác định sai trang cuối.

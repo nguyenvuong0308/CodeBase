@@ -12,7 +12,9 @@ import com.codebasetemplate.required.firebase.GetDataFromRemoteUseCaseImpl
 import com.codebasetemplate.required.inapp.ProductIdProviderImpl
 import com.codebasetemplate.required.shortcut.AppShortCut
 import com.codebasetemplate.required.startflow.AppOnBoardingContentProvider
-import com.codebasetemplate.required.startflow.AppOnBoardingUiCustomizer
+import com.codebasetemplate.required.startflow.AppOnBoardingV1UiCustomizer
+import com.codebasetemplate.required.startflow.AppOnBoardingV2UiCustomizer
+import com.codebasetemplate.required.startflow.AppOnBoardingV3UiCustomizer
 import com.codebasetemplate.required.update.InAppUpdateImpl
 import com.core.ads.AdsSdkInitializer
 import com.core.analytics.AdjustAnalytics
@@ -21,7 +23,9 @@ import com.core.config.domain.GetDataFromRemoteConfigUseCase
 import com.core.config.domain.data.IAppProviderAdPlaceName
 import com.core.startflow.StartFlowNavigator
 import com.core.startflow.onboarding.OnBoardingContentProvider
-import com.core.startflow.onboarding.OnBoardingUiCustomizer
+import com.core.startflow.onboarding.v1.OnBoardingV1UiCustomizer
+import com.core.startflow.onboarding.v2.OnBoardingV2UiCustomizer
+import com.core.startflow.onboarding.v3.OnBoardingV3UiCustomizer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -85,9 +89,23 @@ class RequiredModule {
     @Provides
     @IntoSet
     @Singleton
-    fun provideAppOnBoardingUiCustomizer(
-        customizer: AppOnBoardingUiCustomizer
-    ): OnBoardingUiCustomizer = customizer
+    fun provideAppOnBoardingV1UiCustomizer(
+        customizer: AppOnBoardingV1UiCustomizer
+    ): OnBoardingV1UiCustomizer = customizer
+
+    @Provides
+    @IntoSet
+    @Singleton
+    fun provideAppOnBoardingV2UiCustomizer(
+        customizer: AppOnBoardingV2UiCustomizer
+    ): OnBoardingV2UiCustomizer = customizer
+
+    @Provides
+    @IntoSet
+    @Singleton
+    fun provideAppOnBoardingV3UiCustomizer(
+        customizer: AppOnBoardingV3UiCustomizer
+    ): OnBoardingV3UiCustomizer = customizer
 
     @Provides
     @IntoSet

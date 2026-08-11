@@ -25,7 +25,13 @@ class OnBoardingPagerAdapter2(
         return if(item is OnBoardingItem.FullNativeItem) {
             OnBoardingFullNativeFragment.Companion.newInstance()
         } else {
-            OnBoardingFragment2.Companion.newInstance((item as OnBoardingItem.Item).position)
+            val pageItem = item as OnBoardingItem.Item
+            OnBoardingFragment2.newInstance(
+                position = pageItem.position,
+                isPageEnd = pageItem.isPageEnd,
+                isShowAd = pageItem.isShowAds,
+                pageCount = items.count { it is OnBoardingItem.Item },
+            )
         }
     }
 }
