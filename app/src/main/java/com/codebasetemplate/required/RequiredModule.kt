@@ -8,7 +8,6 @@ import com.codebasetemplate.required.adjust.AdjustTracking
 import com.codebasetemplate.required.ads.AdmobAdsInitializer
 import com.codebasetemplate.required.ads.AppAdPlaceName
 import com.codebasetemplate.required.ads.ProviderAppProviderAdPlaceName
-import com.codebasetemplate.required.ads.ReopenActionImpl
 import com.codebasetemplate.required.firebase.GetDataFromRemoteUseCaseImpl
 import com.codebasetemplate.required.inapp.ProductIdProviderImpl
 import com.codebasetemplate.required.shortcut.AppShortCut
@@ -16,11 +15,9 @@ import com.codebasetemplate.required.startflow.AppOnBoardingContentProvider
 import com.codebasetemplate.required.startflow.AppOnBoardingUiCustomizer
 import com.codebasetemplate.required.update.InAppUpdateImpl
 import com.core.ads.AdsSdkInitializer
-import com.core.ads.admob.ReopenAction
 import com.core.analytics.AdjustAnalytics
 import com.core.billing.ProductIdProvider
 import com.core.config.domain.GetDataFromRemoteConfigUseCase
-import com.core.config.domain.RemoteConfigRepository
 import com.core.config.domain.data.IAppProviderAdPlaceName
 import com.core.startflow.StartFlowNavigator
 import com.core.startflow.onboarding.OnBoardingContentProvider
@@ -81,13 +78,6 @@ class RequiredModule {
     @Provides
     @Singleton
     fun provideAdjustTracking(): AdjustAnalytics = AdjustTracking()
-
-    /**
-     * Cung cấp hành động khi app được reopen, có phụ thuộc remote config hiện tại.
-     */
-    @Provides
-    @Singleton
-    fun provideReopenAction(remoteConfigRepository: RemoteConfigRepository): ReopenAction = ReopenActionImpl(remoteConfigRepository)
 
     /**
      * Đăng ký custom UI onboarding của app vào set customizer mà module startflow sử dụng.

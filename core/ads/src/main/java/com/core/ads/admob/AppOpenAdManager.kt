@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.util.Date
+import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -50,8 +51,10 @@ class AppOpenAdManager @Inject constructor(
     private val adManager: AdsManager,
     private val reOpenShowCondition: ReOpenShowCondition,
     private val adjustAnalytics: AdjustAnalytics,
-    private val reopenAction: ReopenAction
+    customReopenAction: Optional<ReopenAction>
 ) : LifecycleObserver, Application.ActivityLifecycleCallbacks {
+
+    private val reopenAction: ReopenAction = customReopenAction.orElse(DefaultReopenAction)
 
     companion object {
         const val TAG = "AdmobManager"
@@ -84,10 +87,12 @@ class AppOpenAdManager @Inject constructor(
         var loadId: Int = 0,
         val waiterActivities: MutableMap<IAdPlaceName, Activity> = linkedMapOf()
     ) {
+        /** Returns true while this holder contains an ad loaded less than four hours ago. */
         fun isAdAvailable(): Boolean {
             return appOpenAd != null && wasLoadTimeLessThanNHoursAgo(4)
         }
 
+        /** Checks whether the cached ad was loaded within the supplied validity window. */
         private fun wasLoadTimeLessThanNHoursAgo(numHours: Long): Boolean {
             val dateDifference = Date().time - loadTime
             val numMilliSecondsPerHour = 3600000L
@@ -101,6 +106,10 @@ class AppOpenAdManager @Inject constructor(
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
     }
 
+    /**
+     * Handles the application returning to the foreground after its first launch.
+     * Depending on configuration, it shows a cached app-open ad or starts the custom reopen flow.
+     */
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun onStart() {
         if (isFirstOpenApp || !reOpenShowCondition.isCanShow()) {
@@ -120,6 +129,10 @@ class AppOpenAdManager @Inject constructor(
         }
     }
 
+    /**
+     * Preloads the ad needed for the next foreground transition unless ads are being skipped or
+     * another fullscreen ad is already visible.
+     */
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     fun onStop() {
         if (isFirstOpenApp) {
@@ -132,15 +145,28 @@ class AppOpenAdManager @Inject constructor(
             return
         }
         currentActivity?.let {
-            fetchAd(it, CoreAdPlaceName.APP_REOPEN)
+            if(reopenAction.isCustomAction(it)) {
+                reopenAction.loadAdFull(it)
+            } else {
+                fetchAd(it, CoreAdPlaceName.APP_REOPEN)
+            }
         }
     }
 
+    /** Restores app-open state to its initial-launch defaults. */
     fun setupDefaultValue() {
         isFirstOpenApp = true
         adManager.setupAppOpenAdDefaultValue()
     }
 
+    /**
+     * Loads an app-open ad for [adPlaceName] using its configured waterfall.
+     *
+     * A load is reused when another placement is already requesting the same ad unit. The method
+     * reports an immediately available cache entry without issuing another SDK request.
+     *
+     * @param waterfallIndex index of the ad unit to try in the placement's waterfall.
+     */
     fun fetchAd(activity: Activity, adPlaceName: IAdPlaceName, waterfallIndex: Int = 0) {
         if(reopenAction.isCustomAction(activity) && adPlaceName == CoreAdPlaceName.APP_REOPEN) return
 
@@ -174,6 +200,7 @@ class AppOpenAdManager @Inject constructor(
         markAppOpenAdUnitWaiter(adHolder.adPlace, adUnitHolder, activity)
         scheduleAppOpenLoadTimeout(adUnitHolder, adUnitId)
         val loadCallback = object : AppOpenAdLoadCallback() {
+            /** Caches the loaded ad, records revenue events, and releases all shared waiters. */
             override fun onAdLoaded(ad: AppOpenAd) {
                 super.onAdLoaded(ad)
                 Log.i(TAG, "AppOpenAd loaded $adPlaceName $adUnitId")
@@ -196,6 +223,7 @@ class AppOpenAdManager @Inject constructor(
                 }
             }
 
+            /** Advances the waterfall or applies the configured retry policy after a load error. */
             override fun onAdFailedToLoad(p0: LoadAdError) {
                 super.onAdFailedToLoad(p0)
                 adUnitHolder.isLoading = false
@@ -236,6 +264,10 @@ class AppOpenAdManager @Inject constructor(
         )
     }
 
+    /**
+     * Shows a valid cached app-open ad for [adPlaceName].
+     * If no ad is ready, it starts loading one when a network connection is available.
+     */
     fun showAdIfAvailable(activity: Activity, adPlaceName: IAdPlaceName) {
         if (adManager.isNotAbleToVisibleAdsToUser(adPlaceName) || adManager.isHasFullscreenAdShowing()) {
             notifyAdNotValidOrLoadFailed(adPlaceName)
@@ -261,6 +293,7 @@ class AppOpenAdManager @Inject constructor(
             }
 
             val fullScreenContentCallback = object : FullScreenContentCallback() {
+                /** Clears display state and notifies observers after the user closes the ad. */
                 override fun onAdDismissedFullScreenContent() {
                     super.onAdShowedFullScreenContent()
                     Log.i(TAG, "AppOpenAd dismissed $adPlaceName")
@@ -271,6 +304,7 @@ class AppOpenAdManager @Inject constructor(
                     notifyAdOpenAppDismissed(adPlaceName)
                 }
 
+                /** Clears the unusable ad and reports that the placement could not be shown. */
                 override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                     super.onAdShowedFullScreenContent()
                     Log.i(TAG, "AppOpenAd failed to show $adPlaceName")
@@ -280,6 +314,7 @@ class AppOpenAdManager @Inject constructor(
                     notifyAdNotValidOrLoadFailed(adPlaceName)
                 }
 
+                /** Dims the underlying Activity and publishes the visible-ad state. */
                 override fun onAdShowedFullScreenContent() {
                     super.onAdShowedFullScreenContent()
                     Log.i(TAG, "AppOpenAd showed $adPlaceName")
@@ -287,6 +322,7 @@ class AppOpenAdManager @Inject constructor(
                     notifyAdOpenAppShowing(adPlaceName)
                 }
 
+                /** Updates the global click counter used by ad-frequency safeguards. */
                 override fun onAdClicked() {
                     super.onAdClicked()
                     adManager.increaseAdClickedCount()
@@ -306,6 +342,7 @@ class AppOpenAdManager @Inject constructor(
         }
     }
 
+    /** Ensures enough time has elapsed since either an interstitial or app-open ad was shown. */
     private fun isTimeAvailableShowAds(): Boolean {
         val timeInterval =
             remoteConfigRepository.getAppOpenAdConfig().timeInterval
@@ -314,46 +351,57 @@ class AppOpenAdManager @Inject constructor(
                 && currentTimeInSecond - PreventShowManyInterstitialAds.getLastTimeShowedAppOpenAd() >= timeInterval
     }
 
+    /** Publishes that [adPlaceName] has an ad ready to show. */
     private fun notifyAdOpenAppLoaded(adPlaceName: IAdPlaceName) {
         applicationScope.launch {
             _adOpenAppFlow.emit(AdOpenAdUiResource.AdLoaded(adPlaceName))
         }
     }
 
+    /** Publishes that [adPlaceName] is now presenting its app-open ad. */
     private fun notifyAdOpenAppShowing(adPlaceName: IAdPlaceName) {
         applicationScope.launch {
             _adOpenAppFlow.emit(AdOpenAdUiResource.AdShowing(adPlaceName))
         }
     }
 
+    /** Publishes that [adPlaceName] cannot show an ad or exhausted its load attempts. */
     private fun notifyAdNotValidOrLoadFailed(adPlaceName: IAdPlaceName) {
         applicationScope.launch {
             _adOpenAppFlow.emit(AdOpenAdUiResource.AdNotValidOrLoadFailed(adPlaceName))
         }
     }
 
+    /** Publishes that the app-open ad for [adPlaceName] was dismissed. */
     private fun notifyAdOpenAppDismissed(adPlaceName: IAdPlaceName) {
         applicationScope.launch {
             _adOpenAppFlow.emit(AdOpenAdUiResource.AdDismissed(adPlaceName))
         }
     }
 
+    /** No-op lifecycle callback required by [Application.ActivityLifecycleCallbacks]. */
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
 
+    /** Remembers the latest started Activity while no app-open ad is covering the UI. */
     override fun onActivityStarted(activity: Activity) {
         if (!adManager.isHasAppOpenAdShowing()) {
             currentActivity = activity
         }
     }
 
+    /** No-op lifecycle callback required by [Application.ActivityLifecycleCallbacks]. */
     override fun onActivityResumed(activity: Activity) {}
 
+    /** No-op lifecycle callback required by [Application.ActivityLifecycleCallbacks]. */
     override fun onActivityPaused(activity: Activity) {}
 
+    /** No-op lifecycle callback required by [Application.ActivityLifecycleCallbacks]. */
     override fun onActivityStopped(activity: Activity) {}
 
+    /** No-op lifecycle callback required by [Application.ActivityLifecycleCallbacks]. */
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 
+    /** No-op lifecycle callback required by [Application.ActivityLifecycleCallbacks]. */
     override fun onActivityDestroyed(activity: Activity) {}
 
     /**
@@ -378,6 +426,7 @@ class AppOpenAdManager @Inject constructor(
             .distinct()
     }
 
+    /** Resets a placement and reports failure when its configuration has no usable ad unit. */
     private fun failAppOpenLoadBecauseNoAdUnit(adHolder: AppOpenAdHolder) {
         val placeName = adHolder.adPlace.placeName
         Log.i(TAG, "AppOpenAd no available ad unit $placeName")
@@ -385,6 +434,7 @@ class AppOpenAdManager @Inject constructor(
         notifyAdNotValidOrLoadFailed(placeName)
     }
 
+    /** Finds the first valid shared ad cached for any unit in [adPlace]'s waterfall. */
     private fun findLoadedAppOpenAdUnitHolder(adPlace: AdPlace): AppOpenAdUnitHolder? {
         return adPlace.getWaterfallAdUnitIds()
             .firstNotNullOfOrNull { adUnitId ->
@@ -392,6 +442,7 @@ class AppOpenAdManager @Inject constructor(
             }
     }
 
+    /** Registers a placement and Activity as waiting for a shared ad-unit load to finish. */
     private fun markAppOpenAdUnitWaiter(
         adPlace: AdPlace,
         adUnitHolder: AppOpenAdUnitHolder,
@@ -401,6 +452,7 @@ class AppOpenAdManager @Inject constructor(
         adUnitHolder.waiterActivities[adPlace.placeName] = activity
     }
 
+    /** Completes all placements sharing a successfully loaded ad unit and clears their waiters. */
     private fun onAppOpenAdUnitLoaded(
         adPlace: AdPlace,
         adUnitHolder: AppOpenAdUnitHolder
@@ -415,6 +467,7 @@ class AppOpenAdManager @Inject constructor(
         adUnitHolder.waiterActivities.clear()
     }
 
+    /** Resumes sibling waterfalls after the owner placement's shared ad-unit load fails. */
     private fun onAppOpenAdUnitFailed(
         adPlace: AdPlace,
         adUnitHolder: AppOpenAdUnitHolder,
@@ -457,6 +510,10 @@ class AppOpenAdManager @Inject constructor(
         adUnitHolder.waiterActivities.clear()
     }
 
+    /**
+     * Releases a shared load that produces no SDK callback within the timeout window.
+     * The load ID prevents an older timeout job from cancelling a newer request.
+     */
     private fun scheduleAppOpenLoadTimeout(
         adUnitHolder: AppOpenAdUnitHolder,
         adUnitId: String
@@ -474,6 +531,7 @@ class AppOpenAdManager @Inject constructor(
         }
     }
 
+    /** Removes and returns the first valid shared ad available to [adPlace]. */
     private fun consumeAppOpenAd(adPlace: AdPlace): AppOpenAd? {
         // Move a loaded shared ad into the placement holder right before showing it.
         adPlace.getWaterfallAdUnitIds().forEach { adUnitId ->
@@ -488,6 +546,7 @@ class AppOpenAdManager @Inject constructor(
         return null
     }
 
+    /** Forwards the paid-event value and mediation source to Adjust revenue analytics. */
     private fun trackAdjustAdRevenue(
         adUnitId: String,
         loadedAdapterResponseInfo: AdapterResponseInfo?,
