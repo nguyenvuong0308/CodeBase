@@ -29,7 +29,7 @@ Use the modules you need:
 
 ```kotlin
 dependencies {
-    implementation("com.github.nguyenvuong0308:CodeBase:3.0.5")
+    implementation("com.github.nguyenvuong0308:CodeBase:3.0.6")
 }
 ```
 
@@ -49,6 +49,19 @@ Available artifacts:
 
 ## Documentation
 
+- [Firebase Ads configuration guide](docs/firebase-ads-guide/firebase_ads_config_guide.html)
 - [Native collapsible remote config](docs/native-collapsible-config.md)
 - [StartFlow Language V1/V2 UI customization](docs/startflow-language-ui-customization.md)
 - [StartFlow Onboarding UI customization](docs/startflow-onboarding-ui-customization.md)
+
+### Native ad text sizes
+
+Native placements support optional text sizes configured in Firebase Remote Config. Values use `sp`; omit a field or set it to `0` to keep the template layout default.
+
+```json
+{
+  "primary_text_size_sp": 16,
+  "body_text_size_sp": 14,
+  "cta_text_size_sp": 14
+}
+```

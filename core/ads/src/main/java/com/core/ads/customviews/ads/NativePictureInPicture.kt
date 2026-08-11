@@ -466,6 +466,11 @@ class NativePictureInPicture @JvmOverloads constructor(
             binding.primary.textSize = primaryTextSize
         }
 
+        val tertiaryTextSize = styles.tertiaryTextSize
+        if (tertiaryTextSize > 0) {
+            binding.body.textSize = tertiaryTextSize
+        }
+
         styles.callToActionBackgroundColor?.let {
             binding.layoutCta.updateBackgroundColor(it)
         }
@@ -543,6 +548,7 @@ class NativePictureInPicture @JvmOverloads constructor(
             .withCallToActionBackgroundColor(nativeAdPlace.backgroundCta)
             .withCallToActionRadius(nativeAdPlace.ctaRadius)
             .withCallToActionTypefaceColor(nativeAdPlace.ctaTextColor)
+            .withCallToActionTextSize(nativeAdPlace.ctaTextSizeSp ?: 0f)
             .withCtaBorderColor(nativeAdPlace.ctaBorderColor)
             .withBorderColor(borderColor)
             .withBackgroundColor(nativeAdPlace.backgroundColor)
@@ -552,7 +558,9 @@ class NativePictureInPicture @JvmOverloads constructor(
             .withStep2CountDownSecond(nativeAdPlace.step2CountDownTimer)
             .withBackgroundFullColor(nativeAdPlace.backgroundFullColor)
             .withPrimaryTextTypefaceColor(nativeAdPlace.primaryTextColor)
+            .withPrimaryTextSize(nativeAdPlace.primaryTextSizeSp ?: 0f)
             .withTertiaryTextTypefaceColor(nativeAdPlace.bodyTextColor)
+            .withTertiaryTextSize(nativeAdPlace.bodyTextSizeSp ?: 0f)
             .withMainBackgroundRadius(nativeAdPlace.backgroundRadius)
             .withBackgroundAdsNotifyView(AdsR.drawable.gnt_rounded_corners_shape)
             .withBackgroundColorAdsNotifyView(nativeAdPlace.backgroundColorAdsNotifyView)

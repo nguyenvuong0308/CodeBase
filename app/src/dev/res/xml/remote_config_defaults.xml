@@ -122,9 +122,12 @@
     <!--native_expand_template: native_expand_v1 - native_expand_v2-->
     <!--background_color: màu nền-->
     <!--primary_text_color: màu text primary-->
+    <!--primary_text_size_sp: kích thước headline theo sp; bỏ trống hoặc <= 0 để dùng layout mặc định-->
     <!--body_text_color: màu text body-->
+    <!--body_text_size_sp: kích thước body theo sp; bỏ trống hoặc <= 0 để dùng layout mặc định-->
     <!--background_cta: -->
     <!--cta_text_color: -->
+    <!--cta_text_size_sp: kích thước text CTA theo sp; bỏ trống hoặc <= 0 để dùng layout mặc định-->
     <!--border_color: -->
     <!--refresh_time_second: native reload interval in seconds, <= 0 disables refresh-->
 

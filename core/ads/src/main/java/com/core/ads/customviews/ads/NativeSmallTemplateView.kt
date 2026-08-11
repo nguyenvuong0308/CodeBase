@@ -130,6 +130,11 @@ class NativeSmallTemplateView @JvmOverloads constructor(
             binding.primary.textSize = primaryTextSize
         }
 
+        val tertiaryTextSize = styles.tertiaryTextSize
+        if (tertiaryTextSize > 0) {
+            binding.body.textSize = tertiaryTextSize
+        }
+
          styles.callToActionBackgroundColor?.let {
              binding.layoutCta.updateBackgroundColor(it)
         }
