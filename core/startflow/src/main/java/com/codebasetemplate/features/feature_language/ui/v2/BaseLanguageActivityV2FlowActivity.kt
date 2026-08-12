@@ -30,7 +30,7 @@ import com.core.startflow.OnBoardingConfigFactory
 import com.core.startflow.StartFlowActivity
 import com.core.startflow.StartFlowNavigator
 import com.core.startflow.StartFlowShortcut
-import com.core.startflow.databinding.ActivityLanguageV2Binding
+import com.core.startflow.databinding.StartflowActivityLanguageV2Binding
 import com.codebasetemplate.features.feature_language.ui.LanguageViewModel
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageGroup
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageOption
@@ -39,7 +39,7 @@ import com.codebasetemplate.util.EventTracking
 import java.util.Locale
 import javax.inject.Inject
 
-abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<ActivityLanguageV2Binding>() {
+abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowActivityLanguageV2Binding>() {
 
     @Inject
     lateinit var startFlowNavigator: StartFlowNavigator
@@ -53,8 +53,8 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<ActivityLa
     override val isSpaceDisplayCutout: Boolean
         get() = true
 
-    override fun bindingProvider(inflater: LayoutInflater): ActivityLanguageV2Binding {
-        return ActivityLanguageV2Binding.inflate(inflater)
+    override fun bindingProvider(inflater: LayoutInflater): StartflowActivityLanguageV2Binding {
+        return StartflowActivityLanguageV2Binding.inflate(inflater)
     }
 
     private val viewModel: LanguageViewModel by viewModels()

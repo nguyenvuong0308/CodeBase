@@ -7,7 +7,7 @@ import androidx.fragment.app.activityViewModels
 import com.codebasetemplate.features.feature_onboarding.ui.model.OnBoardingItem
 import com.core.startflow.R
 import com.core.startflow.StartFlowScreenType
-import com.core.startflow.databinding.FragmentOnboardingV3EndTabBinding
+import com.core.startflow.databinding.StartflowFragmentOnboardingV3EndTabBinding
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingEvent
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingViewModel
 import com.codebasetemplate.util.EventTracking
@@ -34,7 +34,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class OnBoardingFragmentV3EndTab : BaseFragment<FragmentOnboardingV3EndTabBinding>() {
+class OnBoardingFragmentV3EndTab : BaseFragment<StartflowFragmentOnboardingV3EndTabBinding>() {
 
     private val sharedViewModel: OnBoardingViewModel by activityViewModels()
 
@@ -63,8 +63,8 @@ class OnBoardingFragmentV3EndTab : BaseFragment<FragmentOnboardingV3EndTabBindin
     override fun bindingProvider(
         inflater: LayoutInflater,
         container: ViewGroup?,
-    ): FragmentOnboardingV3EndTabBinding {
-        return FragmentOnboardingV3EndTabBinding.inflate(inflater, container, false)
+    ): StartflowFragmentOnboardingV3EndTabBinding {
+        return StartflowFragmentOnboardingV3EndTabBinding.inflate(inflater, container, false)
     }
 
     override val screenType: ScreenType

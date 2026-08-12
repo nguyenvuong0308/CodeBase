@@ -15,7 +15,7 @@ import com.core.utilities.setCurrentItemFixCrash
 import com.core.startflow.StartFlowActivity
 import com.core.startflow.StartFlowNavigator
 import com.core.startflow.StartFlowShortcut
-import com.core.startflow.databinding.ActivityOnboardingV3Binding
+import com.core.startflow.databinding.StartflowActivityOnboardingV3Binding
 import com.core.startflow.OnBoardingConfigFactory
 import com.codebasetemplate.features.feature_onboarding.ui.model.OnBoardingItem
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingEvent
@@ -25,7 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class OnBoardingActivityV3 : StartFlowActivity<ActivityOnboardingV3Binding>() {
+class OnBoardingActivityV3 : StartFlowActivity<StartflowActivityOnboardingV3Binding>() {
     override val isHideStatusBar: Boolean
         get() = true
 
@@ -38,8 +38,8 @@ class OnBoardingActivityV3 : StartFlowActivity<ActivityOnboardingV3Binding>() {
 
     private val sharedViewModel: OnBoardingViewModel by viewModels()
 
-    override fun bindingProvider(inflater: LayoutInflater): ActivityOnboardingV3Binding {
-        return ActivityOnboardingV3Binding.inflate(inflater)
+    override fun bindingProvider(inflater: LayoutInflater): StartflowActivityOnboardingV3Binding {
+        return StartflowActivityOnboardingV3Binding.inflate(inflater)
     }
 
     private val targetScreenFromShortCut by lazy {

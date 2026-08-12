@@ -24,7 +24,7 @@ import com.core.config.domain.data.IAdPlaceName
 import com.core.utilities.getCurrentLanguageCode
 import com.core.utilities.gone
 import com.core.utilities.visible
-import com.core.startflow.databinding.ActivityLanguageV2Binding
+import com.core.startflow.databinding.StartflowActivityLanguageV2Binding
 import com.core.startflow.StartFlowActivity
 import com.core.startflow.StartFlowNavigator
 import com.codebasetemplate.features.feature_language.ui.LanguageViewModel
@@ -39,7 +39,7 @@ import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class LanguageActivityV2FromSetting : StartFlowActivity<ActivityLanguageV2Binding>() {
+class LanguageActivityV2FromSetting : StartFlowActivity<StartflowActivityLanguageV2Binding>() {
 
     @Inject
     lateinit var startFlowNavigator: StartFlowNavigator
@@ -53,8 +53,8 @@ class LanguageActivityV2FromSetting : StartFlowActivity<ActivityLanguageV2Bindin
     override val isSpaceDisplayCutout: Boolean
         get() = true
 
-    override fun bindingProvider(inflater: LayoutInflater): ActivityLanguageV2Binding {
-        return ActivityLanguageV2Binding.inflate(inflater)
+    override fun bindingProvider(inflater: LayoutInflater): StartflowActivityLanguageV2Binding {
+        return StartflowActivityLanguageV2Binding.inflate(inflater)
     }
 
     private val viewModel: LanguageViewModel by viewModels()

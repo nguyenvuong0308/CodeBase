@@ -30,7 +30,7 @@
             android:orientation="vertical"
             android:paddingHorizontal="@dimen/_12dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/core_item_language_ltr" />
+            tools:listitem="@layout/startflow_item_language_ltr" />
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"

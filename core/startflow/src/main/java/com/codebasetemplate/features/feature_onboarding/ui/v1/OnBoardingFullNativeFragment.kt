@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.activityViewModels
-import com.core.startflow.databinding.CoreFragmentOnboardingFullNativeBinding
+import com.core.startflow.databinding.StartflowFragmentOnboardingFullNativeBinding
 import com.core.startflow.OnBoardingConfigFactory
 import com.core.startflow.StartFlowScreenType
 import com.core.ads.domain.AdLoadBannerNativeUiResource
@@ -23,7 +23,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class OnBoardingFullNativeFragment : BaseFragment<CoreFragmentOnboardingFullNativeBinding>() {
+class OnBoardingFullNativeFragment : BaseFragment<StartflowFragmentOnboardingFullNativeBinding>() {
 
     private val sharedViewModel: OnBoardingViewModel by activityViewModels()
 
@@ -34,8 +34,8 @@ class OnBoardingFullNativeFragment : BaseFragment<CoreFragmentOnboardingFullNati
     override fun bindingProvider(
         inflater: LayoutInflater,
         container: ViewGroup?,
-    ): CoreFragmentOnboardingFullNativeBinding {
-        return CoreFragmentOnboardingFullNativeBinding.inflate(inflater, container, false)
+    ): StartflowFragmentOnboardingFullNativeBinding {
+        return StartflowFragmentOnboardingFullNativeBinding.inflate(inflater, container, false)
     }
 
     override val screenType: ScreenType

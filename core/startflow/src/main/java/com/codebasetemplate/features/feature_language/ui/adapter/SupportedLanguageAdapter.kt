@@ -4,8 +4,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.viewbinding.ViewBinding
-import com.core.startflow.databinding.CoreItemLanguageLtrBinding
-import com.core.startflow.databinding.CoreItemLanguageRtlBinding
+import com.core.startflow.databinding.StartflowItemLanguageLtrBinding
+import com.core.startflow.databinding.StartflowItemLanguageRtlBinding
 import com.core.baseui.adapter.DataBoundListAdapter
 import com.core.baseui.executor.AppExecutors
 import com.core.baseui.supportedlanguage.SupportedLanguage
@@ -47,13 +47,13 @@ class SupportedLanguageAdapter(
 
     override fun createBinding(parent: ViewGroup, viewType: Int): ViewBinding {
         return when (viewType) {
-            SupportedLanguage.RightToLeft.No.viewType -> CoreItemLanguageLtrBinding.inflate(
+            SupportedLanguage.RightToLeft.No.viewType -> StartflowItemLanguageLtrBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
             )
 
-            else -> CoreItemLanguageRtlBinding.inflate(
+            else -> StartflowItemLanguageRtlBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
@@ -68,7 +68,7 @@ class SupportedLanguageAdapter(
         val isShowClickHand = item.languageCode == systemLanguageCode && isShowHand
 
         when (binding) {
-            is CoreItemLanguageLtrBinding -> {
+            is StartflowItemLanguageLtrBinding -> {
                 showData(
                     item = item,
                     tvLanguageName = binding.tvLanguage,
@@ -83,7 +83,7 @@ class SupportedLanguageAdapter(
                 }
             }
 
-            is CoreItemLanguageRtlBinding -> {
+            is StartflowItemLanguageRtlBinding -> {
                 showData(
                     item = item,
                     tvLanguageName = binding.tvLanguage,

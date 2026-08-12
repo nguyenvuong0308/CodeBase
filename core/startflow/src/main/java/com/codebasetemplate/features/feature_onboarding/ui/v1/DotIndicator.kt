@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
-import com.core.startflow.databinding.CoreDotIndicatorBinding
+import com.core.startflow.databinding.StartflowDotIndicatorBinding
 import com.core.dimens.R
 import com.core.utilities.changeSize
 import com.core.utilities.gone
@@ -15,7 +15,7 @@ import com.core.utilities.gone
 class DotIndicator @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : LinearLayoutCompat(context, attrs) {
-    private val _viewBinding = CoreDotIndicatorBinding.inflate(LayoutInflater.from(context), this, true)
+    private val _viewBinding = StartflowDotIndicatorBinding.inflate(LayoutInflater.from(context), this, true)
     private val _listDot = ArrayList<View>()
     init {
         _viewBinding.run {

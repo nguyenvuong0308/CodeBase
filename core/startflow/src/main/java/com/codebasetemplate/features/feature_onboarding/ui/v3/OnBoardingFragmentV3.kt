@@ -9,7 +9,7 @@ import androidx.fragment.app.activityViewModels
 import com.codebasetemplate.features.feature_onboarding.ui.model.OnBoardingItem
 import com.core.startflow.R
 import com.core.startflow.StartFlowScreenType
-import com.core.startflow.databinding.FragmentOnboardingV3Binding
+import com.core.startflow.databinding.StartflowFragmentOnboardingV3Binding
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingEvent
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingViewModel
 import com.codebasetemplate.util.EventTracking
@@ -41,7 +41,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class OnBoardingFragmentV3 : BaseFragment<FragmentOnboardingV3Binding>() {
+class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>() {
 
     private val sharedViewModel: OnBoardingViewModel by activityViewModels()
 
@@ -77,8 +77,8 @@ class OnBoardingFragmentV3 : BaseFragment<FragmentOnboardingV3Binding>() {
     override fun bindingProvider(
         inflater: LayoutInflater,
         container: ViewGroup?,
-    ): FragmentOnboardingV3Binding {
-        return FragmentOnboardingV3Binding.inflate(inflater, container, false)
+    ): StartflowFragmentOnboardingV3Binding {
+        return StartflowFragmentOnboardingV3Binding.inflate(inflater, container, false)
     }
 
     override val screenType: ScreenType

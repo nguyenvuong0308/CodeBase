@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.recyclerview.widget.DefaultItemAnimator
 import com.core.startflow.StartFlowActivity
-import com.core.startflow.databinding.CoreActivityLanguageBinding
+import com.core.startflow.databinding.StartflowActivityLanguageBinding
 import com.codebasetemplate.features.feature_language.ui.adapter.SupportedLanguageAdapter
 import com.core.config.domain.data.CoreAdPlaceName
 import com.core.startflow.OnBoardingConfigFactory
@@ -35,7 +35,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class LanguageActivity : StartFlowActivity<CoreActivityLanguageBinding>() {
+class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
 
     @Inject
     lateinit var startFlowNavigator: StartFlowNavigator
@@ -49,8 +49,8 @@ class LanguageActivity : StartFlowActivity<CoreActivityLanguageBinding>() {
     override val isSpaceDisplayCutout: Boolean
         get() = true
 
-    override fun bindingProvider(inflater: LayoutInflater): CoreActivityLanguageBinding {
-        return CoreActivityLanguageBinding.inflate(inflater)
+    override fun bindingProvider(inflater: LayoutInflater): StartflowActivityLanguageBinding {
+        return StartflowActivityLanguageBinding.inflate(inflater)
     }
 
     private val viewModel: LanguageViewModel by viewModels()

@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.activity.viewModels
 import androidx.viewpager2.widget.ViewPager2
 import com.core.startflow.StartFlowActivity
-import com.core.startflow.databinding.CoreActivityOnboardingBinding
+import com.core.startflow.databinding.StartflowActivityOnboardingBinding
 import com.codebasetemplate.features.feature_onboarding.ui.adapter.OnBoardingPagerAdapter
 import com.codebasetemplate.features.feature_onboarding.ui.model.OnBoardingItem
 import com.core.config.domain.data.CoreAdPlaceName
@@ -34,7 +34,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class OnBoardingActivity : StartFlowActivity<CoreActivityOnboardingBinding>() {
+class OnBoardingActivity : StartFlowActivity<StartflowActivityOnboardingBinding>() {
     override val isHideStatusBar: Boolean
         get() = true
 
@@ -53,8 +53,8 @@ class OnBoardingActivity : StartFlowActivity<CoreActivityOnboardingBinding>() {
     @Inject
     lateinit var contentProviders: Set<@JvmSuppressWildcards OnBoardingContentProvider>
 
-    override fun bindingProvider(inflater: LayoutInflater): CoreActivityOnboardingBinding {
-        return CoreActivityOnboardingBinding.inflate(inflater)
+    override fun bindingProvider(inflater: LayoutInflater): StartflowActivityOnboardingBinding {
+        return StartflowActivityOnboardingBinding.inflate(inflater)
     }
 
     private val targetScreenFromShortCut by lazy {

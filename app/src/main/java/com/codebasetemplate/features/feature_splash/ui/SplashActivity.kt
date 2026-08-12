@@ -14,7 +14,7 @@ import com.core.config.domain.data.IAdPlaceName
 import com.core.startflow.OnBoardingConfigFactory
 import com.core.startflow.StartFlowScreenType
 import com.core.startflow.StartFlowShortcut
-import com.core.startflow.databinding.CoreActivitySplashBinding
+import com.core.startflow.databinding.StartflowActivitySplashBinding
 import com.core.utilities.getCurrentLanguageCode
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 private const val TAG = "SplashActivity"
 
 @AndroidEntryPoint
-class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
+class SplashActivity : BaseSplashActivity<StartflowActivitySplashBinding>() {
 
     companion object {
         private const val EARLY_PROGRESS_RATIO = 0.4f
@@ -47,8 +47,8 @@ class SplashActivity : BaseSplashActivity<CoreActivitySplashBinding>() {
     /**
      * Tạo ViewBinding cho màn Splash từ layout trong module core:startflow.
      */
-    override fun bindingProvider(inflater: LayoutInflater): CoreActivitySplashBinding {
-        return CoreActivitySplashBinding.inflate(inflater)
+    override fun bindingProvider(inflater: LayoutInflater): StartflowActivitySplashBinding {
+        return StartflowActivitySplashBinding.inflate(inflater)
     }
 
     /**

@@ -68,7 +68,7 @@
             android:paddingEnd="16dp"
             android:paddingBottom="16dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_language_group_v2" />
+            tools:listitem="@layout/startflow_item_language_group_v2" />
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:id="@+id/lnApplyLoading"

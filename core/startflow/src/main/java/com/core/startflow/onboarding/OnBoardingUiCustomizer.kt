@@ -2,10 +2,10 @@ package com.core.startflow.onboarding
 
 import androidx.fragment.app.Fragment
 import com.core.config.domain.data.OnBoardingConfig
-import com.core.startflow.databinding.CoreFragmentOnboardingBinding
-import com.core.startflow.databinding.CoreFragmentOnboardingV2Binding
-import com.core.startflow.databinding.FragmentOnboardingV3Binding
-import com.core.startflow.databinding.FragmentOnboardingV3EndTabBinding
+import com.core.startflow.databinding.StartflowFragmentOnboardingBinding
+import com.core.startflow.databinding.StartflowFragmentOnboardingV2Binding
+import com.core.startflow.databinding.StartflowFragmentOnboardingV3Binding
+import com.core.startflow.databinding.StartflowFragmentOnboardingV3EndTabBinding
 
 interface OnBoardingUiCustomizer {
     @Deprecated(
@@ -14,7 +14,7 @@ interface OnBoardingUiCustomizer {
     )
     fun customizeOnBoardingV1(
         fragment: Fragment,
-        binding: CoreFragmentOnboardingBinding,
+        binding: StartflowFragmentOnboardingBinding,
         position: Int,
         isLastPage: Boolean
     ) = Unit
@@ -25,7 +25,7 @@ interface OnBoardingUiCustomizer {
     )
     fun customizeOnBoardingV2(
         fragment: Fragment,
-        binding: CoreFragmentOnboardingV2Binding,
+        binding: StartflowFragmentOnboardingV2Binding,
         position: Int,
         isLastPage: Boolean
     ) = Unit
@@ -36,7 +36,7 @@ interface OnBoardingUiCustomizer {
     )
     fun customizeOnBoardingV3(
         fragment: Fragment,
-        binding: FragmentOnboardingV3Binding,
+        binding: StartflowFragmentOnboardingV3Binding,
         introductionPosition: Int,
         realPosition: Int,
         isPageEnd: Boolean,
@@ -50,7 +50,7 @@ interface OnBoardingUiCustomizer {
     )
     fun customizeOnBoardingV3EndTab(
         fragment: Fragment,
-        binding: FragmentOnboardingV3EndTabBinding,
+        binding: StartflowFragmentOnboardingV3EndTabBinding,
         position: Int
     ) = Unit
 }

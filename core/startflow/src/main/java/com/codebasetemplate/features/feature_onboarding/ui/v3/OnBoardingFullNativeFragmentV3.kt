@@ -13,7 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.core.startflow.StartFlowScreenType
-import com.core.startflow.databinding.CoreFragmentOnboardingFullNativeBinding
+import com.core.startflow.databinding.StartflowFragmentOnboardingFullNativeBinding
 import com.core.startflow.OnBoardingConfigFactory
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingEvent
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingViewModel
@@ -33,7 +33,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class OnBoardingFullNativeFragmentV3 : BaseFragment<CoreFragmentOnboardingFullNativeBinding>() {
+class OnBoardingFullNativeFragmentV3 : BaseFragment<StartflowFragmentOnboardingFullNativeBinding>() {
 
     companion object {
         private const val SHOW_CONTROL_ANIMATION_DURATION_MS = 300L
@@ -50,8 +50,8 @@ class OnBoardingFullNativeFragmentV3 : BaseFragment<CoreFragmentOnboardingFullNa
     override fun bindingProvider(
         inflater: LayoutInflater,
         container: ViewGroup?,
-    ): CoreFragmentOnboardingFullNativeBinding {
-        return CoreFragmentOnboardingFullNativeBinding.inflate(inflater, container, false)
+    ): StartflowFragmentOnboardingFullNativeBinding {
+        return StartflowFragmentOnboardingFullNativeBinding.inflate(inflater, container, false)
     }
 
     override val screenType: ScreenType

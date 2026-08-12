@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.core.startflow.R
-import com.core.startflow.databinding.ItemLanguageGroupV2Binding
-import com.core.startflow.databinding.ItemLanguageOptionV2Binding
+import com.core.startflow.databinding.StartflowItemLanguageGroupV2Binding
+import com.core.startflow.databinding.StartflowItemLanguageOptionV2Binding
 import java.util.Locale
 
 class LanguageV2Adapter : ListAdapter<LanguageRow, RecyclerView.ViewHolder>(DIFF) {
@@ -48,11 +48,11 @@ class LanguageV2Adapter : ListAdapter<LanguageRow, RecyclerView.ViewHolder>(DIFF
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
             VIEW_TYPE_GROUP -> GroupViewHolder(
-                ItemLanguageGroupV2Binding.inflate(inflater, parent, false)
+                StartflowItemLanguageGroupV2Binding.inflate(inflater, parent, false)
             )
 
             else -> OptionViewHolder(
-                ItemLanguageOptionV2Binding.inflate(inflater, parent, false)
+                StartflowItemLanguageOptionV2Binding.inflate(inflater, parent, false)
             )
         }
     }
@@ -145,7 +145,7 @@ class LanguageV2Adapter : ListAdapter<LanguageRow, RecyclerView.ViewHolder>(DIFF
     }
 
     private inner class GroupViewHolder(
-        private val binding: ItemLanguageGroupV2Binding,
+        private val binding: StartflowItemLanguageGroupV2Binding,
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(row: LanguageRow.Group) {
@@ -181,7 +181,7 @@ class LanguageV2Adapter : ListAdapter<LanguageRow, RecyclerView.ViewHolder>(DIFF
     }
 
     private inner class OptionViewHolder(
-        private val binding: ItemLanguageOptionV2Binding,
+        private val binding: StartflowItemLanguageOptionV2Binding,
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(row: LanguageRow.Option) {
