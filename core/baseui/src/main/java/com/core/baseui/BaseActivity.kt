@@ -75,7 +75,7 @@ abstract class BaseActivity<T : ViewBinding> : AppCompatActivity(), CoroutineSco
     private lateinit var askCheckPermission: ActivityResultLauncher<Array<String>>
     private lateinit var pickImageIntent: ActivityResultLauncher<PickVisualMediaRequest>
     private var onImagePicked: ((Uri?) -> Unit)? = null
-    private val insetsViewModel: InsetsViewModel by viewModels()
+    protected val insetsViewModel: InsetsViewModel by viewModels()
     private val keyboardChangeViewModel: KeyboardChangeViewModel by viewModels()
     private var _onPermissionResult: ((Map<String, Boolean>) -> Unit)? = null
     private lateinit var startActivityIntent: ActivityResultLauncher<Intent>

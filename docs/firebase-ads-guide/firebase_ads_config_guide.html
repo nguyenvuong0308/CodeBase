@@ -180,6 +180,7 @@
     <ul class="toc">
       <li><a href="#keys">Danh sách key Firebase</a></li>
       <li><a href="#ad-place">Schema ad place</a></li>
+      <li><a href="#ab-testing">A/B testing theo ad place</a></li>
       <li><a href="#native">Native ads</a></li>
       <li><a href="#banner">Banner ads</a></li>
       <li><a href="#fullscreen">Interstitial, Rewarded, Rewarded Interstitial</a></li>
@@ -208,6 +209,8 @@
           <tr><td><code>rewarded_rewardedinter_inter_ad_places</code></td><td>JSON array object</td><td>Các vị trí interstitial, rewarded, rewarded interstitial và native interstitial.</td></tr>
           <tr><td><code>rewarded_rewardedinter_inter_ad_places_2</code></td><td>JSON array object</td><td>Override fallback cho fullscreen ads.</td></tr>
           <tr><td><code>ad_places_version_config</code></td><td>JSON array object</td><td>Map versionCode sang key ad places riêng.</td></tr>
+          <tr><td><code>ab_testing_ad_place_names</code></td><td>JSON array string</td><td>Danh sách các <code>place_name</code> hiện có được phép nhận cấu hình A/B override.</td></tr>
+          <tr><td><code>ad_place_ab_&lt;place_name&gt;</code></td><td>JSON object</td><td>Object ad place đầy đủ dùng để thay thế toàn bộ object gốc trong variant A/B.</td></tr>
           <tr><td><code>interstitial_ad_config</code></td><td>JSON object</td><td>Retry, interval và giới hạn session cho interstitial.</td></tr>
           <tr><td><code>rewarded_ad_config</code></td><td>JSON object</td><td>Retry và wait-to-show cho rewarded video.</td></tr>
           <tr><td><code>rewarded_interstitial_ad_config</code></td><td>JSON object</td><td>Retry và wait-to-show cho rewarded interstitial. Defaults hiện tại chưa khai báo key này, code sẽ dùng default nội bộ.</td></tr>
@@ -252,6 +255,67 @@
     }
   }
 ]</code></pre>
+    </section>
+
+    <section id="ab-testing">
+      <h2>A/B testing theo ad place</h2>
+      <p>Cơ chế A/B testing hoạt động như một lớp override đặt trên các list ad place hiện tại. Core resolve list gốc theo thứ tự versioned key, key <code>*_2</code> và key mặc định trước; sau đó mới áp dụng override. Việc replace diễn ra hoàn toàn trong <code>core:config</code>, vì vậy app tiếp tục dùng <code>getAdPlaceBy(...)</code> và AdsManager như cũ, không cần sửa implementation.</p>
+
+      <h3>1. Khai báo danh sách place được A/B test</h3>
+      <p>Tạo parameter <code>ab_testing_ad_place_names</code> với kiểu String và giá trị là JSON array. Chỉ nên khai báo các <code>place_name</code> đã tồn tại trong một trong ba list ad place gốc.</p>
+      <pre><code>[
+  "anchored_bottom_home",
+  "fullscreen_test"
+]</code></pre>
+
+      <h3>2. Tạo parameter override cho từng place</h3>
+      <p>Tên parameter tuân theo format <code>ad_place_ab_&lt;place_name&gt;</code>. Ví dụ với place <code>anchored_bottom_home</code>, parameter tương ứng là:</p>
+      <pre><code>ad_place_ab_anchored_bottom_home</code></pre>
+      <p>Giá trị control/default có thể để rỗng. Giá trị variant phải là một object ad place đầy đủ; tối thiểu phải có <code>place_name</code>, <code>ad_id</code>, <code>ad_type</code> và <code>is_enable</code>.</p>
+      <pre><code>{
+  "place_name": "anchored_bottom_home",
+  "ad_id": "ca-app-pub-xxx/yyy",
+  "ad_type": "native",
+  "native_template_size": "medium_cta_bottom",
+  "is_enable": true,
+  "is_tracking_click": true,
+  "background_color": "#FFFFFF",
+  "primary_text_color": "#1F2937",
+  "body_text_color": "#6B7280",
+  "background_cta": "#5E56F5"
+}</code></pre>
+
+      <div class="note">
+        <strong>Quan trọng:</strong> override thay thế toàn bộ object, không merge từng field. Mọi field không xuất hiện trong variant sẽ nhận default của mapper, không giữ giá trị từ object gốc. Vì vậy hãy copy object gốc rồi sửa các field cần test.
+      </div>
+
+      <h3>3. Thiết lập experiment trên Firebase</h3>
+      <ol>
+        <li>Giữ <code>ab_testing_ad_place_names</code> là parameter chung, không cần thay đổi giữa control và variant.</li>
+        <li>Chọn <code>ad_place_ab_&lt;place_name&gt;</code> làm parameter của experiment.</li>
+        <li>Control dùng chuỗi rỗng để app giữ nguyên object trong list gốc.</li>
+        <li>Variant dùng JSON object đầy đủ muốn thử nghiệm.</li>
+        <li>Publish Remote Config và chạy experiment theo phân bổ user của Firebase.</li>
+      </ol>
+
+      <h3>Quy tắc resolve và fallback</h3>
+      <ul>
+        <li>Danh sách tên được trim, loại phần tử rỗng và loại trùng.</li>
+        <li>Override chỉ áp dụng cho place đã có trong list gốc; không thể thêm place mới.</li>
+        <li><code>place_name</code> trong object override phải trùng chính xác với tên nằm trong danh sách.</li>
+        <li>Key không tồn tại, value rỗng, JSON lỗi hoặc thiếu field bắt buộc sẽ giữ nguyên object gốc.</li>
+        <li>Thứ tự và số lượng phần tử của list gốc không thay đổi.</li>
+      </ul>
+
+      <h3>Ví dụ kết quả</h3>
+      <table>
+        <thead><tr><th>Nhóm</th><th>Giá trị parameter override</th><th>Kết quả trong app</th></tr></thead>
+        <tbody>
+          <tr><td>Control</td><td>Chuỗi rỗng</td><td>Dùng nguyên object từ list ad place gốc.</td></tr>
+          <tr><td>Variant</td><td>JSON object đầy đủ, hợp lệ</td><td>Thay toàn bộ object gốc trước khi map sang <code>AdPlace</code>.</td></tr>
+          <tr><td>Fallback</td><td>JSON sai, thiếu field hoặc sai <code>place_name</code></td><td>Bỏ qua override và dùng object gốc.</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <section id="native">

@@ -39,6 +39,7 @@ class RemoteConfigService @Inject constructor(
 
     companion object {
         const val CONFIG_CACHE_EXPIRATION_SECONDS = 1L
+        internal const val AB_TESTING_AD_PLACE_KEY_PREFIX = "ad_place_ab_"
     }
 //
 //    private val config = FirebaseRemoteConfig.getInstance().apply {
@@ -186,6 +187,24 @@ class RemoteConfigService @Inject constructor(
         )
     }
 
+    internal fun getAdPlaces(): List<AdPlaceModel> {
+        val basePlaces = buildList {
+            addAll(getBannerNativeAdPlaces())
+            addAll(getAppOpenAdPlaces())
+            addAll(getRewardedRewardedInterInterAdPlaces())
+        }
+        val configuredPlaceNames = remoteConfig.readList(
+            moshi,
+            ConfigParam.AbTestingAdPlaceNames,
+        )
+
+        return AdPlaceAbTestOverrideResolver.resolve(
+            basePlaces = basePlaces,
+            configuredPlaceNames = configuredPlaceNames,
+            overrideProvider = ::readAbTestingAdPlaceOverride,
+        )
+    }
+
     private fun getAdPlacesByConfigKeys(
         versionedKeySelector: (AdPlacesVersionKeyModel) -> String?,
         fallbackOverrideKey: String,
@@ -233,6 +252,17 @@ class RemoteConfigService @Inject constructor(
             }
         } catch (_: Exception) {
             emptyList()
+        }
+    }
+
+    private fun readAbTestingAdPlaceOverride(placeName: String): AdPlaceModel? {
+        val key = "$AB_TESTING_AD_PLACE_KEY_PREFIX$placeName"
+        return try {
+            remoteConfig.getString(key)
+                .takeIf(String::isNotBlank)
+                ?.let { moshi.adapter(AdPlaceModel::class.java).fromJson(it) }
+        } catch (_: Exception) {
+            null
         }
     }
 

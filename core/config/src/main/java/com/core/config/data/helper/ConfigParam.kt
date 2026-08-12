@@ -110,6 +110,12 @@ internal sealed class ConfigParam<T : Any> {
 
     }
 
+    internal object AbTestingAdPlaceNames: ConfigParam<String>() {
+
+        override val key = "ab_testing_ad_place_names"
+
+    }
+
     internal object BannerNativeAdPlaces: ConfigParam<AdPlaceModel>() {
 
         override val key = "banner_native_ad_places"
