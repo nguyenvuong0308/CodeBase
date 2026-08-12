@@ -8,12 +8,11 @@ Nó sử dụng một layer-list để đặt logo ở giữa trên một màu n
     <!-- Lớp 1: Màu nền -->
     <item android:drawable="@color/splash_background_color" />
 
-    <!-- Lớp 2: Logo của bạn từ thư mục mipmap -->
-    <!-- Thay @mipmap/ic_launcher bằng tên chính xác của file logo trong mipmap -->
+    <!-- Lớp 2: logo mặc định; app có thể override drawable cùng tên. -->
     <item
         android:width="120dp"
         android:height="120dp"
-        android:drawable="@mipmap/ic_launcher"
+        android:drawable="@drawable/core_startflow_splash_icon"
         android:gravity="center" />
 
 </layer-list>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Standalone fallback for consumers that do not expose @mipmap/ic_launcher.
+        Applications can replace this alias with a drawable resource of the same name.
+    -->
+    <item name="core_startflow_splash_icon" type="drawable">@android:drawable/sym_def_app_icon</item>
+</resources>
