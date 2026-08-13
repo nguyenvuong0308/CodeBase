@@ -156,6 +156,7 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
         viewBinding.languageBack.setOnClickListener {
             setupAfterOnBackPressed()
         }
+        viewBinding.languageApply.configureLanguageV2ApplyButton()
         viewBinding.languageApply.setOnClickListener {
             onApplyClicked()
         }

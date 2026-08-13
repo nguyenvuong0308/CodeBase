@@ -151,6 +151,7 @@ class LanguageActivityV2FromSetting : StartFlowActivity<StartflowActivityLanguag
             languageBack.setOnClickListener {
                 setupAfterOnBackPressed()
             }
+            languageApply.configureLanguageV2ApplyButton()
             languageApply.setOnClickListener {
                 if (supportedLanguageAdapter.selectedOption == null) return@setOnClickListener
                 showApplyingLanguageState()

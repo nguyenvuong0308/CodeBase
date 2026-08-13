@@ -20,6 +20,7 @@
     <color name="startflow_language_v2_back_icon">#FF000000</color>
     <color name="startflow_language_v2_title">#FF000000</color>
     <color name="startflow_language_v2_apply_icon">#9747FF</color>
+    <color name="startflow_language_v2_apply_text">#9747FF</color>
     <color name="startflow_language_v2_loading_indicator">#9747FF</color>
     <color name="startflow_language_v2_loading_text">#FF000000</color>
     <color name="startflow_language_v2_ad_background">#FF000000</color>
