@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class SplashViewModel @Inject constructor(
+class BaseSplashViewModel @Inject constructor(
     private val appPreferences: AppPreferences
 ) : ViewModel() {
 
