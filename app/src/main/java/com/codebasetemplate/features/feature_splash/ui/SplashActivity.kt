@@ -275,4 +275,26 @@ class SplashActivity : BaseSplashActivity<StartflowActivitySplashBinding>() {
         intentNext.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
         this@SplashActivity.startActivity(intentNext)
     }
+
+//    /** Dùng khi có logic khác bình thường (kiểu thêm biến mới để load) */
+//    override fun fetchSplashAds() {
+//        Log.d(TAG, "fetchSplashAds: 0")
+//        if (baseViewModel.isFirstOpenApp) {
+//            if (remoteConfigRepository.getSplashScreenConfig().adTypeFirstOpen == AdType.AppOpen) {
+//                Log.d(TAG, "fetchSplashAds: 1")
+//                fetchAppOpenAd()
+//            } else {
+//                Log.d(TAG, "fetchSplashAds: 2")
+//                fetchAppOpenAdTypeInterstitial()
+//            }
+//        } else {
+//            if (remoteConfigRepository.getSplashScreenConfig().adType == AdType.AppOpen) {
+//                Log.d(TAG, "fetchSplashAds: 3")
+//                fetchAppOpenAd()
+//            } else {
+//                Log.d(TAG, "fetchSplashAds: 4")
+//                fetchAppOpenAdTypeInterstitial()
+//            }
+//        }
+//    }
 }

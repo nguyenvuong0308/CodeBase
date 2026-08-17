@@ -10,12 +10,6 @@ import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.viewbinding.ViewBinding
 import com.codebasetemplate.util.EventTracking
-import com.core.config.domain.data.CoreAdPlaceName
-import com.core.startflow.OnBoardingConfigFactory
-import com.core.startflow.StartFlowActivity
-import com.core.startflow.StartFlowNavigator
-import com.core.startflow.StartFlowScreenType
-import com.core.startflow.StartFlowShortcut
 import com.core.ads.domain.AdFullScreenUiResource
 import com.core.ads.domain.AdOpenAdUiResource
 import com.core.ads.domain.ConsentFormUiResource
@@ -25,8 +19,14 @@ import com.core.baseui.countdown.JsgCountDownTimer
 import com.core.baseui.ext.collectFlowOn
 import com.core.config.data.FetchRemoteConfigState
 import com.core.config.domain.data.AdType
+import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
 import com.core.preference.SharedPrefs
+import com.core.startflow.OnBoardingConfigFactory
+import com.core.startflow.StartFlowActivity
+import com.core.startflow.StartFlowNavigator
+import com.core.startflow.StartFlowScreenType
+import com.core.startflow.StartFlowShortcut
 import com.core.utilities.getCurrentLanguageCode
 import com.core.utilities.hideNavigationBar
 import com.core.utilities.manager.isNetworkConnected
@@ -48,7 +48,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
     @Inject
     lateinit var startFlowNavigator: StartFlowNavigator
 
-    protected val baseViewModel by viewModels<SplashViewModel>()
+    protected val baseViewModel by viewModels<BaseSplashViewModel>()
     override val isWaitingAds: Boolean
         get() = true
     protected var timeShowIntro by SharedPrefs.instance.preference(
@@ -326,35 +326,40 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
         }
     }
 
-    private fun fetchSplashAds() {
+    open fun fetchSplashAds() {
         Log.d(TAG, "fetchSplashAds: 0")
         if (baseViewModel.isFirstOpenApp) {
             if (remoteConfigRepository.getSplashScreenConfig().adTypeFirstOpen == AdType.AppOpen) {
                 Log.d(TAG, "fetchSplashAds: 1")
-                appOpenAdManager.fetchAd(this, appOpenPlaceName)
+                fetchAppOpenAd()
             } else {
                 Log.d(TAG, "fetchSplashAds: 2")
-                adsManager.loadFullscreenAd(
-                    this,
-                    interstitialPlaceName,
-                    isNeedUpdateAdPlace = true,
-                    identifier = ""
-                )
+                fetchAppOpenAdTypeInterstitial()
             }
         } else {
             if (remoteConfigRepository.getSplashScreenConfig().adType == AdType.AppOpen) {
                 Log.d(TAG, "fetchSplashAds: 3")
-                appOpenAdManager.fetchAd(this, appOpenPlaceName)
+                fetchAppOpenAd()
             } else {
                 Log.d(TAG, "fetchSplashAds: 4")
-                adsManager.loadFullscreenAd(
-                    this,
-                    interstitialPlaceName,
-                    isNeedUpdateAdPlace = true,
-                    identifier = ""
-                )
+                fetchAppOpenAdTypeInterstitial()
             }
         }
+    }
+
+    /** Đây là hàm tải quảng cáo app open */
+    open fun fetchAppOpenAd() {
+        appOpenAdManager.fetchAd(this, appOpenPlaceName)
+    }
+
+    /** Đây là hàm tải quảng cáo interstitial */
+    open fun fetchAppOpenAdTypeInterstitial() {
+        adsManager.loadFullscreenAd(
+            this,
+            interstitialPlaceName,
+            isNeedUpdateAdPlace = true,
+            identifier = ""
+        )
     }
 
     private fun handleRemoteConfigReady() {
