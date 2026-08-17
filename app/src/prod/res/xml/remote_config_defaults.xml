@@ -251,6 +251,26 @@
             "border_color": "#242424"
             },
             {
+            "place_name": "anchored_native_collapsible_test",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "native_template_size": "small_cta_bottom",
+            "is_native_collapsible": true,
+            "native_expand_template": "native_expand_v2",
+            "is_tracking_click": true,
+            "is_enable": true,
+            "background_color": "#FFFFFF",
+            "cta_radius_dp": 5,
+            "primary_text_color": "#1F2937",
+            "body_text_color": "#6B7280",
+            "cta_text_color": "#FFFFFF",
+            "background_cta": "#5E56F5",
+            "border_color": "#E5E7EB",
+            "control_close_position": "right",
+            "collapsible_expand_cooldown_second": 10,
+            "expired_time_second": 10
+            },
+            {
             "place_name": "anchored_native_test",
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",

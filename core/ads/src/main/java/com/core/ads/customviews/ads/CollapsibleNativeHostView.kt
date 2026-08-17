@@ -50,6 +50,7 @@ internal class CollapsibleNativeHostView(
     private var collapsibleExpandCooldownSecond = 0
     private var collapsibleExpandCooldownKey = javaClass.name
     private var popupRequestVersion = 0
+    private val expandState = CollapsibleExpandState()
 
     init {
         (inlineTemplateView.parent as? ViewGroup)?.removeView(inlineTemplateView)
@@ -64,12 +65,39 @@ internal class CollapsibleNativeHostView(
         val isSameShowingExpandedNativeAd =
             popupWindow?.isShowing == true && expandedPopupNativeAd === nativeAd
         currentNativeAd = nativeAd
-        if (isSameShowingExpandedNativeAd) {
-            showExpandedPopup(nativeAd)
-        } else if (isExpandCooldownActive() || hasNativeAdShownExpanded(nativeAd)) {
-            showCollapsedInline()
+        val shouldExpand = expandState.shouldExpand(
+            isSameShowingExpandedNativeAd = isSameShowingExpandedNativeAd,
+            isExpandCooldownActive = isExpandCooldownActive(),
+            hasNativeAdShownExpanded = hasNativeAdShownExpanded(nativeAd),
+        )
+        if (shouldExpand) {
+            if (!isSameShowingExpandedNativeAd) {
+                showExpandedPopup(nativeAd)
+            }
         } else {
-            showExpandedPopup(nativeAd)
+            if (!isCollapsedInlineVisible()) {
+                showCollapsedInline()
+            }
+        }
+    }
+
+    /**
+     * Explicitly switches this host between its expanded popup and collapsed inline state.
+     *
+     * The requested state is retained for subsequently assigned native ads. Explicit expansion
+     * bypasses the automatic cooldown because it is initiated by the host application.
+     */
+    fun setExpanded(expanded: Boolean) {
+        expandState.setExpanded(expanded)
+        if (expanded) {
+            val nativeAd = currentNativeAd ?: return
+            val isAlreadyExpanded =
+                popupWindow?.isShowing == true && expandedPopupNativeAd === nativeAd
+            if (!isAlreadyExpanded) {
+                showExpandedPopup(nativeAd)
+            }
+        } else if (!isCollapsedInlineVisible()) {
+            showCollapsedInline()
         }
     }
 
@@ -293,5 +321,23 @@ internal class CollapsibleNativeHostView(
 
     private fun markNativeAdExpandedShown(nativeAd: NativeAd) {
 //        expandedShownNativeAds.add(nativeAd)
+    }
+}
+
+internal class CollapsibleExpandState {
+    private var manuallyExpanded: Boolean? = null
+
+    fun setExpanded(expanded: Boolean) {
+        manuallyExpanded = expanded
+    }
+
+    fun shouldExpand(
+        isSameShowingExpandedNativeAd: Boolean,
+        isExpandCooldownActive: Boolean,
+        hasNativeAdShownExpanded: Boolean,
+    ): Boolean {
+        manuallyExpanded?.let { return it }
+        return isSameShowingExpandedNativeAd ||
+            (!isExpandCooldownActive && !hasNativeAdShownExpanded)
     }
 }

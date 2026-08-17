@@ -83,6 +83,22 @@
             </androidx.appcompat.widget.LinearLayoutCompat>
 
             <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/nativeCollapsibleTestLayout"
+                style="@style/MenuItemStyle"
+                android:background="@drawable/bg_transparent_ripple_media_shape">
+
+                <ImageView
+                    style="@style/MenuIconStyle"
+                    android:contentDescription="@string/collapsible_native_test_title"
+                    android:src="@drawable/ic_view_carousel"
+                    app:tint="@color/indigo_500" />
+
+                <TextView
+                    style="@style/MenuTextStyle"
+                    android:text="@string/collapsible_native_test_title" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
                 android:id="@+id/shopLayout"
                 style="@style/MenuItemStyle"
                 android:background="@drawable/bg_transparent_ripple_media_shape">

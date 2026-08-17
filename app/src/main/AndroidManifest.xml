@@ -35,6 +35,11 @@
             android:exported="true"
             android:label="Native PIP Test" />
 
+        <activity
+            android:name=".features.feature_demo_native_collapsible.ui.CollapsibleNativeTestActivity"
+            android:exported="false"
+            android:label="@string/collapsible_native_test_title" />
+
         <activity android:name=".features.feature_uninstall.ui.UninstallActivityHost" />
 
         <activity android:name=".features.feature_demo_frame_mvvm.frame_detail.ui.FrameDetailActivity" />

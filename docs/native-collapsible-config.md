@@ -32,6 +32,27 @@ Nếu `native_expand_template` bị thiếu hoặc có giá trị không hợp l
 }
 ```
 
+Màn `Native Collapsible Test` trong app dùng ad place riêng
+`anchored_native_collapsible_test`. Thêm object sau vào danh sách `banner_native_ad_places` trên
+Firebase Remote Config để chạy màn test độc lập:
+
+```json
+{
+  "place_name": "anchored_native_collapsible_test",
+  "ad_id": "ca-app-pub-3940256099942544/2247696110",
+  "ad_type": "native",
+  "native_template_size": "small_cta_bottom",
+  "is_native_collapsible": true,
+  "native_expand_template": "native_expand_v2",
+  "control_close_position": "right",
+  "collapsible_expand_cooldown_second": 10,
+  "is_enable": true
+}
+```
+
+Activity vẫn ép `is_native_collapsible=true` để tránh cấu hình test vô tình tắt chức năng cần kiểm
+tra. Các giá trị template, vị trí nút đóng và cooldown được giữ nguyên từ Remote Config.
+
 Trong ví dụ này:
 
 - `small_cta_bottom` là template hiển thị sau khi thu gọn.

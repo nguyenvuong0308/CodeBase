@@ -11,6 +11,7 @@ sealed class AppAdPlaceName(override val name: String): IAdPlaceName {
     object ANCHORED_NATIVE_TEST : AppAdPlaceName("anchored_native_test")
     object ANCHORED_BOTTOM_HOME : AppAdPlaceName("anchored_bottom_home")
     object ANCHORED_NATIVE_PIP_HOME : AppAdPlaceName("anchored_native_pip_home")
+    object ANCHORED_NATIVE_COLLAPSIBLE_TEST : AppAdPlaceName("anchored_native_collapsible_test")
     object ANCHORED_NATIVE_IN_LIST_TEST : AppAdPlaceName("anchored_native_in_list_test")
     object ANCHORED_BANNER_TEST : AppAdPlaceName("anchored_banner_test")
     object ANCHORED_EXIT : AppAdPlaceName("anchored_exit")

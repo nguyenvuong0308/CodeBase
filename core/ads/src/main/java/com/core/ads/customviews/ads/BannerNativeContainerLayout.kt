@@ -443,6 +443,11 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
         getCurrentNativeTemplateView()?.onHostResume()
     }
 
+    /** Explicitly expands or collapses the currently displayed collapsible native ad. */
+    fun setNativeExpanded(expanded: Boolean) {
+        (getCurrentNativeTemplateView() as? CollapsibleNativeHostView)?.setExpanded(expanded)
+    }
+
     private fun getCurrentNativeTemplateView(): BaseNativeTemplateView? {
         if (childCount == 0) return null
         return getChildAt(0) as? BaseNativeTemplateView
