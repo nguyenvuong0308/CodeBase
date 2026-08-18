@@ -211,7 +211,7 @@
           <tr><td><code>ad_places_version_config</code></td><td>JSON array object</td><td>Map versionCode sang key ad places riêng.</td></tr>
           <tr><td><code>ab_testing_ad_place_names</code></td><td>JSON array string</td><td>Danh sách các <code>place_name</code> hiện có được phép nhận cấu hình A/B override.</td></tr>
           <tr><td><code>ad_place_ab_&lt;place_name&gt;</code></td><td>JSON object</td><td>Object ad place đầy đủ dùng để thay thế toàn bộ object gốc trong variant A/B.</td></tr>
-          <tr><td><code>interstitial_ad_config</code></td><td>JSON object</td><td>Retry, interval và giới hạn session cho interstitial.</td></tr>
+          <tr><td><code>interstitial_ad_config</code></td><td>JSON object</td><td>Retry, interval, meaningful actions và giới hạn session cho interstitial.</td></tr>
           <tr><td><code>rewarded_ad_config</code></td><td>JSON object</td><td>Retry và wait-to-show cho rewarded video.</td></tr>
           <tr><td><code>rewarded_interstitial_ad_config</code></td><td>JSON object</td><td>Retry và wait-to-show cho rewarded interstitial. Defaults hiện tại chưa khai báo key này, code sẽ dùng default nội bộ.</td></tr>
           <tr><td><code>app_open_ad_config</code></td><td>JSON object</td><td>Interval, retry và mode reopen app.</td></tr>
@@ -238,7 +238,7 @@
           <tr><td><code>is_tracking_click</code></td><td>Boolean</td><td>Tất cả</td><td>Bật tracking click.</td></tr>
           <tr><td><code>is_tracking_show</code></td><td>Boolean</td><td>Tất cả</td><td>Bật tracking show/impression theo flow nội bộ.</td></tr>
           <tr><td><code>is_auto_load_after_dismiss</code></td><td>Boolean</td><td>Fullscreen</td><td>Sau khi dismiss, tự load lại ad mới. Default code: <code>true</code>.</td></tr>
-          <tr><td><code>is_ignore_interval</code></td><td>Boolean</td><td>Interstitial</td><td>Bỏ qua interval khi show interstitial ở place này.</td></tr>
+          <tr><td><code>is_ignore_interval</code></td><td>Boolean</td><td>Interstitial</td><td>Ưu tiên bỏ qua interval, giới hạn session và meaningful actions ở place này.</td></tr>
           <tr><td><code>is_tutorial_flow</code></td><td>Boolean</td><td>Tất cả</td><td>Place thuộc tutorial flow, chịu ảnh hưởng của <code>tutorial_config</code>.</td></tr>
         </tbody>
       </table>
@@ -478,7 +478,7 @@
         <thead><tr><th>Field</th><th>Kiểu</th><th>Ý nghĩa</th></tr></thead>
         <tbody>
           <tr><td><code>plus_interval</code></td><td>Int</td><td>Cộng thêm vào <code>interstitial_ad_config.time_interval</code> riêng cho place.</td></tr>
-          <tr><td><code>is_ignore_interval</code></td><td>Boolean</td><td>Bỏ qua interval khi kiểm tra show.</td></tr>
+          <tr><td><code>is_ignore_interval</code></td><td>Boolean</td><td>Ưu tiên cao nhất: bỏ qua interval, giới hạn session và meaningful actions khi kiểm tra show.</td></tr>
           <tr><td><code>is_show_native_after</code></td><td>Boolean</td><td>Sau khi interstitial dismiss, show thêm native interstitial từ <code>native_config</code>.</td></tr>
           <tr><td><code>native_after_load_strategy</code></td><td>String</td><td><code>with_interstitial</code> load native cùng lúc interstitial; <code>on_interstitial_impression</code> load native khi interstitial impression.</td></tr>
           <tr><td><code>native_config</code></td><td>Object</td><td>NativeAdPlace lồng, thường dùng <code>native_template_size=full_interstitial_v3</code>.</td></tr>
@@ -492,10 +492,12 @@
   "time_per_session": 600,
   "time_interval": 3,
   "time_interval_after_show_open_ad": 3,
+  "meaningful_actions_between_interstitial": 3,
   "is_enable_retry": true,
   "max_retry_count": 5,
   "retry_interval_second_list": [1, 2, 3]
 }</code></pre>
+      <p><code>meaningful_actions_between_interstitial</code> là số lần yêu cầu show interstitial tối thiểu sau khi một interstitial đã dismiss. Ví dụ giá trị <code>3</code>: hai yêu cầu tiếp theo bị bỏ qua và yêu cầu thứ ba mới đủ điều kiện; interstitial đầu tiên không bị chặn. Giá trị <code>0</code> hoặc âm sẽ tắt giới hạn này. Khi bật, cả interval và ngưỡng meaningful actions đều phải hợp lệ. Place có <code>is_ignore_interval=true</code> luôn được ưu tiên và bỏ qua các giới hạn trên.</p>
 
       <h3>Rewarded global config</h3>
       <pre><code>{

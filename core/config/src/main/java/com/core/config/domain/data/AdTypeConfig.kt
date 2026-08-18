@@ -21,6 +21,7 @@ data class InterstitialAdTypeConfig(
     val timePerSession: Long,
     val timeInterval: Long,
     val timeIntervalAfterShowOpenAd: Long,
+    val meaningfulActionsBetweenInterstitial: Int,
     val isEnableRetry: Boolean,
     val maxRetryCount: Int,
     val retryIntervalSecondList: List<Long>,

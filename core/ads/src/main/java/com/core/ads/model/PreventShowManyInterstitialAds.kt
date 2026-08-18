@@ -17,15 +17,33 @@ object PreventShowManyInterstitialAds {
 
     private var adShownInSessionCount = 0
 
+    private var meaningfulActionCount = 0
+
+    private var hasShownInterstitial = false
+
     private var countDownTimer: CountDownTimer? = null
 
     fun initIntervalTimeShowInterstitialMillis() {
         showInterAdLastTime = 0L
         showOpenAdLastTime = 0L
+        meaningfulActionCount = 0
+        hasShownInterstitial = false
     }
 
     internal fun updateLastTimeShowedInterAd() {
         showInterAdLastTime = getCurrentTimeInSecond()
+        resetMeaningfulActionsAfterInterstitial()
+    }
+
+    internal fun resetMeaningfulActionsAfterInterstitial() {
+        meaningfulActionCount = 0
+        hasShownInterstitial = true
+    }
+
+    internal fun recordMeaningfulAction() {
+        if (meaningfulActionCount < Int.MAX_VALUE) {
+            meaningfulActionCount++
+        }
     }
 
     internal fun updateLastTimeShowedAppOpenAd() {
@@ -60,7 +78,22 @@ object PreventShowManyInterstitialAds {
     }
 
     internal fun isNotValidTimeToShow(interstitialAdConfig: InterstitialAdTypeConfig, adPlace: AdPlace): Boolean {
-        return isNotValidIntervalTimeShowAds(interstitialAdConfig, adPlace) || isNotValidSessionTimeShowAds(interstitialAdConfig)
+        if (adPlace.isIgnoreInterval) {
+            return false
+        }
+        return isNotValidIntervalTimeShowAds(interstitialAdConfig, adPlace) ||
+                isNotValidSessionTimeShowAds(interstitialAdConfig) ||
+                isNotValidMeaningfulActionCount(interstitialAdConfig)
+    }
+
+    internal fun isNotValidMeaningfulActionCount(
+        interstitialAdConfig: InterstitialAdTypeConfig
+    ): Boolean {
+        if (!hasShownInterstitial) {
+            return false
+        }
+        return meaningfulActionCount < interstitialAdConfig.meaningfulActionsBetweenInterstitial
+            .coerceAtLeast(0)
     }
 
     private fun isNotValidIntervalTimeShowAds(interstitialAdConfig: InterstitialAdTypeConfig, adPlace: AdPlace): Boolean {

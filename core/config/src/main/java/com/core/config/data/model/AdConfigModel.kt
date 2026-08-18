@@ -42,6 +42,8 @@ internal data class InterstitialAdConfigModel(
     val timeInterval: Long?,
     @Json(name = "time_interval_after_show_open_ad")
     val timeIntervalAfterShowOpenAd: Long?,
+    @Json(name = "meaningful_actions_between_interstitial")
+    val meaningfulActionsBetweenInterstitial: Int?,
 
     @Json(name = "is_enable_retry")
     val isEnableRetry: Boolean?,
