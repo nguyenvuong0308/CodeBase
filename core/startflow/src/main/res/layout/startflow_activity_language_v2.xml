@@ -35,7 +35,7 @@
             style="@style/AppHeaderTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/core_screen_language"
+            android:text="@string/startflow_language_v2_screen_title"
             android:textColor="@color/startflow_language_v2_title"
             android:layout_marginStart="@dimen/app_header_title_margin_start"
             app:layout_constraintBottom_toBottomOf="parent"

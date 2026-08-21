@@ -3,5 +3,8 @@
     <!-- Override this resource in the app module to switch the V2 Apply action to text. -->
     <bool name="startflow_language_v2_apply_use_text">false</bool>
     <dimen name="startflow_language_v2_apply_use_text_size">16sp</dimen>
+    <dimen name="startflow_language_v2_item_title_size">14sp</dimen>
+    <dimen name="startflow_language_v2_item_subtitle_size">12sp</dimen>
     <item name="startflow_language_v2_apply_text_value" type="string">@string/core_common_save</item>
+    <item name="startflow_language_v2_screen_title" type="string">@string/core_screen_language</item>
 </resources>
