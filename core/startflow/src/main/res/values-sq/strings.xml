@@ -12,6 +12,7 @@
     <string name="core_screen_language">Gjuha</string>
         
     <string name="core_apply_language">Aplikoni gjuhën…</string>
+    <string name="core_setting_up_language">Po konfigurojmë gjuhën për ju;\nprisni një çast.</string>
         
     <string name="core_common_save">Ruaj</string>
         

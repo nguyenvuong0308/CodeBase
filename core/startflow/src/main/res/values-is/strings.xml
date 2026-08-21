@@ -12,6 +12,7 @@
     <string name="core_screen_language">Tungumál</string>
         
     <string name="core_apply_language">Notaðu tungumál...</string>
+    <string name="core_setting_up_language">Við erum að setja upp tungumálið fyrir þig;\nbíddu augnablik.</string>
         
     <string name="core_common_save">Vista</string>
         

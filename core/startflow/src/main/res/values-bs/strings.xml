@@ -12,6 +12,7 @@
     <string name="core_screen_language">Jezik</string>
         
     <string name="core_apply_language">Primijeni jezik…</string>
+    <string name="core_setting_up_language">Postavljamo jezik za vas;\npričekajte trenutak.</string>
         
     <string name="core_common_save">Sačuvaj</string>
         

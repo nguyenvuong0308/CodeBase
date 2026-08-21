@@ -12,6 +12,7 @@
     <string name="core_screen_language">ಭಾಷೆ</string>
         
     <string name="core_apply_language">ಭಾಷೆಯನ್ನು ಅನ್ವಯಿಸಿ...</string>
+    <string name="core_setting_up_language">ನಿಮಗಾಗಿ ಭಾಷೆಯನ್ನು ಹೊಂದಿಸಲಾಗುತ್ತಿದೆ;\nದಯವಿಟ್ಟು ಸ್ವಲ್ಪ ನಿರೀಕ್ಷಿಸಿ.</string>
         
     <string name="core_common_save">ಉಳಿಸಿ</string>
         

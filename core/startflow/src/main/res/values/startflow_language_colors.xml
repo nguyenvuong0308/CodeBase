@@ -23,6 +23,10 @@
     <color name="startflow_language_v2_apply_text">#9747FF</color>
     <color name="startflow_language_v2_loading_indicator">#9747FF</color>
     <color name="startflow_language_v2_loading_text">#FF000000</color>
+    <color name="startflow_language_v2_applying_scrim">#990C1712</color>
+    <color name="startflow_language_v2_applying_primary">#08A8E3</color>
+    <color name="startflow_language_v2_applying_secondary">#E8EEF0</color>
+    <color name="startflow_language_v2_applying_text">#FFFFFFFF</color>
     <color name="startflow_language_v2_ad_background">#FF000000</color>
     <color name="startflow_language_v2_group_background">#F2F2F2</color>
     <color name="startflow_language_v2_group_title">#202027</color>

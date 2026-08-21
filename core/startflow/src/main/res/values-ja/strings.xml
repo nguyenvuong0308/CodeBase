@@ -12,6 +12,7 @@
     <string name="core_screen_language">言語</string>
         
     <string name="core_apply_language">言語を適用…</string>
+    <string name="core_setting_up_language">言語を設定しています。\nしばらくお待ちください。</string>
         
     <string name="core_common_save">保存</string>
         

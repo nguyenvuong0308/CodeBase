@@ -12,6 +12,7 @@
     <string name="core_screen_language">语言</string>
         
     <string name="core_apply_language">应用语言...</string>
+    <string name="core_setting_up_language">正在为你设置语言；\n请稍候。</string>
         
     <string name="core_common_save">节省</string>
         

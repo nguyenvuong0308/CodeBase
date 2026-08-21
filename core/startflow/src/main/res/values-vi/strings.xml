@@ -6,6 +6,7 @@
     <string name="core_back_button_desc">Quay lại</string>
     <string name="core_screen_language">Ngôn ngữ</string>
     <string name="core_apply_language">Đang áp dụng ngôn ngữ…</string>
+    <string name="core_setting_up_language">Đang thiết lập ngôn ngữ cho bạn;\nvui lòng đợi trong giây lát.</string>
     <string name="core_common_save">Lưu</string>
     <string name="core_common_skip">Bỏ qua</string>
     <string name="core_common_continue">Tiếp tục</string>

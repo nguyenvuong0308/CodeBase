@@ -12,6 +12,7 @@
     <string name="core_screen_language">Sprog</string>
         
     <string name="core_apply_language">Anvend sprog...</string>
+    <string name="core_setting_up_language">Vi konfigurerer sproget for dig;\nvent et øjeblik.</string>
         
     <string name="core_common_save">Spare</string>
         

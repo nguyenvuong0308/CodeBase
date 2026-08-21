@@ -12,6 +12,7 @@
     <string name="core_screen_language">ენა</string>
         
     <string name="core_apply_language">ენის გამოყენება…</string>
+    <string name="core_setting_up_language">თქვენთვის ენა დაყენების პროცესშია;\nგთხოვთ, ცოტა ხანს მოიცადოთ.</string>
         
     <string name="core_common_save">შენახვა</string>
         

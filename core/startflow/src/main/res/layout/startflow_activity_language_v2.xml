@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/startflow_language_v2_background"
-    android:orientation="vertical">
+    android:background="@color/startflow_language_v2_background">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/languageHeader"
@@ -53,7 +57,7 @@
             android:paddingHorizontal="8dp"
             android:textAllCaps="false"
             android:textColor="@color/startflow_language_v2_apply_text"
-            android:textSize="16sp"
+            android:textSize="@dimen/startflow_language_v2_apply_use_text_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -78,28 +82,6 @@
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:listitem="@layout/startflow_item_language_group_v2" />
 
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/lnApplyLoading"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <ProgressBar
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:indeterminateTint="@color/startflow_language_v2_loading_indicator" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/core_apply_language"
-                android:textColor="@color/startflow_language_v2_loading_text"
-                android:textSize="16dp" />
-        </androidx.appcompat.widget.LinearLayoutCompat>
     </FrameLayout>
 
     <FrameLayout
@@ -115,4 +97,48 @@
             android:layout_gravity="bottom"
             android:background="@color/startflow_language_v2_ad_background" />
     </FrameLayout>
-</androidx.appcompat.widget.LinearLayoutCompat>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <FrameLayout
+        android:id="@+id/lnApplyLoading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:accessibilityLiveRegion="polite"
+        android:background="@color/startflow_language_v2_applying_scrim"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:id="@+id/applyingLanguageIcon"
+                android:layout_width="140dp"
+                android:layout_height="140dp">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="match_parent"
+                    android:src="@drawable/start_flow_language_wait"
+                    android:layout_height="match_parent"/>
+            </FrameLayout>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/applyingLanguageMessage"
+                android:layout_width="280dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:fontFamily="@font/roboto_regular"
+                android:gravity="center"
+                android:lineSpacingExtra="2dp"
+                android:text="@string/core_setting_up_language"
+                android:textColor="@color/startflow_language_v2_applying_text"
+                android:textSize="16sp" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </FrameLayout>
+</FrameLayout>

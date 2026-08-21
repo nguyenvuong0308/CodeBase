@@ -14,6 +14,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import androidx.core.view.marginTop
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.RecyclerView
 import com.core.ads.BaseAdmobApplication
@@ -38,6 +39,9 @@ import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageGrou
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageOption
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageV2Adapter
 import com.codebasetemplate.util.EventTracking
+import com.core.baseui.ext.collectFlowOn
+import com.core.baseui.ext.collectFlowOnNullable
+import com.core.utilities.margin
 import java.util.Locale
 import javax.inject.Inject
 
@@ -50,10 +54,10 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
         get() = true
 
     override val isSpaceStatusBar: Boolean
-        get() = true
+        get() = false
 
     override val isSpaceDisplayCutout: Boolean
-        get() = true
+        get() = false
 
     override fun bindingProvider(inflater: LayoutInflater): StartflowActivityLanguageV2Binding {
         return StartflowActivityLanguageV2Binding.inflate(inflater)
@@ -220,6 +224,11 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
         bindLiveData(viewModel.initDataAndNextScreen) { isNext ->
             if (isNext) {
                 pendingApplyOption?.let(::processNextScreen)
+            }
+        }
+        collectFlowOnNullable(insetsViewModel.systemInsets) { insetsViewModelWrapInsets ->
+            insetsViewModelWrapInsets?.insets?.let {
+                viewBinding.languageHeader.margin(top = it.top)
             }
         }
     }
@@ -391,7 +400,6 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
     private fun checkIfNavigationIsNeeded() {
         if (!appPreferences.navigateAfterChangeLanguage) return
 
-        viewBinding.rvLanguage.gone()
         viewBinding.lnApplyLoading.visible()
         viewBinding.languageBack.isEnabled = false
         viewBinding.languageApply.isEnabled = false
@@ -427,7 +435,6 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
     }
 
     private fun showApplyingLanguageState() {
-        viewBinding.rvLanguage.gone()
         viewBinding.lnApplyLoading.visible()
         viewBinding.languageBack.isEnabled = false
         viewBinding.languageApply.isEnabled = false

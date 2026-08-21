@@ -12,6 +12,7 @@
     <string name="core_screen_language">भाषा</string>
         
     <string name="core_apply_language">भाषा लागू गर्नुहोस्...</string>
+    <string name="core_setting_up_language">तपाईंका लागि भाषा सेटअप गरिँदै छ;\nकृपया केही बेर पर्खनुहोस्।</string>
         
     <string name="core_common_save">बचत गर्नुहोस्</string>
         

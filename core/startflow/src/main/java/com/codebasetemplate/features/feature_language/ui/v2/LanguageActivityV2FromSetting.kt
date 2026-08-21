@@ -100,7 +100,6 @@ class LanguageActivityV2FromSetting : StartFlowActivity<StartflowActivityLanguag
 
     private fun checkIfNavigationIsNeeded() {
         if (appPreferences.navigateAfterChangeLanguage) {
-            viewBinding.rvLanguage.gone()
             viewBinding.lnApplyLoading.visible()
             viewBinding.languageBack.isEnabled = false
             viewBinding.languageApply.isEnabled = false
@@ -453,7 +452,6 @@ class LanguageActivityV2FromSetting : StartFlowActivity<StartflowActivityLanguag
     }
 
     private fun showApplyingLanguageState() {
-        viewBinding.rvLanguage.gone()
         viewBinding.lnApplyLoading.visible()
         viewBinding.languageBack.isEnabled = false
         viewBinding.languageApply.isEnabled = false

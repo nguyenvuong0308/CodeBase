@@ -12,6 +12,7 @@
     <string name="core_screen_language">لغة</string>
         
     <string name="core_apply_language">تطبيق اللغة...</string>
+    <string name="core_setting_up_language">جارٍ إعداد اللغة لك؛\nيرجى الانتظار لحظة.</string>
         
     <string name="core_common_save">يحفظ</string>
         

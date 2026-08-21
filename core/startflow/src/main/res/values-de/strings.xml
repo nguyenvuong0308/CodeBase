@@ -12,6 +12,7 @@
     <string name="core_screen_language">Sprache</string>
         
     <string name="core_apply_language">Sprache anwenden…</string>
+    <string name="core_setting_up_language">Die Sprache wird für dich eingerichtet;\nbitte warte einen Moment.</string>
         
     <string name="core_common_save">Speichern</string>
         

@@ -6,6 +6,9 @@
     <string name="core_back_button_desc">Back</string>
     <string name="core_screen_language">Language</string>
     <string name="core_apply_language">Apply language…</string>
+    <string name="core_setting_up_language">Setting up the language for you;\nplease wait a moment.</string>
+    <string name="core_language_applying_source_symbol" translatable="false">あ</string>
+    <string name="core_language_applying_target_symbol" translatable="false">A</string>
     <string name="core_common_save">Save</string>
     <string name="core_common_skip">Skip</string>
     <string name="core_common_continue">Continue</string>

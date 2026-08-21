@@ -12,6 +12,7 @@
     <string name="core_screen_language">Dil</string>
         
     <string name="core_apply_language">Dili uygula…</string>
+    <string name="core_setting_up_language">Diliniz ayarlanıyor;\nlütfen biraz bekleyin.</string>
         
     <string name="core_common_save">Kaydetmek</string>
         
