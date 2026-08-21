@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="58dp"
+    android:height="58dp"
+    android:viewportWidth="58"
+    android:viewportHeight="58">
+    <path
+        android:fillColor="@color/startflow_language_v2_applying_secondary"
+        android:pathData="M17,0 L41,0 C50.4,0 58,7.6 58,17 L58,31 C58,37.4 54.4,43.1 49,46 L53,58 L38,53 L17,53 C7.6,53 0,45.4 0,36 L0,17 C0,7.6 7.6,0 17,0 Z" />
+</vector>
