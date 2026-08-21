@@ -1679,7 +1679,9 @@ class AdmobManager @Inject constructor(
                                 }
                             } else {
                                 Log.i(TAG, "Native not retry $placeName")
-//                        notifyBannerNativeFailedToLoad(placeName)
+                                if (nativeAdConfig.isHideWhenError) {
+                                    notifyBannerNativeFailedToLoad(placeName)
+                                }
                                 adHolder.reset()
                             }
                         }
@@ -1883,6 +1885,9 @@ class AdmobManager @Inject constructor(
                     } else {
                         Log.i(TAG, "Banner not retry $placeName")
 //                        notifyBannerNativeFailedToLoad(placeName)
+                        if (bannerAdConfig.isHideWhenError) {
+                            notifyBannerNativeFailedToLoad(placeName)
+                        }
                         adHolder.reset()
                     }
                 }
