@@ -2,6 +2,7 @@ package com.codebasetemplate.features.feature_language.ui.v2
 
 import android.content.Context
 import android.content.Intent
+import androidx.recyclerview.widget.RecyclerView
 import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageGroup
@@ -22,6 +23,12 @@ class LanguageActivityV23 : BaseLanguageActivityV2FlowActivity() {
         get() = EventTracking.EVENT_LFO3_COMPLETE
 
     override val shouldHandleLanguageApplyNavigation: Boolean
+        get() = true
+
+    override val shouldScrollToInitialExpandedGroup: Boolean
+        get() = !selectedGroupIdArg.isNullOrBlank()
+
+    override val shouldFadeInInitialLanguageList: Boolean
         get() = true
 
     override fun initialExpandedGroupId(languageGroups: List<LanguageGroup>): String? {
@@ -57,6 +64,7 @@ class LanguageActivityV23 : BaseLanguageActivityV2FlowActivity() {
             context: Context,
             selectedGroupId: String,
             selectedLanguageTag: String,
+            selectedGroupTopOffset: Int = RecyclerView.NO_POSITION,
             fromSetting: Boolean = false,
             fromSplash: Boolean = false,
             fromIntroduction: Boolean = false,
@@ -70,6 +78,7 @@ class LanguageActivityV23 : BaseLanguageActivityV2FlowActivity() {
             ).apply {
                 putExtra(LanguageV2FlowArgs.KEY_SELECTED_GROUP_ID, selectedGroupId)
                 putExtra(LanguageV2FlowArgs.KEY_SELECTED_LANGUAGE_TAG, selectedLanguageTag)
+                putExtra(LanguageV2FlowArgs.KEY_SELECTED_GROUP_TOP_OFFSET, selectedGroupTopOffset)
             }
         }
     }

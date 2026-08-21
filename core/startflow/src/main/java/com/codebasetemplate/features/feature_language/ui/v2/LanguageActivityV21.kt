@@ -26,6 +26,7 @@ class LanguageActivityV21 : BaseLanguageActivityV2FlowActivity() {
         val nextIntent = LanguageActivityV22.intentStart(
             context = this,
             selectedGroupId = group.id,
+            selectedGroupTopOffset = currentGroupTopOffset(group.id),
             fromSetting = isFromSetting,
             fromSplash = isOpenFromSlash,
             fromIntroduction = backFromIntroduction

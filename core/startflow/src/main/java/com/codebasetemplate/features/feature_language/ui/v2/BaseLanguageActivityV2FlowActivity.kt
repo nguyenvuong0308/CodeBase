@@ -10,10 +10,12 @@ import android.os.LocaleList
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.RecyclerView
 import com.core.ads.BaseAdmobApplication
 import com.core.ads.domain.AdLoadBannerNativeUiResource
 import com.core.analytics.AnalyticsEvent
@@ -75,6 +77,13 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
         intent.extras?.getString(LanguageV2FlowArgs.KEY_SELECTED_LANGUAGE_TAG)
     }
 
+    protected val selectedGroupTopOffsetArg: Int by lazy {
+        intent.extras?.getInt(
+            LanguageV2FlowArgs.KEY_SELECTED_GROUP_TOP_OFFSET,
+            RecyclerView.NO_POSITION
+        ) ?: RecyclerView.NO_POSITION
+    }
+
     private val targetScreenFromShortCut by lazy {
         intent.extras?.getString(StartFlowShortcut.KEY_SHORTCUT_TARGET_SCREEN, "")
     }
@@ -104,6 +113,12 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
     protected open val trackingCompleteEventName: String? = null
 
     protected open val shouldHandleLanguageApplyNavigation: Boolean
+        get() = false
+
+    protected open val shouldScrollToInitialExpandedGroup: Boolean
+        get() = false
+
+    protected open val shouldFadeInInitialLanguageList: Boolean
         get() = false
 
     protected open fun initialExpandedGroupId(languageGroups: List<LanguageGroup>): String? {
@@ -144,6 +159,7 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
 
     override fun initViews(savedInstanceState: Bundle?) {
         super.initViews(savedInstanceState)
+        setupBackPressAction()
         trackingStartedAtMs = SystemClock.elapsedRealtime()
         trackingViewEventName?.let { eventName ->
             EventTracking.logEvent(eventName)
@@ -186,10 +202,15 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
         }
 
         languageGroups = buildLanguageGroups()
+        val expandedGroupId = initialExpandedGroupId(languageGroups)
+        prepareInitialLanguageListAnimation()
         supportedLanguageAdapter.submitGroups(
             languageGroups = languageGroups,
-            expandedGroupId = initialExpandedGroupId(languageGroups),
-            selectedLanguageTag = initialSelectedLanguageTag()
+            expandedGroupId = expandedGroupId,
+            selectedLanguageTag = initialSelectedLanguageTag(),
+            onSubmitted = {
+                showInitialLanguageList(expandedGroupId)
+            }
         )
         setApplyButtonState(
             isVisible = initialApplyVisibility(),
@@ -201,6 +222,57 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
                 pendingApplyOption?.let(::processNextScreen)
             }
         }
+    }
+
+    private fun setupBackPressAction() {
+        if (!isOpenFromSlash) return
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() = Unit
+        })
+    }
+
+    private fun prepareInitialLanguageListAnimation() {
+        if (!shouldFadeInInitialLanguageList) return
+        viewBinding.rvLanguage.animate().cancel()
+        viewBinding.rvLanguage.alpha = 0f
+    }
+
+    private fun showInitialLanguageList(expandedGroupId: String?) {
+        val targetPosition = initialExpandedGroupPosition(expandedGroupId)
+        viewBinding.rvLanguage.post {
+            if (targetPosition >= 0) {
+                val layoutManager = viewBinding.rvLanguage.layoutManager as? NpaLinearLayoutManager
+                layoutManager?.scrollToPositionWithOffset(
+                    targetPosition,
+                    initialExpandedGroupTopOffset()
+                )
+            }
+            fadeInInitialLanguageList()
+        }
+    }
+
+    private fun initialExpandedGroupPosition(expandedGroupId: String?): Int {
+        if (!shouldScrollToInitialExpandedGroup || expandedGroupId.isNullOrBlank()) {
+            return RecyclerView.NO_POSITION
+        }
+        return supportedLanguageAdapter.groupAdapterPosition(expandedGroupId)
+    }
+
+    private fun initialExpandedGroupTopOffset(): Int {
+        return if (selectedGroupTopOffsetArg != RecyclerView.NO_POSITION) {
+            selectedGroupTopOffsetArg
+        } else {
+            0
+        }
+    }
+
+    private fun fadeInInitialLanguageList() {
+        if (!shouldFadeInInitialLanguageList) return
+        viewBinding.rvLanguage.animate()
+            .alpha(1f)
+            .setDuration(INITIAL_LIST_FADE_IN_DURATION_MS)
+            .start()
     }
 
     protected fun setApplyButtonState(isVisible: Boolean, isEnabled: Boolean) {
@@ -243,6 +315,16 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
                 SystemClock.elapsedRealtime()
             )
         }
+    }
+
+    protected fun currentGroupTopOffset(groupId: String): Int {
+        val position = supportedLanguageAdapter.groupAdapterPosition(groupId)
+        if (position < 0) return RecyclerView.NO_POSITION
+        val layoutManager = viewBinding.rvLanguage.layoutManager as? NpaLinearLayoutManager
+            ?: return RecyclerView.NO_POSITION
+        val view = layoutManager.findViewByPosition(position)
+            ?: return RecyclerView.NO_POSITION
+        return view.top - viewBinding.rvLanguage.paddingTop
     }
 
     override fun providerBannerNativeAdPlaceName(): List<IAdPlaceName> {
@@ -390,7 +472,18 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
             languageGroup(
                 id = "hi",
                 language = SupportedLanguage.HINDI,
-                options = listOf(option("hi-IN", "India", "IN", SupportedLanguage.HINDI))
+                title = "India",
+                nativeName = "India",
+                options = listOf(
+                    option("hi-IN", "Hindi", "IN", SupportedLanguage.HINDI),
+                    option("gu-IN", "Gujarati", "IN", SupportedLanguage.GUJARATI),
+                    option("kn-IN", "Kannada", "IN", SupportedLanguage.KANNADA),
+                    option("ml-IN", "Malayalam", "IN", SupportedLanguage.MALAYALAM),
+                    option("mr-IN", "Marathi", "IN", SupportedLanguage.MARATHI),
+                    option("pa-IN", "Punjabi", "IN", SupportedLanguage.PUNJABI),
+                    option("ta-IN", "Tamil", "IN", SupportedLanguage.TAMIL),
+                    option("te-IN", "Telugu", "IN", SupportedLanguage.TELUGU),
+                )
             ),
             languageGroup(
                 id = "es",
@@ -441,15 +534,10 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
             singleLanguageGroup("bg", "bg-BG", "Bulgaria", "BG", SupportedLanguage.BULGARIAN),
             singleLanguageGroup("cs", "cs-CZ", "Czechia", "CZ", SupportedLanguage.CZECH),
             singleLanguageGroup("da", "da-DK", "Denmark", "DK", SupportedLanguage.DANMARK),
-            singleLanguageGroup("gu", "gu-IN", "India", "IN", SupportedLanguage.GUJARATI),
-            singleLanguageGroup("kn", "kn-IN", "India", "IN", SupportedLanguage.KANNADA),
-            singleLanguageGroup("ml", "ml-IN", "India", "IN", SupportedLanguage.MALAYALAM),
-            singleLanguageGroup("mr", "mr-IN", "India", "IN", SupportedLanguage.MARATHI),
             singleLanguageGroup("my", "my-MM", "Myanmar", "MM", SupportedLanguage.BURMESE),
             singleLanguageGroup("hu", "hu-HU", "Hungary", "HU", SupportedLanguage.HUNGARIAN),
             singleLanguageGroup("hr", "hr-HR", "Croatia", "HR", SupportedLanguage.CROATIAN),
             singleLanguageGroup("no", "no-NO", "Norway", "NO", SupportedLanguage.NORWEGIAN),
-            singleLanguageGroup("pa", "pa-IN", "India", "IN", SupportedLanguage.PUNJABI),
             singleLanguageGroup("ro", "ro-RO", "Romania", "RO", SupportedLanguage.RUMANU),
             singleLanguageGroup("sv", "sv-SE", "Sweden", "SE", SupportedLanguage.SWEDISH),
             singleLanguageGroup("sw", "sw-KE", "Kenya", "KE", SupportedLanguage.SWAHILI),
@@ -457,8 +545,6 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
             singleLanguageGroup("sk", "sk-SK", "Slovakia", "SK", SupportedLanguage.SLOVAK),
             singleLanguageGroup("uz", "uz-UZ", "Uzbekistan", "UZ", SupportedLanguage.UZBEK),
             singleLanguageGroup("uk", "uk-UA", "Ukraine", "UA", SupportedLanguage.UKRAINA),
-            singleLanguageGroup("ta", "ta-IN", "India", "IN", SupportedLanguage.TAMIL),
-            singleLanguageGroup("te", "te-IN", "India", "IN", SupportedLanguage.TELUGU),
             languageGroup(
                 id = "zh",
                 language = SupportedLanguage.CHINA_SIMPLIFIED,
@@ -478,7 +564,6 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
             ),
             singleLanguageGroup("fa", "fa-IR", "Iran", "IR", SupportedLanguage.PERSIAN),
             singleLanguageGroup("ur", "ur-PK", "Pakistan", "PK", SupportedLanguage.URDU),
-            singleLanguageGroup("yi", "yi-001", "World", "IL", SupportedLanguage.YIDDISH),
         ).sortedByDescending { it.options.size > 1 }
     }
 
@@ -499,22 +584,24 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
     private fun languageGroup(
         id: String,
         language: SupportedLanguage,
+        title: String? = null,
+        nativeName: String? = null,
         options: List<LanguageOption>,
     ): LanguageGroup {
         val baseTag = options.firstOrNull()?.languageTag ?: language.languageCode
         val locale = Locale.forLanguageTag(baseTag)
-        val title = locale.getDisplayLanguage(Locale.ENGLISH)
+        val resolvedTitle = title ?: locale.getDisplayLanguage(Locale.ENGLISH)
             .replaceFirstChar {
                 if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString()
             }
             .ifBlank { language.displayName }
-        val nativeName = locale.getDisplayLanguage(locale)
+        val resolvedNativeName = nativeName ?: locale.getDisplayLanguage(locale)
             .replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
             .ifBlank { language.displayName }
         return LanguageGroup(
             id = id,
-            title = title,
-            nativeName = nativeName,
+            title = resolvedTitle,
+            nativeName = resolvedNativeName,
             language = language,
             options = options,
         )
@@ -541,6 +628,7 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
 
     companion object {
         private const val NAVIGATION_AFTER_LANGUAGE_CHANGE_FALLBACK_MS = 700L
+        private const val INITIAL_LIST_FADE_IN_DURATION_MS = 0L
     }
 }
 
@@ -550,6 +638,7 @@ object LanguageV2FlowArgs {
     const val KEY_BACK_FROM_INTRODUCTION = "KEY_BACK_FROM_INTRODUCTION"
     const val KEY_SELECTED_GROUP_ID = "KEY_SELECTED_GROUP_ID"
     const val KEY_SELECTED_LANGUAGE_TAG = "KEY_SELECTED_LANGUAGE_TAG"
+    const val KEY_SELECTED_GROUP_TOP_OFFSET = "KEY_SELECTED_GROUP_TOP_OFFSET"
 
     fun fillCommonExtras(
         intent: Intent,

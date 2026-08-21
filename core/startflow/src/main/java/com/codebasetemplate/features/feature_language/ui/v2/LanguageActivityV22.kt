@@ -2,6 +2,7 @@ package com.codebasetemplate.features.feature_language.ui.v2
 
 import android.content.Context
 import android.content.Intent
+import androidx.recyclerview.widget.RecyclerView
 import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageGroup
@@ -21,6 +22,12 @@ class LanguageActivityV22 : BaseLanguageActivityV2FlowActivity() {
     override val trackingCompleteEventName: String
         get() = EventTracking.EVENT_LFO2_COMPLETE
 
+    override val shouldScrollToInitialExpandedGroup: Boolean
+        get() = !selectedGroupIdArg.isNullOrBlank()
+
+    override val shouldFadeInInitialLanguageList: Boolean
+        get() = true
+
     override fun initialExpandedGroupId(languageGroups: List<LanguageGroup>): String? {
         return selectedGroupIdArg ?: languageGroups.firstOrNull()?.id
     }
@@ -31,6 +38,7 @@ class LanguageActivityV22 : BaseLanguageActivityV2FlowActivity() {
             context = this,
             selectedGroupId = group.id,
             selectedLanguageTag = option.languageTag,
+            selectedGroupTopOffset = currentGroupTopOffset(group.id),
             fromSetting = isFromSetting,
             fromSplash = isOpenFromSlash,
             fromIntroduction = backFromIntroduction
@@ -45,6 +53,7 @@ class LanguageActivityV22 : BaseLanguageActivityV2FlowActivity() {
             context: Context,
             selectedGroupId: String,
             selectedLanguageTag: String? = null,
+            selectedGroupTopOffset: Int = RecyclerView.NO_POSITION,
             fromSetting: Boolean = false,
             fromSplash: Boolean = false,
             fromIntroduction: Boolean = false,
@@ -58,6 +67,7 @@ class LanguageActivityV22 : BaseLanguageActivityV2FlowActivity() {
             ).apply {
                 putExtra(LanguageV2FlowArgs.KEY_SELECTED_GROUP_ID, selectedGroupId)
                 putExtra(LanguageV2FlowArgs.KEY_SELECTED_LANGUAGE_TAG, selectedLanguageTag)
+                putExtra(LanguageV2FlowArgs.KEY_SELECTED_GROUP_TOP_OFFSET, selectedGroupTopOffset)
             }
         }
     }

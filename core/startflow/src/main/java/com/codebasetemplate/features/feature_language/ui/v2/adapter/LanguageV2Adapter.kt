@@ -68,11 +68,18 @@ class LanguageV2Adapter : ListAdapter<LanguageRow, RecyclerView.ViewHolder>(DIFF
         languageGroups: List<LanguageGroup>,
         expandedGroupId: String? = null,
         selectedLanguageTag: String? = null,
+        onSubmitted: (() -> Unit)? = null,
     ) {
         groups = languageGroups
         this.selectedLanguageTag = selectedLanguageTag
         this.expandedGroupId = expandedGroupId
-        submitList(buildRows())
+        submitList(buildRows()) {
+            onSubmitted?.invoke()
+        }
+    }
+
+    fun groupAdapterPosition(groupId: String): Int {
+        return findGroupAdapterPosition(currentList, groupId)
     }
 
     private fun toggleGroup(group: LanguageGroup) {
@@ -153,7 +160,7 @@ class LanguageV2Adapter : ListAdapter<LanguageRow, RecyclerView.ViewHolder>(DIFF
             val group = row.group
             binding.languageGroupTitle.text = group.title
             binding.languageGroupSubtitle.text = group.nativeName
-            val flags = group.options.take(3)
+            val flags = uniqueFlagOptions(group.options)
             bindFlag(binding.languageGroupFlagOne, flags.getOrNull(0)?.countryCode)
             bindFlag(binding.languageGroupFlagTwo, flags.getOrNull(1)?.countryCode)
             bindFlag(binding.languageGroupFlagThree, flags.getOrNull(2)?.countryCode)
@@ -293,6 +300,18 @@ class LanguageV2Adapter : ListAdapter<LanguageRow, RecyclerView.ViewHolder>(DIFF
 
         private fun tagsExactlyMatch(left: String, right: String): Boolean {
             return left.replace('_', '-').equals(right.replace('_', '-'), ignoreCase = true)
+        }
+
+        internal fun findGroupAdapterPosition(rows: List<LanguageRow>, groupId: String): Int {
+            return rows.indexOfFirst { row ->
+                row is LanguageRow.Group && row.group.id == groupId
+            }
+        }
+
+        internal fun uniqueFlagOptions(options: List<LanguageOption>): List<LanguageOption> {
+            return options.distinctBy {
+                it.countryCode.uppercase(Locale.US)
+            }.take(3)
         }
 
         fun countryFlagEmoji(countryCode: String): String {
