@@ -201,7 +201,7 @@ class LanguageActivityV2FromSetting : StartFlowActivity<StartflowActivityLanguag
             checkIfNavigationIsNeeded()
         } else {
             changeLanguage(option.languageTag)
-            scheduleNavigationFallbackAfterLanguageChange()
+            checkIfNavigationIsNeeded()
         }
     }
 
@@ -459,14 +459,6 @@ class LanguageActivityV2FromSetting : StartFlowActivity<StartflowActivityLanguag
         viewBinding.languageApply.isEnabled = false
     }
 
-    private fun scheduleNavigationFallbackAfterLanguageChange() {
-        viewBinding.root.postDelayed({
-            if (!isFinishing && !isDestroyed && appPreferences.navigateAfterChangeLanguage) {
-                checkIfNavigationIsNeeded()
-            }
-        }, NAVIGATION_AFTER_LANGUAGE_CHANGE_FALLBACK_MS)
-    }
-
     override fun setupAfterOnBackPressed() {
         if (isFromSetting) {
             showBackInterAdThenFinish()
@@ -485,8 +477,6 @@ class LanguageActivityV2FromSetting : StartFlowActivity<StartflowActivityLanguag
         const val KEY_IS_OPEN_FROM_SPLASH = "KEY_IS_OPEN_FROM_SPLASH"
         const val KEY_IS_FROM_SETTING = "KEY_IS_FROM_SETTING"
         const val KEY_BACK_FROM_INTRODUCTION = "KEY_BACK_FROM_INTRODUCTION"
-
-        private const val NAVIGATION_AFTER_LANGUAGE_CHANGE_FALLBACK_MS = 700L
 
         private val LANGUAGE_FROM_SETTING_NATIVE_AD_PLACE_NAME: IAdPlaceName =
             CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V2_FROM_SETTING_NATIVE
