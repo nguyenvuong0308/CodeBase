@@ -355,6 +355,7 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
                 timePerSession = ConfigParam.INTERSTITIAL_AD_CONFIG_DEFAULT_TIME_PER_SESSION,
                 timeInterval = ConfigParam.INTERSTITIAL_AD_CONFIG_DEFAULT_TIME_INTERVAL,
                 timeIntervalAfterShowOpenAd = ConfigParam.REOPEN_TO_INTERSTITIAL_AD_CONFIG_DEFAULT_TIME_INTERVAL,
+                meaningfulActionsBetweenInterstitial = ConfigParam.INTERSTITIAL_AD_CONFIG_DEFAULT_MEANINGFUL_ACTIONS,
                 isEnableRetry = ConfigParam.RETRY_IS_ENABLE_RETRY,
                 maxRetryCount = ConfigParam.RETRY_MAX_RETRY_COUNT,
                 retryIntervalSecondList = ConfigParam.RETRY_INTERVAL_LIST,

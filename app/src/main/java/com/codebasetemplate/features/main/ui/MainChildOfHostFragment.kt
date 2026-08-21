@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import com.codebasetemplate.databinding.CoreFragmentMainBinding
+import com.codebasetemplate.features.feature_demo_native_collapsible.ui.CollapsibleNativeTestActivity
 import com.codebasetemplate.features.feature_demo_native_pip.ui.NativePipTestActivity
 import com.codebasetemplate.features.feature_reward.RewardTestActivity
 import com.codebasetemplate.features.main.ui.host.MainHostEvent
@@ -53,6 +54,10 @@ class MainChildOfHostFragment : BaseChildOfHostFragment<CoreFragmentMainBinding,
 
             nativePipTestLayout.setOnSingleClick {
                 startActivity(Intent(requireContext(), NativePipTestActivity::class.java))
+            }
+
+            nativeCollapsibleTestLayout.setOnSingleClick {
+                startActivity(Intent(requireContext(), CollapsibleNativeTestActivity::class.java))
             }
 
             showInterstitialLayout.setOnSingleClick {

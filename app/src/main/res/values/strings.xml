@@ -45,4 +45,16 @@
 
     <string name="msg_update_downloaded">An update has just been downloaded.</string>
     <string name="text_restart">Restart</string>
+    <string name="collapsible_native_test_title">Native Collapsible Test</string>
+    <string name="collapsible_native_test_description">Loads anchored_native_collapsible_test in isolation and forces native collapsible mode. Template, close position, and cooldown still come from Remote Config.</string>
+    <string name="collapsible_native_test_reload">Reload test</string>
+    <string name="collapsible_native_test_expand">Expand</string>
+    <string name="collapsible_native_test_collapse">Collapse</string>
+    <string name="collapsible_native_test_status_waiting">Waiting for ad…</string>
+    <string name="collapsible_native_test_status_loading">Loading native ad…</string>
+    <string name="collapsible_native_test_status_loaded">Loaded: inline=%1$s, expand=%2$s, close=%3$s, cooldown=%4$d s</string>
+    <string name="collapsible_native_test_status_closed">Ad closed. Tap Reload test to run again.</string>
+    <string name="collapsible_native_test_status_failed">Ad failed to load. Check the ad placement and logs.</string>
+    <string name="collapsible_native_test_status_network_error">Network error while loading the ad.</string>
+    <string name="collapsible_native_test_status_wrong_type">anchored_native_collapsible_test returned a banner. Configure it as native to test collapsible behavior.</string>
 </resources>

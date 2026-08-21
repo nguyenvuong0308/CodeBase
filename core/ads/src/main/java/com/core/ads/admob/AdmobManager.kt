@@ -429,13 +429,10 @@ class AdmobManager @Inject constructor(
     }
 
     override fun isCanNotShowInterAd(adPlace: AdPlace): Boolean {
-        if (adPlace.isIgnoreInterval) {
-            return false
-        }
-        if (PreventShowManyInterstitialAds.isNotValidTimeToShow(remoteConfigRepository.getInterstitialAdConfig(), adPlace)) {
-            return true
-        }
-        return false
+        return PreventShowManyInterstitialAds.isNotValidTimeToShow(
+            remoteConfigRepository.getInterstitialAdConfig(),
+            adPlace
+        )
     }
 
     override fun getAdRequest(isCollapsible: Boolean): AdRequest {
@@ -490,6 +487,7 @@ class AdmobManager @Inject constructor(
         }
 
         if (adPlace.isInterstitialType()) {
+            PreventShowManyInterstitialAds.recordMeaningfulAction()
             adHolder.isWaitLoadToShow =
                 remoteConfigRepository.getInterstitialAdConfig().isWaitLoadToShow || isWaitLoadToShow
             adHolder.adPlace = adPlace

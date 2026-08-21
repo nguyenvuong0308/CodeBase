@@ -337,6 +337,7 @@
             "ads_per_session": 5,
             "time_per_session": 600,
             "time_interval": 3,
+            "meaningful_actions_between_interstitial": 0,
             "is_enable_retry": true,
             "max_retry_count": 5,
             "retry_interval_second_list": [

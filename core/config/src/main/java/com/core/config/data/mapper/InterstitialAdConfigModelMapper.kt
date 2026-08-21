@@ -17,6 +17,8 @@ internal class InterstitialAdConfigModelMapper @Inject constructor(
             timePerSession = model.timePerSession ?: ConfigParam.INTERSTITIAL_AD_CONFIG_DEFAULT_TIME_PER_SESSION,
             timeInterval = model.timeInterval ?: ConfigParam.INTERSTITIAL_AD_CONFIG_DEFAULT_TIME_INTERVAL,
             timeIntervalAfterShowOpenAd = model.timeIntervalAfterShowOpenAd ?: ConfigParam.REOPEN_TO_INTERSTITIAL_AD_CONFIG_DEFAULT_TIME_INTERVAL,
+            meaningfulActionsBetweenInterstitial = model.meaningfulActionsBetweenInterstitial
+                ?: ConfigParam.INTERSTITIAL_AD_CONFIG_DEFAULT_MEANINGFUL_ACTIONS,
             isEnableRetry = model.isEnableRetry ?: ConfigParam.RETRY_IS_ENABLE_RETRY,
             maxRetryCount = model.maxRetryCount ?: ConfigParam.RETRY_MAX_RETRY_COUNT,
             retryIntervalSecondList = model.retryIntervalSecondList ?: ConfigParam.RETRY_INTERVAL_LIST,

@@ -32,6 +32,7 @@ Không sửa `core/startflow`, không cần tạo customizer bằng Kotlin và k
 | `startflow_language_v2_back_icon` | Icon Back |
 | `startflow_language_v2_title` | Tiêu đề màn hình |
 | `startflow_language_v2_apply_icon` | Icon xác nhận/Apply |
+| `startflow_language_v2_apply_text` | Màu chữ của nút Apply khi dùng dạng text |
 | `startflow_language_v2_loading_indicator` | Màu vòng loading |
 | `startflow_language_v2_loading_text` | Màu chữ khi đang áp dụng ngôn ngữ |
 | `startflow_language_v2_ad_background` | Nền vùng quảng cáo |
@@ -68,6 +69,23 @@ Chỉ thay giá trị, giữ nguyên tên resource:
 ```
 
 File thật của app phải giữ đủ các resource V1/V2 đang có; đoạn trên chỉ minh họa những màu thường cần đổi.
+
+## Đổi nút Apply V2 giữa icon và text
+
+App cấu hình trong `app/src/main/res/values/startflow_language_config.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- false: icon check, true: text -->
+    <bool name="startflow_language_v2_apply_use_text">true</bool>
+
+    <!-- Không bắt buộc. Mặc định dùng bản dịch của core_common_save. -->
+    <string name="startflow_language_v2_apply_text_value">Done</string>
+</resources>
+```
+
+Đặt `startflow_language_v2_apply_use_text` thành `false` để quay lại icon. Có thể đổi màu chữ bằng `startflow_language_v2_apply_text`; màu icon vẫn dùng `startflow_language_v2_apply_icon`.
 
 ## Dark mode
 

@@ -1,59 +1,61 @@
-# AGENTS.md
+# Quy trình làm việc của Agent
 
-## Implementation Planning
+File này áp dụng cho toàn bộ repository. Mọi thay đổi code phải đi đúng thứ tự dưới đây; không được đánh dấu hoàn thành khi chưa chạy kiểm thử.
 
-These rules apply only when the request requires modifying, adding, removing, or refactoring source code.
+## Workflow bắt buộc
 
-Before modifying any source code:
+### 1. Lập plan và task
 
-1. Check whether `PLAN.md` exists at the project root.
+- Đọc yêu cầu, kiểm tra code liên quan và xác định phạm vi ảnh hưởng trước khi sửa.
+- Tạo plan gồm các task nhỏ, có kết quả kiểm chứng được. Plan tối thiểu phải có các bước riêng: `Code`, `Viết test`, `Auto test`.
+- Gán trạng thái ban đầu cho từng task: task đầu tiên là `in_progress`, các task còn lại là `pending`.
+- Chỉ được có tối đa một task `in_progress` tại một thời điểm.
+- Nếu phát hiện thêm việc trong lúc triển khai, cập nhật plan trước khi tiếp tục.
 
-2. If `PLAN.md` exists:
-   - Read `PLAN.md` before analyzing or modifying source code.
-   - Check whether the current request continues, changes, or expands an existing task.
-   - If the request continues an existing task, continue that task instead of creating a duplicate.
-   - Review the existing task status, requirements, approach, checklist, and notes before continuing.
+### 2. Code
 
-3. If `PLAN.md` does not exist:
-   - Create `PLAN.md` at the project root before modifying source code.
+- Chuyển task code cần thực hiện sang `in_progress`.
+- Chỉ sửa những phần cần thiết cho yêu cầu; giữ nguyên các thay đổi không liên quan của người dùng.
+- Tự kiểm tra diff và các nhánh lỗi quan trọng sau khi code.
+- Khi phần triển khai đã xong, chuyển task `Code` sang `completed`, sau đó chuyển task `Viết test` sang `in_progress`.
+- Hoàn thành code chưa đồng nghĩa với hoàn thành toàn bộ yêu cầu.
 
-4. For every source-code change:
-   - Create a new plan item if the request is unrelated to existing tasks.
-   - Update the existing plan item if the request continues or expands an existing task.
-   - Set the relevant task to `IN PROGRESS` before modifying source code.
+### 3. Viết test
 
-5. Do not modify source code before `PLAN.md` has been created or updated for the current request.
+- Thêm hoặc cập nhật test cho hành vi mới, bug đã sửa và các trường hợp biên phù hợp.
+- Ưu tiên unit test trong `src/test`; chỉ dùng instrumentation test trong `src/androidTest` khi cần Android runtime hoặc thiết bị/emulator.
+- Test sửa bug phải có khả năng thất bại khi chưa có bản sửa và thành công sau khi sửa.
+- Nếu không thể viết test tự động, phải ghi rõ lý do và cách kiểm chứng thay thế trong phần bàn giao; không được âm thầm bỏ qua.
+- Khi test đã được viết xong, chuyển task `Viết test` sang `completed`, sau đó chuyển task `Auto test` sang `in_progress`.
 
-6. During implementation:
-   - Keep the plan synchronized with important discoveries, decisions, scope changes, and implementation progress.
-   - Update the checklist as steps are completed.
-   - Record blockers or important technical findings when they affect the implementation.
+### 4. Auto test
 
-7. After implementation:
-   - Verify the changes according to the applicable Android rules and project requirements.
-   - Update the plan with the actual implementation result.
-   - Mark the task as `DONE` only after verification is complete.
+- Agent phải chủ động chạy test, không chờ người dùng yêu cầu lại.
+- Chạy test hẹp nhất liên quan đến module/thay đổi trước, sau đó chạy bộ test rộng hơn khi phạm vi hoặc rủi ro yêu cầu.
+- Trên Windows/PowerShell, dùng Gradle wrapper của repository, ví dụ:
+  - Module không có product flavor: `.\gradlew.bat :core:utilities:test`
+  - Module có flavor: `.\gradlew.bat :core:ads:testProdDebugUnitTest`
+  - Toàn bộ unit test: `.\gradlew.bat test`
+  - Instrumentation test khi có emulator/device phù hợp: `.\gradlew.bat connectedAndroidTest`
+- Nếu test thất bại do thay đổi vừa thực hiện, sửa code/test và chạy lại cho đến khi pass.
+- Nếu bị chặn bởi môi trường hoặc lỗi có sẵn không liên quan, giữ task `Auto test` ở `in_progress`, ghi lại command, lỗi cụ thể và bằng chứng phân biệt lỗi đó với thay đổi hiện tại.
+- Chỉ chuyển task `Auto test` sang `completed` khi các test bắt buộc đã pass.
 
-8. Keep completed tasks in `PLAN.md` as project history unless explicitly asked to remove them.
+### 5. Cập nhật trạng thái và bàn giao
 
-9. Do not create duplicate plan items for the same ongoing task.
+- Trạng thái hợp lệ: `pending` -> `in_progress` -> `completed`.
+- Cập nhật trạng thái ngay sau mỗi bước, không dồn cập nhật vào cuối.
+- Chỉ đánh dấu toàn bộ task/yêu cầu là `completed` khi:
+  - Code đã hoàn tất.
+  - Test cần thiết đã được thêm hoặc đã nêu rõ lý do hợp lệ khi không thể thêm.
+  - Auto test bắt buộc đã pass.
+  - Không còn task con `pending` hoặc `in_progress`.
+- Phần bàn giao cuối phải nêu ngắn gọn: nội dung đã đổi, test đã thêm, command test đã chạy và kết quả. Nếu còn blocker, task chưa được báo là hoàn thành.
 
-Requests that only require explanation, analysis, debugging guidance, code review, documentation, or answering questions do not require `PLAN.md` unless source code will actually be modified.
+## Luồng trạng thái chuẩn
 
-## Release Notes
-
-Khi task liên quan đến tag hoặc release mới, agent phải kiểm tra tag/commit liên quan và tự tạo release note trong `docs/`.
-
-- Tên file: `docs/release-notes-<version>.md`, ví dụ `docs/release-notes-3.1.6.md`.
-- Nội dung phải dựa trên `git log` và `git diff` của tag/commit liên quan; không tự suy đoán thay đổi.
-- Nếu người dùng giới hạn phạm vi, ví dụ "chỉ commit hôm nay", chỉ dùng đúng phạm vi đó.
-- Giữ format giống các release note có sẵn: tiêu đề, tóm tắt, `Thay đổi`, `Nâng cấp`, `Migration` nếu cần, và link commit/changelog.
-- Chỉ cập nhật `README.md` khi người dùng yêu cầu thêm link vào danh sách tài liệu.
-
-## CodeGraph
-
-In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the repo root), reach for it before grep/find or reading files when you need to understand or locate code.
-
-- MCP tool: use `codegraph_explore` when available.
-- Shell fallback: `codegraph explore "<symbol names or question>"`.
-- If there is no `.codegraph/` directory, skip CodeGraph entirely.
+1. `Lập plan/task: in_progress`
+2. `Lập plan/task: completed` -> `Code: in_progress`
+3. `Code: completed` -> `Viết test: in_progress`
+4. `Viết test: completed` -> `Auto test: in_progress`
+5. `Auto test: completed` -> `Task tổng: completed`
