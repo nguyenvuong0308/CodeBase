@@ -2,9 +2,8 @@ package com.codebasetemplate
 
 import com.core.ads.BaseAdmobApplication
 import com.core.ads.admob.ReOpenShowCondition
-import com.core.billing.ProductIdManager
-import com.core.preference.PurchasePreferences
 import com.core.rate.RateInApp
+import dagger.Lazy
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -12,22 +11,16 @@ import javax.inject.Inject
 class App : BaseAdmobApplication() {
 
     @Inject
-    lateinit var purchasePreferences: PurchasePreferences
+    lateinit var reOpenShowConditionLazy: Lazy<ReOpenShowCondition>
 
-    @Inject
-    lateinit var productIdManager: ProductIdManager
-
-    @Inject
-    lateinit var reOpenShowCondition: ReOpenShowCondition
+    val reOpenShowCondition: ReOpenShowCondition
+        get() = reOpenShowConditionLazy.get()
 
     init {
         instance = this
     }
 
     override fun initOtherConfig() {
-        createOtherShortCut()
-        registerKeyVipList()
-
         RateInApp.instance.registerActivityLifecycle(this)
         RateInApp.instance.rateConfig.apply {
             isHideNavigationBar = true
@@ -35,26 +28,6 @@ class App : BaseAdmobApplication() {
             isSpaceStatusBar = true
             isSpaceDisplayCutout = true
         }
-    }
-
-
-
-    private fun createOtherShortCut() {
-        //TODO tạo thêm shortcut
-    }
-
-    /**
-     * Đăng ký các key để xác định userVip của ứng dụng (đây là các key lưu trạng thái mua các gói vip trong ứng dụng)
-     */
-    private fun registerKeyVipList() {
-        /*purchasePreferences.registerKeyVipList(
-            keyVipList = mutableListOf(
-                KEY_IS_PRO_LIFE_TIME,
-                KEY_IS_PRO_BY_YEAR,
-                KEY_IS_PRO_BY_MONTH,
-                KEY_IS_PRO_BY_WEEK,
-            )
-        )*/
     }
 
     companion object {

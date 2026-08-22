@@ -4,10 +4,8 @@ import android.app.Application
 import android.os.Build
 import android.text.TextUtils
 import android.webkit.WebView
-import androidx.appcompat.app.AppCompatDelegate
 import com.core.ads.extensions.getAndroidId
 import com.core.ads.extensions.md5
-import com.core.preference.AppPreferences
 import com.core.preference.SharedPrefs
 import com.core.utilities.isAppDebuggable
 import com.core.utilities.util.Timber
@@ -18,13 +16,9 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.FirebaseAnalytics.ConsentType
 import com.google.firebase.analytics.analytics
 import java.util.EnumMap
-import java.util.Locale
-import javax.inject.Inject
 
 abstract class BaseAdmobApplication : Application() {
 
-    @Inject
-    lateinit var appPreferences: AppPreferences
     open val requiredUpdateConsent = true
 
     private val deviceTestList = mutableListOf<String>()
@@ -33,10 +27,6 @@ abstract class BaseAdmobApplication : Application() {
         super.onCreate()
 
         SharedPrefs.init(context = this, name = "Core")
-
-        if(appPreferences.systemLanguageCode.isBlank()) {
-            appPreferences.systemLanguageCode = Locale.getDefault().language
-        }
 
         fixWebView()
 
