@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Hướng dẫn từng bước custom nội dung và giao diện Onboarding của StartFlow.">
+  <title>Custom Onboarding StartFlow — Hướng dẫn từng bước</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18201d;
+      --muted: #64706b;
+      --paper: #f6f8f4;
+      --surface: #ffffff;
+      --surface-soft: #eef3ed;
+      --line: #dce4de;
+      --brand: #1f6b4f;
+      --brand-dark: #164c3a;
+      --brand-soft: #dceee5;
+      --accent: #ffb45e;
+      --accent-soft: #fff1dd;
+      --danger: #a43f35;
+      --danger-soft: #fbe9e6;
+      --code: #17231f;
+      --code-ink: #e8f3ed;
+      --shadow: 0 18px 50px rgba(26, 54, 43, 0.09);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --content: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 30px; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 94% 2%, rgba(255, 180, 94, 0.17), transparent 25rem),
+        linear-gradient(180deg, #fbfcfa 0, var(--paper) 38rem);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+    a { color: inherit; }
+    button { font: inherit; }
+    code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+    :focus-visible { outline: 3px solid rgba(255, 180, 94, 0.75); outline-offset: 3px; }
+
+    .reading-progress {
+      position: fixed;
+      inset: 0 auto auto 0;
+      z-index: 50;
+      width: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--brand), var(--accent));
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      right: -180px;
+      top: -210px;
+      border: 80px solid rgba(31, 107, 79, 0.07);
+      border-radius: 50%;
+    }
+    .hero-inner {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.14fr) minmax(330px, 0.86fr);
+      gap: 64px;
+      align-items: center;
+      width: min(var(--content), calc(100% - 40px));
+      min-height: 610px;
+      margin: 0 auto;
+      padding: 76px 0 62px;
+    }
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      margin: 0 0 18px;
+      padding: 7px 11px;
+      border: 1px solid #cfe2d7;
+      border-radius: 999px;
+      color: var(--brand-dark);
+      background: rgba(255, 255, 255, 0.75);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .eyebrow-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    h1 {
+      max-width: 720px;
+      margin: 0;
+      font-size: clamp(42px, 6vw, 76px);
+      font-weight: 780;
+      letter-spacing: -.055em;
+      line-height: .98;
+    }
+    h1 span { color: var(--brand); }
+    .hero-copy {
+      max-width: 670px;
+      margin: 24px 0 0;
+      color: var(--muted);
+      font-size: clamp(17px, 2vw, 20px);
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 19px;
+      border: 1px solid var(--brand);
+      border-radius: 12px;
+      color: #fff;
+      background: var(--brand);
+      font-weight: 750;
+      text-decoration: none;
+      box-shadow: 0 9px 24px rgba(31, 107, 79, 0.18);
+    }
+    .button.secondary { color: var(--brand); background: transparent; box-shadow: none; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 30px; color: var(--muted); font-size: 13px; }
+    .hero-meta strong { color: var(--ink); }
+
+    .phone-stage { position: relative; height: 430px; }
+    .phone {
+      position: absolute;
+      width: 205px;
+      height: 420px;
+      padding: 10px;
+      border: 1px solid rgba(23, 35, 31, .18);
+      border-radius: 34px;
+      background: #17231f;
+      box-shadow: 0 28px 70px rgba(23, 35, 31, .24);
+    }
+    .phone.one { left: 6%; top: 16px; transform: rotate(-7deg); }
+    .phone.two { right: 3%; top: 0; transform: rotate(5deg); }
+    .phone-screen {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 25px;
+      background: #f7fbf8;
+    }
+    .phone-notch { width: 65px; height: 17px; margin: 0 auto; border-radius: 0 0 12px 12px; background: #17231f; }
+    .phone-skip { padding: 14px 17px 0; color: #74827b; font-size: 9px; text-align: right; }
+    .art {
+      position: relative;
+      width: calc(100% - 26px);
+      height: 188px;
+      margin: 16px auto 12px;
+      overflow: hidden;
+      border-radius: 22px;
+      background: linear-gradient(145deg, #dbeee5, #fff2dd);
+    }
+    .art::before, .art::after { content: ""; position: absolute; border-radius: 50%; }
+    .art::before { width: 105px; height: 105px; left: 16px; top: 28px; background: #ffba6b; }
+    .art::after { width: 128px; height: 128px; right: -25px; bottom: -24px; background: #2f8464; }
+    .art-card {
+      position: absolute;
+      z-index: 2;
+      width: 93px;
+      height: 118px;
+      left: 50%;
+      top: 36px;
+      border: 5px solid #fff;
+      border-radius: 15px;
+      background: #f8fbf9;
+      transform: translateX(-50%) rotate(-3deg);
+      box-shadow: 0 14px 25px rgba(24, 32, 29, .15);
+    }
+    .art-card::before { content: ""; display: block; width: 42px; height: 42px; margin: 14px auto 8px; border-radius: 50%; background: var(--brand-soft); }
+    .art-card::after { content: ""; display: block; width: 55px; height: 19px; margin: 0 auto; border-block: 5px solid #d2ddd6; }
+    .phone-title { margin: 5px 20px 0; font-size: 17px; line-height: 1.18; text-align: center; }
+    .phone-subtitle { margin: 8px 17px 0; color: #718078; font-size: 9px; line-height: 1.5; text-align: center; }
+    .dots { display: flex; justify-content: center; gap: 5px; margin-top: auto; padding: 16px; }
+    .dots i { width: 6px; height: 6px; border-radius: 8px; background: #cad6cf; }
+    .dots i.active { width: 18px; background: var(--brand); }
+    .phone-cta { margin: 0 14px 16px; padding: 10px; border-radius: 11px; color: #fff; background: var(--brand); font-size: 10px; font-weight: 800; text-align: center; }
+    .phone.two .art { background: linear-gradient(145deg, #e5e2ff, #e1f4eb); }
+    .phone.two .art::before { background: #8f79dd; }
+    .phone.two .art::after { background: #ffb45e; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      gap: 54px;
+      width: min(var(--content), calc(100% - 40px));
+      margin: 0 auto;
+      padding: 60px 0 100px;
+    }
+    .sidebar { position: relative; }
+    .sidebar-inner { position: sticky; top: 24px; }
+    .sidebar-label { margin: 0 0 12px 14px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .toc { display: grid; gap: 4px; }
+    .toc a {
+      display: grid;
+      grid-template-columns: 27px 1fr;
+      gap: 8px;
+      align-items: center;
+      padding: 9px 12px;
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      text-decoration: none;
+    }
+    .toc a span:first-child { color: #99a59f; font-size: 11px; font-variant-numeric: tabular-nums; }
+    .toc a:hover, .toc a.active { color: var(--brand-dark); background: var(--brand-soft); }
+    .toc a.active span:first-child { color: var(--brand); }
+    .sidebar-note { margin-top: 24px; padding: 15px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.68); color: var(--muted); font-size: 12px; }
+    .sidebar-note strong { display: block; margin-bottom: 4px; color: var(--ink); }
+
+    .content { min-width: 0; }
+    .section { margin-bottom: 84px; }
+    .section-heading { display: grid; grid-template-columns: 52px 1fr; gap: 16px; align-items: start; margin-bottom: 28px; }
+    .step-number {
+      display: grid;
+      place-items: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 15px;
+      color: #fff;
+      background: var(--brand);
+      font-size: 15px;
+      font-weight: 850;
+      box-shadow: 0 10px 24px rgba(31, 107, 79, .18);
+    }
+    h2 { margin: 0; font-size: clamp(27px, 4vw, 40px); line-height: 1.1; letter-spacing: -.035em; }
+    h3 { margin: 0 0 9px; font-size: 20px; line-height: 1.3; letter-spacing: -.018em; }
+    .section-lead { max-width: 760px; margin: 8px 0 0; color: var(--muted); }
+
+    .outcome {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin: 0 0 24px;
+      padding: 15px 17px;
+      border: 1px solid #cfe1d6;
+      border-radius: 14px;
+      background: #f0f8f3;
+      color: #315c49;
+      font-size: 14px;
+    }
+    .outcome strong { color: var(--brand-dark); }
+    .checkmark { flex: 0 0 auto; display: grid; place-items: center; width: 23px; height: 23px; border-radius: 50%; color: #fff; background: var(--brand); font-size: 12px; font-weight: 900; }
+
+    .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    .choice-card, .info-card {
+      padding: 21px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(255,255,255,.82);
+      box-shadow: 0 8px 24px rgba(23,35,31,.035);
+    }
+    .choice-card.recommended { border-color: #8fbda7; box-shadow: inset 0 4px 0 var(--brand); }
+    .choice-icon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 28px; border-radius: 12px; color: var(--brand-dark); background: var(--brand-soft); font-weight: 900; }
+    .choice-card:nth-child(2) .choice-icon { color: #8b561c; background: var(--accent-soft); }
+    .choice-card:nth-child(3) .choice-icon { color: #6046a3; background: #eee9fb; }
+    .choice-card p, .info-card p { margin: 0; color: var(--muted); font-size: 14px; }
+    .pill { display: inline-flex; margin-top: 16px; padding: 5px 8px; border-radius: 999px; color: var(--brand-dark); background: var(--brand-soft); font-size: 11px; font-weight: 800; }
+
+    .path {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      align-items: stretch;
+      margin-top: 24px;
+    }
+    .path-node { position: relative; padding: 15px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); }
+    .path-node:not(:last-child)::after { content: "→"; position: absolute; z-index: 2; right: -15px; top: 50%; color: var(--brand); font-weight: 900; transform: translateY(-50%); }
+    .path-node small { display: block; color: var(--brand); font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+    .path-node strong { display: block; margin-top: 4px; font-size: 13px; }
+
+    .split { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 22px; align-items: stretch; }
+    .file-tree { padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); font: 13px/1.9 "SFMono-Regular", Consolas, monospace; }
+    .file-tree .folder { color: var(--brand); font-weight: 800; }
+    .file-tree .new { display: inline-block; padding: 0 6px; border-radius: 5px; color: #704313; background: var(--accent-soft); font-size: 10px; font-weight: 800; }
+    .mini-preview { display: grid; place-items: center; min-height: 280px; padding: 20px; border-radius: var(--radius-md); background: linear-gradient(145deg, var(--brand-soft), var(--accent-soft)); }
+    .mini-phone { width: 135px; padding: 8px; border-radius: 23px; background: #1a2823; box-shadow: var(--shadow); }
+    .mini-screen { height: 240px; padding: 16px 12px 12px; border-radius: 17px; background: #fff; text-align: center; }
+    .mini-image { width: 100%; height: 108px; margin-bottom: 12px; border-radius: 13px; background: linear-gradient(140deg, #dceee5, #ffd8a8); }
+    .mini-line { height: 8px; margin: 7px auto; border-radius: 8px; background: #d5ded9; }
+    .mini-line.dark { width: 76%; background: #34463e; }
+    .mini-line.short { width: 55%; }
+    .mini-button { margin-top: 19px; padding: 7px; border-radius: 8px; color: #fff; background: var(--brand); font-size: 8px; font-weight: 800; }
+
+    .code-block { position: relative; margin: 18px 0 24px; overflow: hidden; border: 1px solid #273932; border-radius: var(--radius-md); background: var(--code); box-shadow: 0 12px 34px rgba(23,35,31,.12); }
+    .code-bar { display: flex; align-items: center; justify-content: space-between; min-height: 42px; padding: 0 12px 0 16px; border-bottom: 1px solid #30443c; color: #a5bcb1; font-size: 11px; }
+    .code-bar span::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: var(--accent); }
+    .copy-button { padding: 5px 9px; border: 1px solid #435a50; border-radius: 7px; color: #dbe9e2; background: transparent; cursor: pointer; font-size: 11px; }
+    .copy-button:hover { border-color: #6e8c7f; background: #263b32; }
+    pre { margin: 0; padding: 20px; overflow: auto; color: var(--code-ink); font-size: 12.5px; line-height: 1.7; tab-size: 4; }
+    .token-key { color: #ffc776; }
+    .token-type { color: #91d9bb; }
+    .token-string { color: #f5a6a0; }
+    .token-comment { color: #829a8f; }
+    .token-value { color: #a9bfff; }
+
+    .note { margin: 20px 0; padding: 17px 18px; border-left: 4px solid var(--accent); border-radius: 0 13px 13px 0; background: var(--accent-soft); color: #654a2e; font-size: 14px; }
+    .note.danger { border-color: var(--danger); color: #713b35; background: var(--danger-soft); }
+    .note strong { color: var(--ink); }
+
+    .tabs { margin-top: 22px; }
+    .tab-list { display: flex; gap: 7px; padding: 5px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface-soft); }
+    .tab-button { flex: 1; padding: 9px 12px; border: 0; border-radius: 9px; color: var(--muted); background: transparent; cursor: pointer; font-weight: 800; }
+    .tab-button[aria-selected="true"] { color: var(--brand-dark); background: #fff; box-shadow: 0 5px 15px rgba(23,35,31,.08); }
+    .tab-panel[hidden] { display: none; }
+    .tab-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 15px; }
+    .summary-cell { padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: #fff; font-size: 13px; }
+    .summary-cell small { display: block; color: var(--muted); }
+    .summary-cell code { color: var(--brand-dark); font-weight: 700; }
+
+    .flow-visual { display: grid; grid-template-columns: 1fr 44px 1fr 44px 1fr; align-items: center; margin: 24px 0; }
+    .flow-box { min-height: 116px; padding: 17px; border: 1px solid var(--line); border-radius: 15px; background: var(--surface); }
+    .flow-box .flow-index { display: grid; place-items: center; width: 25px; height: 25px; margin-bottom: 13px; border-radius: 8px; color: #fff; background: var(--brand); font-size: 11px; font-weight: 850; }
+    .flow-box strong { display: block; font-size: 13px; }
+    .flow-box small { color: var(--muted); }
+    .flow-arrow { color: var(--brand); font-size: 25px; font-weight: 900; text-align: center; }
+
+    .checklist { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0; list-style: none; }
+    .checklist li { position: relative; padding: 14px 14px 14px 44px; border: 1px solid var(--line); border-radius: 12px; background: #fff; font-size: 14px; }
+    .checklist li::before { content: "✓"; position: absolute; left: 14px; top: 13px; display: grid; place-items: center; width: 21px; height: 21px; border-radius: 50%; color: #fff; background: var(--brand); font-size: 11px; font-weight: 900; }
+
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 15px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; font-size: 13px; }
+    th, td { padding: 14px 15px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--brand-dark); background: var(--surface-soft); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+    tr:last-child td { border-bottom: 0; }
+    td code { color: var(--brand-dark); }
+
+    details { margin: 12px 0; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+    summary { padding: 16px 18px; cursor: pointer; font-weight: 780; }
+    details > div { padding: 0 18px 18px; color: var(--muted); font-size: 14px; }
+
+    .finish-card {
+      padding: clamp(24px, 5vw, 42px);
+      border-radius: var(--radius-lg);
+      color: #eef9f3;
+      background: var(--brand-dark);
+      box-shadow: var(--shadow);
+    }
+    .finish-card h2 { color: #fff; }
+    .finish-card p { max-width: 710px; color: #c1d7cc; }
+    .finish-card .button { color: var(--brand-dark); background: var(--accent); border-color: var(--accent); box-shadow: none; }
+    footer { padding: 26px 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; text-align: center; }
+
+    @media (max-width: 980px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 28px; padding-top: 60px; }
+      .phone-stage { max-width: 470px; width: 100%; margin: 0 auto; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+    }
+    @media (max-width: 720px) {
+      body { font-size: 15px; }
+      .hero-inner, .layout { width: min(100% - 28px, var(--content)); }
+      .hero-inner { min-height: auto; padding-bottom: 48px; }
+      .phone-stage { height: 345px; transform: scale(.82); transform-origin: top center; margin-bottom: -55px; }
+      .phone.one { left: 0; }
+      .phone.two { right: 0; }
+      .section { margin-bottom: 64px; }
+      .section-heading { grid-template-columns: 42px 1fr; }
+      .step-number { width: 42px; height: 42px; }
+      .card-grid, .split, .checklist, .tab-summary { grid-template-columns: 1fr; }
+      .path { grid-template-columns: 1fr 1fr; }
+      .path-node:not(:last-child)::after { display: none; }
+      .flow-visual { grid-template-columns: 1fr; gap: 8px; }
+      .flow-arrow { transform: rotate(90deg); }
+      pre { font-size: 11.5px; }
+    }
+    @media (max-width: 460px) {
+      h1 { font-size: 42px; }
+      .phone-stage { width: 430px; margin-left: calc((100% - 430px)/2); transform: scale(.7); margin-bottom: -112px; }
+      .hero-meta { display: grid; gap: 7px; }
+      .path { grid-template-columns: 1fr; }
+      .tab-list { display: grid; grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    @media print {
+      .reading-progress, .sidebar, .hero-actions, .copy-button { display: none !important; }
+      body { background: #fff; }
+      .hero-inner, .layout { width: 100%; }
+      .hero-inner { grid-template-columns: 1fr; min-height: auto; padding: 30px 0; }
+      .phone-stage { display: none; }
+      .layout { display: block; padding-top: 30px; }
+      .section, .code-block { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="reading-progress" aria-hidden="true"></div>
+
+  <header class="hero" id="top">
+    <div class="hero-inner">
+      <div>
+        <p class="eyebrow"><span class="eyebrow-dot"></span> StartFlow • Android</p>
+        <h1>Custom onboarding,<br><span>từng bước một.</span></h1>
+        <p class="hero-copy">Một lộ trình thực hành để thay nội dung, màu sắc và toàn bộ giao diện onboarding mà vẫn giữ nguyên navigation, quảng cáo và tracking của core.</p>
+        <div class="hero-actions">
+          <a class="button" href="#choose">Bắt đầu từ bước 0</a>
+          <a class="button secondary" href="#quick-check">Xem checklist nhanh</a>
+        </div>
+        <div class="hero-meta">
+          <span><strong>6 bước</strong> triển khai</span>
+          <span><strong>3 mức</strong> custom</span>
+          <span><strong>V1 · V2 · V3</strong> đều được hỗ trợ</span>
+        </div>
+      </div>
+
+      <div class="phone-stage" aria-label="Minh họa hai giao diện onboarding trên điện thoại">
+        <div class="phone one" aria-hidden="true">
+          <div class="phone-screen">
+            <div class="phone-notch"></div><div class="phone-skip">BỎ QUA</div>
+            <div class="art"><div class="art-card"></div></div>
+            <h3 class="phone-title">Mọi thứ bạn cần, ở đúng chỗ</h3>
+            <p class="phone-subtitle">Cá nhân hóa trải nghiệm đầu tiên theo thương hiệu của ứng dụng.</p>
+            <div class="dots"><i class="active"></i><i></i><i></i></div>
+            <div class="phone-cta">TIẾP TỤC</div>
+          </div>
+        </div>
+        <div class="phone two" aria-hidden="true">
+          <div class="phone-screen">
+            <div class="phone-notch"></div><div class="phone-skip">BỎ QUA</div>
+            <div class="art"><div class="art-card"></div></div>
+            <h3 class="phone-title">Sẵn sàng để bắt đầu?</h3>
+            <p class="phone-subtitle">Core vẫn xử lý flow; app chỉ sở hữu phần nội dung và giao diện.</p>
+            <div class="dots"><i></i><i></i><i class="active"></i></div>
+            <div class="phone-cta">BẮT ĐẦU</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" aria-label="Mục lục">
+      <div class="sidebar-inner">
+        <p class="sidebar-label">Trong hướng dẫn này</p>
+        <nav class="toc">
+          <a href="#choose"><span>00</span><span>Chọn mức custom</span></a>
+          <a href="#resources"><span>01</span><span>Chuẩn bị resources</span></a>
+          <a href="#content"><span>02</span><span>Thay nội dung</span></a>
+          <a href="#branding"><span>03</span><span>Đổi giao diện</span></a>
+          <a href="#hilt"><span>04</span><span>Đăng ký Hilt</span></a>
+          <a href="#remote-config"><span>05</span><span>Remote Config</span></a>
+          <a href="#verify"><span>06</span><span>Chạy & kiểm tra</span></a>
+          <a href="#renderer"><span>+</span><span>UI hoàn toàn riêng</span></a>
+          <a href="#pitfalls"><span>!</span><span>Lỗi thường gặp</span></a>
+        </nav>
+        <div class="sidebar-note">
+          <strong>Đường dẫn code mẫu</strong>
+          <span>app/src/main/java/.../required/startflow</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <section class="section" id="choose">
+        <div class="section-heading">
+          <div class="step-number">00</div>
+          <div><h2>Chọn đúng mức custom</h2><p class="section-lead">Đừng bắt đầu bằng việc copy XML. Chọn extension point nhỏ nhất đáp ứng thiết kế để core tiếp tục bảo vệ flow và tracking.</p></div>
+        </div>
+        <div class="outcome"><span class="checkmark">✓</span><div><strong>Kết quả của bước này:</strong> bạn biết cần tạo ContentProvider, UiCustomizer hay PageRenderer.</div></div>
+        <div class="card-grid">
+          <article class="choice-card">
+            <div class="choice-icon">Aa</div><h3>Chỉ đổi nội dung</h3>
+            <p>Thay số trang, ảnh, title và subtitle. Layout và hành vi giữ nguyên.</p>
+            <span class="pill">ContentProvider</span>
+          </article>
+          <article class="choice-card recommended">
+            <div class="choice-icon">◐</div><h3>Đổi branding</h3>
+            <p>Đổi màu, text style, background, CTA và visibility trên layout có sẵn.</p>
+            <span class="pill">Nên dùng • UiCustomizer</span>
+          </article>
+          <article class="choice-card">
+            <div class="choice-icon">▦</div><h3>Thay toàn bộ UI</h3>
+            <p>Dùng layout riêng khi thiết kế không thể biểu diễn bằng UiSpec.</p>
+            <span class="pill">PageRenderer</span>
+          </article>
+        </div>
+        <div class="path" aria-label="Luồng xử lý custom onboarding">
+          <div class="path-node"><small>App</small><strong>Resources & code custom</strong></div>
+          <div class="path-node"><small>Hilt</small><strong>Đưa implementation vào Set</strong></div>
+          <div class="path-node"><small>StartFlow</small><strong>Chọn theo version/priority</strong></div>
+          <div class="path-node"><small>Runtime</small><strong>Render + navigation + tracking</strong></div>
+        </div>
+        <div class="note"><strong>Quy tắc nhanh:</strong> phần lớn ứng dụng chỉ cần <code>ContentProvider + UiCustomizer</code>. Chỉ dùng <code>PageRenderer</code> khi cấu trúc layout thực sự khác.</div>
+      </section>
+
+      <section class="section" id="resources">
+        <div class="section-heading">
+          <div class="step-number">01</div>
+          <div><h2>Chuẩn bị resources trong app</h2><p class="section-lead">Đặt toàn bộ ảnh, chuỗi, màu và drawable ở module app. Mỗi app có thể mang thương hiệu riêng mà không chạm vào <code>core:startflow</code>.</p></div>
+        </div>
+        <div class="outcome"><span class="checkmark">✓</span><div><strong>Kết quả:</strong> có đủ 3 ảnh, title/subtitle và màu CTA tương ứng với 3 content page.</div></div>
+        <div class="split">
+          <div class="file-tree" aria-label="Cấu trúc resources gợi ý">
+            <div><span class="folder">app/src/main/res/</span></div>
+            <div>├── drawable/</div>
+            <div>│&nbsp;&nbsp;├── onboarding_01.webp <span class="new">MỚI</span></div>
+            <div>│&nbsp;&nbsp;├── onboarding_02.webp <span class="new">MỚI</span></div>
+            <div>│&nbsp;&nbsp;├── onboarding_03.webp <span class="new">MỚI</span></div>
+            <div>│&nbsp;&nbsp;└── bg_onboarding_action.xml</div>
+            <div>└── values/</div>
+            <div>&nbsp;&nbsp;&nbsp;├── strings.xml</div>
+            <div>&nbsp;&nbsp;&nbsp;└── colors.xml</div>
+          </div>
+          <div class="mini-preview" aria-label="Minh họa cách resource xuất hiện trên onboarding">
+            <div class="mini-phone"><div class="mini-screen"><div class="mini-image"></div><div class="mini-line dark"></div><div class="mini-line short"></div><div class="mini-button">TIẾP TỤC</div></div></div>
+          </div>
+        </div>
+        <div class="code-block">
+          <div class="code-bar"><span>res/values/strings.xml</span><button class="copy-button" type="button">Sao chép</button></div>
+          <pre><code>&lt;string name=<span class="token-string">"onboarding_title_1"</span>&gt;Tổ chức công việc dễ dàng&lt;/string&gt;
+&lt;string name=<span class="token-string">"onboarding_subtitle_1"</span>&gt;Mọi thứ quan trọng trong một nơi.&lt;/string&gt;
+&lt;string name=<span class="token-string">"onboarding_title_2"</span>&gt;Không bỏ lỡ điều gì&lt;/string&gt;
+&lt;string name=<span class="token-string">"onboarding_subtitle_2"</span>&gt;Nhắc việc đúng lúc, đúng ngữ cảnh.&lt;/string&gt;
+&lt;string name=<span class="token-string">"onboarding_title_3"</span>&gt;Bắt đầu theo cách của bạn&lt;/string&gt;
+&lt;string name=<span class="token-string">"onboarding_subtitle_3"</span>&gt;Thiết lập nhanh và thay đổi bất kỳ lúc nào.&lt;/string&gt;
+&lt;string name=<span class="token-string">"onboarding_next"</span>&gt;Tiếp tục&lt;/string&gt;
+&lt;string name=<span class="token-string">"onboarding_start"</span>&gt;Bắt đầu&lt;/string&gt;</code></pre>
+        </div>
+        <ul class="checklist">
+          <li>Tên resource nằm trong module <code>app</code>.</li>
+          <li>Ảnh tối ưu kích thước, ưu tiên WebP.</li>
+          <li>Đủ resource cho mọi <code>position</code> từ 0.</li>
+          <li>Chuỗi người dùng nhìn thấy có thể dịch.</li>
+        </ul>
+      </section>
+
+      <section class="section" id="content">
+        <div class="section-heading">
+          <div class="step-number">02</div>
+          <div><h2>Cung cấp nội dung từng trang</h2><p class="section-lead">Sửa implementation mẫu <code>AppOnBoardingContentProvider</code>. Provider này dùng chung cho cả V1, V2 và V3.</p></div>
+        </div>
+        <div class="outcome"><span class="checkmark">✓</span><div><strong>Kết quả:</strong> StartFlow lấy đúng ảnh/title/subtitle theo vị trí và biết tổng số content page.</div></div>
+        <div class="code-block">
+          <div class="code-bar"><span>AppOnBoardingContentProvider.kt</span><button class="copy-button" type="button">Sao chép</button></div>
+          <pre><code><span class="token-key">@Singleton</span>
+<span class="token-key">class</span> <span class="token-type">AppOnBoardingContentProvider</span> <span class="token-key">@Inject</span> constructor()
+    : <span class="token-type">OnBoardingContentProvider</span> {
+
+    override <span class="token-key">val</span> introPageCount: <span class="token-type">Int</span> = <span class="token-value">3</span>
+
+    override <span class="token-key">fun</span> getImageResIntro(position: <span class="token-type">Int</span>): <span class="token-type">Int</span> = <span class="token-key">when</span> (position) {
+        <span class="token-value">0</span> -&gt; R.drawable.onboarding_01
+        <span class="token-value">1</span> -&gt; R.drawable.onboarding_02
+        <span class="token-key">else</span> -&gt; R.drawable.onboarding_03
+    }
+
+    override <span class="token-key">fun</span> getStringIntro(position: <span class="token-type">Int</span>): <span class="token-type">Int</span> = <span class="token-key">when</span> (position) {
+        <span class="token-value">0</span> -&gt; R.string.onboarding_title_1
+        <span class="token-value">1</span> -&gt; R.string.onboarding_title_2
+        <span class="token-key">else</span> -&gt; R.string.onboarding_title_3
+    }
+
+    override <span class="token-key">fun</span> getSubtitleIntro(position: <span class="token-type">Int</span>): <span class="token-type">Int</span>? = <span class="token-key">when</span> (position) {
+        <span class="token-value">0</span> -&gt; R.string.onboarding_subtitle_1
+        <span class="token-value">1</span> -&gt; R.string.onboarding_subtitle_2
+        <span class="token-value">2</span> -&gt; R.string.onboarding_subtitle_3
+        <span class="token-key">else</span> -&gt; <span class="token-value">null</span>
+    }
+}</code></pre>
+        </div>
+        <div class="note"><strong>Subtitle có điều kiện:</strong> V2 và V3 ở kiểu card <code>top_v2</code> có dùng subtitle. Trả về <code>null</code> nếu muốn ẩn. Hãy đăng ký đúng <strong>một</strong> ContentProvider vì thứ tự phần tử trong Hilt Set không đảm bảo.</div>
+        <p>File mẫu có sẵn tại <a href="../app/src/main/java/com/codebasetemplate/required/startflow/AppOnBoardingContentProvider.kt"><code>app/.../startflow/AppOnBoardingContentProvider.kt</code></a>.</p>
+      </section>
+
+      <section class="section" id="branding">
+        <div class="section-heading">
+          <div class="step-number">03</div>
+          <div><h2>Đổi branding bằng UiSpec</h2><p class="section-lead">Remote Config chọn version nào thì customizer của version đó được gọi. Chọn tab bên dưới để lấy đúng contract.</p></div>
+        </div>
+        <div class="outcome"><span class="checkmark">✓</span><div><strong>Kết quả:</strong> layout core mang màu sắc, CTA và text style của app nhưng vẫn giữ listener mặc định.</div></div>
+
+        <div class="tabs" data-tabs>
+          <div class="tab-list" role="tablist" aria-label="Chọn phiên bản onboarding">
+            <button class="tab-button" id="tab-v1" role="tab" aria-controls="panel-v1" aria-selected="false">Version 1</button>
+            <button class="tab-button" id="tab-v2" role="tab" aria-controls="panel-v2" aria-selected="false">Version 2</button>
+            <button class="tab-button" id="tab-v3" role="tab" aria-controls="panel-v3" aria-selected="true">Version 3</button>
+          </div>
+
+          <div class="tab-panel" id="panel-v1" role="tabpanel" aria-labelledby="tab-v1" hidden>
+            <div class="tab-summary"><div class="summary-cell"><small>State</small><code>OnBoardingV1PageState</code></div><div class="summary-cell"><small>Phù hợp khi</small>Layout tối giản title + action + indicator</div></div>
+            <div class="code-block"><div class="code-bar"><span>AppOnBoardingV1UiCustomizer.kt</span><button class="copy-button" type="button">Sao chép</button></div><pre><code><span class="token-key">class</span> <span class="token-type">AppOnBoardingV1UiCustomizer</span> <span class="token-key">@Inject</span> constructor()
+    : <span class="token-type">OnBoardingV1UiCustomizer</span> {
+
+    override <span class="token-key">fun</span> customize(
+        context: <span class="token-type">Context</span>,
+        state: <span class="token-type">OnBoardingV1PageState</span>,
+        current: <span class="token-type">OnBoardingV1UiSpec</span>,
+    ) = current.copy(
+        actionText = context.getString(
+            <span class="token-key">if</span> (state.isLastPage) R.string.onboarding_start
+            <span class="token-key">else</span> R.string.onboarding_next
+        ),
+        actionTextColor = ContextCompat.getColor(context, R.color.onboarding_primary),
+        actionBackgroundRes = R.drawable.bg_onboarding_action,
+    )
+}</code></pre></div>
+          </div>
+
+          <div class="tab-panel" id="panel-v2" role="tabpanel" aria-labelledby="tab-v2" hidden>
+            <div class="tab-summary"><div class="summary-cell"><small>State</small><code>OnBoardingV2PageState</code></div><div class="summary-cell"><small>Khác V1</small>Có subtitle, content background và fill-gradient CTA</div></div>
+            <div class="code-block"><div class="code-bar"><span>AppOnBoardingV2UiCustomizer.kt</span><button class="copy-button" type="button">Sao chép</button></div><pre><code><span class="token-key">class</span> <span class="token-type">AppOnBoardingV2UiCustomizer</span> <span class="token-key">@Inject</span> constructor()
+    : <span class="token-type">OnBoardingV2UiCustomizer</span> {
+
+    override <span class="token-key">fun</span> customize(
+        context: <span class="token-type">Context</span>,
+        state: <span class="token-type">OnBoardingV2PageState</span>,
+        current: <span class="token-type">OnBoardingV2UiSpec</span>,
+    ) = current.copy(
+        titleTextColor = ContextCompat.getColor(context, R.color.onboarding_text),
+        contentBackgroundRes = R.drawable.bg_onboarding_content,
+        actionBackgroundRes = R.drawable.bg_onboarding_action,
+        <span class="token-comment">// Tắt fill để drawable CTA riêng được hiển thị.</span>
+        isActionFillGradientEnabled = <span class="token-value">false</span>,
+    )
+}</code></pre></div>
+          </div>
+
+          <div class="tab-panel" id="panel-v3" role="tabpanel" aria-labelledby="tab-v3">
+            <div class="tab-summary"><div class="summary-cell"><small>State</small><code>OnBoardingV3PageState</code></div><div class="summary-cell"><small>Nên dùng khi</small>Cần page type, vị trí action và ads state đầy đủ</div></div>
+            <div class="code-block"><div class="code-bar"><span>AppOnBoardingV3UiCustomizer.kt</span><button class="copy-button" type="button">Sao chép</button></div><pre><code><span class="token-key">@Singleton</span>
+<span class="token-key">class</span> <span class="token-type">AppOnBoardingV3UiCustomizer</span> <span class="token-key">@Inject</span> constructor()
+    : <span class="token-type">OnBoardingV3UiCustomizer</span> {
+
+    override <span class="token-key">val</span> priority: <span class="token-type">Int</span> = <span class="token-value">100</span>
+
+    override <span class="token-key">fun</span> customize(
+        context: <span class="token-type">Context</span>,
+        state: <span class="token-type">OnBoardingV3PageState</span>,
+        current: <span class="token-type">OnBoardingV3UiSpec</span>,
+    ): <span class="token-type">OnBoardingV3UiSpec</span> = current.copy(
+        titleTextColor = ContextCompat.getColor(context, R.color.onboarding_text),
+        actionTextColor = ContextCompat.getColor(context, R.color.onboarding_primary),
+        actionText = context.getString(
+            <span class="token-key">if</span> (state.isPageEnd) R.string.onboarding_start
+            <span class="token-key">else</span> R.string.onboarding_next
+        ),
+        actionBackgroundRes = R.drawable.bg_onboarding_action,
+    )
+}</code></pre></div>
+          </div>
+        </div>
+
+        <div class="note danger"><strong>Không thay click listener để đổi giao diện.</strong> Listener mặc định còn chịu trách nhiệm chuyển trang, kết thúc onboarding, tracking và phối hợp quảng cáo.</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Version</th><th>Điểm khác biệt chính</th><th>State cuối trang</th></tr></thead>
+            <tbody>
+              <tr><td><strong>V1</strong></td><td>Title, action, indicator, background</td><td><code>state.isLastPage</code></td></tr>
+              <tr><td><strong>V2</strong></td><td>Thêm subtitle, content card, gradient CTA</td><td><code>state.isLastPage</code></td></tr>
+              <tr><td><strong>V3</strong></td><td>Page type, action position, ads và indicator</td><td><code>state.isPageEnd</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="hilt">
+        <div class="section-heading">
+          <div class="step-number">04</div>
+          <div><h2>Đăng ký implementation với Hilt</h2><p class="section-lead">StartFlow nhận các extension qua multibinding. Thêm <code>@IntoSet</code> cho provider và đúng customizer của version app đang dùng.</p></div>
+        </div>
+        <div class="outcome"><span class="checkmark">✓</span><div><strong>Kết quả:</strong> implementation của app được inject vào StartFlow ở runtime.</div></div>
+        <div class="flow-visual" aria-label="Minh họa Hilt multibinding">
+          <div class="flow-box"><span class="flow-index">1</span><strong>Implementation</strong><small>AppOnBoarding…</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box"><span class="flow-index">2</span><strong>@IntoSet</strong><small>RequiredModule</small></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-box"><span class="flow-index">3</span><strong>StartFlow</strong><small>Chọn đúng contract</small></div>
+        </div>
+        <div class="code-block">
+          <div class="code-bar"><span>RequiredModule.kt</span><button class="copy-button" type="button">Sao chép</button></div>
+          <pre><code><span class="token-key">@Provides</span>
+<span class="token-key">@IntoSet</span>
+<span class="token-key">@Singleton</span>
+<span class="token-key">fun</span> provideAppOnBoardingContentProvider(
+    provider: <span class="token-type">AppOnBoardingContentProvider</span>,
+): <span class="token-type">OnBoardingContentProvider</span> = provider
+
+<span class="token-key">@Provides</span>
+<span class="token-key">@IntoSet</span>
+<span class="token-key">@Singleton</span>
+<span class="token-key">fun</span> provideAppOnBoardingV3UiCustomizer(
+    customizer: <span class="token-type">AppOnBoardingV3UiCustomizer</span>,
+): <span class="token-type">OnBoardingV3UiCustomizer</span> = customizer</code></pre>
+        </div>
+        <div class="note"><strong>Chỉ bind thứ thực sự dùng.</strong> App đang chạy V3 không bắt buộc phải đăng ký customizer V1/V2. Core đã khai báo <code>@Multibinds</code>, nên set rỗng vẫn hợp lệ.</div>
+      </section>
+
+      <section class="section" id="remote-config">
+        <div class="section-heading">
+          <div class="step-number">05</div>
+          <div><h2>Đồng bộ Remote Config</h2><p class="section-lead">Version quyết định customizer nào chạy; mảng <code>intro_data*</code> quyết định page content nào có quảng cáo.</p></div>
+        </div>
+        <div class="outcome"><span class="checkmark">✓</span><div><strong>Kết quả:</strong> version, số content page, vị trí CTA và cấu hình ads khớp với code app.</div></div>
+        <div class="code-block">
+          <div class="code-bar"><span>Remote Config — ví dụ V3</span><button class="copy-button" type="button">Sao chép</button></div>
+          <pre><code>{
+  <span class="token-string">"onboarding_config"</span>: {
+    <span class="token-string">"version"</span>: <span class="token-value">3</span>,
+    <span class="token-string">"position_next"</span>: <span class="token-string">"bottom"</span>,
+    <span class="token-string">"is_show_close"</span>: <span class="token-value">true</span>,
+    <span class="token-string">"is_show_swipe"</span>: <span class="token-value">true</span>,
+    <span class="token-string">"delay_show_close_swipe_seconds"</span>: <span class="token-value">1</span>
+  },
+  <span class="token-string">"application_config"</span>: {
+    <span class="token-string">"intro_data_v3"</span>: [<span class="token-value">0</span>, <span class="token-value">1</span>, <span class="token-value">0</span>]
+  }
+}</code></pre>
+        </div>
+        <div class="card-grid">
+          <article class="info-card"><h3><code>0</code> • Content thường</h3><p>Hiển thị page onboarding, không có banner/native ad.</p></article>
+          <article class="info-card"><h3><code>1</code> • Content + ad</h3><p>Hiển thị content page và vùng banner/native tương ứng.</p></article>
+          <article class="info-card"><h3><code>2</code> • Full native</h3><p>Đây là ad page, không tiêu thụ một vị trí content provider.</p></article>
+        </div>
+        <div class="note"><strong>Điểm dễ nhầm ở V3:</strong> <code>introductionPosition</code> là vị trí logic có tính full-native ad; <code>realPosition</code> mới là vị trí content dùng để lấy ảnh và text.</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Version</th><th>Mảng cần đồng bộ</th><th>Customizer được gọi</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><code>application_config.intro_data</code></td><td><code>OnBoardingV1UiCustomizer</code></td></tr>
+              <tr><td>2</td><td><code>application_config.intro_data_v2</code></td><td><code>OnBoardingV2UiCustomizer</code></td></tr>
+              <tr><td>3</td><td><code>application_config.intro_data_v3</code></td><td><code>OnBoardingV3UiCustomizer</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section" id="verify">
+        <div class="section-heading">
+          <div class="step-number">06</div>
+          <div><h2>Chạy app và kiểm tra</h2><p class="section-lead">Kiểm tra theo thứ tự để phân biệt lỗi resource, Hilt và Remote Config. Đừng chỉ nhìn trang đầu tiên.</p></div>
+        </div>
+        <div class="outcome"><span class="checkmark">✓</span><div><strong>Kết quả:</strong> cả trang thường, trang cuối và page có ads đều hiển thị đúng; navigation/tracking không bị phá vỡ.</div></div>
+        <ol class="checklist" id="quick-check">
+          <li>Clean/build app và xác nhận Hilt compile.</li>
+          <li>Reset trạng thái đã xem onboarding trên máy test.</li>
+          <li>Mở từng page, kiểm tra ảnh/title/subtitle.</li>
+          <li>Kiểm tra CTA “Tiếp tục” và “Bắt đầu”.</li>
+          <li>Thử swipe, close và delay theo config.</li>
+          <li>Thử page có mã <code>1</code> và full-native <code>2</code>.</li>
+          <li>Xoay màn hình/background app nếu flow hỗ trợ.</li>
+          <li>Xác nhận event view/next/complete vẫn được gửi.</li>
+        </ol>
+        <div class="code-block">
+          <div class="code-bar"><span>PowerShell — kiểm tra module</span><button class="copy-button" type="button">Sao chép</button></div>
+          <pre><code>.\gradlew.bat :core:startflow:test</code></pre>
+        </div>
+        <p>Nếu cần theo dõi giá trị thực tế, log tạm <code>state.pageType</code>, <code>state.realPosition</code>, <code>state.isPageEnd</code> trong customizer rồi xóa log sau khi xác nhận.</p>
+      </section>
+
+      <section class="section" id="renderer">
+        <div class="section-heading">
+          <div class="step-number">+</div>
+          <div><h2>Nâng cao: thay toàn bộ page UI</h2><p class="section-lead">Dùng PageRenderer khi UiSpec không đủ. App inflate layout riêng, còn StartFlow vẫn sở hữu actions, lifecycle, navigation và tracking.</p></div>
+        </div>
+        <div class="code-block">
+          <div class="code-bar"><span>SpecialOnBoardingV3Renderer.kt</span><button class="copy-button" type="button">Sao chép</button></div>
+          <pre><code><span class="token-key">@Singleton</span>
+<span class="token-key">class</span> <span class="token-type">SpecialOnBoardingV3Renderer</span> <span class="token-key">@Inject</span> constructor()
+    : <span class="token-type">OnBoardingV3PageRenderer</span> {
+
+    override <span class="token-key">val</span> priority: <span class="token-type">Int</span> = <span class="token-value">100</span>
+
+    override <span class="token-key">fun</span> supports(state: <span class="token-type">OnBoardingV3PageState</span>): <span class="token-type">Boolean</span> =
+        state.pageType == OnBoardingV3PageType.STANDARD
+
+    override <span class="token-key">fun</span> render(scope: <span class="token-type">OnBoardingV3RenderScope</span>): <span class="token-type">OnBoardingV3RenderedPage</span> {
+        <span class="token-key">val</span> binding = AppOnboardingSpecialBinding.inflate(
+            scope.inflater, scope.parent, <span class="token-value">false</span>
+        )
+        binding.image.setImageResource(scope.state.imageRes)
+        binding.title.text = scope.state.title
+        binding.subtitle.text = scope.state.subtitle
+        binding.action.setOnClickListener { scope.actions.onPrimaryAction() }
+
+        <span class="token-key">return</span> OnBoardingV3RenderedPage(
+            view = binding.root,
+            onBannerNativeResult = { resource, placeName -&gt;
+                binding.layoutBannerNative.processAdResource(resource, placeName)
+            },
+            onDispose = { <span class="token-comment">/* hủy animation/listener riêng */</span> },
+        )
+    }
+}</code></pre>
+        </div>
+        <ul class="checklist">
+          <li>Inflate với <code>attachToParent = false</code>.</li>
+          <li>Dùng <code>scope.lifecycleOwner</code> cho observer.</li>
+          <li>Gọi actions của scope, không tự navigate.</li>
+          <li>V3 phải forward callback ads vào ad container.</li>
+          <li>Dọn animation/listener trong <code>onDispose</code>.</li>
+          <li>Bind renderer bằng <code>@IntoSet</code>.</li>
+        </ul>
+        <div class="note danger"><strong>Không override XML core bằng resource trùng tên.</strong> View Binding của core yêu cầu đúng toàn bộ ID/type và có thể crash ngay lúc inflate.</div>
+      </section>
+
+      <section class="section" id="pitfalls">
+        <div class="section-heading">
+          <div class="step-number">!</div>
+          <div><h2>Lỗi thường gặp</h2><p class="section-lead">Mở từng mục để chẩn đoán nhanh trước khi sửa sâu vào core.</p></div>
+        </div>
+        <details>
+          <summary>Code customizer không chạy</summary>
+          <div>Kiểm tra <code>onboarding_config.version</code>, annotation <code>@IntoSet</code>, kiểu trả về của provider Hilt và việc app có đang bỏ qua onboarding do trạng thái đã xem hay không.</div>
+        </details>
+        <details>
+          <summary>CTA drawable riêng không xuất hiện ở V2</summary>
+          <div>Đặt <code>isActionFillGradientEnabled = false</code>. Gradient của view mặc định có thể đang phủ drawable bạn đã gán.</div>
+        </details>
+        <details>
+          <summary>Ảnh/text bị lệch sau một full-native ad ở V3</summary>
+          <div>Dùng <code>realPosition</code> cho content. <code>introductionPosition</code> là vị trí logic trong toàn bộ flow và có tính cả slot full-native.</div>
+        </details>
+        <details>
+          <summary>Trang cuối hoặc text “Bắt đầu” bị sai</summary>
+          <div>Đảm bảo <code>introPageCount</code> và mảng <code>intro_data*</code> khớp nhau. Với V1/V2 dùng <code>isLastPage</code>; với V3 dùng <code>isPageEnd</code>.</div>
+        </details>
+        <details>
+          <summary>Renderer crash với “View must return without a parent”</summary>
+          <div>Inflate binding bằng <code>scope.inflater</code>, truyền <code>scope.parent</code> nhưng tham số cuối phải là <code>false</code>. Không tái sử dụng view đã attach.</div>
+        </details>
+        <details>
+          <summary>Kết quả style không như priority mong đợi</summary>
+          <div>UiCustomizer chạy từ priority thấp đến cao; kết quả sau có thể override kết quả trước. Renderer thì chọn phần tử hỗ trợ page có priority cao nhất.</div>
+        </details>
+      </section>
+
+      <section class="section">
+        <div class="finish-card">
+          <h2>Hoàn tất khi 4 lớp đã khớp</h2>
+          <p><strong>Resources</strong> đủ theo position · <strong>Provider/Customizer</strong> trả đúng dữ liệu · <strong>Hilt</strong> bind đúng contract · <strong>Remote Config</strong> chọn đúng version và danh sách page.</p>
+          <a class="button" href="#top">Quay lại đầu trang</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>Tài liệu nội bộ StartFlow · Mở trực tiếp file HTML để sử dụng offline.</footer>
+
+  <script>
+    const progress = document.querySelector('.reading-progress');
+    const tocLinks = [...document.querySelectorAll('.toc a')];
+    const sections = tocLinks.map((link) => document.querySelector(link.hash)).filter(Boolean);
+
+    function updateReadingState() {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = `${scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0}%`;
+      const active = [...sections].reverse().find((section) => section.getBoundingClientRect().top <= 140) || sections[0];
+      tocLinks.forEach((link) => {
+        const isActive = active && link.hash === `#${active.id}`;
+        link.classList.toggle('active', isActive);
+        if (isActive) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+    }
+
+    document.querySelectorAll('[data-tabs]').forEach((tabs) => {
+      const buttons = [...tabs.querySelectorAll('[role="tab"]')];
+      const panels = [...tabs.querySelectorAll('[role="tabpanel"]')];
+      const activate = (button) => {
+        buttons.forEach((item) => item.setAttribute('aria-selected', String(item === button)));
+        panels.forEach((panel) => { panel.hidden = panel.id !== button.getAttribute('aria-controls'); });
+      };
+      buttons.forEach((button, index) => {
+        button.addEventListener('click', () => activate(button));
+        button.addEventListener('keydown', (event) => {
+          if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+          event.preventDefault();
+          const offset = event.key === 'ArrowRight' ? 1 : -1;
+          const next = buttons[(index + offset + buttons.length) % buttons.length];
+          activate(next);
+          next.focus();
+        });
+      });
+    });
+
+    document.querySelectorAll('.copy-button').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const code = button.closest('.code-block').querySelector('code').innerText;
+        try {
+          await navigator.clipboard.writeText(code);
+          const original = button.textContent;
+          button.textContent = 'Đã chép';
+          window.setTimeout(() => { button.textContent = original; }, 1500);
+        } catch (_) {
+          button.textContent = 'Không thể chép';
+        }
+      });
+    });
+
+    window.addEventListener('scroll', updateReadingState, { passive: true });
+    window.addEventListener('resize', updateReadingState);
+    updateReadingState();
+  </script>
+</body>
+</html>
