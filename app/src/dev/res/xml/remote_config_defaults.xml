@@ -112,7 +112,7 @@
     <!--với Native-->
     <!--ad_type: banner - native-->
     <!--native_template_size:
-    small - small_cta_top - small_cta_bottom - small_cta_right -
+    small - small_cta_top - small_cta_bottom - small_cta_right - small_banner_cta_right -
     small_long - small_for_popup - medium - medium_cta_top - medium_cta_bottom - medium_short_cta_bottom -
     medium_cta_right_top - medium_cta_right - medium_media_right -
     medium_media_left - full_cta_bottom - full_cta_top - full_cta_right - full_cta_bottom_onboarding
@@ -483,7 +483,7 @@
             "place_name": "anchored_native_test",
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
-            "native_template_size": "small_cta_right",
+            "native_template_size": "small_banner_cta_right",
             "is_enable": true,
             "is_tracking_click": true,
             "cta_radius_dp": 5,

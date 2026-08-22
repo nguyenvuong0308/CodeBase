@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="small_banner_native_test_title">Small banner CTA-right native</string>
+    <string name="small_banner_native_test_waiting">Waiting for the test ad…</string>
+    <string name="small_banner_native_test_loading">Loading small_banner_cta_right…</string>
+    <string name="small_banner_native_test_loaded">Loaded small_banner_cta_right</string>
+    <string name="small_banner_native_test_failed">Ad failed to load. Check network and Logcat.</string>
+    <string name="small_banner_native_test_wrong_type">anchored_native_test must be configured as native.</string>
+    <string name="small_banner_native_test_reload">Reload test ad</string>
+</resources>

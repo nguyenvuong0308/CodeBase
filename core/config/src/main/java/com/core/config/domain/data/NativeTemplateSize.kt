@@ -11,6 +11,7 @@ sealed class NativeTemplateSize {
                 Small.key -> Small
                 SmallCtaTop.key -> SmallCtaTop
                 SmallCtaRight.key -> SmallCtaRight
+                SmallBannerCtaRight.key -> SmallBannerCtaRight
                 SmallLong.key -> SmallLong
                 SmallForPopup.key -> SmallForPopup
 
@@ -51,6 +52,10 @@ sealed class NativeTemplateSize {
 
     object SmallCtaRight: NativeTemplateSize() {
         override val key = "small_cta_right"
+    }
+
+    object SmallBannerCtaRight : NativeTemplateSize() {
+        override val key = "small_banner_cta_right"
     }
 
     object MiniCtaRight: NativeTemplateSize() {
