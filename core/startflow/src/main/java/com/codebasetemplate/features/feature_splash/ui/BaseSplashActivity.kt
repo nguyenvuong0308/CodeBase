@@ -63,6 +63,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
     private var splashCompleteLogged = false
     private var interSplashTrackingStartedAtMs = 0L
     private var interSplashCompleteLogged = false
+    private var enterAppOnNetworkLost = false
 
     private val appOpenPlaceName by lazy {
         if (baseViewModel.isFirstOpenApp) {
@@ -153,7 +154,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
         analyticsManager.logEvent(eventName)
 
         if (isNetworkConnected()) {
-            startSplashPrerequisites()
+            startSplashPrerequisites(enterAppOnNetworkLost = true)
         } else {
             onSplashStatusChanged(SplashStatus.WaitingForInternet)
             showRequireTurnOnNetworkBottomSheetFragment()
@@ -374,7 +375,8 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
         tryStartSplashAdsFlow()
     }
 
-    private fun startSplashPrerequisites() {
+    private fun startSplashPrerequisites(enterAppOnNetworkLost: Boolean) {
+        this.enterAppOnNetworkLost = enterAppOnNetworkLost
         remoteConfigRepository.fetchAndActive()
         if (!baseViewModel.isRequestEuConsentComplete) {
             adsManager.requestConsentInfoUpdate(this, false)
@@ -442,31 +444,35 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
 
     private fun checkAbleToNextScreen() {
         if (isFinishing || isDestroyed) return
-        val nextScreen = {
-            countDownTimer?.pauseTimer()
-            appOpenAdManager.isFirstOpenApp = false
-            logSplashCompleteIfNeeded()
-            openNextScreen()
-            finish()
-        }
 
         if (baseViewModel.currentProgress >= baseViewModel.timeSkipAppOpenAdWhenNotAvailable && baseViewModel.isAdNotValidOrLoadFailed) {
-            nextScreen()
+            openNextScreenAndFinish()
             return
         }
 
         if (baseViewModel.isTimerComplete && !baseViewModel.isAppOpenAdLoaded && !baseViewModel.isAppOpenAdShowing) {
-            nextScreen()
+            openNextScreenAndFinish()
             return
         }
 
         if (baseViewModel.isAppOpenAdDismissed) {
-            nextScreen()
+            openNextScreenAndFinish()
             return
         }
     }
 
     abstract fun openNextScreen()
+
+    private fun openNextScreenAndFinish() {
+        if (isFinishing || isDestroyed) return
+        countDownTimer?.pauseTimer()
+        delayedShowAdJob?.cancel()
+        delayedShowAdJob = null
+        appOpenAdManager.isFirstOpenApp = false
+        logSplashCompleteIfNeeded()
+        openNextScreen()
+        finish()
+    }
 
     private fun handleWhenAdShowing() {
         Log.d(TAG, "handleWhenAdShowing: ")
@@ -490,6 +496,18 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
         baseViewModel.isActivityResume = false
         if (countDownTimer?.isTimerRunning() == true) {
             countDownTimer?.pauseTimer()
+        }
+    }
+
+    override fun onNetworkChange(isNetworkConnected: Boolean) {
+        super.onNetworkChange(isNetworkConnected)
+        if (shouldEnterAppWhenNetworkLost(
+                isNetworkConnected = isNetworkConnected,
+                enterAppOnNetworkLost = enterAppOnNetworkLost,
+                isProgressRunning = countDownTimer?.isTimerRunning() == true
+            )
+        ) {
+            openNextScreenAndFinish()
         }
     }
 
@@ -606,7 +624,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
                     delay(1000)
                     if (isNetworkConnected()) {
                         analyticsManager.logEvent(AnalyticsEvent.ACTION_SPLASH_RETRY_TURN_ON)
-                        startSplashPrerequisites()
+                        startSplashPrerequisites(enterAppOnNetworkLost = true)
                     } else {
                         baseViewModel.showRequireTurnOnNetworkWhenRetryClickedFlow.emit(true)
                         val intentNetwork = if (Build.VERSION.SDK_INT >= 29) {
@@ -619,7 +637,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
                 }
             },
             onCancel = {
-                startSplashPrerequisites()
+                startSplashPrerequisites(enterAppOnNetworkLost = false)
             }
         )
     }
@@ -672,3 +690,9 @@ enum class SplashStatus {
     ShowingAd,
     ReadyToEnterApp
 }
+
+internal fun shouldEnterAppWhenNetworkLost(
+    isNetworkConnected: Boolean,
+    enterAppOnNetworkLost: Boolean,
+    isProgressRunning: Boolean
+): Boolean = !isNetworkConnected && (enterAppOnNetworkLost || isProgressRunning)
