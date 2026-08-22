@@ -1221,13 +1221,14 @@ fun provideOnBoardingV3UiCustomizer(
     <section id="gallery">
       <p class="section-kicker">Visual reference</p>
       <h2>Native UI gallery</h2>
-      <div class="config-keys field"><code>native_template_size</code></div>
-      <p>Các ảnh dưới đây được chụp bằng <code>adb shell screencap</code> từ debug preview Activity, sử dụng AdMob test native id <code>ca-app-pub-3940256099942544/2247696110</code>.</p>
+      <div class="config-keys field"><code>native_template_size</code><code>is_native_collapsible</code><code>native_expand_template</code><code>pip_anchor_mode</code></div>
+      <p>Các ảnh dưới đây được chụp lại bằng <code>capture_native_gallery.ps1</code> qua <code>adb shell screencap</code> từ dev preview Activity, sử dụng AdMob test native id <code>ca-app-pub-3940256099942544/2247696110</code>. Gallery bao phủ toàn bộ template built-in, hai giao diện native collapsible và Picture in Picture.</p>
       <div class="grid">
         <figure><img src="native-screenshots/small.png" alt="small"><figcaption><code>small</code></figcaption></figure>
         <figure><img src="native-screenshots/small_cta_top.png" alt="small_cta_top"><figcaption><code>small_cta_top</code></figcaption></figure>
         <figure><img src="native-screenshots/small_cta_bottom.png" alt="small_cta_bottom"><figcaption><code>small_cta_bottom</code></figcaption></figure>
         <figure><img src="native-screenshots/small_cta_right.png" alt="small_cta_right"><figcaption><code>small_cta_right</code></figcaption></figure>
+        <figure><img src="native-screenshots/small_banner_cta_right.png" alt="small_banner_cta_right"><figcaption><code>small_banner_cta_right</code></figcaption></figure>
         <figure><img src="native-screenshots/mini_cta_right.png" alt="mini_cta_right"><figcaption><code>mini_cta_right</code></figcaption></figure>
         <figure><img src="native-screenshots/small_long.png" alt="small_long"><figcaption><code>small_long</code></figcaption></figure>
         <figure><img src="native-screenshots/small_for_popup.png" alt="small_for_popup"><figcaption><code>small_for_popup</code></figcaption></figure>
@@ -1246,9 +1247,12 @@ fun provideOnBoardingV3UiCustomizer(
         <figure><img src="native-screenshots/full_interstitial_v1.png" alt="full_interstitial_v1"><figcaption><code>full_interstitial_v1</code></figcaption></figure>
         <figure><img src="native-screenshots/full_interstitial_v2.png" alt="full_interstitial_v2"><figcaption><code>full_interstitial_v2</code></figcaption></figure>
         <figure><img src="native-screenshots/full_interstitial_v3.png" alt="full_interstitial_v3"><figcaption><code>full_interstitial_v3</code></figcaption></figure>
+        <figure><img src="native-screenshots/medium_collapsible_cta_bottom.png" alt="medium_cta_bottom with native_expand_v1"><figcaption><code>medium_cta_bottom</code> + <code>native_expand_v1</code></figcaption></figure>
+        <figure><img src="native-screenshots/medium_collapsible_cta_bottom_v2.png" alt="medium_cta_bottom with native_expand_v2"><figcaption><code>medium_cta_bottom</code> + <code>native_expand_v2</code></figcaption></figure>
+        <figure><img src="native-screenshots/native_pip.png" alt="native_pip picture in picture"><figcaption><code>native_pip</code> · Picture in Picture</figcaption></figure>
       </div>
       <div class="note">
-        <p><strong>Custom native:</strong> key không nằm trong danh sách built-in sẽ thành <code>NativeTemplateSize.CustomKey</code> và được chuyển sang <code>CustomNativeProvider.getInstance().getCustomNativeAds()</code>. Muốn dùng custom key phải implement provider tương ứng; tài liệu này chỉ minh họa các template built-in.</p>
+        <p><strong>Custom native:</strong> key không nằm trong danh sách built-in sẽ thành <code>NativeTemplateSize.CustomKey</code> và được chuyển sang <code>CustomNativeProvider.getInstance().getCustomNativeAds()</code>. Riêng <code>native_pip</code> được render bằng <code>NativePictureInPicture</code> theo luồng PIP chuyên dụng đã mô tả ở phần Native Picture in Picture.</p>
       </div>
     </section>
     </article>
