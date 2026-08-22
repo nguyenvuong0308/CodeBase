@@ -64,6 +64,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
     private var interSplashTrackingStartedAtMs = 0L
     private var interSplashCompleteLogged = false
     private var enterAppOnNetworkLost = false
+    private var networkLostFastEnterJob: Job? = null
 
     private val appOpenPlaceName by lazy {
         if (baseViewModel.isFirstOpenApp) {
@@ -377,10 +378,39 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
 
     private fun startSplashPrerequisites(enterAppOnNetworkLost: Boolean) {
         this.enterAppOnNetworkLost = enterAppOnNetworkLost
+        if (enterAppOnNetworkLost) {
+            startNetworkLostFastEnterWatcher()
+        } else {
+            stopNetworkLostFastEnterWatcher()
+        }
         remoteConfigRepository.fetchAndActive()
         if (!baseViewModel.isRequestEuConsentComplete) {
             adsManager.requestConsentInfoUpdate(this, false)
         }
+    }
+
+    private fun startNetworkLostFastEnterWatcher() {
+        networkLostFastEnterJob?.cancel()
+        networkLostFastEnterJob = CoroutineScope(coroutineContext).launch {
+            while (this@BaseSplashActivity.enterAppOnNetworkLost) {
+                delay(250)
+                if (shouldEnterAppWhenNetworkLost(
+                        isNetworkConnected = isNetworkConnected(),
+                        enterAppOnNetworkLost = this@BaseSplashActivity.enterAppOnNetworkLost,
+                        isProgressRunning = countDownTimer?.isTimerRunning() == true
+                    )
+                ) {
+                    openNextScreenAndFinish()
+                    return@launch
+                }
+            }
+        }
+    }
+
+    private fun stopNetworkLostFastEnterWatcher() {
+        enterAppOnNetworkLost = false
+        networkLostFastEnterJob?.cancel()
+        networkLostFastEnterJob = null
     }
 
     private fun tryStartSplashAdsFlow() {
@@ -465,6 +495,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
 
     private fun openNextScreenAndFinish() {
         if (isFinishing || isDestroyed) return
+        stopNetworkLostFastEnterWatcher()
         countDownTimer?.pauseTimer()
         delayedShowAdJob?.cancel()
         delayedShowAdJob = null
@@ -476,6 +507,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
 
     private fun handleWhenAdShowing() {
         Log.d(TAG, "handleWhenAdShowing: ")
+        stopNetworkLostFastEnterWatcher()
         logSplashBeforeAdIfNeeded()
         logInterSplashViewIfNeeded()
         onSplashStatusChanged(SplashStatus.ShowingAd)
@@ -516,6 +548,7 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
         appOpenAdManager.isFirstOpenApp = false
         delayedShowAdJob?.cancel()
         delayedShowAdJob = null
+        stopNetworkLostFastEnterWatcher()
         coroutineContext.cancelChildren()
         stopCountDown()
     }
