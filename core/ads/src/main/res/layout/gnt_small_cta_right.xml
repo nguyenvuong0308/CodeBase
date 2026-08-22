@@ -9,10 +9,6 @@
         android:id="@+id/native_ad_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/_4dp"
-        android:layout_marginTop="@dimen/_10dp"
-        android:layout_marginEnd="@dimen/_4dp"
-        android:layout_marginBottom="@dimen/_10dp"
         android:background="@drawable/core_bg_native_ads">
 
         <RelativeLayout
