@@ -83,7 +83,7 @@ abstract class BaseAdsBottomSheetDialogFragment<B : ViewBinding> : BottomSheetDi
         get() = Dispatchers.Main + job
 
 
-    private fun setupDialog() {
+    open fun setupDialog() {
 
         val isTablet = false
         val screenWidth = Resources.getSystem().displayMetrics.widthPixels

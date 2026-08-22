@@ -82,7 +82,7 @@ abstract class BaseAdsDialogFragment<B : ViewBinding> : DialogFragment(), Corout
         get() = Dispatchers.Main + job
 
 
-    private fun setupDialog() {
+    open fun setupDialog() {
 
         val isTablet = false
         val screenWidth = Resources.getSystem().displayMetrics.widthPixels

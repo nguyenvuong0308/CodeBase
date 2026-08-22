@@ -52,7 +52,7 @@ abstract class BaseDialogFragment<VB : ViewBinding> : DialogFragment() {
 
     abstract fun initView()
 
-    fun setupDialog() {
+    open fun setupDialog() {
 
         val isTablet = false
         val screenWidth = Resources.getSystem().displayMetrics.widthPixels
