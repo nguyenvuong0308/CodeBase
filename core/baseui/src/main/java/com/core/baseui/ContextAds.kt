@@ -32,6 +32,23 @@ import kotlin.math.max
 private const val TAG = "ContextAds"
 private const val NATIVE_REFRESH_HOLDER_DELAY_MS = 2_000L
 
+internal class NativeRefreshPauseController {
+    var isPaused: Boolean = false
+        private set
+
+    fun pause() {
+        isPaused = true
+    }
+
+    fun resume() {
+        isPaused = false
+    }
+
+    fun canRefresh(isWaitingLoad: Boolean, isLifecycleStarted: Boolean): Boolean {
+        return !isPaused && !isWaitingLoad && isLifecycleStarted
+    }
+}
+
 abstract class ContextAds(
     var adsManager: AdsManager,
     var remoteConfigRepository: RemoteConfigRepository,
@@ -89,6 +106,7 @@ abstract class ContextAds(
     private val bannerNativeRefreshIntervals = mutableMapOf<IAdPlaceName, Int>()
     private val nativeRefreshLoadingStartedAtMs = mutableMapOf<IAdPlaceName, Long>()
     private val delayedNativeRefreshApplyJobs = mutableMapOf<IAdPlaceName, Job>()
+    private val nativeRefreshPauseController = NativeRefreshPauseController()
 
     init {
         adBannerOrNativePreload.addAll(initPreloadBannerNativeAdPlaceName)
@@ -100,6 +118,22 @@ abstract class ContextAds(
 
     fun ready() {
         isWaitingLoad = false
+    }
+
+    /**
+     * Pauses future automatic native refresh requests for this context.
+     * A refresh request that has already started is allowed to finish.
+     */
+    fun pauseNativeRefresh() {
+        nativeRefreshPauseController.pause()
+    }
+
+    /**
+     * Allows automatic native refresh requests again.
+     * Lifecycle and loading-state restrictions are still applied.
+     */
+    fun resumeNativeRefresh() {
+        nativeRefreshPauseController.resume()
     }
 
     fun isRewardReady(adPlaceName: IAdPlaceName): Boolean {
@@ -247,8 +281,11 @@ abstract class ContextAds(
         bannerNativeRefreshJobs[adPlaceName] = lifecycleScope.launch {
             while (isActive) {
                 delay(refreshTimeSecond.toLong() * 1_000L)
-                if (isWaitingLoad ||
-                    !lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+                if (!nativeRefreshPauseController.canRefresh(
+                        isWaitingLoad = isWaitingLoad,
+                        isLifecycleStarted = lifecycleOwner.lifecycle.currentState
+                            .isAtLeast(Lifecycle.State.STARTED)
+                    )
                 ) {
                     continue
                 }
