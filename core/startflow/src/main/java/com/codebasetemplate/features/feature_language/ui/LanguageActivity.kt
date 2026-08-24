@@ -11,6 +11,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.recyclerview.widget.DefaultItemAnimator
+import com.core.startflow.R
 import com.core.startflow.StartFlowActivity
 import com.core.startflow.databinding.StartflowActivityLanguageBinding
 import com.codebasetemplate.features.feature_language.ui.adapter.SupportedLanguageAdapter
@@ -152,6 +153,12 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
     override fun initViews(savedInstanceState: Bundle?) {
         super.initViews(savedInstanceState)
         viewBinding.run {
+            if (resources.getBoolean(R.bool.startflow_language_show_image_background)) {
+                imageBackground.visible()
+            } else {
+                imageBackground.gone()
+            }
+
             toolbar.onToolbarListener = object : CoreToolbarView.OnToolbarListener {
                 override fun onBack() {
                     setupAfterOnBackPressed()

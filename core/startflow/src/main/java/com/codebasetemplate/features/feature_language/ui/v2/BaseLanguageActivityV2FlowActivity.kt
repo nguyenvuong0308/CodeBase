@@ -30,6 +30,7 @@ import com.core.utilities.getCurrentLanguageCode
 import com.core.utilities.gone
 import com.core.utilities.visible
 import com.core.startflow.OnBoardingConfigFactory
+import com.core.startflow.R
 import com.core.startflow.StartFlowActivity
 import com.core.startflow.StartFlowNavigator
 import com.core.startflow.StartFlowShortcut
@@ -171,6 +172,12 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
         window.statusBarColor = Color.WHITE
         window.decorView.systemUiVisibility =
             window.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+
+        if (resources.getBoolean(R.bool.startflow_language_show_image_background)) {
+            viewBinding.imageBackground.visible()
+        } else {
+            viewBinding.imageBackground.gone()
+        }
 
         viewBinding.languageBack.visibility = if (isFromSetting) View.VISIBLE else View.GONE
         viewBinding.languageBack.setOnClickListener {
