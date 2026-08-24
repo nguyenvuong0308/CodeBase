@@ -85,17 +85,19 @@ fun Context.shareApp(@StringRes resId: Int) {
 }
 
 fun Context.shareFiles(listFile: List<String>) {
-    val imageUris: ArrayList<Uri> = arrayListOf<Uri>()
-    imageUris.addAll(listFile.map {
-        FileProvider.getUriForFile(
-            this,
-            "$packageName.provider",
-            File(it)
-        )
-    })
+    val imageUris = listFile.mapNotNull { path ->
+        val file = File(path)
+        if (!file.isFile || !file.canRead()) return@mapNotNull null
+        runCatching {
+            FileProvider.getUriForFile(this, "$packageName.provider", file)
+        }.getOrNull()
+    }
+    if (imageUris.isEmpty()) return
+
     val shareIntent = Intent().apply {
         action = Intent.ACTION_SEND_MULTIPLE
-        putParcelableArrayListExtra(Intent.EXTRA_STREAM, imageUris)
+        putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(imageUris))
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         type = "*/*"
     }
     try {
