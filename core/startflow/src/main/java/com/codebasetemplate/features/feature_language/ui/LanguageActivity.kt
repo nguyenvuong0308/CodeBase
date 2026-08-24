@@ -89,6 +89,12 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
 
     private var hasCheckedNavigation = false
 
+    private var hasUserSelectedLanguage = false
+
+    private var step1AdState = LanguageBannerAdState.PENDING
+
+    private var step2AdState = LanguageBannerAdState.PENDING
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -181,6 +187,8 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
 
             supportedLanguageAdapter.onClickListener = {
                 toolbar.isEnableTvAction = true
+                hasUserSelectedLanguage = true
+                updateBannerVisibility()
             }
 
             rvLanguage.apply {
@@ -212,12 +220,12 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
         // Đánh dấu rằng chúng ta muốn mở màn hình Settings sau khi đổi ngôn ngữ
         appPreferences.navigateAfterChangeLanguage = true
 
-        // Gọi hàm đổi ngôn ngữ
-        if (language.languageCode == getCurrentLanguageCode()) {
-            checkIfNavigationIsNeeded()
-        } else {
-            changeLanguage(language)
-        }
+        applyLanguageAndContinue(
+            selectedLanguageCode = language.languageCode,
+            currentLanguageCode = getCurrentLanguageCode(),
+            changeLanguage = { changeLanguage(language) },
+            continueAfterLanguageApplied = ::checkIfNavigationIsNeeded,
+        )
     }
 
     private fun processNextScreen() {
@@ -235,7 +243,6 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
                     BaseAdmobApplication.isUserSelectLanguageNotDefault = false
                 }
             }
-            appPreferences.navigateAfterChangeLanguage
             userChoosesToGoToSettingsAfterLanguageChange(it)
         }
     }
@@ -245,7 +252,8 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
             return listOf()
         }
         return mutableListOf<IAdPlaceName>().apply {
-            add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_BOTTOM)
+            add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V1_STEP_1)
+            add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V1_STEP_2)
             if ((isOpenFromSlash || backFromIntroduction) && isEnableIntroductionScreen) {
                 addAll(OnBoardingConfigFactory.getOnBoardingAdPlaceName(remoteConfigRepository.getOnBoardingConfig(), remoteConfigRepository.getAppConfig()))
             }
@@ -253,10 +261,66 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
     }
 
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
-        viewBinding.layoutBannerNative.processAdResource(
-            adResource,
-            CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_BOTTOM
-        )
+        val adState = when (adResource) {
+            is AdLoadBannerNativeUiResource.BannerAdLoaded,
+            is AdLoadBannerNativeUiResource.NativeAdLoaded -> LanguageBannerAdState.AVAILABLE
+
+            is AdLoadBannerNativeUiResource.AdFailed,
+            is AdLoadBannerNativeUiResource.AdNetworkError -> LanguageBannerAdState.UNAVAILABLE
+
+            is AdLoadBannerNativeUiResource.Loading -> LanguageBannerAdState.PENDING
+        }
+
+        when (adResource.commonAdPlaceName) {
+            CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V1_STEP_1 -> {
+                step1AdState = adState
+                viewBinding.layoutBannerNativeStep1.processAdResource(
+                    adResource = adResource,
+                    placeName = CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V1_STEP_1,
+                    canVisible = false,
+                    isHideNativeBannerWhenNetworkError = true,
+                )
+            }
+
+            CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V1_STEP_2 -> {
+                step2AdState = adState
+                viewBinding.layoutBannerNativeStep2.processAdResource(
+                    adResource = adResource,
+                    placeName = CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V1_STEP_2,
+                    canVisible = false,
+                    isHideNativeBannerWhenNetworkError = true,
+                )
+            }
+
+            else -> return
+        }
+
+        updateBannerVisibility()
+    }
+
+    private fun updateBannerVisibility() {
+        when (
+            resolveLanguageBannerStep(
+                hasUserSelectedLanguage = hasUserSelectedLanguage,
+                step1AdState = step1AdState,
+                step2AdState = step2AdState,
+            )
+        ) {
+            LanguageBannerStep.STEP_1 -> {
+                viewBinding.layoutBannerNativeStep1.visible()
+                viewBinding.layoutBannerNativeStep2.gone()
+            }
+
+            LanguageBannerStep.STEP_2 -> {
+                viewBinding.layoutBannerNativeStep1.gone()
+                viewBinding.layoutBannerNativeStep2.visible()
+            }
+
+            null -> {
+                viewBinding.layoutBannerNativeStep1.gone()
+                viewBinding.layoutBannerNativeStep2.gone()
+            }
+        }
     }
 
 

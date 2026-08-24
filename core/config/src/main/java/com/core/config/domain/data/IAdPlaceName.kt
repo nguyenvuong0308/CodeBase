@@ -26,7 +26,8 @@ sealed class CoreAdPlaceName(
     object ANCHORED_ONBOARDING_BOTTOM_V2 : CoreAdPlaceName("anchored_onboarding_bottom_v2")
     object ANCHORED_FULL_ONBOARDING : CoreAdPlaceName("anchored_full_onboarding")
     object ANCHORED_FULL_ONBOARDING_V2 : CoreAdPlaceName("anchored_full_onboarding_v2")
-    object ANCHORED_CHANGE_LANGUAGE_BOTTOM : CoreAdPlaceName("anchored_change_language_bottom")
+    object ANCHORED_CHANGE_LANGUAGE_V1_STEP_1 : CoreAdPlaceName("flow_tutorial_v1_201_language_1_n_native")
+    object ANCHORED_CHANGE_LANGUAGE_V1_STEP_2 : CoreAdPlaceName("flow_tutorial_v1_201_language_2_n_native")
 
     object ANCHORED_BOTTOM_SPLASH : CoreAdPlaceName("flow_tutorial_101_splash")
 

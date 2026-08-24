@@ -203,7 +203,8 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
                     add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V2_NATIVE_2)
                     add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V2_NATIVE_3)
                 } else {
-                    add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_BOTTOM)
+                    add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V1_STEP_1)
+                    add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V1_STEP_2)
                 }
             }
 

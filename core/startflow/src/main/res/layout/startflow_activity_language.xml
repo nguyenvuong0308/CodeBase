@@ -13,7 +13,7 @@
         android:adjustViewBounds="true"
         android:background="@drawable/startflow_language_image_background"
         android:scaleType="fitCenter"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
@@ -30,7 +30,7 @@
             app:ctv_tv_action_text="@string/core_common_save"
             app:ctv_tv_action_text_color="@color/startflow_language_v1_toolbar_action"
             app:ctv_tv_title="@string/core_screen_language"
-            app:ctv_tv_title_text_color="@color/startflow_language_v1_toolbar_title"/>
+            app:ctv_tv_title_text_color="@color/startflow_language_v1_toolbar_title" />
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -44,7 +44,7 @@
                 android:orientation="vertical"
                 android:paddingHorizontal="@dimen/_12dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/startflow_item_language_ltr"/>
+                tools:listitem="@layout/startflow_item_language_ltr" />
 
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:id="@+id/lnApplyLoading"
@@ -58,7 +58,7 @@
                 <ProgressBar
                     android:layout_width="@dimen/_60dp"
                     android:layout_height="@dimen/_60dp"
-                    android:indeterminateTint="@color/startflow_language_v1_loading_indicator"/>
+                    android:indeterminateTint="@color/startflow_language_v1_loading_indicator" />
 
                 <TextView
                     style="@style/Title16Medium"
@@ -66,7 +66,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/_10dp"
                     android:text="@string/core_apply_language"
-                    android:textColor="@color/startflow_language_v1_loading_text"/>
+                    android:textColor="@color/startflow_language_v1_loading_text" />
             </androidx.appcompat.widget.LinearLayoutCompat>
         </FrameLayout>
 
@@ -78,11 +78,20 @@
             app:layout_constraintBottom_toBottomOf="parent">
 
             <com.core.ads.customviews.ads.BannerNativeContainerLayout
-                android:id="@+id/layout_banner_native"
+                android:id="@+id/layout_banner_native_step1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:background="@color/startflow_language_v1_ad_background"/>
+                android:background="@color/startflow_language_v1_ad_background" />
+
+            <com.core.ads.customviews.ads.BannerNativeContainerLayout
+                android:id="@+id/layout_banner_native_step2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="@color/startflow_language_v1_ad_background"
+                android:visibility="gone" />
         </FrameLayout>
+
     </androidx.appcompat.widget.LinearLayoutCompat>
 </FrameLayout>
