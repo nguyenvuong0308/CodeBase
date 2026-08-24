@@ -198,15 +198,13 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
             getCurrentLanguageCode().isBlank() || isAlwaysShowIntroAndLanguageScreen
         return mutableListOf<IAdPlaceName>().apply {
             if (isLoadLanguage) {
-                add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_BOTTOM)
-            }
-            if (isEnableIntroductionScreen && isLoadLanguage) {
-                addAll(
-                    OnBoardingConfigFactory.getOnBoardingAdPlaceName(
-                        remoteConfigRepository.getOnBoardingConfig(),
-                        remoteConfigRepository.getAppConfig()
-                    )
-                )
+                if(remoteConfigRepository.getLanguageActivityConfig().isV2) {
+                    add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V2_NATIVE_1)
+                    add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V2_NATIVE_2)
+                    add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_V2_NATIVE_3)
+                } else {
+                    add(CoreAdPlaceName.ANCHORED_CHANGE_LANGUAGE_BOTTOM)
+                }
             }
 
             if (targetScreenFromShortCut == StartFlowScreenType.Uninstall.screenName) {
