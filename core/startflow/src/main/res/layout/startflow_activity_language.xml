@@ -17,7 +17,8 @@
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <com.core.baseui.toolbar.CoreToolbarView
             android:id="@+id/toolbar"
