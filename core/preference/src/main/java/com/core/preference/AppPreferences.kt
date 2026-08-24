@@ -3,8 +3,10 @@ package com.core.preference
 import android.content.Context
 import android.content.SharedPreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
+import androidx.core.content.edit
 
 @Singleton
 class AppPreferences @Inject constructor(
@@ -40,10 +42,10 @@ class AppPreferences @Inject constructor(
         defaultValue = true
     )
 
-    var systemLanguageCode by prefs.string (
-        key = { KEY_SYSTEM_LANGUAGE_CODE },
-        defaultValue = ""
-    )
+    var systemLanguageCode: String
+        get() = prefs.getString(KEY_SYSTEM_LANGUAGE_CODE, "").orEmpty()
+            .ifBlank { Locale.getDefault().language }
+        set(value) = prefs.edit { putString(KEY_SYSTEM_LANGUAGE_CODE, value) }
 
     var currentLanguageCode by prefs.string (
         key = { KEY_CURRENT_LANGUAGE_CODE },

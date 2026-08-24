@@ -12,6 +12,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -21,6 +22,8 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.codebasetemplate.R
 import com.codebasetemplate.features.feature_splash.ui.SplashActivity
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.analytics
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -28,6 +31,18 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     companion object {
         const val FCM_CHANNEL_ID = "fcm_channel_id"
+    }
+
+    @Suppress("OVERRIDE_DEPRECATION")
+    override fun handleIntent(intent: Intent) {
+        try {
+            super.handleIntent(intent)
+        } catch (se: SecurityException) {
+            Log.e("FCM", "SecurityException when Firebase handles notification intent", se)
+            Firebase.analytics.logEvent("FCM_AUTO_NOTIFY_SECURITY", Bundle().apply {
+                putString("model", Build.MODEL)
+            })
+        }
     }
 
     override fun onNewToken(token: String) {

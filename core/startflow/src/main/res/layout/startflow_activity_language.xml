@@ -1,73 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/startflow_language_v1_background"
-    android:orientation="vertical">
+    android:background="@color/startflow_language_v1_background">
 
-    <com.core.baseui.toolbar.CoreToolbarView
-        android:id="@+id/toolbar"
+    <com.codebasetemplate.features.feature_onboarding.ui.v1.FitWidthImageView
+        android:id="@+id/imageBackground"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:ctv_ic_back_show="false"
-        app:ctv_tv_action_enable="false"
-        app:ctv_tv_action_show="true"
-        app:ctv_tv_action_text="@string/core_common_save"
-        app:ctv_tv_action_text_color="@color/startflow_language_v1_toolbar_action"
-        app:ctv_tv_title_text_color="@color/startflow_language_v1_toolbar_title"
-        app:ctv_tv_title="@string/core_screen_language" />
+        android:layout_height="match_parent"
+        android:adjustViewBounds="true"
+        android:background="@drawable/startflow_language_image_background"
+        android:scaleType="fitCenter"
+        android:visibility="gone"/>
 
-    <FrameLayout
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvLanguage"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingHorizontal="@dimen/_12dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/startflow_item_language_ltr" />
+        android:layout_height="match_parent">
 
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:layout_width="match_parent"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:id="@+id/lnApplyLoading"
-            android:visibility="gone"
-            android:orientation="vertical"
-            android:layout_height="wrap_content">
-            <ProgressBar
-                android:layout_width="@dimen/_60dp"
-                android:indeterminateTint="@color/startflow_language_v1_loading_indicator"
-                android:layout_height="@dimen/_60dp"/>
-
-            <TextView
-                android:textColor="@color/startflow_language_v1_loading_text"
-                android:text="@string/core_apply_language"
-                style="@style/Title16Medium"
-                android:layout_marginTop="@dimen/_10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </androidx.appcompat.widget.LinearLayoutCompat>
-    </FrameLayout>
-
-
-    <FrameLayout
-        android:id="@+id/layout_ads"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <com.core.ads.customviews.ads.BannerNativeContainerLayout
-            android:id="@+id/layout_banner_native"
+        <com.core.baseui.toolbar.CoreToolbarView
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:background="@color/startflow_language_v1_ad_background" />
-    </FrameLayout>
+            app:ctv_ic_back_show="false"
+            app:ctv_tv_action_enable="false"
+            app:ctv_tv_action_show="true"
+            app:ctv_tv_action_text="@string/core_common_save"
+            app:ctv_tv_action_text_color="@color/startflow_language_v1_toolbar_action"
+            app:ctv_tv_title="@string/core_screen_language"
+            app:ctv_tv_title_text_color="@color/startflow_language_v1_toolbar_title"/>
 
-</androidx.appcompat.widget.LinearLayoutCompat>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvLanguage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/_12dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/startflow_item_language_ltr"/>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/lnApplyLoading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <ProgressBar
+                    android:layout_width="@dimen/_60dp"
+                    android:layout_height="@dimen/_60dp"
+                    android:indeterminateTint="@color/startflow_language_v1_loading_indicator"/>
+
+                <TextView
+                    style="@style/Title16Medium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_10dp"
+                    android:text="@string/core_apply_language"
+                    android:textColor="@color/startflow_language_v1_loading_text"/>
+            </androidx.appcompat.widget.LinearLayoutCompat>
+        </FrameLayout>
+
+
+        <FrameLayout
+            android:id="@+id/layout_ads"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <com.core.ads.customviews.ads.BannerNativeContainerLayout
+                android:id="@+id/layout_banner_native"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="@color/startflow_language_v1_ad_background"/>
+        </FrameLayout>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</FrameLayout>
