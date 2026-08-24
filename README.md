@@ -29,7 +29,7 @@ Use the modules you need:
 
 ```kotlin
 dependencies {
-    implementation("com.github.nguyenvuong0308:CodeBase:3.1.6")
+    implementation("com.github.nguyenvuong0308:CodeBase:3.3.0")
 }
 ```
 
@@ -49,6 +49,7 @@ Available artifacts:
 
 ## Documentation
 
+- [Release notes 3.1.1-3.3.0](docs/release-notes-3.1.1-3.3.0.md)
 - [Release notes 3.1.1](docs/release-notes-3.1.1.md)
 - [Release notes 3.0.5–3.0.9](docs/release-notes-3.0.5-3.0.9.md)
 - [Firebase Ads configuration guide](docs/firebase-ads-guide/firebase_ads_config_guide.html)
