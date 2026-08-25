@@ -861,7 +861,7 @@
         <key>onboarding_config</key>
         <value>
             {
-            "version": 3,
+            "version": 2,
             "position_next": "top",
             "is_show_close": true,
             "is_show_swipe": false,
