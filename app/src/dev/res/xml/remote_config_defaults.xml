@@ -861,7 +861,7 @@
         <key>onboarding_config</key>
         <value>
             {
-            "version": 2,
+            "version": 3,
             "position_next": "top",
             "is_show_close": true,
             "is_show_swipe": false,
@@ -875,7 +875,7 @@
         <key>language_activity_config</key>
         <value>
             {
-            "version": 1,
+            "version": 2,
             "time_show_loading_lfo": 3
             }
         </value>

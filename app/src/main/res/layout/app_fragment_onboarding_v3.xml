@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/layoutMediumNative"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:orientation="vertical">
+
+            <com.codebasetemplate.features.feature_onboarding.ui.v1.FitWidthImageViewV2
+                android:id="@+id/iv_introduction"
+                style="@style/RoundOnboardingV3"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:background="@color/white"
+                android:scaleType="fitCenter"
+                tools:src="@drawable/intro_31" />
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:orientation="vertical">
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:id="@+id/topNextV2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/_10dp"
+                    android:layout_marginBottom="@dimen/_10dp"
+                    android:background="@drawable/bg_white_round"
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/_5dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/tvTitleTop"
+                        style="@style/Body14Bold"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:gravity="center"
+                        android:text="@string/core_onboarding_title_2"
+                        android:textColor="@color/black" />
+
+                    <TextView
+                        android:id="@+id/tvSubTitleTop"
+                        style="@style/Body12Regular"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_5dp"
+                        android:gravity="center"
+                        android:text="@string/core_onboarding_title_2"
+                        android:textColor="@color/black" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginTop="10dp"
+                        android:visibility="visible">
+
+                        <androidx.appcompat.widget.LinearLayoutCompat
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical|start"
+                            android:layout_marginHorizontal="@dimen/_15dp">
+
+                            <View
+                                android:id="@+id/indicatorTopV21"
+                                android:layout_width="@dimen/_8dp"
+                                android:layout_height="@dimen/_8dp"
+                                android:background="@drawable/bg_intro_dot_selected" />
+
+                            <View
+                                android:id="@+id/indicatorTopV22"
+                                android:layout_width="@dimen/_8dp"
+                                android:layout_height="@dimen/_8dp"
+                                android:layout_marginHorizontal="@dimen/_10dp"
+                                android:background="@drawable/bg_intro_dot_selected" />
+
+                            <View
+                                android:id="@+id/indicatorTopV23"
+                                android:layout_width="@dimen/_8dp"
+                                android:layout_height="@dimen/_8dp"
+                                android:background="@drawable/bg_intro_dot_selected" />
+
+                            <View
+                                android:id="@+id/indicatorTopV24"
+                                android:layout_width="@dimen/_8dp"
+                                android:layout_height="@dimen/_8dp"
+                                android:layout_marginHorizontal="@dimen/_10dp"
+                                android:background="@drawable/bg_intro_dot_selected" />
+                        </androidx.appcompat.widget.LinearLayoutCompat>
+
+                        <TextView
+                            android:id="@+id/tvNextTopV1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:layout_marginEnd="@dimen/_10dp"
+                            android:background="@drawable/bg_transparent_ripple_media_shape"
+                            android:fontFamily="@font/roboto_medium"
+                            android:paddingHorizontal="@dimen/_12dp"
+                            android:paddingVertical="@dimen/_3dp"
+                            android:text="@string/common_next"
+                            android:textColor="@color/onboarding_primary_color"
+                            android:textSize="@dimen/_14dp" />
+                    </FrameLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+                <FrameLayout
+                    android:id="@+id/topNext"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@drawable/bg_white_round_top"
+                    android:visibility="visible">
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal|bottom"
+                        android:layout_marginBottom="@dimen/_25dp">
+
+                        <View
+                            android:id="@+id/indicatorTopV11"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+
+                        <View
+                            android:id="@+id/indicatorTopV12"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:layout_marginHorizontal="@dimen/_10dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+
+                        <View
+                            android:id="@+id/indicatorTopV13"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:layout_marginEnd="@dimen/_10dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+
+                        <View
+                            android:id="@+id/indicatorTopV14"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+                    <TextView
+                        android:id="@+id/tvNextTop"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|bottom"
+                        android:layout_marginEnd="@dimen/_10dp"
+                        android:layout_marginBottom="@dimen/_17dp"
+                        android:background="@drawable/bg_transparent_ripple_media_shape"
+                        android:fontFamily="@font/roboto_medium"
+                        android:paddingHorizontal="@dimen/_12dp"
+                        android:paddingVertical="@dimen/_3dp"
+                        android:text="@string/common_next"
+                        android:textColor="@color/onboarding_primary_color"
+                        android:textSize="@dimen/_16dp" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/frameAds"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white">
+
+                    <com.core.ads.customviews.ads.BannerNativeContainerLayout
+                        android:id="@+id/layoutBannerNative"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="visible" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/bottomNext"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/white"
+                    android:visibility="visible">
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal|bottom"
+                        android:layout_marginBottom="@dimen/_25dp">
+
+                        <View
+                            android:id="@+id/indicatorBottom1"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+
+                        <View
+                            android:id="@+id/indicatorBottom2"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:layout_marginHorizontal="@dimen/_10dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+
+                        <View
+                            android:id="@+id/indicatorBottom3"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:layout_marginEnd="@dimen/_10dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+
+                        <View
+                            android:id="@+id/indicatorBottom4"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+                    <TextView
+                        android:id="@+id/tvNextBottom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|bottom"
+                        android:layout_marginEnd="@dimen/_10dp"
+                        android:layout_marginBottom="@dimen/_17dp"
+                        android:background="@drawable/bg_transparent_ripple_media_shape"
+                        android:fontFamily="@font/roboto_medium"
+                        android:paddingHorizontal="@dimen/_12dp"
+                        android:paddingVertical="@dimen/_3dp"
+                        android:text="@string/common_next"
+                        android:textColor="@color/onboarding_primary_color"
+                        android:textSize="@dimen/_16dp" />
+                </FrameLayout>
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <View
+                android:id="@+id/viewBlur"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:background="@drawable/bg_intro_text_dark" />
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_10dp"
+                android:layout_marginTop="@dimen/_50dp"
+                android:gravity="center"
+                android:text="@string/core_onboarding_title_2"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_24dp" />
+
+        </FrameLayout>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</FrameLayout>

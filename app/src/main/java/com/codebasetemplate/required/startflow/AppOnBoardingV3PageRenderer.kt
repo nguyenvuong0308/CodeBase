@@ -2,7 +2,7 @@ package com.codebasetemplate.required.startflow
 
 import android.view.View
 import com.codebasetemplate.R
-import com.codebasetemplate.databinding.FragmentOnboardingV3Binding
+import com.codebasetemplate.databinding.AppFragmentOnboardingV3Binding
 import com.core.startflow.onboarding.v3.OnBoardingV3ActionPosition
 import com.core.startflow.onboarding.v3.OnBoardingV3PageRenderer
 import com.core.startflow.onboarding.v3.OnBoardingV3PageState
@@ -24,7 +24,7 @@ class AppOnBoardingV3PageRenderer @Inject constructor() : OnBoardingV3PageRender
     }
 
     override fun render(scope: OnBoardingV3RenderScope): OnBoardingV3RenderedPage {
-        val binding = FragmentOnboardingV3Binding.inflate(
+        val binding = AppFragmentOnboardingV3Binding.inflate(
             scope.inflater,
             scope.parent,
             false,
@@ -52,16 +52,16 @@ class AppOnBoardingV3PageRenderer @Inject constructor() : OnBoardingV3PageRender
         binding.tvNextBottom.setOnSingleClick { scope.actions.onPrimaryAction() }
 
         listOf(
-            binding.indicator11,
-            binding.indicator22,
-            binding.indicator33,
-            binding.indicator44,
+            binding.indicatorTopV11,
+            binding.indicatorTopV12,
+            binding.indicatorTopV13,
+            binding.indicatorTopV14,
         ).updateIndicators(state.introductionPosition, state.pageCount)
         listOf(
-            binding.indicator1,
-            binding.indicator2,
-            binding.indicator3,
-            binding.indicator4,
+            binding.indicatorBottom1,
+            binding.indicatorBottom2,
+            binding.indicatorBottom3,
+            binding.indicatorBottom4,
         ).updateIndicators(state.introductionPosition, state.pageCount)
 
         return OnBoardingV3RenderedPage(

@@ -6,7 +6,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.codebasetemplate.databinding.CoreFragmentOnboardingFullNativeBinding
+import com.core.startflow.databinding.StartflowFragmentOnboardingFullNativeBinding
 import com.core.startflow.onboarding.v3.OnBoardingV3FullAdsPageRenderer
 import com.core.startflow.onboarding.v3.OnBoardingV3PageState
 import com.core.startflow.onboarding.v3.OnBoardingV3RenderScope
@@ -28,7 +28,7 @@ class AppOnBoardingV3FullAdsPageRenderer @Inject constructor() :
     override fun supports(state: OnBoardingV3PageState): Boolean = state.isFullAds
 
     override fun render(scope: OnBoardingV3RenderScope): OnBoardingV3RenderedPage {
-        val binding = CoreFragmentOnboardingFullNativeBinding.inflate(
+        val binding = StartflowFragmentOnboardingFullNativeBinding.inflate(
             scope.inflater,
             scope.parent,
             false,
