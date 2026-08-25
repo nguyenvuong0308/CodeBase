@@ -58,6 +58,13 @@
                         android:layout_width="@dimen/_8dp"
                         android:layout_height="@dimen/_8dp"
                         android:background="@drawable/bg_intro_dot_selected"/>
+
+                    <View
+                        android:id="@+id/indicator44"
+                        android:layout_width="@dimen/_8dp"
+                        android:layout_height="@dimen/_8dp"
+                        android:layout_marginStart="@dimen/_10dp"
+                        android:background="@drawable/bg_intro_dot_selected"/>
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
                 <TextView
@@ -118,6 +125,13 @@
                         android:layout_width="@dimen/_8dp"
                         android:layout_height="@dimen/_8dp"
                         android:background="@drawable/bg_intro_dot_selected"/>
+
+                    <View
+                        android:id="@+id/indicator4"
+                        android:layout_width="@dimen/_8dp"
+                        android:layout_height="@dimen/_8dp"
+                        android:layout_marginStart="@dimen/_10dp"
+                        android:background="@drawable/bg_intro_dot_selected"/>
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
                 <TextView
@@ -153,6 +167,19 @@
             android:gravity="center"
             android:layout_marginHorizontal="@dimen/_10dp"
             android:layout_height="wrap_content"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|top"
+            android:layout_margin="12dp"
+            android:background="@drawable/bg_intro_get_started_button"
+            android:elevation="4dp"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="6dp"
+            android:text="@string/app_custom_onboarding_normal_ads"
+            android:textColor="@color/white"
+            android:textSize="12sp" />
 
     </FrameLayout>
 

@@ -27,6 +27,7 @@ import com.core.startflow.OnBoardingConfigFactory as StartFlowOnBoardingConfigFa
 import com.core.startflow.onboarding.OnBoardingContentProvider
 import com.core.startflow.onboarding.OnBoardingUiCustomizer
 import com.core.startflow.onboarding.activeOnBoardingContentProvider
+import com.core.startflow.onboarding.v3.OnBoardingV3FullAdsPageRenderer
 import com.core.startflow.onboarding.v3.OnBoardingV3PageActions
 import com.core.startflow.onboarding.v3.OnBoardingV3PageRenderer
 import com.core.startflow.onboarding.v3.OnBoardingV3PageState
@@ -35,6 +36,7 @@ import com.core.startflow.onboarding.v3.OnBoardingV3RenderScope
 import com.core.startflow.onboarding.v3.OnBoardingV3RenderedPage
 import com.core.startflow.onboarding.v3.OnBoardingV3UiCustomizer
 import com.core.startflow.onboarding.v3.OnBoardingV3UiSpec
+import com.core.startflow.onboarding.v3.activeOnBoardingV3FullAdsRenderer
 import com.core.startflow.onboarding.v3.activeOnBoardingV3Renderer
 import com.core.startflow.onboarding.v3.applyOnBoardingV3Customizers
 import com.core.startflow.onboarding.v3.toOnBoardingV3ActionPosition
@@ -64,6 +66,9 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
 
     @Inject
     lateinit var v3PageRenderers: Set<@JvmSuppressWildcards OnBoardingV3PageRenderer>
+
+    @Inject
+    lateinit var v3FullAdsPageRenderers: Set<@JvmSuppressWildcards OnBoardingV3FullAdsPageRenderer>
 
     private var renderedPage: OnBoardingV3RenderedPage? = null
     private var latestAdResource: AdLoadBannerNativeUiResource? = null
@@ -118,19 +123,20 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
             isFullAds = fullAds
         )
 
-        val renderer = v3PageRenderers.activeOnBoardingV3Renderer(state)
-        if (renderer != null) {
-            installRenderedPage(
-                renderer.render(
-                    OnBoardingV3RenderScope(
-                        inflater = layoutInflater,
-                        parent = viewBinding.root,
-                        lifecycleOwner = viewLifecycleOwner,
-                        state = state,
-                        actions = pageActions(state),
-                    )
-                )
-            )
+        val renderScope = OnBoardingV3RenderScope(
+            inflater = layoutInflater,
+            parent = viewBinding.root,
+            lifecycleOwner = viewLifecycleOwner,
+            state = state,
+            actions = pageActions(state),
+        )
+        val customPage = if (state.isFullAds) {
+            v3FullAdsPageRenderers.activeOnBoardingV3FullAdsRenderer(state)?.render(renderScope)
+        } else {
+            v3PageRenderers.activeOnBoardingV3Renderer(state)?.render(renderScope)
+        }
+        if (customPage != null) {
+            installRenderedPage(customPage)
             latestAdResource?.let(::dispatchAdResource)
             return
         }

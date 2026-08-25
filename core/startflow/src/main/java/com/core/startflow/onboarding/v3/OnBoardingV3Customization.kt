@@ -117,6 +117,19 @@ interface OnBoardingV3PageRenderer {
     fun render(scope: OnBoardingV3RenderScope): OnBoardingV3RenderedPage
 }
 
+/**
+ * A renderer dedicated to full-ad pages.
+ * Keeping this contract separate prevents a standard page renderer from replacing full-ad UI.
+ */
+interface OnBoardingV3FullAdsPageRenderer {
+    val priority: Int
+        get() = 0
+
+    fun supports(state: OnBoardingV3PageState): Boolean = true
+
+    fun render(scope: OnBoardingV3RenderScope): OnBoardingV3RenderedPage
+}
+
 fun Set<OnBoardingV3UiCustomizer>.applyOnBoardingV3Customizers(
     context: Context,
     state: OnBoardingV3PageState,
@@ -133,8 +146,21 @@ fun Set<OnBoardingV3UiCustomizer>.applyOnBoardingV3Customizers(
 fun Set<OnBoardingV3PageRenderer>.activeOnBoardingV3Renderer(
     state: OnBoardingV3PageState,
 ): OnBoardingV3PageRenderer? {
+    if (state.isFullAds) return null
+
     return sortedWith(
         compareByDescending<OnBoardingV3PageRenderer> { it.priority }
+            .thenBy { it.javaClass.name }
+    ).firstOrNull { it.supports(state) }
+}
+
+fun Set<OnBoardingV3FullAdsPageRenderer>.activeOnBoardingV3FullAdsRenderer(
+    state: OnBoardingV3PageState,
+): OnBoardingV3FullAdsPageRenderer? {
+    if (!state.isFullAds) return null
+
+    return sortedWith(
+        compareByDescending<OnBoardingV3FullAdsPageRenderer> { it.priority }
             .thenBy { it.javaClass.name }
     ).firstOrNull { it.supports(state) }
 }

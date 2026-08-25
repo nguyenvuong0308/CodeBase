@@ -42,6 +42,8 @@
     <string name="are_you_sure_you_want_to_exit">Are you sure you want to exit?</string>
     <string name="common_yes">Yes</string>
     <string name="common_no">No</string>
+    <string name="app_custom_onboarding_normal_ads" translatable="false">APP CUSTOM · NORMAL ADS</string>
+    <string name="app_custom_onboarding_full_ads" translatable="false">APP CUSTOM · FULL ADS</string>
 
     <string name="msg_update_downloaded">An update has just been downloaded.</string>
     <string name="text_restart">Restart</string>

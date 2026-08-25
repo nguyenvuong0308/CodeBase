@@ -14,6 +14,8 @@ import com.codebasetemplate.required.shortcut.AppShortCut
 import com.codebasetemplate.required.startflow.AppOnBoardingContentProvider
 import com.codebasetemplate.required.startflow.AppOnBoardingV1UiCustomizer
 import com.codebasetemplate.required.startflow.AppOnBoardingV2UiCustomizer
+import com.codebasetemplate.required.startflow.AppOnBoardingV3FullAdsPageRenderer
+import com.codebasetemplate.required.startflow.AppOnBoardingV3PageRenderer
 import com.codebasetemplate.required.startflow.AppOnBoardingV3UiCustomizer
 import com.codebasetemplate.required.update.InAppUpdateImpl
 import com.core.ads.AdsSdkInitializer
@@ -25,6 +27,8 @@ import com.core.startflow.StartFlowNavigator
 import com.core.startflow.onboarding.OnBoardingContentProvider
 import com.core.startflow.onboarding.v1.OnBoardingV1UiCustomizer
 import com.core.startflow.onboarding.v2.OnBoardingV2UiCustomizer
+import com.core.startflow.onboarding.v3.OnBoardingV3FullAdsPageRenderer
+import com.core.startflow.onboarding.v3.OnBoardingV3PageRenderer
 import com.core.startflow.onboarding.v3.OnBoardingV3UiCustomizer
 import dagger.Module
 import dagger.Provides
@@ -106,6 +110,20 @@ class RequiredModule {
     fun provideAppOnBoardingV3UiCustomizer(
         customizer: AppOnBoardingV3UiCustomizer
     ): OnBoardingV3UiCustomizer = customizer
+
+    @Provides
+    @IntoSet
+    @Singleton
+    fun provideAppOnBoardingV3PageRenderer(
+        renderer: AppOnBoardingV3PageRenderer
+    ): OnBoardingV3PageRenderer = renderer
+
+    @Provides
+    @IntoSet
+    @Singleton
+    fun provideAppOnBoardingV3FullAdsPageRenderer(
+        renderer: AppOnBoardingV3FullAdsPageRenderer
+    ): OnBoardingV3FullAdsPageRenderer = renderer
 
     @Provides
     @IntoSet
