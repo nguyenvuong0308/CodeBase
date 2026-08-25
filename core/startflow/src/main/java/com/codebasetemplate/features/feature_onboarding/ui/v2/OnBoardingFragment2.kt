@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.activityViewModels
+import com.codebasetemplate.features.feature_onboarding.ui.OutlineTextView
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingEvent
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingViewModel
 import com.codebasetemplate.util.EventTracking
@@ -146,17 +147,21 @@ class OnBoardingFragment2 : BaseFragment<StartflowFragmentOnboardingV2Binding>()
                 strokeWidthDp = 1.5f,
                 cornerRadiusDp = 12f,
             )
-            tvNext.setFillGradientEnabled(
-                true,
-                intArrayOf(
-                    "#fb03fb".toColorInt(),
-                    "#0bdaff".toColorInt(),
+            if (tvNext is OutlineTextView) {
+                tvNext.setFillGradientEnabled(
+                    true,
+                    intArrayOf(
+                        "#fb03fb".toColorInt(),
+                        "#0bdaff".toColorInt(),
+                    )
                 )
-            )
+            }
             layoutContent.setBackgroundColor(Color.TRANSPARENT)
             getString(R.string.core_onboarding_action_get_start)
         } else {
-            tvNext.setFillGradientEnabled(false)
+            if (tvNext is OutlineTextView) {
+                tvNext.setFillGradientEnabled(false)
+            }
             tvNext.setTextColor(Color.WHITE)
             tvNext.setBackgroundResource(R.drawable.core_button_onboarding)
             layoutContent.setBackgroundResource(R.drawable.core_bg_content_onboarding_v2)
@@ -190,10 +195,12 @@ class OnBoardingFragment2 : BaseFragment<StartflowFragmentOnboardingV2Binding>()
         spec.contentBackgroundRes?.let(layoutContent::setBackgroundResource)
         spec.actionBackgroundRes?.let(tvNext::setBackgroundResource)
         spec.isActionFillGradientEnabled?.let { enabled ->
-            tvNext.setFillGradientEnabled(
-                enabled,
-                spec.actionFillGradientColors?.toIntArray(),
-            )
+            if (tvNext is OutlineTextView) {
+                tvNext.setFillGradientEnabled(
+                    enabled,
+                    spec.actionFillGradientColors?.toIntArray(),
+                )
+            }
         }
     }
 
