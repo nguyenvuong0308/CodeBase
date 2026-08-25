@@ -1,264 +1,309 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_height="match_parent">
 
-    <FrameLayout
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="@color/white"
+        android:layout_height="match_parent"
+        android:id="@+id/layoutMediumNative"
         android:orientation="vertical">
 
-        <com.codebasetemplate.features.feature_onboarding.ui.v1.FitWidthImageViewV2
-            android:id="@+id/iv_introduction"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:adjustViewBounds="true"
-            style="@style/RoundOnboardingV3"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:background="@color/white"
-            android:scaleType="fitCenter"
-            tools:src="@drawable/intro_31" />
+            android:orientation="vertical">
 
-        <androidx.appcompat.widget.LinearLayoutCompat
-            android:layout_width="match_parent"
-            android:orientation="vertical"
-            android:layout_gravity="bottom"
-            android:layout_height="wrap_content">
+            <com.codebasetemplate.features.feature_onboarding.ui.v1.FitWidthImageViewV2
+                android:id="@+id/iv_introduction"
+                style="@style/RoundOnboardingV3"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:background="@color/white"
+                android:scaleType="fitCenter"
+                tools:src="@drawable/intro_31" />
 
             <androidx.appcompat.widget.LinearLayoutCompat
-                android:id="@+id/topNextV2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/_10dp"
-                android:layout_marginBottom="@dimen/_10dp"
-                android:background="@drawable/bg_white_round"
-                android:orientation="vertical"
-                android:visibility="gone"
-                android:paddingBottom="@dimen/_5dp">
+                android:layout_gravity="bottom"
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvTitleTop"
-                    style="@style/Body14Bold"
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:id="@+id/topNextV2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:gravity="center"
-                    android:text="@string/core_onboarding_title_2"
-                    android:textColor="@color/black" />
+                    android:layout_marginHorizontal="@dimen/_10dp"
+                    android:layout_marginBottom="@dimen/_10dp"
+                    android:background="@drawable/bg_white_round"
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/_5dp"
+                    android:visibility="gone">
 
-                <TextView
-                    android:id="@+id/tvSubTitleTop"
-                    style="@style/Body12Regular"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/_5dp"
-                    android:gravity="center"
-                    android:text="@string/core_onboarding_title_2"
-                    android:textColor="@color/black" />
+                    <TextView
+                        android:id="@+id/tvTitleTop"
+                        style="@style/Body14Bold"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:gravity="center"
+                        android:text="@string/core_onboarding_title_2"
+                        android:textColor="@color/black" />
+
+                    <TextView
+                        android:id="@+id/tvSubTitleTop"
+                        style="@style/Body12Regular"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_5dp"
+                        android:gravity="center"
+                        android:text="@string/core_onboarding_title_2"
+                        android:textColor="@color/black" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:layout_marginTop="10dp"
+                        android:visibility="visible">
+
+                        <androidx.appcompat.widget.LinearLayoutCompat
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical|start"
+                            android:layout_marginHorizontal="@dimen/_15dp">
+
+                            <View
+                                android:id="@+id/indicatorTopV21"
+                                android:layout_width="@dimen/_8dp"
+                                android:layout_height="@dimen/_8dp"
+                                android:background="@drawable/bg_intro_dot_selected" />
+
+                            <View
+                                android:id="@+id/indicatorTopV22"
+                                android:layout_width="@dimen/_8dp"
+                                android:layout_height="@dimen/_8dp"
+                                android:layout_marginHorizontal="@dimen/_10dp"
+                                android:background="@drawable/bg_intro_dot_selected" />
+
+                            <View
+                                android:id="@+id/indicatorTopV23"
+                                android:layout_width="@dimen/_8dp"
+                                android:layout_height="@dimen/_8dp"
+                                android:background="@drawable/bg_intro_dot_selected" />
+
+                            <View
+                                android:id="@+id/indicatorTopV24"
+                                android:layout_width="@dimen/_8dp"
+                                android:layout_height="@dimen/_8dp"
+                                android:layout_marginHorizontal="@dimen/_10dp"
+                                android:background="@drawable/bg_intro_dot_selected" />
+                        </androidx.appcompat.widget.LinearLayoutCompat>
+
+                        <TextView
+                            android:id="@+id/tvNextTopV1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:layout_marginEnd="@dimen/_10dp"
+                            android:background="@drawable/bg_transparent_ripple_media_shape"
+                            android:fontFamily="@font/roboto_medium"
+                            android:paddingHorizontal="@dimen/_12dp"
+                            android:paddingVertical="@dimen/_3dp"
+                            android:text="@string/common_next"
+                            android:textColor="@color/onboarding_primary_color"
+                            android:textSize="@dimen/_14dp" />
+                    </FrameLayout>
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
                 <FrameLayout
+                    android:id="@+id/topNext"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="60dp"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_white_round_top"
                     android:visibility="visible">
 
                     <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical|start"
-                        android:layout_marginHorizontal="@dimen/_15dp">
+                        android:layout_gravity="center_horizontal|bottom"
+                        android:layout_marginBottom="@dimen/_25dp">
 
                         <View
-                            android:id="@+id/indicatorTopV21"
+                            android:id="@+id/indicatorTopV11"
                             android:layout_width="@dimen/_8dp"
                             android:layout_height="@dimen/_8dp"
                             android:background="@drawable/bg_intro_dot_selected" />
 
                         <View
-                            android:id="@+id/indicatorTopV22"
+                            android:id="@+id/indicatorTopV12"
                             android:layout_width="@dimen/_8dp"
                             android:layout_height="@dimen/_8dp"
                             android:layout_marginHorizontal="@dimen/_10dp"
                             android:background="@drawable/bg_intro_dot_selected" />
 
                         <View
-                            android:id="@+id/indicatorTopV23"
+                            android:id="@+id/indicatorTopV13"
                             android:layout_width="@dimen/_8dp"
                             android:layout_height="@dimen/_8dp"
+                            android:layout_marginEnd="@dimen/_10dp"
                             android:background="@drawable/bg_intro_dot_selected" />
 
                         <View
-                            android:id="@+id/indicatorTopV24"
+                            android:id="@+id/indicatorTopV14"
                             android:layout_width="@dimen/_8dp"
                             android:layout_height="@dimen/_8dp"
-                            android:layout_marginHorizontal="@dimen/_10dp"
                             android:background="@drawable/bg_intro_dot_selected" />
                     </androidx.appcompat.widget.LinearLayoutCompat>
 
                     <TextView
-                        android:id="@+id/tvNextTopV1"
+                        android:id="@+id/tvNextTop"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="end"
+                        android:layout_gravity="end|bottom"
                         android:layout_marginEnd="@dimen/_10dp"
+                        android:layout_marginBottom="@dimen/_17dp"
                         android:background="@drawable/bg_transparent_ripple_media_shape"
                         android:fontFamily="@font/roboto_medium"
                         android:paddingHorizontal="@dimen/_12dp"
                         android:paddingVertical="@dimen/_3dp"
                         android:text="@string/common_next"
                         android:textColor="@color/onboarding_primary_color"
-                        android:textSize="@dimen/_14dp" />
+                        android:textSize="@dimen/_16dp" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/frameAds"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white">
+
+                    <com.core.ads.customviews.ads.BannerNativeContainerLayout
+                        android:id="@+id/layoutBannerNative"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="visible" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/bottomNext"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/white"
+                    android:visibility="visible">
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal|bottom"
+                        android:layout_marginBottom="@dimen/_25dp">
+
+                        <View
+                            android:id="@+id/indicatorBottom1"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+
+                        <View
+                            android:id="@+id/indicatorBottom2"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:layout_marginHorizontal="@dimen/_10dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+
+                        <View
+                            android:id="@+id/indicatorBottom3"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:layout_marginEnd="@dimen/_10dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+
+                        <View
+                            android:id="@+id/indicatorBottom4"
+                            android:layout_width="@dimen/_8dp"
+                            android:layout_height="@dimen/_8dp"
+                            android:background="@drawable/bg_intro_dot_selected" />
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+                    <TextView
+                        android:id="@+id/tvNextBottom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|bottom"
+                        android:layout_marginEnd="@dimen/_10dp"
+                        android:layout_marginBottom="@dimen/_17dp"
+                        android:background="@drawable/bg_transparent_ripple_media_shape"
+                        android:fontFamily="@font/roboto_medium"
+                        android:paddingHorizontal="@dimen/_12dp"
+                        android:paddingVertical="@dimen/_3dp"
+                        android:text="@string/common_next"
+                        android:textColor="@color/onboarding_primary_color"
+                        android:textSize="@dimen/_16dp" />
                 </FrameLayout>
             </androidx.appcompat.widget.LinearLayoutCompat>
 
-            <FrameLayout
+            <View
+                android:id="@+id/viewBlur"
                 android:layout_width="match_parent"
-                android:layout_alignParentBottom="true"
-                android:visibility="visible"
-                android:background="@drawable/bg_white_round_top"
-                android:id="@+id/topNext"
-                android:layout_height="60dp">
-                <androidx.appcompat.widget.LinearLayoutCompat
-                    android:layout_width="wrap_content"
-                    android:layout_gravity="center_horizontal|bottom"
-                    android:layout_marginBottom="@dimen/_25dp"
-                    android:layout_height="wrap_content">
-                    <View
-                        android:layout_width="@dimen/_8dp"
-                        android:id="@+id/indicatorTopV11"
-                        android:layout_height="@dimen/_8dp"
-                        android:background="@drawable/bg_intro_dot_selected"/>
+                android:layout_height="180dp"
+                android:background="@drawable/bg_intro_text_dark" />
 
-                    <View
-                        android:id="@+id/indicatorTopV12"
-                        android:layout_width="@dimen/_8dp"
-                        android:layout_height="@dimen/_8dp"
-                        android:layout_marginHorizontal="@dimen/_10dp"
-                        android:background="@drawable/bg_intro_dot_selected"/>
-
-                    <View
-                        android:id="@+id/indicatorTopV13"
-                        android:layout_width="@dimen/_8dp"
-                        android:layout_height="@dimen/_8dp"
-                        android:layout_marginEnd="@dimen/_10dp"
-                        android:background="@drawable/bg_intro_dot_selected"/>
-
-                    <View
-                        android:id="@+id/indicatorTopV14"
-                        android:layout_width="@dimen/_8dp"
-                        android:layout_height="@dimen/_8dp"
-                        android:background="@drawable/bg_intro_dot_selected"/>
-                </androidx.appcompat.widget.LinearLayoutCompat>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:textColor="@color/onboarding_primary_color"
-                    android:layout_gravity="end|bottom"
-                    android:layout_marginBottom="@dimen/_17dp"
-                    android:layout_marginEnd="@dimen/_10dp"
-                    android:textSize="@dimen/_16dp"
-                    android:paddingVertical="@dimen/_3dp"
-                    android:paddingHorizontal="@dimen/_12dp"
-                    android:id="@+id/tvNextTop"
-                    android:background="@drawable/bg_transparent_ripple_media_shape"
-                    android:text="@string/common_next"
-                    android:fontFamily="@font/roboto_medium"
-                    android:layout_height="wrap_content"/>
-            </FrameLayout>
-            <FrameLayout
+            <TextView
+                android:id="@+id/tvTitle"
                 android:layout_width="match_parent"
-                android:id="@+id/frameAds"
-                android:background="@color/white"
-                android:layout_height="wrap_content">
-                <com.core.ads.customviews.ads.BannerNativeContainerLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/layoutBannerNative"
-                    android:visibility="visible"
-                    android:orientation="vertical" />
-            </FrameLayout>
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/_10dp"
+                android:layout_marginTop="@dimen/_50dp"
+                android:gravity="center"
+                android:text="@string/core_onboarding_title_2"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_24dp" />
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_alignParentBottom="true"
-                android:visibility="visible"
-                android:id="@+id/bottomNext"
-                android:background="@color/white"
-                android:layout_height="60dp">
-                <androidx.appcompat.widget.LinearLayoutCompat
-                    android:layout_width="wrap_content"
-                    android:layout_gravity="center_horizontal|bottom"
-                    android:layout_marginBottom="@dimen/_25dp"
-                    android:layout_height="wrap_content">
-                    <View
-                        android:layout_width="@dimen/_8dp"
-                        android:id="@+id/indicatorBottom1"
-                        android:layout_height="@dimen/_8dp"
-                        android:background="@drawable/bg_intro_dot_selected"/>
+        </FrameLayout>
 
-                    <View
-                        android:id="@+id/indicatorBottom2"
-                        android:layout_width="@dimen/_8dp"
-                        android:layout_height="@dimen/_8dp"
-                        android:layout_marginHorizontal="@dimen/_10dp"
-                        android:background="@drawable/bg_intro_dot_selected"/>
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
-                    <View
-                        android:id="@+id/indicatorBottom3"
-                        android:layout_width="@dimen/_8dp"
-                        android:layout_height="@dimen/_8dp"
-                        android:layout_marginEnd="@dimen/_10dp"
-                        android:background="@drawable/bg_intro_dot_selected"/>
+    <RelativeLayout
+        android:id="@+id/layoutFullNative"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-                    <View
-                        android:id="@+id/indicatorBottom4"
-                        android:layout_width="@dimen/_8dp"
-                        android:layout_height="@dimen/_8dp"
-                        android:background="@drawable/bg_intro_dot_selected"/>
-                </androidx.appcompat.widget.LinearLayoutCompat>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:textColor="@color/onboarding_primary_color"
-                    android:layout_gravity="end|bottom"
-                    android:layout_marginBottom="@dimen/_17dp"
-                    android:layout_marginEnd="@dimen/_10dp"
-                    android:textSize="@dimen/_16dp"
-                    android:paddingVertical="@dimen/_3dp"
-                    android:paddingHorizontal="@dimen/_12dp"
-                    android:id="@+id/tvNextBottom"
-                    android:background="@drawable/bg_transparent_ripple_media_shape"
-                    android:text="@string/common_next"
-                    android:fontFamily="@font/roboto_medium"
-                    android:layout_height="wrap_content"/>
-            </FrameLayout>
-        </androidx.appcompat.widget.LinearLayoutCompat>
-
-        <View
-            android:id="@+id/viewBlur"
-            android:background="@drawable/bg_intro_text_dark"
+        <com.core.ads.customviews.ads.BannerNativeContainerLayout
+            android:id="@+id/fullNativeBanner"
             android:layout_width="match_parent"
-            android:layout_height="180dp"/>
+            android:layout_height="match_parent"
+            app:bnl_isNativeFullscreen="true" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_marginTop="@dimen/_50dp"
-            android:id="@+id/tvTitle"
-            android:text="@string/core_onboarding_title_2"
-            android:textAllCaps="true"
-            android:textColor="@color/white"
-            android:textSize="@dimen/_24dp"
-            android:gravity="center"
-            android:layout_marginHorizontal="@dimen/_10dp"
-            android:layout_height="wrap_content"/>
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivClose"
+            android:layout_width="@dimen/_24dp"
+            android:layout_height="@dimen/_24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="@dimen/_15dp"
+            android:background="@drawable/bg_button_gray"
+            android:padding="@dimen/_2dp"
+            android:src="@drawable/ic_rounded_close" />
 
-    </FrameLayout>
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/swipe"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/_50dp"
+            android:layout_centerInParent="true"
+            android:alpha="0.8"
+            android:visibility="gone"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/swipe_left" />
+    </RelativeLayout>
 
-
-
-</androidx.appcompat.widget.LinearLayoutCompat>
+</FrameLayout>

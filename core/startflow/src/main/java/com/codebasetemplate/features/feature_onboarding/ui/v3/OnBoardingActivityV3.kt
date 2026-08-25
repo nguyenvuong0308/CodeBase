@@ -36,7 +36,7 @@ class OnBoardingActivityV3 : StartFlowActivity<StartflowActivityOnboardingV3Bind
         get() = false
 
 
-    private val sharedViewModel: OnBoardingViewModel by viewModels()
+    private val sharedViewModel: OnBoardingViewModelV3 by viewModels()
 
     override fun bindingProvider(inflater: LayoutInflater): StartflowActivityOnboardingV3Binding {
         return StartflowActivityOnboardingV3Binding.inflate(inflater)

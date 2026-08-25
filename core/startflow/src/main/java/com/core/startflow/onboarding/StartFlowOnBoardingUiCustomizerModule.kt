@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.multibindings.Multibinds
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import com.core.startflow.onboarding.v3.OnBoardingV3FullAdsPageRenderer
 import com.core.startflow.onboarding.v3.OnBoardingV3PageRenderer
 import com.core.startflow.onboarding.v3.OnBoardingV3UiCustomizer
 import com.core.startflow.onboarding.v1.OnBoardingV1PageRenderer
@@ -37,4 +38,7 @@ abstract class StartFlowOnBoardingUiCustomizerModule {
 
     @Multibinds
     abstract fun bindOnBoardingV3PageRenderers(): Set<OnBoardingV3PageRenderer>
+
+    @Multibinds
+    abstract fun bindOnBoardingV3FullAdsPageRenderers(): Set<OnBoardingV3FullAdsPageRenderer>
 }

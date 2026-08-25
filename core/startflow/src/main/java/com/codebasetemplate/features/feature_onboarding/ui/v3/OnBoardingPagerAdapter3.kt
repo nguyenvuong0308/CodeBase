@@ -20,28 +20,12 @@ class OnBoardingPagerAdapter3(
 
     override fun createFragment(position: Int): Fragment {
         val item = items[position]
-        return if (item is OnBoardingItem.FullNativeItem) {
-            OnBoardingFullNativeFragmentV3.newInstance(item.position)
-        } else {
-            if (position == items.size - 1) {
-                if(item.isShowAds) {
-                    OnBoardingFragmentV3.newInstance(
-                        position = (item as OnBoardingItem.Item).position,
-                        isPageEnd = item.isPageEnd,
-                        isShowAd = item.isShowAds,
-                        realPosition = item.realPosition
-                    )
-                } else {
-                    OnBoardingFragmentV3EndTab.newInstance((item as OnBoardingItem.Item).realPosition)
-                }
-            } else {
-                OnBoardingFragmentV3.newInstance(
-                    position = (item as OnBoardingItem.Item).position,
-                    isPageEnd = item.isPageEnd,
-                    isShowAd = item.isShowAds,
-                    realPosition = item.realPosition
-                )
-            }
-        }
+        return OnBoardingFragmentV3.newInstance(
+            position = (item as OnBoardingItem.Item).position,
+            isPageEnd = item.isPageEnd,
+            isShowAd = item.isShowAds,
+            realPosition = item.realPosition,
+            fullAds = item.isFullAds
+        )
     }
 }
