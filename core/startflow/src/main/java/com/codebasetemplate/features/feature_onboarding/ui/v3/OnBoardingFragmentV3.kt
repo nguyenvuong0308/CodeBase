@@ -5,13 +5,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.codebasetemplate.features.feature_onboarding.ui.model.OnBoardingItem
 import com.core.startflow.R
 import com.core.startflow.StartFlowScreenType
 import com.core.startflow.databinding.StartflowFragmentOnboardingV3Binding
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingEvent
-import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingViewModel
 import com.codebasetemplate.util.EventTracking
 import com.core.ads.domain.AdLoadBannerNativeUiResource
 import com.core.baseui.fragment.BaseFragment
@@ -34,16 +38,20 @@ import com.core.startflow.onboarding.v3.OnBoardingV3UiSpec
 import com.core.startflow.onboarding.v3.activeOnBoardingV3Renderer
 import com.core.startflow.onboarding.v3.applyOnBoardingV3Customizers
 import com.core.startflow.onboarding.v3.toOnBoardingV3ActionPosition
+import com.core.utilities.getStatusBarHeight
 import com.core.utilities.gone
+import com.core.utilities.padding
 import com.core.utilities.setOnSingleClick
 import com.core.utilities.visibleIf
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>() {
 
-    private val sharedViewModel: OnBoardingViewModel by activityViewModels()
+    private val sharedViewModel: OnBoardingViewModelV3 by activityViewModels()
 
     @Inject
     lateinit var uiCustomizers: Set<@JvmSuppressWildcards OnBoardingUiCustomizer>
@@ -61,11 +69,13 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
     private var latestAdResource: AdLoadBannerNativeUiResource? = null
 
     companion object {
-        fun newInstance(position: Int, isPageEnd: Boolean, isShowAd: Boolean, realPosition: Int) = OnBoardingFragmentV3().apply {
+        private const val SHOW_CONTROL_ANIMATION_DURATION_MS = 300L
+        fun newInstance(position: Int, isPageEnd: Boolean, isShowAd: Boolean, realPosition: Int, fullAds: Boolean) = OnBoardingFragmentV3().apply {
             this.realPosition = realPosition
             this.introductionPosition = position
             this.isShowAd = isShowAd
             this.isPageEnd = isPageEnd
+            this.fullAds = fullAds
         }
     }
 
@@ -73,6 +83,7 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
     private var introductionPosition by argument<Int>()
     private var isPageEnd by argument<Boolean>()
     private var isShowAd by argument<Boolean>()
+    private var fullAds by argument<Boolean>()
 
     override fun bindingProvider(
         inflater: LayoutInflater,
@@ -104,6 +115,7 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
             title = getString(contentProvider.getStringIntro(realPosition)),
             subtitle = contentProvider.getSubtitleIntro(realPosition)?.let(::getString),
             config = onBoardingConfig,
+            isFullAds = fullAds
         )
 
         val renderer = v3PageRenderers.activeOnBoardingV3Renderer(state)
@@ -122,8 +134,11 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
             latestAdResource?.let(::dispatchAdResource)
             return
         }
+        viewBinding.layoutMediumNative.visibleIf(!fullAds)
+        viewBinding.layoutFullNative.visibleIf(fullAds)
 
-        bindDefaultUi(state)
+        bindLayoutMediumNativeUi(state)
+        bindLayoutFullNativeUi(state)
 
         // Backward-compatible bridge for apps that still use direct View Binding customization.
         uiCustomizers.sortedBy { it.javaClass.name }.forEach {
@@ -139,7 +154,45 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
         }
     }
 
-    private fun bindDefaultUi(state: OnBoardingV3PageState) {
+    private var isControlShownInCurrentView = false
+
+    private fun bindLayoutFullNativeUi(state: OnBoardingV3PageState) {
+        viewBinding.ivClose.setOnSingleClick {
+            sharedViewModel.navigateTo(OnBoardingEvent.NextEvent)
+        }
+        val onBoardingConfig = remoteConfigRepository.getOnBoardingConfig()
+        val ivClose = viewBinding.ivClose
+        val swipe = viewBinding.swipe
+        isControlShownInCurrentView = false
+        ivClose.prepareDelayedVisible(onBoardingConfig.isShowClose)
+        swipe.prepareDelayedVisible(onBoardingConfig.isShowSwipe)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                if (isControlShownInCurrentView) return@repeatOnLifecycle
+                delay(onBoardingConfig.delayShowCloseSwipeSeconds.coerceAtLeast(0L) * 1000L)
+                ivClose.showWithFadeIfNeeded()
+                swipe.showWithFadeIfNeeded()
+                isControlShownInCurrentView = true
+            }
+        }
+        viewBinding.layoutFullNative.padding(top = getStatusBarHeight()) // Fullscreen cách statusbar (để hiển thị chữ "i" quảng cáo không bị che)
+    }
+
+
+    private fun View.prepareDelayedVisible(isShow: Boolean) {
+        isGone = !isShow
+        alpha = 0f
+    }
+
+    private fun View.showWithFadeIfNeeded() {
+        if (!isVisible) return
+        animate()
+            .alpha(1f)
+            .setDuration(SHOW_CONTROL_ANIMATION_DURATION_MS)
+            .start()
+    }
+
+    private fun bindLayoutMediumNativeUi(state: OnBoardingV3PageState) {
         viewBinding.ivIntroduction.setImageResource(state.imageRes)
         viewBinding.tvTitle.text = state.title
         viewBinding.tvTitleTop.text = state.title
@@ -162,7 +215,7 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
             viewBinding.indicatorTopV13,
             viewBinding.indicatorTopV14,
         )
-        indicators2.updateSelectedIndicator(state.realPosition)
+        indicators2.updateSelectedIndicator(state.introductionPosition)
 
         val indicators1 = listOf(
             viewBinding.indicatorTopV21,
@@ -171,7 +224,7 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
             viewBinding.indicatorTopV24,
 
         )
-        indicators1.updateSelectedIndicator(state.realPosition)
+        indicators1.updateSelectedIndicator(state.introductionPosition)
 
         val indicators0 = listOf(
             viewBinding.indicatorBottom1,
@@ -179,7 +232,7 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
             viewBinding.indicatorBottom3,
             viewBinding.indicatorBottom4
         )
-        indicators0.updateSelectedIndicator(state.realPosition)
+        indicators0.updateSelectedIndicator(state.introductionPosition)
 
         val actions = pageActions(state)
 
@@ -299,13 +352,15 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
         val placeName = StartFlowOnBoardingConfigFactory
             .getOnboardingV3AdPlaceName(introductionPosition)
         renderedPage?.onBannerNativeResult?.invoke(adResource, placeName)
-            ?: viewBinding.layoutBannerNative.processAdResource(adResource, placeName)
+            ?: if(fullAds) viewBinding.fullNativeBanner.processAdResource(adResource, placeName) else viewBinding.layoutBannerNative.processAdResource(adResource, placeName)
     }
 
     override fun onDestroyView() {
         renderedPage?.onDispose?.invoke()
         renderedPage = null
         latestAdResource = null
+        viewBinding.ivClose.animate().cancel()
+        viewBinding.swipe.animate().cancel()
         super.onDestroyView()
     }
 

@@ -25,6 +25,7 @@ data class OnBoardingV3PageState(
     val title: CharSequence,
     val subtitle: CharSequence?,
     val config: OnBoardingConfig,
+    val isFullAds: Boolean
 )
 
 enum class OnBoardingV3PageType {
