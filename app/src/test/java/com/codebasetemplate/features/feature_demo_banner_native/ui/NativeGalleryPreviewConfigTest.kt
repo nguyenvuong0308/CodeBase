@@ -75,6 +75,20 @@ class NativeGalleryPreviewConfigTest {
     }
 
     @Test
+    fun `selector exposes large media cta right as an inline standard format`() {
+        val option = NativeGalleryPreviewConfig.options.single {
+            it.arguments.templateKey == NativeTemplateSize.LargeMediaCtaRight.key
+        }
+
+        assertEquals("Large", option.group)
+        assertEquals("Large Media Cta Right", option.title)
+        assertFalse(option.arguments.collapsible)
+        assertFalse(
+            NativeGalleryPreviewConfig.requiresFullScreen(option.arguments.templateKey)
+        )
+    }
+
+    @Test
     fun `special selector options map to collapsible and pip preview arguments`() {
         NativeGalleryPreviewConfig.options
             .filter { it.arguments.collapsible }

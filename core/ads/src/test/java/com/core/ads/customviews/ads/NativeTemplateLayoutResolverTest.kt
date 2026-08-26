@@ -58,6 +58,33 @@ class NativeTemplateLayoutResolverTest {
         }
     }
 
+    @Test
+    fun `large media cta right uses matching shimmer and 200dp media`() {
+        val result = resolveNativeShimmerLayout(NativeTemplateSize.LargeMediaCtaRight) {
+            fail("Built-in template must not use the custom layout fallback")
+            0
+        }
+
+        assertEquals(R.layout.gnt_large_media_cta_right_shimmer, result)
+        listOf(
+            "gnt_large_media_cta_right.xml",
+            "gnt_large_media_cta_right_shimmer.xml",
+        ).forEach { layoutName ->
+            val mediaView = parseLayout(layoutName)
+                .getElementsByTagName("*")
+                .asElements()
+                .single { element ->
+                    element.androidAttribute("id") == "@+id/media_view"
+                }
+
+            assertEquals(
+                "$layoutName must keep the requested media height",
+                "@dimen/_200dp",
+                mediaView.androidAttribute("layout_height"),
+            )
+        }
+    }
+
     private fun parseLayout(layoutName: String) =
         DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }
             .newDocumentBuilder()

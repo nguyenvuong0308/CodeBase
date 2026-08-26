@@ -32,6 +32,7 @@ $previews = @(
     @{ Key = 'medium_media_left'; File = 'medium_media_left.png' },
     @{ Key = 'medium_media_cta_right'; File = 'medium_media_cta_right.png' },
     @{ Key = 'medium_media_left_cta_right'; File = 'medium_media_left_cta_right.png' },
+    @{ Key = 'large_media_cta_right'; File = 'large_media_cta_right.png' },
     @{ Key = 'full_cta_bottom'; File = 'full_cta_bottom.png' },
     @{ Key = 'full_cta_bottom_onboarding'; File = 'full_cta_bottom_onboarding.png' },
     @{ Key = 'full_cta_top'; File = 'full_cta_top.png' },

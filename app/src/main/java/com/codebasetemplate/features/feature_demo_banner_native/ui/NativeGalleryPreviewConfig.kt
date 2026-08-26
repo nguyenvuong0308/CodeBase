@@ -87,6 +87,7 @@ internal object NativeGalleryPreviewConfig {
             key == NativeTemplateSize.MiniCtaRight.key -> "Small"
 
         key.startsWith("medium") -> "Medium"
+        key.startsWith("large") -> "Large"
         else -> "Full screen"
     }
 
