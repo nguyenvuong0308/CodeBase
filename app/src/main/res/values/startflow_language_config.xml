@@ -2,5 +2,7 @@
 <resources>
     <!-- false: check icon, true: localized text from startflow_language_v2_apply_text_value -->
     <bool name="startflow_language_v2_apply_use_text">false</bool>
+    <!-- Replace the value with an app drawable to customize the Apply button background. -->
+    <item name="startflow_language_v2_apply_background" type="drawable">?attr/selectableItemBackgroundBorderless</item>
     <item name="startflow_language_v2_apply_text_value" type="string">@string/core_common_save</item>
 </resources>
