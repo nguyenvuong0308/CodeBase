@@ -33,6 +33,7 @@
     html { scroll-behavior: smooth; scroll-padding-top: 30px; }
     body {
       margin: 0;
+      overflow-x: hidden;
       color: var(--ink);
       background:
         radial-gradient(circle at 94% 2%, rgba(255, 180, 94, 0.17), transparent 25rem),
@@ -411,7 +412,7 @@
           <a class="button secondary" href="#quick-check">Xem checklist nhanh</a>
         </div>
         <div class="hero-meta">
-          <span><strong>6 bước</strong> triển khai</span>
+          <span><strong>7 bước</strong> triển khai</span>
           <span><strong>3 mức</strong> custom</span>
           <span><strong>V1 · V2 · V3</strong> đều được hỗ trợ</span>
         </div>
@@ -453,7 +454,8 @@
           <a href="#branding"><span>03</span><span>Đổi giao diện</span></a>
           <a href="#hilt"><span>04</span><span>Đăng ký Hilt</span></a>
           <a href="#remote-config"><span>05</span><span>Remote Config</span></a>
-          <a href="#verify"><span>06</span><span>Chạy & kiểm tra</span></a>
+          <a href="#ad-places"><span>06</span><span>Cấu hình ad place</span></a>
+          <a href="#verify"><span>07</span><span>Chạy & kiểm tra</span></a>
           <a href="#renderer"><span>+</span><span>UI hoàn toàn riêng</span></a>
           <a href="#pitfalls"><span>!</span><span>Lỗi thường gặp</span></a>
         </nav>
@@ -738,9 +740,55 @@
         </div>
       </section>
 
-      <section class="section" id="verify">
+      <section class="section" id="ad-places">
         <div class="section-heading">
           <div class="step-number">06</div>
+          <div><h2>Khai báo đúng ad place cho Onboarding</h2><p class="section-lead">StartFlow tìm quảng cáo bằng chuỗi <code>place_name</code> cố định. Tên trong Firebase/default XML phải khớp tuyệt đối với version và vị trí page mà core yêu cầu.</p></div>
+        </div>
+        <div class="outcome"><span class="checkmark">✓</span><div><strong>Kết quả:</strong> mọi slot banner/native và interstitial của Onboarding resolve được cấu hình thay vì rơi về <code>NoneAdPlace</code>.</div></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Flow</th><th>Remote Config key</th><th><code>place_name</code> bắt buộc</th><th>Khi được dùng</th></tr></thead>
+            <tbody>
+              <tr><td>V1</td><td><code>banner_native_ad_places</code></td><td><code>anchored_onboarding_bottom</code></td><td>Slot ad thường, khi <code>intro_data</code> có giá trị <code>1</code>.</td></tr>
+              <tr><td>V1 full ad</td><td><code>banner_native_ad_places</code></td><td><code>anchored_full_onboarding</code></td><td>Khi <code>intro_data</code> chứa <code>2</code>.</td></tr>
+              <tr><td>V2</td><td><code>banner_native_ad_places</code></td><td><code>anchored_onboarding_bottom_v2</code></td><td>Slot ad thường, khi <code>intro_data_v2</code> có giá trị <code>1</code>.</td></tr>
+              <tr><td>V2 full ad</td><td><code>banner_native_ad_places</code></td><td><code>anchored_full_onboarding_v2</code></td><td>Khi <code>intro_data_v2</code> chứa <code>2</code>.</td></tr>
+              <tr><td>V3 slot 1…5</td><td><code>banner_native_ad_places</code></td><td><code>flow_tutorial_301_onb1_n_native</code><br><code>flow_tutorial_302_onb2_n_native</code><br><code>flow_tutorial_303_onb3_n_native</code><br><code>flow_tutorial_303_onb4_n_native</code><br><code>flow_tutorial_303_onb5_n_native</code></td><td>Ánh xạ theo index <code>0…4</code> của <code>intro_data_v3</code>; chỉ preload index có giá trị khác <code>0</code>.</td></tr>
+              <tr><td>CTA/Skip</td><td><code>rewarded_rewardedinter_inter_ad_places</code></td><td><code>action_next_in_introduction</code><br><code>action_skip_in_introduction</code></td><td>Interstitial khi hoàn tất hoặc bỏ qua onboarding.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-block">
+          <div class="code-bar"><span>remote_config_defaults.xml — mẫu một native place</span><button class="copy-button" type="button">Sao chép</button></div>
+          <pre><code>&lt;entry&gt;
+  &lt;key&gt;banner_native_ad_places&lt;/key&gt;
+  &lt;value&gt;[
+    {
+      <span class="token-string">"place_name"</span>: <span class="token-string">"flow_tutorial_301_onb1_n_native"</span>,
+      <span class="token-string">"ad_id"</span>: <span class="token-string">"ca-app-pub-xxx/yyy"</span>,
+      <span class="token-string">"ad_type"</span>: <span class="token-string">"native"</span>,
+      <span class="token-string">"native_template_size"</span>: <span class="token-string">"medium_short_cta_bottom"</span>,
+      <span class="token-string">"is_tutorial_flow"</span>: <span class="token-value">true</span>,
+      <span class="token-string">"is_enable"</span>: <span class="token-value">true</span>
+    }
+  ]&lt;/value&gt;
+&lt;/entry&gt;</code></pre>
+        </div>
+
+        <div class="card-grid">
+          <article class="info-card"><h3>1. Default XML</h3><p>Cập nhật cả <code>app/src/dev/res/xml/remote_config_defaults.xml</code> và <code>app/src/prod/res/xml/remote_config_defaults.xml</code>. Hai flavor không tự đồng bộ.</p></article>
+          <article class="info-card"><h3>2. Firebase Console</h3><p>Dùng đúng key list hiện hành; nếu app bật versioned ad places thì cập nhật list version được chọn, không chỉ fallback.</p></article>
+          <article class="info-card"><h3>3. Kiểm tra chuỗi</h3><p><code>place_name</code> phân biệt từng ký tự. Không tự đặt tên mới nếu chưa thêm mapping tương ứng trong core.</p></article>
+        </div>
+        <div class="note danger"><strong>Không dùng tên legacy cho flow mới.</strong> <code>anchored_change_language_bottom</code> không phải ad place Onboarding. Với V3, thiếu place thứ 4/5 sẽ chỉ làm đúng các page đầu và dễ bị bỏ sót khi test.</div>
+      </section>
+
+      <section class="section" id="verify">
+        <div class="section-heading">
+          <div class="step-number">07</div>
           <div><h2>Chạy app và kiểm tra</h2><p class="section-lead">Kiểm tra theo thứ tự để phân biệt lỗi resource, Hilt và Remote Config. Đừng chỉ nhìn trang đầu tiên.</p></div>
         </div>
         <div class="outcome"><span class="checkmark">✓</span><div><strong>Kết quả:</strong> cả trang thường, trang cuối và page có ads đều hiển thị đúng; navigation/tracking không bị phá vỡ.</div></div>
@@ -751,6 +799,7 @@
           <li>Kiểm tra CTA “Tiếp tục” và “Bắt đầu”.</li>
           <li>Thử swipe, close và delay theo config.</li>
           <li>Thử page có mã <code>1</code> và full-native <code>2</code>.</li>
+          <li>Xác nhận log/request dùng đúng <code>place_name</code> theo bảng bước 06.</li>
           <li>Xoay màn hình/background app nếu flow hỗ trợ.</li>
           <li>Xác nhận event view/next/complete vẫn được gửi.</li>
         </ol>
@@ -840,8 +889,9 @@
 
       <section class="section">
         <div class="finish-card">
-          <h2>Hoàn tất khi 4 lớp đã khớp</h2>
-          <p><strong>Resources</strong> đủ theo position · <strong>Provider/Customizer</strong> trả đúng dữ liệu · <strong>Hilt</strong> bind đúng contract · <strong>Remote Config</strong> chọn đúng version và danh sách page.</p>
+          <h2>Hoàn tất khi 5 lớp đã khớp</h2>
+          <p><strong>Resources</strong> đủ theo position · <strong>Provider/Customizer</strong> trả đúng dữ liệu · <strong>Hilt</strong> bind đúng contract · <strong>Remote Config</strong> chọn đúng version/page · <strong>Ad place</strong> khớp từng slot.</p>
+          <p>Xem thêm <a href="startflow-language-ui-customization.html">hướng dẫn Language StartFlow step-by-step</a> để cấu hình trọn flow trước Onboarding.</p>
           <a class="button" href="#top">Quay lại đầu trang</a>
         </div>
       </section>

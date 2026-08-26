@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Hướng dẫn step-by-step triển khai Language StartFlow V1/V2, resources, navigation và ad place.">
+  <title>Language StartFlow — Hướng dẫn triển khai từng bước</title>
+  <style>
+    :root {
+      --ink: #17201c;
+      --muted: #607069;
+      --line: #dce6e0;
+      --paper: #f7faf8;
+      --surface: #ffffff;
+      --soft: #eef6f1;
+      --brand: #146c43;
+      --brand-dark: #0a4228;
+      --accent: #c9f27d;
+      --warning: #fff5db;
+      --danger: #fff0ed;
+      --code: #10231a;
+      --radius: 18px;
+      --shadow: 0 18px 50px rgba(16, 55, 36, .10);
+      --content: 1180px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--paper); font: 16px/1.65 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    code, pre { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+    a { color: var(--brand); }
+    h1, h2, h3 { margin: 0; line-height: 1.15; letter-spacing: -.025em; }
+    h1 { max-width: 760px; color: #fff; font-size: clamp(44px, 7vw, 82px); }
+    h1 span { color: var(--accent); }
+    h2 { font-size: clamp(28px, 4vw, 44px); }
+    h3 { font-size: 18px; }
+    p { margin: 10px 0 0; }
+    .reading-progress { position: fixed; z-index: 20; inset: 0 auto auto 0; width: 0; height: 4px; background: var(--accent); }
+    .hero { color: #dcece3; background: radial-gradient(circle at 82% 18%, #24845a 0, transparent 29%), linear-gradient(135deg, #071b11, #0d5031); }
+    .hero-inner { width: min(calc(100% - 40px), var(--content)); min-height: 570px; margin: auto; padding: 76px 0 58px; display: grid; grid-template-columns: 1.25fr .75fr; gap: 52px; align-items: center; }
+    .eyebrow { display: inline-flex; gap: 9px; align-items: center; margin-bottom: 20px; color: var(--accent); font-size: 12px; font-weight: 900; letter-spacing: .15em; text-transform: uppercase; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 6px rgba(201,242,125,.12); }
+    .hero-copy { max-width: 680px; margin-top: 24px; color: #bad0c4; font-size: 18px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .button { display: inline-flex; padding: 12px 18px; border: 1px solid var(--accent); border-radius: 999px; color: var(--brand-dark); background: var(--accent); font-weight: 800; text-decoration: none; }
+    .button.secondary { color: #e7f5ed; border-color: rgba(255,255,255,.35); background: transparent; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 26px; color: #9ebaae; font-size: 13px; }
+    .hero-meta strong { color: #fff; }
+    .flow-card { padding: 28px; border: 1px solid rgba(255,255,255,.14); border-radius: 28px; background: rgba(255,255,255,.07); box-shadow: var(--shadow); backdrop-filter: blur(8px); }
+    .flow-card h2 { color: #fff; font-size: 23px; }
+    .flow-map { display: grid; gap: 10px; margin-top: 22px; }
+    .flow-node { position: relative; padding: 13px 15px; border-radius: 13px; color: #dcece3; background: rgba(0,0,0,.18); }
+    .flow-node small { display: block; color: var(--accent); font-weight: 900; text-transform: uppercase; }
+    .flow-node:not(:last-child)::after { content: "↓"; position: absolute; z-index: 2; left: 50%; bottom: -17px; color: var(--accent); }
+    .layout { width: min(calc(100% - 40px), var(--content)); margin: auto; display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 52px; padding: 64px 0 90px; }
+    main, .section { min-width: 0; }
+    .sidebar { position: relative; }
+    .sidebar-inner { position: sticky; top: 28px; }
+    .sidebar-label { margin: 0 0 10px; color: var(--muted); font-size: 11px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+    .toc { display: grid; gap: 5px; }
+    .toc a { display: grid; grid-template-columns: 30px 1fr; gap: 8px; padding: 9px 10px; border-radius: 10px; color: var(--muted); font-size: 13px; text-decoration: none; }
+    .toc a span:first-child { color: var(--brand); font-weight: 900; }
+    .toc a:hover, .toc a.active { color: var(--brand-dark); background: var(--soft); }
+    .sidebar-note { margin-top: 24px; padding: 14px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); font-size: 12px; }
+    .sidebar-note strong, .sidebar-note span { display: block; }
+    .sidebar-note span { margin-top: 5px; color: var(--muted); overflow-wrap: anywhere; }
+    .section { margin-bottom: 82px; scroll-margin-top: 24px; }
+    .section-heading { display: grid; grid-template-columns: 54px 1fr; gap: 16px; align-items: start; margin-bottom: 24px; }
+    .step-number { width: 54px; height: 54px; display: grid; place-items: center; border-radius: 15px; color: #fff; background: var(--brand); font-weight: 900; }
+    .section-lead { max-width: 750px; color: var(--muted); }
+    .outcome, .note { margin: 18px 0; padding: 15px 17px; border: 1px solid #bcdac8; border-radius: 14px; background: var(--soft); }
+    .outcome { display: flex; gap: 12px; align-items: flex-start; }
+    .checkmark { flex: 0 0 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: var(--brand); font-weight: 900; }
+    .note.warning { border-color: #eed290; background: var(--warning); }
+    .note.danger { border-color: #edbeb3; background: var(--danger); }
+    .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 20px 0; }
+    .card { padding: 19px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+    .card p { color: var(--muted); font-size: 14px; }
+    .pill { display: inline-block; margin-top: 13px; padding: 5px 9px; border-radius: 999px; color: var(--brand-dark); background: var(--accent); font-size: 11px; font-weight: 900; }
+    .file-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 20px 0; }
+    .file-card { padding: 17px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+    .file-card code { display: block; margin-bottom: 7px; color: var(--brand-dark); overflow-wrap: anywhere; }
+    .file-card span { color: var(--muted); font-size: 13px; }
+    .code-block { margin: 20px 0; overflow: hidden; border-radius: 16px; background: var(--code); box-shadow: var(--shadow); }
+    .code-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; color: #a7c6b5; border-bottom: 1px solid rgba(255,255,255,.09); font-size: 12px; }
+    .copy-button { padding: 6px 10px; border: 1px solid rgba(255,255,255,.18); border-radius: 8px; color: #d9eee2; background: transparent; cursor: pointer; }
+    pre { margin: 0; padding: 18px; overflow-x: auto; color: #e6f3eb; font-size: 12.5px; line-height: 1.65; }
+    .token-key { color: #8bd5ff; }
+    .token-string { color: #c9f27d; }
+    .token-value { color: #ffcf8b; }
+    .token-comment { color: #87a597; }
+    .table-wrap { margin: 20px 0; overflow-x: auto; border: 1px solid var(--line); border-radius: 15px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; font-size: 13px; }
+    th, td { padding: 13px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--brand-dark); background: var(--soft); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+    tr:last-child td { border-bottom: 0; }
+    td code, p code, li code, .note code, details code { color: var(--brand-dark); overflow-wrap: anywhere; word-break: break-word; }
+    .checklist { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0; list-style: none; counter-reset: check; }
+    .checklist li { position: relative; padding: 14px 14px 14px 44px; border: 1px solid var(--line); border-radius: 12px; background: #fff; font-size: 14px; }
+    .checklist li::before { content: "✓"; position: absolute; left: 14px; top: 13px; width: 22px; height: 22px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: var(--brand); font-size: 11px; font-weight: 900; }
+    details { margin: 11px 0; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+    summary { padding: 15px 17px; cursor: pointer; font-weight: 800; }
+    details div { padding: 0 17px 17px; color: var(--muted); }
+    .finish { padding: 34px; border-radius: 24px; color: #e6f3eb; background: var(--brand-dark); box-shadow: var(--shadow); }
+    .finish h2 { color: #fff; }
+    .finish p { color: #bdd4c7; }
+    .finish a { color: var(--accent); }
+    footer { padding: 25px; color: var(--muted); border-top: 1px solid var(--line); text-align: center; font-size: 12px; }
+    @media (max-width: 960px) { .hero-inner { grid-template-columns: 1fr; } .layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
+    @media (max-width: 700px) { .hero-inner, .layout { width: min(calc(100% - 28px), var(--content)); } .card-grid, .file-grid, .checklist { grid-template-columns: 1fr; } .section-heading { grid-template-columns: 44px 1fr; } .step-number { width: 44px; height: 44px; } h1 { font-size: 44px; } }
+    @media print { .reading-progress, .sidebar, .hero-actions, .copy-button { display: none !important; } .hero-inner, .layout { width: 100%; } .hero-inner { min-height: auto; padding: 25px 0; grid-template-columns: 1fr; } .flow-card { display: none; } .layout { display: block; } .section, .code-block { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <div class="reading-progress" aria-hidden="true"></div>
+  <header class="hero" id="top">
+    <div class="hero-inner">
+      <div>
+        <p class="eyebrow"><span class="dot"></span> StartFlow • Language • Android</p>
+        <h1>Triển khai Language,<br><span>đúng từ config đến ads.</span></h1>
+        <p class="hero-copy">Tài liệu thực hành cho app tích hợp màn chọn ngôn ngữ V1/V2: bật flow, custom resource, cấu hình chính xác từng ad place, nối navigation và kiểm thử trước release.</p>
+        <div class="hero-actions">
+          <a class="button" href="#scope">Bắt đầu từ bước 0</a>
+          <a class="button secondary" href="#quick-check">Checklist release</a>
+        </div>
+        <div class="hero-meta"><span><strong>6 bước</strong> theo thứ tự</span><span><strong>V1 + V2</strong> có mapping riêng</span><span><strong>Offline</strong> không phụ thuộc CDN</span></div>
+      </div>
+      <div class="flow-card" aria-label="Luồng StartFlow từ Splash qua Language và Onboarding">
+        <h2>Luồng runtime cần giữ nguyên</h2>
+        <div class="flow-map">
+          <div class="flow-node"><small>01 • Splash</small><strong>Đọc Remote Config + preload ads</strong></div>
+          <div class="flow-node"><small>02 • Language</small><strong>V1 hoặc V2 ba bước</strong></div>
+          <div class="flow-node"><small>03 • Apply</small><strong>Đổi locale + chờ recreate</strong></div>
+          <div class="flow-node"><small>04 • Destination</small><strong>Onboarding hoặc Main</strong></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" aria-label="Mục lục">
+      <div class="sidebar-inner">
+        <p class="sidebar-label">Trong hướng dẫn này</p>
+        <nav class="toc">
+          <a href="#scope"><span>00</span><span>Chọn version & phạm vi</span></a>
+          <a href="#remote-config"><span>01</span><span>Bật flow từ Remote Config</span></a>
+          <a href="#resources"><span>02</span><span>Custom UI trong app</span></a>
+          <a href="#ad-places"><span>03</span><span>Cấu hình ad place</span></a>
+          <a href="#navigation"><span>04</span><span>Nối StartFlow</span></a>
+          <a href="#verify"><span>05</span><span>Build & kiểm tra</span></a>
+          <a href="#pitfalls"><span>!</span><span>Lỗi thường gặp</span></a>
+        </nav>
+        <div class="sidebar-note"><strong>Hai flavor độc lập</strong><span>Luôn cập nhật cả src/dev và src/prod trước khi publish Firebase.</span></div>
+      </div>
+    </aside>
+
+    <main>
+      <section class="section" id="scope">
+        <div class="section-heading"><div class="step-number">00</div><div><h2>Chọn version và phạm vi triển khai</h2><p class="section-lead">Version được chọn bởi Remote Config, không phải bởi layout app. Xác định trước app dùng màn đầu flow, màn Settings, hay cả hai.</p></div></div>
+        <div class="outcome"><span class="checkmark">✓</span><div><strong>Kết quả:</strong> chốt V1/V2 và biết chính xác activity/ad place nào sẽ chạy.</div></div>
+        <div class="card-grid">
+          <article class="card"><h3>Language V1</h3><p>Một activity với hai trạng thái ad: trước và sau khi người dùng chọn ngôn ngữ.</p><span class="pill">2 native places</span></article>
+          <article class="card"><h3>Language V2 StartFlow</h3><p>Ba activity liên tiếp: chọn nhóm, chọn locale, xác nhận Apply.</p><span class="pill">3 native places</span></article>
+          <article class="card"><h3>Language V2 Settings</h3><p>Một activity riêng, có native place riêng và interstitial khi Back.</p><span class="pill">Native + interstitial</span></article>
+        </div>
+        <div class="note"><strong>Routing thực tế:</strong> <code>LanguageActivityNavigator.intentStart()</code> đọc <code>LanguageActivityConfig.isV2</code>. V2 mở <code>LanguageActivityV21</code> trong start flow, nhưng mở <code>LanguageActivityV2FromSetting</code> khi <code>fromSetting = true</code>.</div>
+      </section>
+
+      <section class="section" id="remote-config">
+        <div class="section-heading"><div class="step-number">01</div><div><h2>Bật Language và chọn version</h2><p class="section-lead">Cập nhật default XML trước để app vẫn chạy đúng khi Firebase chưa fetch được; sau đó tạo cùng key/value trên Firebase Remote Config.</p></div></div>
+        <div class="file-grid">
+          <a class="file-card" href="../app/src/dev/res/xml/remote_config_defaults.xml"><code>app/src/dev/res/xml/remote_config_defaults.xml</code><span>Cấu hình debug/dev để QA.</span></a>
+          <a class="file-card" href="../app/src/prod/res/xml/remote_config_defaults.xml"><code>app/src/prod/res/xml/remote_config_defaults.xml</code><span>Fallback thật được đóng gói trong release.</span></a>
+        </div>
+        <div class="code-block">
+          <div class="code-bar"><span>Remote Config — hai parameter JSON riêng</span><button class="copy-button" type="button">Sao chép</button></div>
+          <pre><code><span class="token-comment">// parameter: application_config</span>
+{
+  <span class="token-string">"is_enable_change_language_screen"</span>: <span class="token-value">true</span>,
+  <span class="token-string">"is_enable_introduction_screen"</span>: <span class="token-value">true</span>,
+  <span class="token-string">"is_always_show_intro_and_language_screen"</span>: <span class="token-value">false</span>
+}
+
+<span class="token-comment">// parameter: language_activity_config</span>
+{
+  <span class="token-string">"version"</span>: <span class="token-value">2</span>,
+  <span class="token-string">"time_show_loading_lfo"</span>: <span class="token-value">3</span>
+}</code></pre>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Field</th><th>Giá trị</th><th>Ý nghĩa</th></tr></thead><tbody>
+          <tr><td><code>is_enable_change_language_screen</code></td><td><code>true/false</code></td><td>Bật/tắt Language trong start flow.</td></tr>
+          <tr><td><code>language_activity_config.version</code></td><td><code>1</code> hoặc <code>2</code></td><td>Giá trị khác hợp lệ sẽ fallback V2 theo domain mapper.</td></tr>
+          <tr><td><code>time_show_loading_lfo</code></td><td>Số giây hoặc bỏ trống</td><td>Thời gian loading LFO nếu flow sử dụng cấu hình này.</td></tr>
+          <tr><td><code>is_enable_introduction_screen</code></td><td><code>true</code></td><td>Sau Apply đi tiếp Onboarding; nếu false đi Main.</td></tr>
+        </tbody></table></div>
+        <div class="note warning"><strong>Firebase không đọc object gộp như ví dụ minh họa bên ngoài.</strong> Trong console, <code>application_config</code> và <code>language_activity_config</code> là hai parameter riêng, mỗi value là JSON string hợp lệ.</div>
+      </section>
+
+      <section class="section" id="resources">
+        <div class="section-heading"><div class="step-number">02</div><div><h2>Custom giao diện bằng resource của app</h2><p class="section-lead">App override resource cùng tên của library. Không copy layout core nếu chỉ đổi màu, text, background hoặc ảnh.</p></div></div>
+        <div class="file-grid">
+          <a class="file-card" href="../app/src/main/res/values/startflow_language_colors.xml"><code>app/src/main/res/values/startflow_language_colors.xml</code><span>Palette V1/V2, item states, title, icon và vùng ads.</span></a>
+          <a class="file-card" href="../app/src/main/res/values/startflow_language_config.xml"><code>app/src/main/res/values/startflow_language_config.xml</code><span>Apply icon/text/background và các alias cấu hình.</span></a>
+        </div>
+        <div class="code-block">
+          <div class="code-bar"><span>startflow_language_config.xml</span><button class="copy-button" type="button">Sao chép</button></div>
+          <pre><code>&lt;resources&gt;
+  <span class="token-comment">&lt;!-- false = icon check; true = localized text --&gt;</span>
+  &lt;bool name=<span class="token-string">"startflow_language_v2_apply_use_text"</span>&gt;true&lt;/bool&gt;
+  &lt;item name=<span class="token-string">"startflow_language_v2_apply_text_value"</span> type=<span class="token-string">"string"</span>&gt;
+    @string/core_common_save
+  &lt;/item&gt;
+
+  <span class="token-comment">&lt;!-- Có thể trỏ tới shape/selector/ripple của app --&gt;</span>
+  &lt;item name=<span class="token-string">"startflow_language_v2_apply_background"</span> type=<span class="token-string">"drawable"</span>&gt;
+    @drawable/bg_language_apply
+  &lt;/item&gt;
+&lt;/resources&gt;</code></pre>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Nhóm</th><th>Resource quan trọng</th><th>Dùng cho</th></tr></thead><tbody>
+          <tr><td>Apply</td><td><code>startflow_language_v2_apply_icon</code><br><code>startflow_language_v2_apply_text</code><br><code>startflow_language_v2_apply_background</code></td><td>Icon/text/background nút xác nhận V2.</td></tr>
+          <tr><td>Màn hình</td><td><code>startflow_language_v1_background</code><br><code>startflow_language_v2_background</code><br><code>startflow_language_v2_title</code></td><td>Nền và header theo version.</td></tr>
+          <tr><td>Selection</td><td><code>startflow_language_v1_item_selected_*</code><br><code>startflow_language_v2_item_selected_*</code></td><td>Item/radio được chọn và chưa chọn.</td></tr>
+          <tr><td>Ảnh nền</td><td><code>startflow_language_show_image_background</code><br><code>startflow_language_image_background</code></td><td>Bật và thay drawable nền dùng chung.</td></tr>
+        </tbody></table></div>
+        <div class="note"><strong>Dark mode:</strong> khai báo lại cùng resource trong <code>app/src/main/res/values-night/</code>. Android tự chọn theo configuration; không cần Kotlin branch.</div>
+      </section>
+
+      <section class="section" id="ad-places">
+        <div class="section-heading"><div class="step-number">03</div><div><h2>Cấu hình đúng từng ad place name</h2><p class="section-lead">Đây là bước dễ thiếu nhất. Tên bên dưới đến trực tiếp từ <code>CoreAdPlaceName</code> và được activity yêu cầu bằng exact match.</p></div></div>
+        <div class="outcome"><span class="checkmark">✓</span><div><strong>Kết quả:</strong> Splash preload đúng place và mỗi màn Language nhận đúng native/interstitial config.</div></div>
+        <div class="table-wrap ad-map"><table><thead><tr><th>Ngữ cảnh</th><th>Remote Config key</th><th><code>place_name</code></th></tr></thead><tbody>
+          <tr><td>V1 • bước 1</td><td><code>banner_native_ad_places</code></td><td><code>flow_tutorial_v1_201_language_1_n_native</code></td></tr>
+          <tr><td>V1 • sau khi chọn</td><td><code>banner_native_ad_places</code></td><td><code>flow_tutorial_v1_201_language_2_n_native</code></td></tr>
+          <tr><td>V2 • chọn nhóm</td><td><code>banner_native_ad_places</code></td><td><code>flow_tutorial_201_language_1_n_native</code></td></tr>
+          <tr><td>V2 • chọn locale</td><td><code>banner_native_ad_places</code></td><td><code>flow_tutorial_201_language_2_n_native</code></td></tr>
+          <tr><td>V2 • Apply</td><td><code>banner_native_ad_places</code></td><td><code>flow_tutorial_201_language_3_n_native</code></td></tr>
+          <tr><td>V2 • mở từ Settings</td><td><code>banner_native_ad_places</code></td><td><code>anchored_change_language_v2_from_setting_native</code></td></tr>
+          <tr><td>V2 • Back từ Settings</td><td><code>rewarded_rewardedinter_inter_ad_places</code></td><td><code>fullscreen_back_language_setting</code></td></tr>
+        </tbody></table></div>
+        <div class="code-block">
+          <div class="code-bar"><span>banner_native_ad_places — mẫu V2 bước 1</span><button class="copy-button" type="button">Sao chép</button></div>
+          <pre><code>{
+  <span class="token-string">"place_name"</span>: <span class="token-string">"flow_tutorial_201_language_1_n_native"</span>,
+  <span class="token-string">"ad_id"</span>: <span class="token-string">"ca-app-pub-xxx/yyy"</span>,
+  <span class="token-string">"ad_type"</span>: <span class="token-string">"native"</span>,
+  <span class="token-string">"native_template_size"</span>: <span class="token-string">"medium_cta_bottom"</span>,
+  <span class="token-string">"is_tutorial_flow"</span>: <span class="token-value">true</span>,
+  <span class="token-string">"is_tracking_click"</span>: <span class="token-value">true</span>,
+  <span class="token-string">"is_enable"</span>: <span class="token-value">true</span>
+}</code></pre>
+        </div>
+        <div class="code-block">
+          <div class="code-bar"><span>rewarded_rewardedinter_inter_ad_places — Back Settings</span><button class="copy-button" type="button">Sao chép</button></div>
+          <pre><code>{
+  <span class="token-string">"place_name"</span>: <span class="token-string">"fullscreen_back_language_setting"</span>,
+  <span class="token-string">"ad_id"</span>: <span class="token-string">"ca-app-pub-xxx/zzz"</span>,
+  <span class="token-string">"ad_type"</span>: <span class="token-string">"interstitial"</span>,
+  <span class="token-string">"is_enable"</span>: <span class="token-value">true</span>
+}</code></pre>
+        </div>
+        <div class="note danger"><strong>Tên legacy không còn nối vào activity hiện tại:</strong> <code>anchored_change_language_bottom</code> xuất hiện trong một số default cũ nhưng không thay thế cho 2 place V1 hoặc 3 place V2 ở bảng trên.</div>
+        <div class="note"><strong>Nếu Language dẫn sang Onboarding:</strong> màn đầu Language còn preload các place Onboarding. Hoàn thành thêm <a href="startflow-onboarding-ui-customization.html#ad-places">bước cấu hình ad place Onboarding</a> trước khi test end-to-end.</div>
+      </section>
+
+      <section class="section" id="navigation">
+        <div class="section-heading"><div class="step-number">04</div><div><h2>Nối destination của StartFlow</h2><p class="section-lead">Core sở hữu Language/Onboarding, còn app cung cấp activity đích qua <code>StartFlowNavigator</code>. Không hard-code MainActivity vào module core.</p></div></div>
+        <div class="code-block">
+          <div class="code-bar"><span>RequiredModule.kt — binding tối thiểu</span><button class="copy-button" type="button">Sao chép</button></div>
+          <pre><code><span class="token-key">@Provides</span>
+<span class="token-key">@Singleton</span>
+<span class="token-key">fun</span> provideStartFlowNavigator(): StartFlowNavigator =
+  <span class="token-key">object</span> : StartFlowNavigator {
+    override <span class="token-key">fun</span> mainClass(): Class&lt;*&gt; = MainActivity::class.java
+    override <span class="token-key">fun</span> otherLanguageEnd(): Class&lt;*&gt;? = null
+    override <span class="token-key">fun</span> mainPreloadAdPlaceNames() =
+      listOf(AppAdPlaceName.ANCHORED_BOTTOM_HOME)
+  }</code></pre>
+        </div>
+        <div class="card-grid">
+          <article class="card"><h3>Từ Splash</h3><p>Gọi <code>LanguageActivityNavigator.intentStart(..., fromSplash = true)</code>. Navigator tự chọn V1/V2.</p></article>
+          <article class="card"><h3>Từ Settings</h3><p>Truyền <code>fromSetting = true</code>; V2 dùng activity riêng và Back có interstitial place riêng.</p></article>
+          <article class="card"><h3>Sau Apply</h3><p><code>otherLanguageEnd()</code> ưu tiên trước; nếu null thì Onboarding hoặc Main theo <code>is_enable_introduction_screen</code>.</p></article>
+        </div>
+        <div class="note"><strong>Manifest:</strong> activities của StartFlow nằm trong manifest library và được merger đưa vào app. Chỉ khai báo thêm nếu app override hành vi manifest có chủ đích; tránh duplicate activity tùy tiện.</div>
+      </section>
+
+      <section class="section" id="verify">
+        <div class="section-heading"><div class="step-number">05</div><div><h2>Build và kiểm tra theo đúng thứ tự</h2><p class="section-lead">Tách kiểm tra resource, flow và ads để biết lỗi nằm ở app merge, Remote Config hay ad inventory.</p></div></div>
+        <ol class="checklist" id="quick-check">
+          <li>Build cả <code>devDebug</code> và <code>prodDebug</code>; không có lỗi duplicate/missing resource.</li>
+          <li>Reset app data để Language xuất hiện như first open.</li>
+          <li>Test V1 và V2 bằng default XML trước khi publish Firebase.</li>
+          <li>V2 đi đủ ba bước và chỉ Apply ở bước cuối.</li>
+          <li>Đổi icon/text/background Apply và kiểm tra state disabled.</li>
+          <li>Xác nhận locale đổi, loading overlay chặn thao tác và destination đúng.</li>
+          <li>Kiểm tra request/log đủ từng <code>place_name</code> trong bảng bước 03.</li>
+          <li>Mở từ Settings, test native place và interstitial khi Back.</li>
+          <li>Fetch/activate Firebase rồi lặp lại để phát hiện khác biệt với defaults.</li>
+          <li>Nếu đi Onboarding, test xuyên suốt tới Main và toàn bộ ad place kế tiếp.</li>
+        </ol>
+        <div class="code-block"><div class="code-bar"><span>PowerShell — test và build hẹp</span><button class="copy-button" type="button">Sao chép</button></div><pre><code>.\gradlew.bat :core:startflow:testProdDebugUnitTest
+.\gradlew.bat :app:assembleDevDebug :app:assembleProdDebug</code></pre></div>
+        <div class="note warning"><strong>Nếu Gradle Test Executor báo <code>Could not find or load main class Test</code>:</strong> kiểm tra entry <code>PATH</code> có dấu quote thừa. Đây là lỗi command line của JVM worker, không phải assertion của StartFlow.</div>
+      </section>
+
+      <section class="section" id="pitfalls">
+        <div class="section-heading"><div class="step-number">!</div><div><h2>Lỗi thường gặp</h2><p class="section-lead">Kiểm tra các điểm này trước khi sửa code core.</p></div></div>
+        <details><summary>Đã set version 2 nhưng vẫn thấy V1</summary><div>Kiểm tra parameter đúng tên <code>language_activity_config</code>, JSON hợp lệ, fetch/activate thành công và default XML của đúng flavor.</div></details>
+        <details><summary>Apply background không đổi</summary><div>Override <code>startflow_language_v2_apply_background</code> với <code>type="drawable"</code> trong module app. Đừng đặt một tên alias khác rồi kỳ vọng layout core tự biết.</div></details>
+        <details><summary>Ads không hiện dù ad_id đúng</summary><div>So chuỗi <code>place_name</code> với bảng bước 03, kiểm tra đúng list key, <code>is_enable</code>, trạng thái VIP/network và remote list version đang active.</div></details>
+        <details><summary>V2 chỉ có ad ở bước đầu</summary><div>Cần ba object riêng cho suffix <code>language_1</code>, <code>language_2</code>, <code>language_3</code>. Một object legacy không được tái sử dụng tự động.</div></details>
+        <details><summary>Apply xong quay lại Language hoặc loading mãi</summary><div>Kiểm tra <code>StartFlowNavigator</code>, <code>navigateAfterChangeLanguage</code>, activity recreation và destination Onboarding/Main. Không tự start activity song song với core.</div></details>
+      </section>
+
+      <section class="section"><div class="finish"><h2>Definition of Done</h2><p>Remote keys đúng flavor · resources override từ app · mọi <code>place_name</code> resolve · navigator dẫn đúng đích · test first-open và Settings đều pass.</p><p>Đối chiếu code nguồn: <a href="../core/config/src/main/java/com/core/config/domain/data/IAdPlaceName.kt">CoreAdPlaceName</a> · <a href="../core/startflow/src/main/java/com/codebasetemplate/features/feature_language/ui/LanguageActivityNavigator.kt">LanguageActivityNavigator</a> · <a href="startflow-onboarding-ui-customization.html">Onboarding guide</a>.</p><a class="button" href="#top">Quay lại đầu trang</a></div></section>
+    </main>
+  </div>
+
+  <footer>Tài liệu nội bộ StartFlow Language · Mở trực tiếp file HTML để sử dụng offline.</footer>
+  <script>
+    const progress = document.querySelector('.reading-progress');
+    const tocLinks = [...document.querySelectorAll('.toc a')];
+    const sections = tocLinks.map((link) => document.querySelector(link.hash)).filter(Boolean);
+    function updateReadingState() {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = `${scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0}%`;
+      let active = sections[0];
+      for (const section of sections) if (section.getBoundingClientRect().top <= 140) active = section;
+      tocLinks.forEach((link) => link.classList.toggle('active', active && link.hash === `#${active.id}`));
+    }
+    document.querySelectorAll('.copy-button').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const code = button.closest('.code-block').querySelector('code').innerText;
+        await navigator.clipboard.writeText(code);
+        const old = button.textContent;
+        button.textContent = 'Đã chép';
+        setTimeout(() => { button.textContent = old; }, 1200);
+      });
+    });
+    addEventListener('scroll', updateReadingState, { passive: true });
+    updateReadingState();
+  </script>
+</body>
+</html>

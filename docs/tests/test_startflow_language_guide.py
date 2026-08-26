@@ -7,7 +7,21 @@ from pathlib import Path
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-GUIDE_PATH = REPOSITORY_ROOT / "docs" / "startflow-onboarding-ui-customization.html"
+GUIDE_PATH = REPOSITORY_ROOT / "docs" / "startflow-language-ui-customization.html"
+AD_PLACE_SOURCE = (
+    REPOSITORY_ROOT
+    / "core"
+    / "config"
+    / "src"
+    / "main"
+    / "java"
+    / "com"
+    / "core"
+    / "config"
+    / "domain"
+    / "data"
+    / "IAdPlaceName.kt"
+)
 
 
 class GuideParser(HTMLParser):
@@ -16,7 +30,6 @@ class GuideParser(HTMLParser):
         self.ids: list[str] = []
         self.hrefs: list[str] = []
         self.external_sources: list[str] = []
-        self.tags: list[tuple[str, dict[str, str]]] = []
         self.document_language: str | None = None
         self.has_viewport = False
         self.has_title = False
@@ -24,7 +37,6 @@ class GuideParser(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attributes = {name: value or "" for name, value in attrs}
-        self.tags.append((tag, attributes))
         if attributes.get("id"):
             self.ids.append(attributes["id"])
         if attributes.get("href"):
@@ -49,7 +61,7 @@ class GuideParser(HTMLParser):
             self.has_title = True
 
 
-class StartFlowOnboardingGuideTest(unittest.TestCase):
+class StartFlowLanguageGuideTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.html = GUIDE_PATH.read_text(encoding="utf-8")
@@ -64,17 +76,14 @@ class StartFlowOnboardingGuideTest(unittest.TestCase):
         self.assertTrue(self.parser.has_title)
         self.assertEqual(self.parser.external_sources, [])
 
-    def test_step_sections_are_present_in_learning_order(self) -> None:
+    def test_step_sections_are_present_in_implementation_order(self) -> None:
         expected_sections = [
-            "choose",
-            "resources",
-            "content",
-            "branding",
-            "hilt",
+            "scope",
             "remote-config",
+            "resources",
             "ad-places",
+            "navigation",
             "verify",
-            "renderer",
             "pitfalls",
         ]
         positions = [self.html.index(f'id="{section_id}"') for section_id in expected_sections]
@@ -91,50 +100,50 @@ class StartFlowOnboardingGuideTest(unittest.TestCase):
         for href in self.parser.hrefs:
             if href.startswith(("#", "mailto:", "tel:")):
                 continue
-            target = (GUIDE_PATH.parent / href).resolve()
+            relative_path = href.partition("#")[0]
+            target = (GUIDE_PATH.parent / relative_path).resolve()
             self.assertTrue(target.is_file(), f"Broken relative file link: {href}")
 
-    def test_version_tabs_have_accessible_wiring(self) -> None:
-        tags = self.parser.tags
-        tab_buttons = [attrs for tag, attrs in tags if tag == "button" and attrs.get("role") == "tab"]
-        tab_panels = [attrs for tag, attrs in tags if attrs.get("role") == "tabpanel"]
-        self.assertEqual({tab["id"] for tab in tab_buttons}, {"tab-v1", "tab-v2", "tab-v3"})
-        self.assertEqual({panel["id"] for panel in tab_panels}, {"panel-v1", "panel-v2", "panel-v3"})
-        for tab in tab_buttons:
-            self.assertIn(tab.get("aria-controls"), {panel["id"] for panel in tab_panels})
-            self.assertIn(tab.get("aria-selected"), {"true", "false"})
-
-    def test_guide_covers_core_customization_contracts(self) -> None:
+    def test_guide_covers_language_configuration_contract(self) -> None:
         required_terms = [
-            "OnBoardingContentProvider",
-            "OnBoardingV1UiCustomizer",
-            "OnBoardingV2UiCustomizer",
-            "OnBoardingV3UiCustomizer",
-            "OnBoardingV3PageRenderer",
-            "@IntoSet",
-            "intro_data_v3",
-            "realPosition",
-            "onPrimaryAction()",
-            "onBannerNativeResult",
+            "application_config",
+            "language_activity_config",
+            "is_enable_change_language_screen",
+            "is_enable_introduction_screen",
+            "startflow_language_v2_apply_use_text",
+            "startflow_language_v2_apply_text_value",
+            "startflow_language_v2_apply_background",
+            "StartFlowNavigator",
+            "LanguageActivityNavigator",
             "banner_native_ad_places",
             "rewarded_rewardedinter_inter_ad_places",
-            "flow_tutorial_301_onb1_n_native",
-            "flow_tutorial_303_onb5_n_native",
-            "action_next_in_introduction",
-            "action_skip_in_introduction",
         ]
         for term in required_terms:
-            self.assertIn(term, self.html, f"Missing required onboarding concept: {term}")
+            self.assertIn(term, self.html, f"Missing required Language concept: {term}")
+
+    def test_documented_language_ad_places_match_core_names(self) -> None:
+        required_place_names = [
+            "flow_tutorial_v1_201_language_1_n_native",
+            "flow_tutorial_v1_201_language_2_n_native",
+            "flow_tutorial_201_language_1_n_native",
+            "flow_tutorial_201_language_2_n_native",
+            "flow_tutorial_201_language_3_n_native",
+            "anchored_change_language_v2_from_setting_native",
+            "fullscreen_back_language_setting",
+        ]
+        source = AD_PLACE_SOURCE.read_text(encoding="utf-8")
+        for place_name in required_place_names:
+            self.assertIn(place_name, source, f"Core no longer declares {place_name}")
+            self.assertIn(place_name, self.html, f"Guide does not document {place_name}")
 
     def test_page_contains_visual_step_by_step_aids(self) -> None:
-        required_visual_classes = ["phone-stage", "path", "flow-visual", "mini-preview", "reading-progress"]
-        for class_name in required_visual_classes:
+        for class_name in ("reading-progress", "flow-map", "file-grid", "ad-map"):
             self.assertRegex(
                 self.html,
                 rf'class="[^"]*\b{re.escape(class_name)}\b',
                 f"Missing visual aid: {class_name}",
             )
-        self.assertGreaterEqual(self.html.count('class="step-number"'), 7)
+        self.assertGreaterEqual(self.html.count('class="step-number"'), 6)
 
 
 if __name__ == "__main__":

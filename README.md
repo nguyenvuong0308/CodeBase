@@ -55,8 +55,10 @@ Available artifacts:
 - [Firebase Ads configuration guide](docs/firebase-ads-guide/firebase_ads_config_guide.html)
 - [Ads A/B testing overrides](docs/ads-ab-testing-config.md)
 - [Native collapsible remote config](docs/native-collapsible-config.md)
-- [StartFlow Language V1/V2 UI customization](docs/startflow-language-ui-customization.md)
-- [StartFlow Onboarding UI customization](docs/startflow-onboarding-ui-customization.md)
+- [StartFlow Language implementation guide (HTML)](docs/startflow-language-ui-customization.html)
+- [StartFlow Onboarding implementation guide (HTML)](docs/startflow-onboarding-ui-customization.html)
+- [StartFlow Language V1/V2 resource reference (Markdown)](docs/startflow-language-ui-customization.md)
+- [StartFlow Onboarding API reference (Markdown)](docs/startflow-onboarding-ui-customization.md)
 
 ### Native ad text sizes
 
