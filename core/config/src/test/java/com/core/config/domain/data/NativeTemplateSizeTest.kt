@@ -23,6 +23,14 @@ class NativeTemplateSizeTest {
     }
 
     @Test
+    fun `medium media cta right key resolves to built in template`() {
+        val result = NativeTemplateSize.getSizeBy("medium_media_cta_right")
+
+        assertSame(NativeTemplateSize.MediumMediaCtaRight, result)
+        assertEquals("medium_media_cta_right", result.key)
+    }
+
+    @Test
     fun `similar unknown key remains custom`() {
         val result = NativeTemplateSize.getSizeBy("medium_media_left_cta_right_custom")
 

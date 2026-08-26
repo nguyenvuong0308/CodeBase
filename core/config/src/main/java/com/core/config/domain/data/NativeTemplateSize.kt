@@ -23,6 +23,7 @@ sealed class NativeTemplateSize {
             MediumCtaRight,
             MediumMediaRight,
             MediumMediaLeft,
+            MediumMediaCtaRight,
             MediumMediaLeftCtaRight,
             FullCtaBottom,
             FullCtaBottomOnboarding,
@@ -100,6 +101,10 @@ sealed class NativeTemplateSize {
 
     object MediumMediaLeft: NativeTemplateSize() {
         override val key = "medium_media_left"
+    }
+
+    object MediumMediaCtaRight : NativeTemplateSize() {
+        override val key = "medium_media_cta_right"
     }
 
     object MediumMediaLeftCtaRight : NativeTemplateSize() {

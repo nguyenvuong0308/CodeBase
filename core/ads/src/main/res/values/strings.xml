@@ -2,4 +2,5 @@
 <resources>
     <string name="ads_countdown_time_default" translatable="false">5s</string>
     <string name="ads_countdown_time_format" translatable="false">%1$ds</string>
+    <string name="native_ad_sponsored_label">Sponsored</string>
 </resources>

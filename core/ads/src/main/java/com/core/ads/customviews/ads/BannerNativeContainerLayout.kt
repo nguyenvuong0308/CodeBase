@@ -262,6 +262,8 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
             NativeTemplateSize.MediumMediaLeft -> NativeMediumMediaLeftTemplateView(context)
 
+            NativeTemplateSize.MediumMediaCtaRight -> NativeMediumMediaCtaRightTemplateView(context)
+
             NativeTemplateSize.MediumMediaLeftCtaRight -> NativeMediumMediaLeftCtaRightTemplateView(context)
 
             NativeTemplateSize.Small -> NativeSmallTemplateView(context)
