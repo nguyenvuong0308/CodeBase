@@ -48,6 +48,22 @@
                     android:text="Native and Banner" />
             </androidx.appcompat.widget.LinearLayoutCompat>
 
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/nativeGalleryLayout"
+                style="@style/MenuItemStyle"
+                android:background="@drawable/bg_transparent_ripple_media_shape">
+
+                <ImageView
+                    style="@style/MenuIconStyle"
+                    android:contentDescription="@string/native_gallery_selector_title"
+                    android:src="@drawable/ic_view_carousel"
+                    app:tint="@color/blue_500" />
+
+                <TextView
+                    style="@style/MenuTextStyle"
+                    android:text="@string/native_gallery_selector_title" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
             <!-- Mục 2: Native in List -->
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:id="@+id/nativeInListLayout"

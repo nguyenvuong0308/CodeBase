@@ -17,4 +17,14 @@ class NativeTemplateLayoutResolverTest {
 
         assertEquals(R.layout.gnt_small_banner_cta_right_shimmer, result)
     }
+
+    @Test
+    fun `medium media left cta right uses its matching shimmer`() {
+        val result = resolveNativeShimmerLayout(NativeTemplateSize.MediumMediaLeftCtaRight) {
+            fail("Built-in template must not use the custom layout fallback")
+            0
+        }
+
+        assertEquals(R.layout.gnt_medium_media_left_cta_right_shimmer, result)
+    }
 }

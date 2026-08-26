@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="native_gallery_selector_title">Native ads gallery</string>
+    <string name="native_gallery_preview_title">Native gallery preview</string>
+    <string name="native_gallery_selector_description">Select a native ad format to load its live preview.</string>
+    <plurals name="native_gallery_format_count">
+        <item quantity="one">%1$d format</item>
+        <item quantity="other">%1$d formats</item>
+    </plurals>
+    <string name="native_gallery_template_details">native_template_size: %1$s</string>
+    <string name="native_gallery_collapsible_details">template: %1$s · expand: %2$s</string>
+</resources>

@@ -3,12 +3,6 @@
 
     <application>
         <activity
-            android:name=".features.feature_demo_banner_native.ui.NativeGalleryPreviewActivity"
-            android:exported="true"
-            android:label="Native gallery preview"
-            android:screenOrientation="portrait" />
-
-        <activity
             android:name=".features.feature_demo_banner_native.ui.NativeSmallBannerCtaRightTestActivity"
             android:exported="true"
             android:label="Small banner native test" />

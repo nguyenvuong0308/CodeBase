@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import com.codebasetemplate.databinding.CoreFragmentMainBinding
+import com.codebasetemplate.features.feature_demo_banner_native.ui.NativeGalleryActivity
 import com.codebasetemplate.features.feature_demo_native_collapsible.ui.CollapsibleNativeTestActivity
 import com.codebasetemplate.features.feature_demo_native_pip.ui.NativePipTestActivity
 import com.codebasetemplate.features.feature_reward.RewardTestActivity
@@ -46,6 +47,10 @@ class MainChildOfHostFragment : BaseChildOfHostFragment<CoreFragmentMainBinding,
 
             nativeAndBannerLayout.setOnSingleClick {
                 hostViewModel.navigateTo(MainHostEvent.OpenBannerAndNative)
+            }
+
+            nativeGalleryLayout.setOnSingleClick {
+                startActivity(Intent(requireContext(), NativeGalleryActivity::class.java))
             }
 
             nativeInListLayout.setOnSingleClick {

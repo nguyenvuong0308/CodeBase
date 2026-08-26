@@ -31,6 +31,18 @@
         <activity android:name=".features.main.ui.MainActivityHost" />
 
         <activity
+            android:name=".features.feature_demo_banner_native.ui.NativeGalleryActivity"
+            android:exported="true"
+            android:label="@string/native_gallery_selector_title"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".features.feature_demo_banner_native.ui.NativeGalleryPreviewActivity"
+            android:exported="true"
+            android:label="@string/native_gallery_preview_title"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".features.feature_demo_native_pip.ui.NativePipTestActivity"
             android:exported="true"
             android:label="Native PIP Test" />

@@ -16,6 +16,7 @@ internal fun resolveNativeShimmerLayout(
     NativeTemplateSize.MediumCtaRightTop -> R.layout.gnt_medium_cta_right_top_shimmer
     NativeTemplateSize.MediumCtaTop -> R.layout.gnt_medium_cta_top_template_view_shimmer
     NativeTemplateSize.MediumMediaLeft -> R.layout.gnt_medium_media_left_shimmer
+    NativeTemplateSize.MediumMediaLeftCtaRight -> R.layout.gnt_medium_media_left_cta_right_shimmer
     NativeTemplateSize.MediumMediaRight -> R.layout.gnt_medium_media_right_shimmer
     NativeTemplateSize.Small -> R.layout.gnt_small_template_view_shimmer
     NativeTemplateSize.SmallCtaTop -> R.layout.gnt_small_cta_top_template_view_shimmer

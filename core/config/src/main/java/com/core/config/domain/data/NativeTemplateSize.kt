@@ -6,35 +6,35 @@ sealed class NativeTemplateSize {
 
     companion object {
 
+        val builtInTemplates: List<NativeTemplateSize> = listOf(
+            Small,
+            SmallCtaTop,
+            SmallCtaBottom,
+            SmallCtaRight,
+            SmallBannerCtaRight,
+            MiniCtaRight,
+            SmallLong,
+            SmallForPopup,
+            Medium,
+            MediumCtaTop,
+            MediumCtaBottom,
+            MediumShortCtaBottom,
+            MediumCtaRightTop,
+            MediumCtaRight,
+            MediumMediaRight,
+            MediumMediaLeft,
+            MediumMediaLeftCtaRight,
+            FullCtaBottom,
+            FullCtaBottomOnboarding,
+            FullCtaTop,
+            FullCtaRight,
+            FullInterstitialV1,
+            FullInterstitialV2,
+            FullInterstitialV3,
+        )
+
         fun getSizeBy(key: String): NativeTemplateSize {
-            return when(key) {
-                Small.key -> Small
-                SmallCtaTop.key -> SmallCtaTop
-                SmallCtaRight.key -> SmallCtaRight
-                SmallBannerCtaRight.key -> SmallBannerCtaRight
-                SmallLong.key -> SmallLong
-                SmallForPopup.key -> SmallForPopup
-
-                Medium.key -> Medium
-                MediumCtaTop.key -> MediumCtaTop
-                MediumCtaRightTop.key -> MediumCtaRightTop
-                MediumCtaRight.key -> MediumCtaRight
-                MediumShortCtaBottom.key -> MediumShortCtaBottom
-                MediumMediaRight.key -> MediumMediaRight
-                MediumMediaLeft.key -> MediumMediaLeft
-
-                FullCtaBottom.key -> FullCtaBottom
-                FullCtaBottomOnboarding.key -> FullCtaBottomOnboarding
-                FullCtaTop.key -> FullCtaTop
-                FullCtaRight.key -> FullCtaRight
-                MediumCtaBottom.key -> MediumCtaBottom
-                SmallCtaBottom.key -> SmallCtaBottom
-                MiniCtaRight.key -> MiniCtaRight
-                FullInterstitialV1.key -> FullInterstitialV1
-                FullInterstitialV2.key -> FullInterstitialV2
-                FullInterstitialV3.key -> FullInterstitialV3
-                else -> CustomKey(key)
-            }
+            return builtInTemplates.firstOrNull { it.key == key } ?: CustomKey(key)
         }
     }
 
@@ -100,6 +100,10 @@ sealed class NativeTemplateSize {
 
     object MediumMediaLeft: NativeTemplateSize() {
         override val key = "medium_media_left"
+    }
+
+    object MediumMediaLeftCtaRight : NativeTemplateSize() {
+        override val key = "medium_media_left_cta_right"
     }
 
     object FullCtaBottom: NativeTemplateSize() {
