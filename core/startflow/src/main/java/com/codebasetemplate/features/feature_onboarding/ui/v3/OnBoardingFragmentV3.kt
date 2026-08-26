@@ -181,7 +181,6 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
                 isControlShownInCurrentView = true
             }
         }
-        viewBinding.layoutFullNative.padding(top = getStatusBarHeight()) // Fullscreen cách statusbar (để hiển thị chữ "i" quảng cáo không bị che)
     }
 
 
