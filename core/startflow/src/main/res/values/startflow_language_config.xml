@@ -6,7 +6,7 @@
     <dimen name="startflow_language_v2_item_title_size">14sp</dimen>
     <dimen name="startflow_language_v2_item_subtitle_size">12sp</dimen>
     <!-- Override this drawable alias in the app module to customize the Apply button background. -->
-    <item name="startflow_language_v2_apply_background" type="drawable">?attr/selectableItemBackgroundBorderless</item>
+    <item name="startflow_language_v2_apply_background" type="drawable">@drawable/bg_transparent_ripple_media_shape</item>
     <item name="startflow_language_v2_apply_text_value" type="string">@string/core_common_save</item>
     <item name="startflow_language_v2_screen_title" type="string">@string/core_screen_language</item>
 
