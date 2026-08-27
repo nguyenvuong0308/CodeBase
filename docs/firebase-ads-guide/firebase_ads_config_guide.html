@@ -618,7 +618,7 @@ Mapper → cache → AdsManager</code></pre>
       <p>Nếu cần thay danh sách place theo versionCode, khai báo <code>ad_places_version_config</code>. Với mỗi nhóm, app đọc key versioned trước; nếu list rỗng mới đọc <code>*_2</code>, sau đó fallback về key mặc định.</p>
       <pre><code>[
   {
-    "version_codes": [12, 13],
+    "version_code": [12, 13],
     "key": {
       "banner_native": "banner_native_ad_places_v12",
       "app_open": "app_open_ad_places_v12",
@@ -626,6 +626,29 @@ Mapper → cache → AdsManager</code></pre>
     }
   }
 ]</code></pre>
+
+      <h3>Replace các key <code>*_2</code> từ app module</h3>
+      <div class="config-keys" data-config-key="banner_native_ad_places_2 app_open_ad_places_2 rewarded_rewardedinter_inter_ad_places_2">
+        <code>banner_native_ad_places_2</code><code>app_open_ad_places_2</code><code>rewarded_rewardedinter_inter_ad_places_2</code>
+      </div>
+      <p>Không cần sửa <code>ConfigParam.kt</code> trong core. Mở <code>app/src/main/java/com/codebasetemplate/required/firebase/AppAdPlacesRemoteConfigKeyProvider.kt</code> và thay giá trị của key cần dùng riêng cho app:</p>
+      <pre><code>class AppAdPlacesRemoteConfigKeyProvider @Inject constructor() :
+    AdPlacesRemoteConfigKeyProvider {
+    override val bannerNativeAdPlacesKey = "my_banner_native_ad_places"
+    override val appOpenAdPlacesKey = "my_app_open_ad_places"
+    override val rewardedRewardedInterInterAdPlacesKey =
+        "my_rewarded_inter_ad_places"
+}</code></pre>
+      <p>Provider của app đã được đăng ký vào Hilt trong <code>RequiredModule</code>. Khi tạo app module mới hoặc di chuyển implementation, giữ binding <code>@IntoSet</code> sau:</p>
+      <pre><code>@Provides
+@IntoSet
+@Singleton
+fun provideAdPlacesRemoteConfigKeyProvider(
+    provider: AppAdPlacesRemoteConfigKeyProvider,
+): AdPlacesRemoteConfigKeyProvider = provider</code></pre>
+      <div class="note">
+        <strong>Thứ tự resolve:</strong> key theo <code>ad_places_version_config</code> được đọc trước. Nếu không có dữ liệu hợp lệ, core đọc key <code>*_2</code> do app provider cung cấp, rồi mới fallback về <code>banner_native_ad_places</code>, <code>app_open_ad_places</code> hoặc <code>rewarded_rewardedinter_inter_ad_places</code>. App có thể chỉ override một property; các property còn lại tự dùng key mặc định của core.
+      </div>
     </section>
 
     <section id="ab-testing">

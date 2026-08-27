@@ -15,6 +15,7 @@ import com.core.config.data.model.RewardedAdConfigModel
 import com.core.config.data.model.RewardedInterstitialAdConfigModel
 import com.core.config.data.model.SplashScreenConfigModel
 import com.core.config.data.model.TutorialConfigModel
+import com.core.config.domain.data.AdPlacesRemoteConfigKeyProvider
 
 internal sealed class ConfigParam<T : Any> {
     abstract val key: String
@@ -125,7 +126,7 @@ internal sealed class ConfigParam<T : Any> {
 
     internal object BannerNativeAdPlaces2: ConfigParam<AdPlaceModel>() {
 
-        override val key = "banner_native_ad_places_2"
+        override val key = AdPlacesRemoteConfigKeyProvider.DEFAULT_BANNER_NATIVE_AD_PLACES_KEY
 
     }
 
@@ -137,7 +138,7 @@ internal sealed class ConfigParam<T : Any> {
 
     internal object AppOpenAdPlaces2: ConfigParam<AdPlaceModel>() {
 
-        override val key = "app_open_ad_places_2"
+        override val key = AdPlacesRemoteConfigKeyProvider.DEFAULT_APP_OPEN_AD_PLACES_KEY
 
     }
 
@@ -149,7 +150,8 @@ internal sealed class ConfigParam<T : Any> {
 
     internal object RewardedRewardedInterInterAdPlaces2: ConfigParam<AdPlaceModel>() {
 
-        override val key = "rewarded_rewardedinter_inter_ad_places_2"
+        override val key =
+            AdPlacesRemoteConfigKeyProvider.DEFAULT_REWARDED_REWARDED_INTER_INTER_AD_PLACES_KEY
 
     }
 

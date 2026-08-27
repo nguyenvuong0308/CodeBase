@@ -2,6 +2,7 @@ package com.core.config.data
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import com.squareup.moshi.Moshi
 import com.core.config.R
 import com.core.config.data.model.AppOpenAdConfigModel
@@ -23,6 +24,8 @@ import com.core.config.data.model.LanguageActivityConfigModel
 import com.core.config.data.model.RequestConsentConfigModel
 import com.core.config.data.model.OnBoardingConfigModel
 import com.core.config.data.model.TutorialConfigModel
+import com.core.config.domain.data.AdPlacesRemoteConfigKeyProvider
+import com.core.config.domain.data.activeAdPlacesRemoteConfigKeyProvider
 import com.google.firebase.Firebase
 import com.google.firebase.remoteconfig.remoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
@@ -34,8 +37,12 @@ import javax.inject.Singleton
 @Singleton
 class RemoteConfigService @Inject constructor(
     private val moshi: Moshi,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    adPlacesRemoteConfigKeyProviders: Set<@JvmSuppressWildcards AdPlacesRemoteConfigKeyProvider>,
 ) {
+
+    private val adPlacesRemoteConfigKeyProvider =
+        adPlacesRemoteConfigKeyProviders.activeAdPlacesRemoteConfigKeyProvider()
 
     companion object {
         const val CONFIG_CACHE_EXPIRATION_SECONDS = 1L
@@ -166,7 +173,7 @@ class RemoteConfigService @Inject constructor(
     internal fun getBannerNativeAdPlaces(): List<AdPlaceModel> {
         return getAdPlacesByConfigKeys(
             versionedKeySelector = { it.bannerNative },
-            fallbackOverrideKey = ConfigParam.BannerNativeAdPlaces2.key,
+            fallbackOverrideKey = adPlacesRemoteConfigKeyProvider.bannerNativeAdPlacesKey,
             defaultKey = ConfigParam.BannerNativeAdPlaces.key,
         )
     }
@@ -174,7 +181,7 @@ class RemoteConfigService @Inject constructor(
     internal fun getAppOpenAdPlaces(): List<AdPlaceModel> {
         return getAdPlacesByConfigKeys(
             versionedKeySelector = { it.appOpen },
-            fallbackOverrideKey = ConfigParam.AppOpenAdPlaces2.key,
+            fallbackOverrideKey = adPlacesRemoteConfigKeyProvider.appOpenAdPlacesKey,
             defaultKey = ConfigParam.AppOpenAdPlaces.key,
         )
     }
@@ -182,7 +189,8 @@ class RemoteConfigService @Inject constructor(
     internal fun getRewardedRewardedInterInterAdPlaces(): List<AdPlaceModel> {
         return getAdPlacesByConfigKeys(
             versionedKeySelector = { it.rewardInter },
-            fallbackOverrideKey = ConfigParam.RewardedRewardedInterInterAdPlaces2.key,
+            fallbackOverrideKey =
+                adPlacesRemoteConfigKeyProvider.rewardedRewardedInterInterAdPlacesKey,
             defaultKey = ConfigParam.RewardedRewardedInterInterAdPlaces.key,
         )
     }
@@ -230,6 +238,7 @@ class RemoteConfigService @Inject constructor(
         versionedKeySelector: (AdPlacesVersionKeyModel) -> String?,
     ): String? {
         val currentVersionCode = getCurrentVersionCode()
+        Log.d("currentVersionCode", "currentVersionCode: $currentVersionCode")
         return remoteConfig.readList(
             moshi,
             ConfigParam.AdPlacesVersionConfigParam

@@ -86,6 +86,22 @@ $contextualKeys = [regex]::Matches($html, 'data-config-key="([^"]+)"') |
 $missingContextualKeys = $configKeys | Where-Object { $contextualKeys -notcontains $_ }
 Assert-Guide ($missingContextualKeys.Count -eq 0) "Config keys missing contextual labels: $($missingContextualKeys -join ', ')"
 
+$adPlaceSectionMatch = [regex]::Match($html, '<section id="ad-place">([\s\S]*?)</section>')
+Assert-Guide $adPlaceSectionMatch.Success '#ad-place section was not found.'
+$adPlaceSectionHtml = $adPlaceSectionMatch.Groups[1].Value
+foreach ($providerMarker in @(
+    'AppAdPlacesRemoteConfigKeyProvider.kt',
+    'AdPlacesRemoteConfigKeyProvider',
+    'bannerNativeAdPlacesKey',
+    'appOpenAdPlacesKey',
+    'rewardedRewardedInterInterAdPlacesKey',
+    'provideAdPlacesRemoteConfigKeyProvider',
+    '@IntoSet',
+    '<div class="note">'
+)) {
+    Assert-Guide ($adPlaceSectionHtml.Contains($providerMarker)) "App key replacement guide is missing: $providerMarker"
+}
+
 $appOpenSectionMatch = [regex]::Match($html, '<section id="app-open">([\s\S]*?)</section>')
 Assert-Guide $appOpenSectionMatch.Success '#app-open section was not found.'
 $appOpenSectionHtml = $appOpenSectionMatch.Groups[1].Value

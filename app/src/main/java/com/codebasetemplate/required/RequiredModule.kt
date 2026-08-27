@@ -22,6 +22,7 @@ import com.core.ads.AdsSdkInitializer
 import com.core.analytics.AdjustAnalytics
 import com.core.billing.ProductIdProvider
 import com.core.config.domain.GetDataFromRemoteConfigUseCase
+import com.core.config.domain.data.AdPlacesRemoteConfigKeyProvider
 import com.core.config.domain.data.IAppProviderAdPlaceName
 import com.core.startflow.StartFlowNavigator
 import com.core.startflow.onboarding.OnBoardingContentProvider
@@ -56,6 +57,16 @@ class RequiredModule {
     @Singleton
     fun providerGetDataFromRemoteUseCase(useCase: GetDataFromRemoteUseCaseImpl): GetDataFromRemoteConfigUseCase =
         useCase
+
+    /**
+     * Cung cấp các key ad places để app có thể thay thế key mặc định của core config.
+     */
+//    @Provides
+//    @IntoSet
+//    @Singleton
+//    fun provideAdPlacesRemoteConfigKeyProvider(
+//        provider: AppAdPlacesRemoteConfigKeyProvider,
+//    ): AdPlacesRemoteConfigKeyProvider = provider
 
     /**
      * Cung cấp danh sách ad placement của app để core config có thể đọc theo interface chung.
