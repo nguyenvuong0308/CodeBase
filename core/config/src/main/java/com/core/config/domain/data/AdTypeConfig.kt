@@ -53,6 +53,7 @@ data class AppOpenAdTypeConfig(
 ) {
     companion object {
         const val REOPEN_MODE_CUSTOM_ACTIVITY = "custom_activity"
+        const val REOPEN_MODE_INTERSTITIAL_AD = "interstitial_ad"
         const val REOPEN_MODE_APP_OPEN_AD = "app_open_ad"
     }
 
