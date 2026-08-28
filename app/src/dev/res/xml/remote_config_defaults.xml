@@ -463,6 +463,7 @@
             "border_color": "#E5E7EB",
             "control_close_position": "right",
             "collapsible_expand_cooldown_second": 10,
+            "refresh_time_second": 100,
             "expired_time_second": 10
             },
             {

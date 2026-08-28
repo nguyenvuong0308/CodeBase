@@ -1,6 +1,5 @@
 package com.core.ads.customviews.ads
 
-import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -18,21 +17,18 @@ import java.util.Collections
 import java.util.WeakHashMap
 
 /**
- * Adds the shared expanded popup behavior to any regular native template.
+ * Adds collapsible popup behavior to the inline native template owned by a container.
  *
- * The wrapped template remains responsible only for rendering the inline state. This host owns
- * popup lifecycle and binds the ad to the inline template only after the popup is dismissed, so a
- * [NativeAd] is never registered with two NativeAdViews at the same time.
+ * This controller follows the lifecycle of its anchor view. It never owns or destroys the
+ * [NativeAd]; it only transfers rendering between the inline and expanded templates.
  */
-internal class CollapsibleNativeHostView(
-    context: Context,
-    private val inlineTemplateView: BaseNativeTemplateView,
-) : BaseNativeTemplateView(context) {
+internal class CollapsibleNativeController(
+    private val anchorView: View,
+    private val onClose: () -> Unit,
+) {
 
     private companion object {
-        val lastExpandedCloseTimes = mutableMapOf<String, Long>()
-        val expandedShownNativeAds: MutableSet<NativeAd> =
-            Collections.newSetFromMap(WeakHashMap<NativeAd, Boolean>())
+        val expandRegistry = CollapsibleExpandRegistry<NativeAd>()
     }
 
     private enum class ControlClosePosition {
@@ -40,6 +36,7 @@ internal class CollapsibleNativeHostView(
         RIGHT,
     }
 
+    private var inlineTemplateView: BaseNativeTemplateView? = null
     private var popupWindow: PopupWindow? = null
     private var popupTemplateView: BaseNativeTemplateView? = null
     private var popupCloseView: AppCompatImageView? = null
@@ -52,45 +49,68 @@ internal class CollapsibleNativeHostView(
     private var popupRequestVersion = 0
     private val expandState = CollapsibleExpandState()
 
-    init {
-        (inlineTemplateView.parent as? ViewGroup)?.removeView(inlineTemplateView)
-        addView(
-            inlineTemplateView,
-            LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT),
-        )
-        inlineTemplateView.onClose = { onClose?.invoke() }
+    /**
+     * Closing the ad has to take the popup down with it. The popup lives in its own window, so
+     * neither hiding nor detaching the anchor dismisses it, and the host normally reacts to
+     * [onClose] by hiding the whole container.
+     */
+    private val closeAdRequest: () -> Unit = {
+        release()
+        onClose()
     }
 
-    override fun setNativeAd(nativeAd: NativeAd) {
+    /**
+     * Binds a freshly created inline template together with the native ad it renders.
+     *
+     * Rebinding the very same ad keeps a showing popup alive: the container recreates its inline
+     * template on every load callback, and tearing the popup down for an unchanged ad would make
+     * the expanded state flicker away.
+     *
+     * A pending explicit [setExpanded] request is consumed here, so it decides the state of this
+     * ad only. Every later ad starts from the automatic expand rules again, which is what the
+     * per-load host view used to give us for free by being recreated.
+     */
+    fun bind(
+        inlineTemplateView: BaseNativeTemplateView,
+        nativeAd: NativeAd,
+        styles: NativeTemplateStyle,
+    ) {
+        if (nativeAd !== currentNativeAd) {
+            release()
+        }
         val isSameShowingExpandedNativeAd =
             popupWindow?.isShowing == true && expandedPopupNativeAd === nativeAd
+        this.inlineTemplateView = inlineTemplateView
         currentNativeAd = nativeAd
+        applyStyles(styles)
+        inlineTemplateView.onClose = closeAdRequest
+
         val shouldExpand = expandState.shouldExpand(
             isSameShowingExpandedNativeAd = isSameShowingExpandedNativeAd,
             isExpandCooldownActive = isExpandCooldownActive(),
             hasNativeAdShownExpanded = hasNativeAdShownExpanded(nativeAd),
         )
+        expandState.reset()
         if (shouldExpand) {
-            if (!isSameShowingExpandedNativeAd) {
-                showExpandedPopup(nativeAd)
-            }
+            showExpandedPopup(nativeAd)
         } else {
-            if (!isCollapsedInlineVisible()) {
-                showCollapsedInline()
-            }
+            showCollapsedInline()
         }
     }
 
     /**
-     * Explicitly switches this host between its expanded popup and collapsed inline state.
+     * Explicitly expands or collapses the collapsible native ad currently bound, or the next one
+     * to be bound when the ad has not arrived yet.
      *
-     * The requested state is retained for subsequently assigned native ads. Explicit expansion
-     * bypasses the automatic cooldown because it is initiated by the host application.
+     * Explicit expansion bypasses the automatic cooldown because it is initiated by the host
+     * application, so the request is deliberately scoped to a single ad.
      */
     fun setExpanded(expanded: Boolean) {
         expandState.setExpanded(expanded)
+        // No ad yet: keep the request pending, bind() consumes it for the ad that arrives.
+        val nativeAd = currentNativeAd ?: return
+        expandState.reset()
         if (expanded) {
-            val nativeAd = currentNativeAd ?: return
             val isAlreadyExpanded =
                 popupWindow?.isShowing == true && expandedPopupNativeAd === nativeAd
             if (!isAlreadyExpanded) {
@@ -101,7 +121,46 @@ internal class CollapsibleNativeHostView(
         }
     }
 
-    override fun applyStyles(styles: NativeTemplateStyle) {
+    fun onHostPause() {
+        popupTemplateView?.onHostPause()
+    }
+
+    fun onHostResume() {
+        popupTemplateView?.onHostResume()
+    }
+
+    fun onAnchorDetached() {
+        collapseWithoutCooldown()
+    }
+
+    /**
+     * Collapses back to the inline template when the anchor stops being visible. The popup is a
+     * separate window, so hiding the anchor alone would leave it floating on screen.
+     */
+    fun onAnchorHidden() {
+        collapseWithoutCooldown()
+    }
+
+    private fun collapseWithoutCooldown() {
+        // Already inline: rebinding here would only restart the template countdown for nothing.
+        if (isCollapsedInlineVisible()) return
+        if (inlineTemplateView != null) {
+            showCollapsedInline()
+        } else {
+            dismissExpandedPopup()
+        }
+    }
+
+    fun release() {
+        popupRequestVersion++
+        dismissExpandedPopup()
+        inlineTemplateView?.onClose = null
+        inlineTemplateView = null
+        currentNativeAd = null
+        currentStyles = null
+    }
+
+    private fun applyStyles(styles: NativeTemplateStyle) {
         currentStyles = styles
         collapsibleExpandCooldownSecond =
             styles.collapsibleExpandCooldownSecond?.coerceAtLeast(0) ?: 0
@@ -109,39 +168,23 @@ internal class CollapsibleNativeHostView(
             styles.adPlaceName?.takeIf { it.isNotBlank() } ?: javaClass.name
         controlClosePosition = resolveControlClosePosition(styles.controlClosePosition)
 
-        inlineTemplateView.applyStyles(styles)
+        inlineTemplateView?.applyStyles(styles)
         popupTemplateView?.applyStyles(styles)
         applyControlClosePosition()
-        invalidate()
-        requestLayout()
-    }
-
-    override fun destroyNativeAd() {
-        dismissExpandedPopup()
-//        inlineTemplateView.destroyNativeAd()
-        currentNativeAd = null
-    }
-
-    override fun onHostPause() {
-        inlineTemplateView.onHostPause()
-    }
-
-    override fun onHostResume() {
-        inlineTemplateView.onHostResume()
-    }
-
-    override fun onDetachedFromWindow() {
-        dismissExpandedPopup()
-        super.onDetachedFromWindow()
     }
 
     private fun showExpandedPopup(nativeAd: NativeAd) {
+        val inlineTemplate = inlineTemplateView ?: return
         val requestVersion = ++popupRequestVersion
-        inlineTemplateView.visibility = INVISIBLE
+        inlineTemplate.visibility = View.INVISIBLE
 
-        post {
+        anchorView.post {
             if (requestVersion != popupRequestVersion) return@post
-            if (!isAttachedToWindow || windowToken == null) {
+            if (
+                !anchorView.isAttachedToWindow ||
+                anchorView.windowToken == null ||
+                anchorView.visibility != View.VISIBLE
+            ) {
                 showCollapsedInline()
                 return@post
             }
@@ -157,22 +200,24 @@ internal class CollapsibleNativeHostView(
             dismissExpandedPopup()
 
             val expandedTemplate = createExpandedTemplate().apply {
-                onClose = { this@CollapsibleNativeHostView.onClose?.invoke() }
+                onClose = closeAdRequest
                 currentStyles?.let(::applyStyles)
                 setNativeAd(nativeAd)
             }
             val popupContent = createPopupContent(expandedTemplate)
             val popup = PopupWindow(
                 popupContent,
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
                 false,
             ).apply {
                 isOutsideTouchable = false
                 isClippingEnabled = true
                 setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                 runCatching {
-                    elevation = resources.getDimensionPixelSize(com.core.dimens.R.dimen._8dp).toFloat()
+                    elevation = anchorView.resources
+                        .getDimensionPixelSize(com.core.dimens.R.dimen._8dp)
+                        .toFloat()
                 }
             }
 
@@ -184,12 +229,11 @@ internal class CollapsibleNativeHostView(
                     popupTemplateView = null
                     popupCloseView = null
                     expandedPopupNativeAd = null
-//                    expandedTemplate.destroyNativeAd()
                 }
             }
 
             runCatching {
-                popup.showAsDropDown(this, 0, -resolvePopupHeight(popupContent))
+                popup.showAsDropDown(anchorView, 0, -resolvePopupHeight(popupContent))
                 expandedPopupNativeAd = nativeAd
                 markNativeAdExpandedShown(nativeAd)
             }.onFailure {
@@ -203,28 +247,33 @@ internal class CollapsibleNativeHostView(
 
     private fun createExpandedTemplate(): BaseNativeTemplateView {
         return when (currentStyles?.nativeExpandTemplate ?: NativeExpandTemplate.V1) {
-            NativeExpandTemplate.V1 -> NativeExpandView(context)
-            NativeExpandTemplate.V2 -> NativeExpandViewV2(context)
+            NativeExpandTemplate.V1 -> NativeExpandView(anchorView.context)
+            NativeExpandTemplate.V2 -> NativeExpandViewV2(anchorView.context)
         }
     }
 
     private fun createPopupContent(expandedTemplate: BaseNativeTemplateView): FrameLayout {
-        return FrameLayout(context).apply {
+        return FrameLayout(anchorView.context).apply {
             addView(
                 expandedTemplate,
-                LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT),
+                FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                ),
             )
             val closeView = AppCompatImageView(context).apply {
                 setBackgroundResource(R.drawable.bg_close_collapsible)
                 setImageResource(R.drawable.ic_arrow_down_24px)
                 imageTintList = ColorStateList.valueOf(Color.BLACK)
-                elevation = resources.getDimensionPixelSize(com.core.dimens.R.dimen._5dp).toFloat()
+                elevation = resources
+                    .getDimensionPixelSize(com.core.dimens.R.dimen._5dp)
+                    .toFloat()
                 setOnClickListener { collapseToInline() }
             }
             popupCloseView = closeView
             addView(
                 closeView,
-                LayoutParams(
+                FrameLayout.LayoutParams(
                     resources.getDimensionPixelSize(com.core.dimens.R.dimen._24dp),
                     resources.getDimensionPixelSize(com.core.dimens.R.dimen._24dp),
                     resolveCloseGravity(controlClosePosition),
@@ -247,31 +296,32 @@ internal class CollapsibleNativeHostView(
         }
         popupRequestVersion++
         dismissExpandedPopup()
-        inlineTemplateView.visibility = VISIBLE
-        currentNativeAd?.let(inlineTemplateView::setNativeAd)
+        val inlineTemplate = inlineTemplateView ?: return
+        inlineTemplate.visibility = View.VISIBLE
+        currentNativeAd?.let(inlineTemplate::setNativeAd)
     }
 
     private fun isCollapsedInlineVisible(): Boolean {
-        return inlineTemplateView.visibility == VISIBLE && popupWindow?.isShowing != true
+        return inlineTemplateView?.visibility == View.VISIBLE && popupWindow?.isShowing != true
     }
 
     private fun dismissExpandedPopup() {
         popupRequestVersion++
         val popup = popupWindow
-        val expandedTemplate = popupTemplateView
         popupWindow = null
         popupTemplateView = null
         popupCloseView = null
         expandedPopupNativeAd = null
         popup?.setOnDismissListener(null)
         popup?.dismiss()
-//        expandedTemplate?.destroyNativeAd()
     }
 
     private fun resolvePopupHeight(view: View): Int {
         if (view.minimumHeight > 0) return view.minimumHeight
 
-        val measuredWidth = width.takeIf { it > 0 } ?: resources.displayMetrics.widthPixels
+        val resources = anchorView.resources
+        val measuredWidth = anchorView.width.takeIf { it > 0 }
+            ?: resources.displayMetrics.widthPixels
         val widthSpec = View.MeasureSpec.makeMeasureSpec(measuredWidth, View.MeasureSpec.EXACTLY)
         val heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         view.measure(widthSpec, heightSpec)
@@ -296,7 +346,7 @@ internal class CollapsibleNativeHostView(
 
     private fun applyControlClosePosition() {
         val closeView = popupCloseView ?: return
-        val params = closeView.layoutParams as? LayoutParams ?: return
+        val params = closeView.layoutParams as? FrameLayout.LayoutParams ?: return
         params.gravity = resolveCloseGravity(controlClosePosition)
         closeView.layoutParams = params
     }
@@ -306,21 +356,27 @@ internal class CollapsibleNativeHostView(
             .takeIf { it > 0 }
             ?.times(1_000L)
             ?: return false
-        val lastCloseTime = lastExpandedCloseTimes[collapsibleExpandCooldownKey] ?: return false
-        return SystemClock.elapsedRealtime() - lastCloseTime < cooldownMillis
+        return expandRegistry.isCooldownActive(
+            key = collapsibleExpandCooldownKey,
+            cooldownMillis = cooldownMillis,
+            nowMillis = SystemClock.elapsedRealtime(),
+        )
     }
 
     private fun markExpandedClosed() {
         if (collapsibleExpandCooldownSecond <= 0) return
-        lastExpandedCloseTimes[collapsibleExpandCooldownKey] = SystemClock.elapsedRealtime()
+        expandRegistry.markClosed(
+            key = collapsibleExpandCooldownKey,
+            nowMillis = SystemClock.elapsedRealtime(),
+        )
     }
 
     private fun hasNativeAdShownExpanded(nativeAd: NativeAd): Boolean {
-        return expandedShownNativeAds.contains(nativeAd)
+        return expandRegistry.hasExpanded(nativeAd)
     }
 
     private fun markNativeAdExpandedShown(nativeAd: NativeAd) {
-//        expandedShownNativeAds.add(nativeAd)
+        expandRegistry.markExpanded(nativeAd)
     }
 }
 
@@ -331,13 +387,52 @@ internal class CollapsibleExpandState {
         manuallyExpanded = expanded
     }
 
+    /** Drops a manual request once it has been applied, so the next ad follows the automatic rules. */
+    fun reset() {
+        manuallyExpanded = null
+    }
+
+    /**
+     * A newly loaded native ad always gets its expanded state, so the only thing holding an ad
+     * back is having been shown expanded already.
+     *
+     * @param isExpandCooldownActive still reported by the caller but deliberately not part of the
+     *   decision: the cooldown must not delay a fresh ad, and an ad that already had its expanded
+     *   run is stopped by [hasNativeAdShownExpanded] anyway.
+     */
     fun shouldExpand(
         isSameShowingExpandedNativeAd: Boolean,
         isExpandCooldownActive: Boolean,
         hasNativeAdShownExpanded: Boolean,
     ): Boolean {
         manuallyExpanded?.let { return it }
-        return isSameShowingExpandedNativeAd ||
-            (!isExpandCooldownActive && !hasNativeAdShownExpanded)
+        return isSameShowingExpandedNativeAd || !hasNativeAdShownExpanded
+    }
+}
+
+internal class CollapsibleExpandRegistry<T : Any> {
+    private val lastCloseTimes = mutableMapOf<String, Long>()
+    private val expandedItems: MutableSet<T> =
+        Collections.newSetFromMap(WeakHashMap<T, Boolean>())
+
+    fun isCooldownActive(
+        key: String,
+        cooldownMillis: Long,
+        nowMillis: Long,
+    ): Boolean {
+        val lastCloseTime = lastCloseTimes[key] ?: return false
+        return nowMillis - lastCloseTime < cooldownMillis
+    }
+
+    fun markClosed(key: String, nowMillis: Long) {
+        lastCloseTimes[key] = nowMillis
+    }
+
+    fun hasExpanded(item: T): Boolean {
+        return expandedItems.contains(item)
+    }
+
+    fun markExpanded(item: T) {
+        expandedItems.add(item)
     }
 }

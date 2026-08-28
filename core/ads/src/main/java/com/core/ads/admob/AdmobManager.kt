@@ -99,6 +99,13 @@ private const val AD_FORMAT_NATIVE = "native"
 private const val AD_FORMAT_REWARDED = "rewarded"
 private const val AD_FORMAT_REWARDED_INTERSTITIAL = "rewarded_interstitial"
 
+internal fun shouldUseCachedNativeAd(
+    isExpired: Boolean,
+    isReload: Boolean,
+): Boolean {
+    return !isExpired && !isReload
+}
+
 // Safety net: if a full-screen load neither succeeds nor fails within this window (e.g. the
 // driving Activity is destroyed mid-load and the SDK never calls back), force-release the
 // stuck ad unit so waiting placements don't stay latched on isLoading = true forever.
@@ -1547,12 +1554,18 @@ class AdmobManager @Inject constructor(
         val nativeAdPlace = adHolder.adPlace as NativeAdPlace
 
         val nativeAd = adHolder.nativeAd
-        val isAdExpired = adHolder.isAdExpired((nativeAdPlace.expiredTimeSecond ?: remoteConfigRepository.getNativeAdConfig().expiredTimeSecond).toLong() * 1_000L) || isReload
-        if (nativeAd != null) {
+        val nativeAdTtlMillis = (nativeAdPlace.expiredTimeSecond
+            ?: remoteConfigRepository.getNativeAdConfig().expiredTimeSecond).toLong() * 1_000L
+        val isAdExpired = adHolder.isAdExpired(nativeAdTtlMillis)
+        if (
+            nativeAd != null &&
+            shouldUseCachedNativeAd(
+                isExpired = isAdExpired,
+                isReload = isReload,
+            )
+        ) {
             notifyNativeLoaded(nativeAd, nativeAdPlace)
-            if(!isAdExpired) {
-                return
-            }
+            return
         }
         Log.d(TAG, "loadNativeAdIfNeed: isReload $isReload")
 
@@ -1680,18 +1693,12 @@ class AdmobManager @Inject constructor(
 
                                     else -> {
                                         Log.i(TAG, "Native retry exceeded count$placeName")
-                                        if (nativeAdConfig.isHideWhenError) {
-                                            notifyBannerNativeFailedToLoad(placeName)
-                                        }
-                                        adHolder.reset()
+                                        finishFailedNativeLoad(adHolder, nativeAdConfig.isHideWhenError)
                                     }
                                 }
                             } else {
                                 Log.i(TAG, "Native not retry $placeName")
-                                if (nativeAdConfig.isHideWhenError) {
-                                    notifyBannerNativeFailedToLoad(placeName)
-                                }
-                                adHolder.reset()
+                                finishFailedNativeLoad(adHolder, nativeAdConfig.isHideWhenError)
                             }
                         }
 
@@ -1976,6 +1983,20 @@ class AdmobManager @Inject constructor(
             activity.removeLoader()
             notifyAdFullScreenCompleted(placeName, false)
         }
+    }
+
+    /**
+     * Kết thúc một lượt load native thất bại.
+     *
+     * Với reload, native cũ vẫn đang được container hiển thị nên không xoá nó khỏi holder, và cũng
+     * không ẩn placement: ẩn đi là mất một quảng cáo đang chạy tốt chỉ vì lượt refresh trượt.
+     */
+    private fun finishFailedNativeLoad(adHolder: NativeAdHolder, isHideWhenError: Boolean) {
+        val hasCachedNativeAd = adHolder.nativeAd != null
+        if (isHideWhenError && !hasCachedNativeAd) {
+            notifyBannerNativeFailedToLoad(adHolder.adPlace.placeName)
+        }
+        adHolder.resetLoadState()
     }
 
     private fun failBannerNativeLoadBecauseNoAdUnit(adHolder: AdHolder) {

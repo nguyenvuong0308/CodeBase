@@ -116,11 +116,19 @@ data class NativeAdHolder(
     var loadedAtMs: Long = 0L,
 ): AdHolder() {
     override fun reset() {
+        resetLoadState()
+        clearNativeAd()
+//        needRetry = true // Quyền retry của native do flow gọi load quyết định.
+    }
+
+    /**
+     * Chỉ reset trạng thái load, giữ lại native đang cache. Dùng khi một lượt load thất bại nhưng
+     * native cũ vẫn đang được container hiển thị: xoá nó sẽ làm hỏng quảng cáo đang trên màn hình.
+     */
+    fun resetLoadState() {
         isLoading = false
         isWaitLoadToShow = false
-        clearNativeAd()
         retryCount = 0
-//        needRetry = true // Quyền retry của native do flow gọi load quyết định.
     }
 
     fun clearNativeAd() {

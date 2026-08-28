@@ -28,7 +28,7 @@ class CollapsibleNativeTestActivity : CoreActivity<ActivityNativeCollapsibleTest
             }
         }
         viewBinding.reloadButton.setOnSingleClick {
-            recreate()
+            contextAds?.loadBannerOrNativeAds(adPlaceName = TEST_PLACE_NAME, isReload = true, oneTimeLoad = false)
         }
         val controls = CollapsibleNativeTestControls(viewBinding.layoutNative::setNativeExpanded)
         viewBinding.expandButton.setOnSingleClick { controls.expand() }

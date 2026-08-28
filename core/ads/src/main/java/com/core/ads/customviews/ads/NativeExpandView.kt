@@ -18,7 +18,7 @@ import com.core.dimens.R
 import com.core.utilities.isValidGlideContext
 import com.google.android.gms.ads.nativead.NativeAd
 
-/** Expanded native renderer used exclusively by [CollapsibleNativeHostView]. */
+/** Expanded native renderer used exclusively by [CollapsibleNativeController]. */
 internal class NativeExpandView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,

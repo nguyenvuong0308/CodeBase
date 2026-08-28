@@ -42,6 +42,19 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
     private var adLoadBannerNativeUiResource: AdLoadBannerNativeUiResource? = null
 
+    /**
+     * Created on demand: only collapsible native places need it, and [setVisibility] may run
+     * before this layout finishes constructing.
+     */
+    private var collapsibleNativeControllerOrNull: CollapsibleNativeController? = null
+
+    private val collapsibleNativeController: CollapsibleNativeController
+        get() = collapsibleNativeControllerOrNull
+            ?: CollapsibleNativeController(
+                anchorView = this,
+                onClose = { onClose?.invoke() },
+            ).also { collapsibleNativeControllerOrNull = it }
+
     private val customNativeAds: CustomNativeAds
         get() {
             return CustomNativeProvider.getInstance().getCustomNativeAds()
@@ -117,6 +130,8 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
         }
 
         if(findOldAdView() == null) {
+            // A shimmer takes the ad's place, so an expanded popup must not stay on screen.
+            collapsibleNativeControllerOrNull?.release()
             removeAllViewInChildViewIfNeed()
             runCatching {
                 addView(placeHolderView)
@@ -149,6 +164,7 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
         } else {
             placeHolderView?.setPlaceHolder(shimmerResId)
         }
+        collapsibleNativeControllerOrNull?.release()
         removeAllViewInChildViewIfNeed()
         addView(placeHolderView)
         placeHolderView?.startShimmer()
@@ -192,6 +208,7 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
     }
 
     private fun removeAllViewInChildViewIfNeed() {
+//        collapsibleNativeControllerOrNull?.release()
         if (isNotEmpty()) {
             val childView = getChildAt(0)
             if (childView is BaseNativeTemplateView) {
@@ -298,22 +315,23 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
             is NativeTemplateSize.CustomKey -> customNativeAds.createNativeAds(context, nativeAdPlace)
         }
-        val nativeTemplateView = if (nativeAdPlace.isNativeCollapsible) {
-            CollapsibleNativeHostView(
-                context = context,
-                inlineTemplateView = inlineTemplateView,
-            )
-        } else {
-            inlineTemplateView
-        }
         runCatching {
-            addView(nativeTemplateView)
+            addView(inlineTemplateView)
         }
 
-        nativeTemplateView.applyStyles(style)
-        nativeTemplateView.setNativeAd(nativeAd)
-        nativeTemplateView.onClose = {
-            onClose?.invoke()
+        if (nativeAdPlace.isNativeCollapsible) {
+            // The controller owns onClose for collapsible places: closing has to dismiss the popup.
+            collapsibleNativeController.bind(
+                inlineTemplateView = inlineTemplateView,
+                nativeAd = nativeAd,
+                styles = style,
+            )
+        } else {
+            inlineTemplateView.onClose = {
+                onClose?.invoke()
+            }
+            inlineTemplateView.applyStyles(style)
+            inlineTemplateView.setNativeAd(nativeAd)
         }
     }
 
@@ -337,6 +355,7 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
                         adResource.nativeTemplateSize
                     )
                     visibleIf(canVisible)
+                collapsibleNativeController.release()
             }
 
             is AdLoadBannerNativeUiResource.AdFailed -> {
@@ -370,6 +389,8 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
         adLoadBannerNativeUiResource = adResource
         when (adResource) {
             is AdLoadBannerNativeUiResource.AdFailed -> {
+                // Collapsing to 0x0 keeps this VISIBLE, so the popup has to be taken down by hand.
+                collapsibleNativeControllerOrNull?.onAnchorHidden()
                 changeSize(0, 0)
             }
 
@@ -407,21 +428,32 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
     }
 
     override fun onDetachedFromWindow() {
+        collapsibleNativeControllerOrNull?.onAnchorDetached()
         super.onDetachedFromWindow()
         onClose = null
     }
 
+    override fun setVisibility(visibility: Int) {
+        super.setVisibility(visibility)
+        // An expanded native lives in its own window; hiding this container never dismisses it.
+        if (visibility != VISIBLE) {
+            collapsibleNativeControllerOrNull?.onAnchorHidden()
+        }
+    }
+
     fun pauseCloseCountDown() {
         getCurrentNativeTemplateView()?.onHostPause()
+        collapsibleNativeControllerOrNull?.onHostPause()
     }
 
     fun resumeCloseCountDown() {
         getCurrentNativeTemplateView()?.onHostResume()
+        collapsibleNativeControllerOrNull?.onHostResume()
     }
 
     /** Explicitly expands or collapses the currently displayed collapsible native ad. */
     fun setNativeExpanded(expanded: Boolean) {
-        (getCurrentNativeTemplateView() as? CollapsibleNativeHostView)?.setExpanded(expanded)
+        collapsibleNativeController.setExpanded(expanded)
     }
 
     private fun getCurrentNativeTemplateView(): BaseNativeTemplateView? {

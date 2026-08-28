@@ -22,6 +22,19 @@ class CollapsibleExpandStateTest {
     }
 
     @Test
+    fun `automatic state keeps the popup when the same expanded ad is rebound`() {
+        val state = CollapsibleExpandState()
+
+        assertTrue(
+            state.shouldExpand(
+                isSameShowingExpandedNativeAd = true,
+                isExpandCooldownActive = true,
+                hasNativeAdShownExpanded = true,
+            ),
+        )
+    }
+
+    @Test
     fun `manual collapse wins when the same ad popup is showing`() {
         val state = CollapsibleExpandState()
 
@@ -54,6 +67,22 @@ class CollapsibleExpandStateTest {
     }
 
     @Test
+    fun `manual request stops applying once it has been reset`() {
+        val state = CollapsibleExpandState()
+
+        state.setExpanded(true)
+        state.reset()
+
+        assertFalse(
+            state.shouldExpand(
+                isSameShowingExpandedNativeAd = false,
+                isExpandCooldownActive = false,
+                hasNativeAdShownExpanded = true,
+            ),
+        )
+    }
+
+    @Test
     fun `automatic state expands a new ad when no blocker is active`() {
         val state = CollapsibleExpandState()
 
@@ -67,10 +96,10 @@ class CollapsibleExpandStateTest {
     }
 
     @Test
-    fun `automatic state keeps ad collapsed during cooldown`() {
+    fun `automatic state expands a new ad even while the cooldown is active`() {
         val state = CollapsibleExpandState()
 
-        assertFalse(
+        assertTrue(
             state.shouldExpand(
                 isSameShowingExpandedNativeAd = false,
                 isExpandCooldownActive = true,
