@@ -348,6 +348,7 @@
             "expired_time_second": 10,
             "count_down_timer": 3,
             "pip_anchor_mode": "flexible",
+            "pip_layout_format": "media_card",
             "pip_margin_dp": 20,
             "pip_top_margin_dp": 20
             }

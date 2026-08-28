@@ -190,6 +190,7 @@ internal class AdPlaceModelMapper @Inject constructor(
             controlClosePosition = model.controlClosePosition,
             collapsibleExpandCooldownSecond = model.collapsibleExpandCooldownSecond,
             pipAnchorMode = model.pipAnchorMode,
+            pipLayoutFormat = model.pipLayoutFormat,
             pipMarginDp = model.pipMarginDp,
             pipTopMarginDp = model.pipTopMarginDp,
             textColorAdsNotifyView = model.textColorAdsNotifyView,

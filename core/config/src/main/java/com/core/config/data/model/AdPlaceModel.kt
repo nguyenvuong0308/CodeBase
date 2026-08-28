@@ -159,6 +159,9 @@ internal data class AdPlaceModel(
     @Json(name = "pip_anchor_mode")
     val pipAnchorMode: String?,
 
+    @Json(name = "pip_layout_format")
+    val pipLayoutFormat: String?,
+
     @Json(name = "pip_margin_dp")
     val pipMarginDp: Float?,
 

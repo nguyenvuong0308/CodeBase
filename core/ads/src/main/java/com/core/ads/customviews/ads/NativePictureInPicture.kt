@@ -6,6 +6,7 @@ import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
 import android.graphics.PixelFormat
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.CountDownTimer
 import android.util.AttributeSet
@@ -17,6 +18,8 @@ import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -26,6 +29,7 @@ import com.core.ads.R as AdsR
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
+import com.core.ads.databinding.GntPictureInPictureMediaCardTemplateViewBinding
 import com.core.ads.databinding.GntPictureInPictureTemplateViewBinding
 import com.core.ads.domain.AdLoadBannerNativeUiResource
 import com.core.ads.domain.AdsManager
@@ -37,7 +41,10 @@ import com.core.config.domain.data.IAdPlaceName
 import com.core.config.domain.data.NativeAdPlace
 import com.core.utilities.dpToPx
 import com.core.utilities.isValidGlideContext
+import com.google.android.gms.ads.nativead.MediaView
 import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.gms.ads.nativead.NativeAdView
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -66,8 +73,63 @@ class NativePictureInPicture @JvmOverloads constructor(
         val marginBottomDp: Float = DEFAULT_MARGIN_DP,
         val initialGravity: Int = Gravity.TOP or Gravity.END,
         val anchorMode: AnchorMode = AnchorMode.Flexible,
-        val closeCountDownSeconds: Long = DEFAULT_CLOSE_COUNTDOWN_SECONDS
+        val closeCountDownSeconds: Long = DEFAULT_CLOSE_COUNTDOWN_SECONDS,
+        val layoutFormat: LayoutFormat = LayoutFormat.Compact,
+        val heightResId: Int? = null
     )
+
+    enum class LayoutFormat(val key: String) {
+        Compact("compact"),
+        MediaCard("media_card");
+
+        internal fun resolveWidthResId(sizeResId: Int): Int = when (this) {
+            Compact -> sizeResId
+            MediaCard -> DimenR.dimen._208dp
+        }
+
+        internal fun resolveHeightResId(sizeResId: Int, heightResId: Int?): Int {
+            return heightResId ?: when (this) {
+                Compact -> sizeResId
+                MediaCard -> DimenR.dimen._208dp
+            }
+        }
+
+        internal fun coerceWidthPx(
+            requestedWidthPx: Int,
+            minimumMediaSizePx: Int,
+            mediaHorizontalMarginsPx: Int = 0
+        ): Int = when (this) {
+            Compact -> requestedWidthPx
+            MediaCard -> maxOf(
+                requestedWidthPx,
+                minimumMediaSizePx + mediaHorizontalMarginsPx
+            )
+        }
+
+        internal fun coerceHeightPx(
+            requestedHeightPx: Int,
+            minimumMediaSizePx: Int,
+            nonMediaContentHeightPx: Int
+        ): Int = when (this) {
+            Compact -> requestedHeightPx
+            MediaCard -> maxOf(
+                requestedHeightPx,
+                minimumMediaSizePx + nonMediaContentHeightPx
+            )
+        }
+
+        companion object {
+            fun fromKey(key: String?): LayoutFormat? {
+                return entries.firstOrNull { format ->
+                    format.key.equals(key, ignoreCase = true)
+                }
+            }
+
+            internal fun resolve(key: String?, fallback: LayoutFormat): LayoutFormat {
+                return fromKey(key) ?: fallback
+            }
+        }
+    }
 
     enum class AnchorMode(val key: String) {
         Flexible("flexible"),
@@ -93,10 +155,71 @@ class NativePictureInPicture @JvmOverloads constructor(
         private const val PROGRESS_MAX = 1000
     }
 
-    private val binding: GntPictureInPictureTemplateViewBinding by lazy {
-        GntPictureInPictureTemplateViewBinding.inflate(LayoutInflater.from(context), this)
+    private interface PictureInPictureLayoutBinding {
+        val root: View
+        val background: View
+        val nativeAdView: NativeAdView
+        val primary: TextView
+        val cta: TextView
+        val icon: ImageView
+        val body: TextView?
+        val advertiser: TextView?
+        val adNotificationView: TextView
+        val layoutCta: View
+        val ctaArrow: ImageView?
+        val mediaView: MediaView?
+        val closeButton: ImageView
+        val closeButtonContainer: View
+        val actionProgress: CircularProgressIndicator
+        val iconSizeResId: Int
+        val iconRadiusResId: Int
     }
 
+    private class CompactLayoutBinding(
+        private val binding: GntPictureInPictureTemplateViewBinding
+    ) : PictureInPictureLayoutBinding {
+        override val root: View = binding.root
+        override val background: View = binding.background
+        override val nativeAdView: NativeAdView = binding.nativeAdView
+        override val primary: TextView = binding.primary
+        override val cta: TextView = binding.cta
+        override val icon: ImageView = binding.icon
+        override val body: TextView = binding.body
+        override val advertiser: TextView = binding.advertiser
+        override val adNotificationView: TextView = binding.adNotificationView
+        override val layoutCta: View = binding.layoutCta
+        override val ctaArrow: ImageView = binding.ctaArrow
+        override val mediaView: MediaView? = null
+        override val closeButton: ImageView = binding.closeButton
+        override val closeButtonContainer: View = binding.closeButtonContainer
+        override val actionProgress: CircularProgressIndicator = binding.actionProgress
+        override val iconSizeResId: Int = DimenR.dimen._42dp
+        override val iconRadiusResId: Int = DimenR.dimen._6dp
+    }
+
+    private class MediaCardLayoutBinding(
+        private val binding: GntPictureInPictureMediaCardTemplateViewBinding
+    ) : PictureInPictureLayoutBinding {
+        override val root: View = binding.root
+        override val background: View = binding.background
+        override val nativeAdView: NativeAdView = binding.nativeAdView
+        override val primary: TextView = binding.primary
+        override val cta: TextView = binding.cta
+        override val icon: ImageView = binding.icon
+        override val body: TextView? = null
+        override val advertiser: TextView? = null
+        override val adNotificationView: TextView = binding.adNotificationView
+        override val layoutCta: View = binding.layoutCta
+        override val ctaArrow: ImageView? = null
+        override val mediaView: MediaView = binding.mediaView
+        override val closeButton: ImageView = binding.closeButton
+        override val closeButtonContainer: View = binding.closeButtonContainer
+        override val actionProgress: CircularProgressIndicator = binding.actionProgress
+        override val iconSizeResId: Int = DimenR.dimen._30dp
+        override val iconRadiusResId: Int = DimenR.dimen._4dp
+    }
+
+    private lateinit var activeLayoutBinding: PictureInPictureLayoutBinding
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private var windowManager: WindowManager? = null
     private var windowParams: WindowManager.LayoutParams? = null
@@ -113,11 +236,15 @@ class NativePictureInPicture @JvmOverloads constructor(
     private var snapAnimator: ValueAnimator? = null
     private var closeCountDownTimer: CountDownTimer? = null
     private var isCloseEnabled = true
+    private var closeProgress = PROGRESS_MAX
     private var isClosedByUser = false
     private var savedWindowPosition: Pair<Int, Int>? = null
     private var savedWindowPositionHostDecorView: WeakReference<View>? = null
     private var pendingConsumedPlaceName: IAdPlaceName? = null
     private var pendingConsumedNativeAd: NativeAd? = null
+    private var boundNativeAd: NativeAd? = null
+    private var appliedStyles: NativeTemplateStyle? = null
+    private var displayedLayoutFormat: LayoutFormat? = null
     private val adsManager: AdsManager? by lazy(LazyThreadSafetyMode.NONE) {
         runCatching {
             EntryPointAccessors.fromApplication(
@@ -147,14 +274,7 @@ class NativePictureInPicture @JvmOverloads constructor(
     }
 
     init {
-        binding.closeButton.isClickable = false
-        binding.closeButtonContainer.setOnClickListener {
-            if (isCloseEnabled) {
-                isClosedByUser = true
-                dismiss()
-                onClose?.invoke()
-            }
-        }
+        applyLayoutFormat(LayoutFormat.Compact)
     }
 
     fun processAdResource(
@@ -171,6 +291,10 @@ class NativePictureInPicture @JvmOverloads constructor(
             is AdLoadBannerNativeUiResource.NativeAdLoaded -> {
                 val anchorMode = AnchorMode.fromKey(adResource.nativeAdPlace.pipAnchorMode)
                     ?: config.anchorMode
+                val layoutFormat = LayoutFormat.resolve(
+                    key = adResource.nativeAdPlace.pipLayoutFormat,
+                    fallback = config.layoutFormat
+                )
                 val closeCountDownSeconds = adResource.nativeAdPlace.countDownTimer
                     ?.coerceAtLeast(0)
                     ?.toLong()
@@ -188,6 +312,7 @@ class NativePictureInPicture @JvmOverloads constructor(
                     styles = createNativeTemplateStyle(adResource.nativeAdPlace),
                     config = config.copy(
                         anchorMode = anchorMode,
+                        layoutFormat = layoutFormat,
                         closeCountDownSeconds = closeCountDownSeconds,
                         marginStartDp = marginDp,
                         marginTopDp = marginTopDp,
@@ -243,6 +368,8 @@ class NativePictureInPicture @JvmOverloads constructor(
         config: Config = Config()
     ): Boolean {
         if (isClosedByUser) return false
+        currentConfig = config
+        applyLayoutFormat(config.layoutFormat)
         setNativeAd(nativeAd)
         styles?.let(::applyStyles)
         return show(activity, config)
@@ -255,6 +382,9 @@ class NativePictureInPicture @JvmOverloads constructor(
             return false
         }
 
+        currentConfig = config
+        applyLayoutFormat(config.layoutFormat)
+
         val decorView = activity.window.decorView
         if (decorView.windowToken == null) {
             decorView.post {
@@ -263,7 +393,6 @@ class NativePictureInPicture @JvmOverloads constructor(
             return false
         }
 
-        currentConfig = config
         val manager = activity.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val params = createLayoutParams(activity, config)
 
@@ -380,57 +509,136 @@ class NativePictureInPicture @JvmOverloads constructor(
     }
 
     override fun setNativeAd(nativeAd: NativeAd) {
-        binding.nativeAdView.callToActionView = binding.cta
-        binding.nativeAdView.headlineView = binding.primary
-        binding.nativeAdView.iconView = binding.icon
+        boundNativeAd = nativeAd
+        bindNativeAd(activeLayoutBinding, nativeAd)
+    }
 
+    private fun bindNativeAd(
+        binding: PictureInPictureLayoutBinding,
+        nativeAd: NativeAd
+    ) {
         binding.primary.text = nativeAd.headline.orEmpty()
         binding.cta.text = nativeAd.callToAction.orEmpty()
 
         val body = nativeAd.body.orEmpty()
-        binding.body.text = body.ifEmpty {
-            nativeAd.advertiser ?: nativeAd.store ?: nativeAd.headline.orEmpty()
-        }
-        binding.nativeAdView.bodyView = binding.body
-
-        val advertiser = nativeAd.advertiser ?: nativeAd.store
-        binding.advertiser.visibility = if (advertiser.isNullOrBlank()) GONE else VISIBLE
-        binding.advertiser.text = advertiser.orEmpty()
-        binding.nativeAdView.advertiserView = binding.advertiser
-
-        binding.icon.visibility = GONE
-        nativeAd.icon?.let {
-            binding.icon.visibility = VISIBLE
-            if (context.isValidGlideContext()) {
-                Glide.with(this)
-                    .load(it.drawable)
-                    .override(resources.getDimensionPixelSize(DimenR.dimen._42dp))
-                    .skipMemoryCache(true)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .apply(
-                        RequestOptions.bitmapTransform(
-                            RoundedCornersTransformation(
-                                context.resources.getDimensionPixelSize(DimenR.dimen._6dp),
-                                0,
-                                RoundedCornersTransformation.CornerType.ALL
-                            )
-                        )
-                    )
-                    .into(binding.icon)
+        binding.body?.let { bodyView ->
+            bodyView.text = body.ifEmpty {
+                nativeAd.advertiser ?: nativeAd.store ?: nativeAd.headline.orEmpty()
             }
         }
 
+        val advertiser = nativeAd.advertiser ?: nativeAd.store
+        binding.advertiser?.let { advertiserView ->
+            advertiserView.visibility = if (advertiser.isNullOrBlank()) GONE else VISIBLE
+            advertiserView.text = advertiser.orEmpty()
+        }
+
+        binding.icon.visibility = GONE
+        nativeAd.icon?.drawable?.let { drawable ->
+            binding.icon.visibility = VISIBLE
+            loadIcon(drawable, binding)
+        }
+
+        registerNativeAdAssets(binding)
         binding.nativeAdView.setNativeAd(nativeAd)
     }
 
+    private fun loadIcon(
+        drawable: Drawable,
+        binding: PictureInPictureLayoutBinding
+    ) {
+        if (!context.isValidGlideContext()) return
+
+        Glide.with(this)
+            .load(drawable)
+            .override(resources.getDimensionPixelSize(binding.iconSizeResId))
+            .skipMemoryCache(true)
+            .diskCacheStrategy(DiskCacheStrategy.NONE)
+            .apply(
+                RequestOptions.bitmapTransform(
+                    RoundedCornersTransformation(
+                        context.resources.getDimensionPixelSize(binding.iconRadiusResId),
+                        0,
+                        RoundedCornersTransformation.CornerType.ALL
+                    )
+                )
+            )
+            .into(binding.icon)
+    }
+
     override fun destroyNativeAd() {
-        binding.nativeAdView.destroy()
+        boundNativeAd = null
+        activeLayoutBinding.nativeAdView.destroy()
+    }
+
+    private fun applyLayoutFormat(layoutFormat: LayoutFormat) {
+        if (displayedLayoutFormat == layoutFormat && ::activeLayoutBinding.isInitialized) return
+
+        if (::activeLayoutBinding.isInitialized) {
+            activeLayoutBinding.nativeAdView.destroy()
+        }
+        removeAllViews()
+
+        val inflater = LayoutInflater.from(context)
+        activeLayoutBinding = when (layoutFormat) {
+            LayoutFormat.Compact -> CompactLayoutBinding(
+                GntPictureInPictureTemplateViewBinding.inflate(inflater, this, false)
+            )
+
+            LayoutFormat.MediaCard -> MediaCardLayoutBinding(
+                GntPictureInPictureMediaCardTemplateViewBinding.inflate(inflater, this, false)
+            )
+        }
+        displayedLayoutFormat = layoutFormat
+        addView(activeLayoutBinding.root)
+        setupCloseButton(activeLayoutBinding)
+        boundNativeAd?.let { nativeAd ->
+            bindNativeAd(activeLayoutBinding, nativeAd)
+        }
+        appliedStyles?.let { styles ->
+            applyStyles(activeLayoutBinding, styles)
+        }
+    }
+
+    private fun setupCloseButton(binding: PictureInPictureLayoutBinding) {
+        binding.closeButton.isClickable = false
+        binding.closeButtonContainer.setOnClickListener {
+            if (isCloseEnabled) {
+                isClosedByUser = true
+                dismiss()
+                onClose?.invoke()
+            }
+        }
+        renderCloseButtonState(binding)
+    }
+
+    private fun registerNativeAdAssets(binding: PictureInPictureLayoutBinding) {
+        binding.nativeAdView.callToActionView = binding.cta
+        binding.nativeAdView.headlineView = binding.primary
+        binding.nativeAdView.iconView = binding.icon
+        binding.nativeAdView.mediaView = binding.mediaView
+        binding.nativeAdView.bodyView = binding.body
+        binding.nativeAdView.advertiserView = binding.advertiser
     }
 
     override fun applyStyles(styles: NativeTemplateStyle) {
+        appliedStyles = styles
+        applyStyles(activeLayoutBinding, styles)
+        invalidate()
+        requestLayout()
+    }
+
+    private fun applyStyles(
+        binding: PictureInPictureLayoutBinding,
+        styles: NativeTemplateStyle
+    ) {
         styles.mainBackgroundColor?.let {
             binding.background.background = it
             binding.primary.background = it
+        }
+
+        styles.mediaBackgroundColor?.let { color ->
+            binding.mediaView?.setBackgroundColor(color.toColorInt())
         }
 
         styles.primaryTextTypeface?.let {
@@ -447,13 +655,13 @@ class NativePictureInPicture @JvmOverloads constructor(
 
         styles.callToActionTypefaceColor?.let {
             binding.cta.setTextColor(it)
-            binding.ctaArrow.setColorFilter(it)
+            binding.ctaArrow?.setColorFilter(it)
         }
 
         styles.tertiaryTextTypefaceColor?.let {
             val color = it.toColorInt()
-            binding.body.setTextColor(color)
-            binding.advertiser.setTextColor(color)
+            binding.body?.setTextColor(color)
+            binding.advertiser?.setTextColor(color)
         }
 
         val ctaTextSize = styles.callToActionTextSize
@@ -468,7 +676,7 @@ class NativePictureInPicture @JvmOverloads constructor(
 
         val tertiaryTextSize = styles.tertiaryTextSize
         if (tertiaryTextSize > 0) {
-            binding.body.applyTextSizeFromDpDimen(tertiaryTextSize)
+            binding.body?.applyTextSizeFromDpDimen(tertiaryTextSize)
         }
 
         styles.callToActionBackgroundColor?.let {
@@ -494,9 +702,6 @@ class NativePictureInPicture @JvmOverloads constructor(
             binding.background.setBackgroundResource(it)
         }
 
-//        styles.backgroundAdsNotifyView?.let {
-//            binding.adNotificationView.setBackgroundResource(it)
-//        }
         applyAdsNotifyViewStyles(styles, binding.adNotificationView)
 
         styles.primaryTextBackgroundColor?.let {
@@ -518,9 +723,6 @@ class NativePictureInPicture @JvmOverloads constructor(
                 color.toColorInt()
             )
         }
-
-        invalidate()
-        requestLayout()
     }
 
     override fun onHostPause() {
@@ -581,10 +783,33 @@ class NativePictureInPicture @JvmOverloads constructor(
         activity: Activity,
         config: Config
     ): WindowManager.LayoutParams {
-        val sizePx = resources.getDimensionPixelSize(config.sizeResId)
+        val minimumMediaSizePx = resources.getDimensionPixelSize(
+            AdsR.dimen.native_picture_in_picture_media_min_size
+        )
+        val mediaMarginPx = resources.getDimensionPixelSize(DimenR.dimen._1_5dp)
+        val requestedWidthPx = resources.getDimensionPixelSize(
+            config.layoutFormat.resolveWidthResId(config.sizeResId)
+        )
+        val widthPx = config.layoutFormat.coerceWidthPx(
+            requestedWidthPx = requestedWidthPx,
+            minimumMediaSizePx = minimumMediaSizePx,
+            mediaHorizontalMarginsPx = mediaMarginPx * 2
+        )
+        val requestedHeightPx = resources.getDimensionPixelSize(
+            config.layoutFormat.resolveHeightResId(config.sizeResId, config.heightResId)
+        )
+        val nonMediaContentHeightPx = resources.getDimensionPixelSize(DimenR.dimen._42dp) +
+            resources.getDimensionPixelSize(DimenR.dimen._40dp) +
+            resources.getDimensionPixelSize(DimenR.dimen._3dp) +
+            mediaMarginPx * 2
+        val heightPx = config.layoutFormat.coerceHeightPx(
+            requestedHeightPx = requestedHeightPx,
+            minimumMediaSizePx = minimumMediaSizePx,
+            nonMediaContentHeightPx = nonMediaContentHeightPx
+        )
         measure(
-            MeasureSpec.makeMeasureSpec(sizePx, MeasureSpec.EXACTLY),
-            MeasureSpec.makeMeasureSpec(sizePx, MeasureSpec.EXACTLY)
+            MeasureSpec.makeMeasureSpec(widthPx, MeasureSpec.EXACTLY),
+            MeasureSpec.makeMeasureSpec(heightPx, MeasureSpec.EXACTLY)
         )
 
         val bounds = resolveHostBounds(activity)
@@ -593,19 +818,19 @@ class NativePictureInPicture @JvmOverloads constructor(
         val marginEndPx = context.dpToPx(config.marginEndDp)
         val marginBottomPx = context.dpToPx(config.marginBottomDp)
         val initialX = if (config.initialGravity and Gravity.END == Gravity.END) {
-            bounds.first - sizePx - marginEndPx
+            bounds.first - widthPx - marginEndPx
         } else {
             marginStartPx
         }
         val initialY = if (config.initialGravity and Gravity.BOTTOM == Gravity.BOTTOM) {
-            bounds.second - sizePx - marginBottomPx
+            bounds.second - heightPx - marginBottomPx
         } else {
             marginTopPx
         }
 
         return WindowManager.LayoutParams(
-            sizePx,
-            sizePx,
+            widthPx,
+            heightPx,
             WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
             PixelFormat.TRANSLUCENT
@@ -784,7 +1009,9 @@ class NativePictureInPicture @JvmOverloads constructor(
         val bounds = resolveHostBounds(activity)
         val viewWidth = measuredWidth.takeIf { it > 0 }
             ?: width.takeIf { it > 0 }
-            ?: resources.getDimensionPixelSize(currentConfig.sizeResId)
+            ?: resources.getDimensionPixelSize(
+                currentConfig.layoutFormat.resolveWidthResId(currentConfig.sizeResId)
+            )
         val targetCenterX = targetX + viewWidth / 2
         return if (targetCenterX < bounds.first / 2) {
             -(targetX + viewWidth).toFloat()
@@ -832,10 +1059,15 @@ class NativePictureInPicture @JvmOverloads constructor(
         progress: Int
     ) {
         isCloseEnabled = isEnabled
-        binding.closeButton.isEnabled = isEnabled
-        binding.closeButton.alpha = if (isEnabled) 1f else 0.65f
-        binding.actionProgress.visibility = if (isEnabled) GONE else VISIBLE
-        binding.actionProgress.progress = progress.coerceIn(0, PROGRESS_MAX)
+        closeProgress = progress.coerceIn(0, PROGRESS_MAX)
+        renderCloseButtonState(activeLayoutBinding)
+    }
+
+    private fun renderCloseButtonState(binding: PictureInPictureLayoutBinding) {
+        binding.closeButton.isEnabled = isCloseEnabled
+        binding.closeButton.alpha = if (isCloseEnabled) 1f else 0.65f
+        binding.actionProgress.visibility = if (isCloseEnabled) GONE else VISIBLE
+        binding.actionProgress.progress = closeProgress
     }
 
     private fun calculateCloseProgress(totalMillis: Long, millisUntilFinished: Long): Int {

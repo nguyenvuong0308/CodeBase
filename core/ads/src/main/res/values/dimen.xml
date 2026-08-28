@@ -2,4 +2,5 @@
 <resources>
     <dimen name="native_cta_radius">@dimen/_28dp</dimen>
     <dimen name="native_cta_right_radius">@dimen/_22dp</dimen>
+    <dimen name="native_picture_in_picture_media_min_size">@dimen/_120dp</dimen>
 </resources>

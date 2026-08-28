@@ -105,6 +105,7 @@ class CollapsibleNativeTestConfigTest {
             controlClosePosition = "left",
             collapsibleExpandCooldownSecond = 10,
             pipAnchorMode = null,
+            pipLayoutFormat = null,
             pipMarginDp = null,
             pipTopMarginDp = null,
             placeName = TestPlace,

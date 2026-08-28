@@ -126,6 +126,7 @@ data class NativeAdPlace(
     val controlClosePosition: String?,
     val collapsibleExpandCooldownSecond: Int?,
     val pipAnchorMode: String?,
+    val pipLayoutFormat: String?,
     val pipMarginDp: Float?,
     val pipTopMarginDp: Float?,
     override val placeName: IAdPlaceName,
