@@ -874,9 +874,23 @@
         <key>language_activity_config</key>
         <value>
             {
-            "version": 2,
+            "version": 1,
             "time_show_loading_lfo": 3
             }
+        </value>
+    </entry>
+
+    <entry>
+        <key>ad_places_disable_when_detect_test_ad</key>
+        <value>
+            [
+            "anchored_uninstall_bottom_step_1",
+            "anchored_uninstall_bottom_step_2",
+            "anchored_onboarding_bottom",
+            "anchored_full_onboarding",
+            "action_next_in_introduction",
+            "action_skip_in_introduction"
+            ]
         </value>
     </entry>
 
