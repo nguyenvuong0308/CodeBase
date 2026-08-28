@@ -26,6 +26,8 @@ class AdjustTracking @Inject constructor() : AdjustAnalytics {
 //        adSourceName?.takeIf { it.isNotBlank() }?.let(adRevenue::setAdRevenueNetwork)
 //        adRevenue.setAdRevenuePlacement(adFormat)
 //        adRevenue.setAdRevenueUnit(adUnitId)
+//        adRevenue.addPartnerParameter("ad_format", adFormat)
+//        adRevenue.addPartnerParameter("ad_unit_id", adUnitId)
 //        Adjust.trackAdRevenue(adRevenue)
     }
 
