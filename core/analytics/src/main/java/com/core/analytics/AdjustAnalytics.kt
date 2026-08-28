@@ -4,6 +4,7 @@ interface AdjustAnalytics {
     fun trackRevenueNetwork(
         adUnitId: String,
         adSourceName: String?,
+        adFormat: String,
         adValueMicros: Long,
         adValueCurrencyCode: String
     )

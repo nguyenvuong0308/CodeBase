@@ -93,6 +93,11 @@ import javax.inject.Singleton
 
 private const val TAG = "AdmobManager"
 private const val CONSENT_AND_MOBILE_ADS_TOTAL_TIMEOUT_MS = 10_000L
+private const val AD_FORMAT_BANNER = "banner"
+private const val AD_FORMAT_INTERSTITIAL = "interstitial"
+private const val AD_FORMAT_NATIVE = "native"
+private const val AD_FORMAT_REWARDED = "rewarded"
+private const val AD_FORMAT_REWARDED_INTERSTITIAL = "rewarded_interstitial"
 
 // Safety net: if a full-screen load neither succeeds nor fails within this window (e.g. the
 // driving Activity is destroyed mid-load and the SDK never calls back), force-release the
@@ -1203,6 +1208,7 @@ class AdmobManager @Inject constructor(
                     trackAdjustAdRevenue(
                         adUnitId = adUnitId,
                         loadedAdapterResponseInfo = p0.responseInfo?.loadedAdapterResponseInfo,
+                        adFormat = AD_FORMAT_INTERSTITIAL,
                         adValueMicros = adValue.valueMicros,
                         adValueCurrencyCode = adValue.currencyCode
                     )
@@ -1352,6 +1358,7 @@ class AdmobManager @Inject constructor(
                     trackAdjustAdRevenue(
                         adUnitId = adUnitId,
                         loadedAdapterResponseInfo = p0.responseInfo?.loadedAdapterResponseInfo,
+                        adFormat = AD_FORMAT_REWARDED_INTERSTITIAL,
                         adValueMicros = adValue.valueMicros,
                         adValueCurrencyCode = adValue.currencyCode
                     )
@@ -1495,6 +1502,7 @@ class AdmobManager @Inject constructor(
                     trackAdjustAdRevenue(
                         adUnitId = adUnitId,
                         loadedAdapterResponseInfo = p0.responseInfo?.loadedAdapterResponseInfo,
+                        adFormat = AD_FORMAT_REWARDED,
                         adValueMicros = adValue.valueMicros,
                         adValueCurrencyCode = adValue.currencyCode
                     )
@@ -1596,6 +1604,7 @@ class AdmobManager @Inject constructor(
                             trackAdjustAdRevenue(
                                 adUnitId = adUnitId,
                                 loadedAdapterResponseInfo = ad.responseInfo?.loadedAdapterResponseInfo,
+                                adFormat = AD_FORMAT_NATIVE,
                                 adValueMicros = adValue.valueMicros,
                                 adValueCurrencyCode = adValue.currencyCode
                             )
@@ -1823,6 +1832,7 @@ class AdmobManager @Inject constructor(
                 trackAdjustAdRevenue(
                     adUnitId = adUnitId,
                     loadedAdapterResponseInfo = responseInfo?.loadedAdapterResponseInfo,
+                    adFormat = AD_FORMAT_BANNER,
                     adValueMicros = adValue.valueMicros,
                     adValueCurrencyCode = adValue.currencyCode
                 )
@@ -2179,12 +2189,14 @@ class AdmobManager @Inject constructor(
     private fun trackAdjustAdRevenue(
         adUnitId: String,
         loadedAdapterResponseInfo: AdapterResponseInfo?,
+        adFormat: String,
         adValueMicros: Long,
         adValueCurrencyCode: String
     ) {
         adjustAnalytics.trackRevenueNetwork(
             adUnitId = adUnitId,
             adSourceName = loadedAdapterResponseInfo?.adSourceName,
+            adFormat = adFormat,
             adValueMicros = adValueMicros,
             adValueCurrencyCode = adValueCurrencyCode
         )

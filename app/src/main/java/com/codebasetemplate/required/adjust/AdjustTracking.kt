@@ -13,6 +13,7 @@ class AdjustTracking @Inject constructor() : AdjustAnalytics {
     override fun trackRevenueNetwork(
         adUnitId: String,
         adSourceName: String?,
+        adFormat: String,
         adValueMicros: Long,
         adValueCurrencyCode: String,
     ) {
@@ -23,6 +24,7 @@ class AdjustTracking @Inject constructor() : AdjustAnalytics {
 //        val adRevenue = AdjustAdRevenue(AD_REVENUE_SOURCE_ADMOB)
 //        adRevenue.setRevenue(adValueMicros.toRevenueAmount(), adValueCurrencyCode)
 //        adSourceName?.takeIf { it.isNotBlank() }?.let(adRevenue::setAdRevenueNetwork)
+//        adRevenue.setAdRevenuePlacement(adFormat)
 //        adRevenue.setAdRevenueUnit(adUnitId)
 //        Adjust.trackAdRevenue(adRevenue)
     }

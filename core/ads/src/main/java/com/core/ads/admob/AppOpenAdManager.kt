@@ -62,6 +62,7 @@ class AppOpenAdManager @Inject constructor(
         // Safety net for a load that neither succeeds nor fails (e.g. Activity destroyed
         // mid-load), so waiting placements don't stay latched on isLoading = true forever.
         private const val APP_OPEN_LOAD_TIMEOUT_MS = 30_000L
+        private const val AD_FORMAT_APP_OPEN = "app_open"
     }
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -208,6 +209,7 @@ class AppOpenAdManager @Inject constructor(
                     trackAdjustAdRevenue(
                         adUnitId = adUnitId,
                         loadedAdapterResponseInfo = ad.responseInfo?.loadedAdapterResponseInfo,
+                        adFormat = AD_FORMAT_APP_OPEN,
                         adValueMicros = adValue.valueMicros,
                         adValueCurrencyCode = adValue.currencyCode
                     )
@@ -550,12 +552,14 @@ class AppOpenAdManager @Inject constructor(
     private fun trackAdjustAdRevenue(
         adUnitId: String,
         loadedAdapterResponseInfo: AdapterResponseInfo?,
+        adFormat: String,
         adValueMicros: Long,
         adValueCurrencyCode: String
     ) {
         adjustAnalytics.trackRevenueNetwork(
             adUnitId = adUnitId,
             adSourceName = loadedAdapterResponseInfo?.adSourceName,
+            adFormat = adFormat,
             adValueMicros = adValueMicros,
             adValueCurrencyCode = adValueCurrencyCode
         )
