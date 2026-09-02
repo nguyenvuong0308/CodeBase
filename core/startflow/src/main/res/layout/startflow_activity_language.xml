@@ -22,6 +22,7 @@
 
         <com.core.baseui.toolbar.CoreToolbarView
             android:id="@+id/toolbar"
+            style="@style/LanguageToolbarStyleV1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:ctv_ic_back_show="false"
