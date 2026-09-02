@@ -85,6 +85,9 @@ class LanguageActivityV2FromSetting : StartFlowActivity<StartflowActivityLanguag
 
     private var hasCheckedNavigation = false
     private var isHandlingBackFromSetting = false
+    private val applyingLanguageMessageAnimator by lazy {
+        ApplyingLanguageMessageAnimator(viewBinding.applyingLanguageMessage)
+    }
 
     override fun onResume() {
         super.onResume()
@@ -100,9 +103,7 @@ class LanguageActivityV2FromSetting : StartFlowActivity<StartflowActivityLanguag
 
     private fun checkIfNavigationIsNeeded() {
         if (appPreferences.navigateAfterChangeLanguage) {
-            viewBinding.lnApplyLoading.visible()
-            viewBinding.languageBack.isEnabled = false
-            viewBinding.languageApply.isEnabled = false
+            showApplyingLanguageState()
             appPreferences.navigateAfterChangeLanguage = false
             if (isFromSetting) {
                 val intent = Intent(
@@ -455,6 +456,12 @@ class LanguageActivityV2FromSetting : StartFlowActivity<StartflowActivityLanguag
         viewBinding.lnApplyLoading.visible()
         viewBinding.languageBack.isEnabled = false
         viewBinding.languageApply.isEnabled = false
+        applyingLanguageMessageAnimator.start()
+    }
+
+    override fun onDestroy() {
+        applyingLanguageMessageAnimator.stop()
+        super.onDestroy()
     }
 
     override fun setupAfterOnBackPressed() {

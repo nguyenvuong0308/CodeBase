@@ -110,6 +110,9 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
     private var pendingApplyOption: LanguageOption? = null
     private var trackingStartedAtMs = 0L
     private var hasLoggedTrackingComplete = false
+    private val applyingLanguageMessageAnimator by lazy {
+        ApplyingLanguageMessageAnimator(viewBinding.applyingLanguageMessage)
+    }
 
     protected abstract val languageNativeAdPlaceName: IAdPlaceName
 
@@ -407,9 +410,7 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
     private fun checkIfNavigationIsNeeded() {
         if (!appPreferences.navigateAfterChangeLanguage) return
 
-        viewBinding.lnApplyLoading.visible()
-        viewBinding.languageBack.isEnabled = false
-        viewBinding.languageApply.isEnabled = false
+        showApplyingLanguageState()
         appPreferences.navigateAfterChangeLanguage = false
 
         val destination = if (isFromSetting) {
@@ -445,6 +446,12 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
         viewBinding.lnApplyLoading.visible()
         viewBinding.languageBack.isEnabled = false
         viewBinding.languageApply.isEnabled = false
+        applyingLanguageMessageAnimator.start()
+    }
+
+    override fun onDestroy() {
+        applyingLanguageMessageAnimator.stop()
+        super.onDestroy()
     }
 
     private fun scheduleNavigationFallbackAfterLanguageChange() {
