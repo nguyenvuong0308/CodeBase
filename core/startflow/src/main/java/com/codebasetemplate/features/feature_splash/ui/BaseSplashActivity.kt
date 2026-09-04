@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.Lifecycle
 import androidx.viewbinding.ViewBinding
 import com.codebasetemplate.util.EventTracking
 import com.core.ads.domain.AdFullScreenUiResource
@@ -29,7 +30,6 @@ import com.core.startflow.StartFlowScreenType
 import com.core.startflow.StartFlowShortcut
 import com.core.utilities.getCurrentLanguageCode
 import com.core.utilities.hideNavigationBar
-import com.core.utilities.manager.isNetworkConnected
 import com.core.utilities.util.Timber
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -117,7 +117,10 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
     }
 
     private var openInternetConnectivityLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            baseViewModel.needHandleEventWhenResume = false
+            handleCurrentNetworkAvailability()
+        }
 
     /**Shortcut Data - Điều hướng màn hình theo shortcut*/
     protected val targetScreenFromShortCut by lazy {
@@ -145,19 +148,16 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
 
     fun onDataReady() {
         onSplashStatusChanged(SplashStatus.FetchingRemoteConfig)
-        val eventName = if (isNetworkConnected()) {
+        val isNetworkAvailable = networkConnectionManager.isNetworkAvailable
+        val eventName = if (isNetworkAvailable) {
             AnalyticsEvent.NETWORK_AVAILABLE
         } else {
             AnalyticsEvent.NETWORK_NOT_AVAILABLE
         }
         analyticsManager.logEvent(eventName)
-
-        if (isNetworkConnected()) {
-            startSplashPrerequisites()
-        } else {
-            onSplashStatusChanged(SplashStatus.WaitingForInternet)
-            showRequireTurnOnNetworkBottomSheetFragment()
-        }
+        val action = baseViewModel.networkGate.onDataReady(isNetworkAvailable)
+        Log.d(TAG, "[SplashNetwork] dataReady available=$isNetworkAvailable action=$action")
+        handleSplashNetworkAction(action)
     }
 
 
@@ -221,13 +221,22 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
         baseViewModel.isActivityResume = true
         if (baseViewModel.needHandleEventWhenResume) {
             baseViewModel.needHandleEventWhenResume = false
+            handleCurrentNetworkAvailability()
+        }
+        if (baseViewModel.networkGate.isWaitingForNetwork) {
             showRequireTurnOnNetworkBottomSheetFragment()
         }
 
-        if (countDownTimer?.isTimerPaused() == true) {
+        if (!baseViewModel.networkGate.isWaitingForNetwork &&
+            !baseViewModel.isTimerComplete &&
+            countDownTimer?.isTimerPaused() == true
+        ) {
             countDownTimer?.resumeTimer()
         }
-        if (countDownTimer == null && baseViewModel.isSplashAdsFlowStarted) {
+        if (!baseViewModel.networkGate.isWaitingForNetwork &&
+            countDownTimer == null &&
+            baseViewModel.isSplashAdsFlowStarted
+        ) {
             startCountDownTimer()
         }
     }
@@ -316,12 +325,22 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
             }
         }
 
-        collectFlowOn(baseViewModel.showRequireTurnOnNetworkWhenRetryClickedFlow) {
-            if (baseViewModel.isActivityResume) {
-                showRequireTurnOnNetworkBottomSheetFragment()
-            } else {
-                baseViewModel.needHandleEventWhenResume = true
-            }
+        collectFlowOn(
+            networkConnectionManager.isNetworkAvailableFlow,
+            Lifecycle.State.RESUMED
+        ) { isNetworkAvailable ->
+            val shouldGuardNetwork = shouldGuardSplashNetwork()
+            val action = baseViewModel.networkGate.onNetworkAvailabilityChanged(
+                isNetworkAvailable = isNetworkAvailable,
+                shouldGuardAds = shouldGuardNetwork,
+                isAdsFlowStarted = baseViewModel.isSplashAdsFlowStarted,
+            )
+            Log.d(
+                TAG,
+                "[SplashNetwork] flow available=$isNetworkAvailable " +
+                        "guard=$shouldGuardNetwork action=$action"
+            )
+            handleSplashNetworkAction(action)
         }
     }
 
@@ -362,22 +381,27 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
     }
 
     private fun handleRemoteConfigReady() {
-        startFlowNavigator.setUpShortCut(
-            this,
-            remoteConfigRepository.getAppConfig().isEnableAppShortCut,
-            remoteConfigRepository.getAppConfig().isEnableAppShortcutUninstall
-        )
-        PreventShowManyInterstitialAds.initIntervalTimeShowInterstitialMillis()
-        adsManager.startDisableAdCountDownTimer()
-        baseViewModel.isRemoteConfigReady = true
+        if (!baseViewModel.isRemoteConfigReady) {
+            startFlowNavigator.setUpShortCut(
+                this,
+                remoteConfigRepository.getAppConfig().isEnableAppShortCut,
+                remoteConfigRepository.getAppConfig().isEnableAppShortcutUninstall
+            )
+            PreventShowManyInterstitialAds.initIntervalTimeShowInterstitialMillis()
+            adsManager.startDisableAdCountDownTimer()
+            baseViewModel.isRemoteConfigReady = true
+        }
         tryStartSplashAdsFlow()
     }
 
     private fun startSplashPrerequisites() {
-        remoteConfigRepository.fetchAndActive()
+        if (!baseViewModel.isRemoteConfigReady) {
+            remoteConfigRepository.fetchAndActive()
+        }
         if (!baseViewModel.isRequestEuConsentComplete) {
             adsManager.requestConsentInfoUpdate(this, false)
         }
+        tryStartSplashAdsFlow()
     }
 
     private fun tryStartSplashAdsFlow() {
@@ -399,13 +423,19 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
         preloadAds()
 
         if (isShowAd()) {
-            fetchSplashAds()
+            if (!baseViewModel.networkGate.isWaitingForNetwork) {
+                requestSplashAd()
+            } else {
+                onSplashStatusChanged(SplashStatus.WaitingForInternet)
+            }
         } else {
+            baseViewModel.networkGate.releaseNetworkWait()
+            dismissRequireTurnOnNetworkBottomSheetFragment()
             onSplashStatusChanged(SplashStatus.AdsUnavailable)
             handleWhenAdNotValidOrLoadFailed()
         }
 
-        if (baseViewModel.isActivityResume) {
+        if (baseViewModel.isActivityResume && !baseViewModel.networkGate.isWaitingForNetwork) {
             onSplashStatusChanged(SplashStatus.CountdownRunning)
             startCountDownTimer()
         }
@@ -434,13 +464,31 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
 
     private fun handleWhenAdNotValidOrLoadFailed() {
         Log.d(TAG, "handleWhenAdNotValidOrLoadFailed: ")
-        onSplashStatusChanged(SplashStatus.AdsUnavailable)
+        onSplashStatusChanged(
+            if (baseViewModel.networkGate.isWaitingForNetwork) {
+                SplashStatus.WaitingForInternet
+            } else {
+                SplashStatus.AdsUnavailable
+            }
+        )
         baseViewModel.handleWhenAdNotValidOrLoadFailed()
         checkAbleToNextScreen()
     }
 
     private fun checkAbleToNextScreen() {
         if (isFinishing || isDestroyed) return
+        if (!networkConnectionManager.isNetworkAvailable && shouldGuardSplashNetwork()) {
+            val action = baseViewModel.networkGate.onNetworkAvailabilityChanged(
+                isNetworkAvailable = false,
+                shouldGuardAds = true,
+                isAdsFlowStarted = baseViewModel.isSplashAdsFlowStarted,
+            )
+            if (action != SplashNetworkAction.None) {
+                Log.d(TAG, "[SplashNetwork] navigation guard action=$action")
+                handleSplashNetworkAction(action)
+            }
+        }
+        if (baseViewModel.networkGate.isWaitingForNetwork) return
         val nextScreen = {
             countDownTimer?.pauseTimer()
             appOpenAdManager.isFirstOpenApp = false
@@ -469,6 +517,8 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
 
     private fun handleWhenAdShowing() {
         Log.d(TAG, "handleWhenAdShowing: ")
+        baseViewModel.networkGate.releaseNetworkWait()
+        dismissRequireTurnOnNetworkBottomSheetFragment()
         logSplashBeforeAdIfNeeded()
         logInterSplashViewIfNeeded()
         onSplashStatusChanged(SplashStatus.ShowingAd)
@@ -544,40 +594,20 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
                 Timber.e("startCountDownTimer ${baseViewModel.currentProgress}")
                 if (baseViewModel.isAppOpenAdLoaded) {
                     Timber.e("isAppOpenAdLoaded ${baseViewModel.isAppOpenAdLoaded}")
-                    if (baseViewModel.currentProgress >= minTimeWaitProgressBeforeShowAd) {
-                        baseViewModel.isAppOpenAdLoaded = false
-                        delayedShowAdJob?.cancel()
+                    if (baseViewModel.currentProgress >= minTimeWaitProgressBeforeShowAd &&
+                        delayedShowAdJob?.isActive != true
+                    ) {
                         delayedShowAdJob = CoroutineScope(coroutineContext).launch {
                             delay(timeMillisDelayBeforeShow)
-                            if (baseViewModel.isFirstOpenApp) {
-                                if (remoteConfigRepository.getSplashScreenConfig().adTypeFirstOpen == AdType.AppOpen) {
-                                    appOpenAdManager.showAdIfAvailable(
-                                        this@BaseSplashActivity,
-                                        appOpenPlaceName
-                                    )
-                                } else {
-                                    adsManager.showAd(
-                                        this@BaseSplashActivity,
-                                        fragmentManager = supportFragmentManager,
-                                        adPlaceName = interstitialPlaceName,
-                                        identifier = ""
-                                    )
-                                }
-                            } else {
-                                if (remoteConfigRepository.getSplashScreenConfig().adType == AdType.AppOpen) {
-                                    appOpenAdManager.showAdIfAvailable(
-                                        this@BaseSplashActivity,
-                                        appOpenPlaceName
-                                    )
-                                } else {
-                                    adsManager.showAd(
-                                        this@BaseSplashActivity,
-                                        fragmentManager = supportFragmentManager,
-                                        adPlaceName = interstitialPlaceName,
-                                        identifier = ""
-                                    )
-                                }
+                            if (!networkConnectionManager.isNetworkAvailable) {
+                                handleCurrentNetworkAvailability()
+                                return@launch
                             }
+                            if (!baseViewModel.isActivityResume || isFinishing || isDestroyed) {
+                                return@launch
+                            }
+                            baseViewModel.isAppOpenAdLoaded = false
+                            showSplashAd()
                         }
                     }
                     return
@@ -602,12 +632,15 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
         showRequireTurnOnNetworkBottomSheetFragment(
             onRetry = {
                 CoroutineScope(coroutineContext).launch {
-                    delay(1000)
-                    if (isNetworkConnected()) {
+                    Log.d(
+                        TAG,
+                        "[SplashNetwork] retry available=${networkConnectionManager.isNetworkAvailable}"
+                    )
+                    if (networkConnectionManager.isNetworkAvailable) {
                         analyticsManager.logEvent(AnalyticsEvent.ACTION_SPLASH_RETRY_TURN_ON)
-                        startSplashPrerequisites()
+                        handleCurrentNetworkAvailability()
                     } else {
-                        baseViewModel.showRequireTurnOnNetworkWhenRetryClickedFlow.emit(true)
+                        baseViewModel.needHandleEventWhenResume = true
                         val intentNetwork = if (Build.VERSION.SDK_INT >= 29) {
                             Intent("android.settings.panel.action.INTERNET_CONNECTIVITY")
                         } else {
@@ -618,9 +651,133 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
                 }
             },
             onCancel = {
-                startSplashPrerequisites()
+                val action = baseViewModel.networkGate.continueWithoutNetwork(
+                    isAdsFlowStarted = baseViewModel.isSplashAdsFlowStarted
+                )
+                Log.d(TAG, "[SplashNetwork] cancel action=$action")
+                handleSplashNetworkAction(action)
             }
         )
+    }
+
+    private fun handleCurrentNetworkAvailability() {
+        val isNetworkAvailable = networkConnectionManager.isNetworkAvailable
+        val shouldGuardNetwork = shouldGuardSplashNetwork()
+        val action = baseViewModel.networkGate.onNetworkAvailabilityChanged(
+            isNetworkAvailable = isNetworkAvailable,
+            shouldGuardAds = shouldGuardNetwork,
+            isAdsFlowStarted = baseViewModel.isSplashAdsFlowStarted,
+        )
+        Log.d(
+            TAG,
+            "[SplashNetwork] snapshot available=$isNetworkAvailable " +
+                    "guard=$shouldGuardNetwork action=$action"
+        )
+        handleSplashNetworkAction(action)
+    }
+
+    private fun shouldGuardSplashNetwork(): Boolean {
+        return !baseViewModel.isSplashAdsFlowStarted ||
+                (isShowAd() &&
+                        !baseViewModel.isAppOpenAdShowing &&
+                        !baseViewModel.isAppOpenAdDismissed)
+    }
+
+    private fun handleSplashNetworkAction(action: SplashNetworkAction) {
+        Log.d(
+            TAG,
+            "[SplashNetwork] handle action=$action " +
+                    "waiting=${baseViewModel.networkGate.isWaitingForNetwork} " +
+                    "adsFlow=${baseViewModel.isSplashAdsFlowStarted} " +
+                    "requested=${baseViewModel.isSplashAdLoadRequested} " +
+                    "loaded=${baseViewModel.isAppOpenAdLoaded} " +
+                    "showing=${baseViewModel.isAppOpenAdShowing} " +
+                    "timerComplete=${baseViewModel.isTimerComplete}"
+        )
+        when (action) {
+            SplashNetworkAction.None -> Unit
+            SplashNetworkAction.ShowNetworkPrompt -> {
+                onSplashStatusChanged(SplashStatus.WaitingForInternet)
+                showRequireTurnOnNetworkBottomSheetFragment()
+            }
+
+            SplashNetworkAction.StartPrerequisites,
+            SplashNetworkAction.RetryPrerequisites -> {
+                dismissRequireTurnOnNetworkBottomSheetFragment()
+                startSplashPrerequisites()
+            }
+
+            SplashNetworkAction.PauseAds -> pauseSplashAdsForNetwork()
+            SplashNetworkAction.ResumeAds -> resumeSplashAdsAfterNetworkWait()
+        }
+    }
+
+    private fun pauseSplashAdsForNetwork() {
+        Log.d(TAG, "[SplashNetwork] pause ads and countdown")
+        delayedShowAdJob?.cancel()
+        delayedShowAdJob = null
+        countDownTimer?.pauseTimer()
+        onSplashStatusChanged(SplashStatus.WaitingForInternet)
+        showRequireTurnOnNetworkBottomSheetFragment()
+    }
+
+    private fun resumeSplashAdsAfterNetworkWait() {
+        Log.d(TAG, "[SplashNetwork] resume ads flow")
+        dismissRequireTurnOnNetworkBottomSheetFragment()
+        if (baseViewModel.isTimerComplete) {
+            checkAbleToNextScreen()
+            return
+        }
+
+        if (isShowAd() &&
+            !baseViewModel.isSplashAdLoadRequested &&
+            !baseViewModel.isAppOpenAdLoaded &&
+            !baseViewModel.isAppOpenAdShowing &&
+            !baseViewModel.isAppOpenAdDismissed
+        ) {
+            requestSplashAd()
+        }
+
+        if (!baseViewModel.isActivityResume) return
+        if (countDownTimer == null) {
+            startCountDownTimer()
+        } else if (countDownTimer?.isTimerPaused() == true) {
+            onSplashStatusChanged(SplashStatus.CountdownRunning)
+            countDownTimer?.resumeTimer()
+        }
+        checkAbleToNextScreen()
+    }
+
+    private fun requestSplashAd() {
+        if (baseViewModel.isSplashAdLoadRequested ||
+            baseViewModel.isAppOpenAdLoaded ||
+            baseViewModel.isAppOpenAdShowing ||
+            baseViewModel.isAppOpenAdDismissed
+        ) {
+            return
+        }
+        Log.d(TAG, "[SplashNetwork] request splash ad")
+        baseViewModel.prepareForSplashAdRetry()
+        fetchSplashAds()
+    }
+
+    private fun showSplashAd() {
+        val adType = if (baseViewModel.isFirstOpenApp) {
+            remoteConfigRepository.getSplashScreenConfig().adTypeFirstOpen
+        } else {
+            remoteConfigRepository.getSplashScreenConfig().adType
+        }
+        Log.d(TAG, "[SplashNetwork] show splash ad type=$adType")
+        if (adType == AdType.AppOpen) {
+            appOpenAdManager.showAdIfAvailable(this, appOpenPlaceName)
+        } else {
+            adsManager.showAd(
+                this,
+                fragmentManager = supportFragmentManager,
+                adPlaceName = interstitialPlaceName,
+                identifier = ""
+            )
+        }
     }
 
     private fun logSplashBeforeAdIfNeeded() {

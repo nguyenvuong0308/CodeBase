@@ -3,7 +3,6 @@ package com.codebasetemplate.features.feature_splash.ui
 import androidx.lifecycle.ViewModel
 import com.core.preference.AppPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -11,7 +10,7 @@ class BaseSplashViewModel @Inject constructor(
     private val appPreferences: AppPreferences
 ) : ViewModel() {
 
-    val showRequireTurnOnNetworkWhenRetryClickedFlow = MutableSharedFlow<Boolean>()
+    internal val networkGate = SplashNetworkGate()
 
     var needHandleEventWhenResume = false
 
@@ -22,6 +21,8 @@ class BaseSplashViewModel @Inject constructor(
     var isRemoteConfigReady = false
 
     var isSplashAdsFlowStarted = false
+
+    var isSplashAdLoadRequested = false
 
     var isAppOpenAdLoaded = false
 
@@ -48,6 +49,7 @@ class BaseSplashViewModel @Inject constructor(
     }
 
     fun handleWhenAdLoaded() {
+        isSplashAdLoadRequested = false
         isAppOpenAdLoaded = true
         isAdNotValidOrLoadFailed = false
         isAppOpenAdShowing = false
@@ -55,20 +57,29 @@ class BaseSplashViewModel @Inject constructor(
     }
 
     fun handleWhenAdNotValidOrLoadFailed() {
+        isSplashAdLoadRequested = false
         isAdNotValidOrLoadFailed = true
         isAppOpenAdShowing = false
         isAppOpenAdDismissed = false
     }
 
     fun handleWhenAdShowing() {
+        isSplashAdLoadRequested = false
         isAdNotValidOrLoadFailed = false
         isAppOpenAdShowing = true
         isAppOpenAdDismissed = false
     }
 
     fun handleWhenAdDismissed() {
+        isSplashAdLoadRequested = false
         isAppOpenAdDismissed = false
         isAppOpenAdShowing = false
         isAppOpenAdDismissed = true
+    }
+
+    fun prepareForSplashAdRetry() {
+        isSplashAdLoadRequested = true
+        isAdNotValidOrLoadFailed = false
+        isAppOpenAdLoaded = false
     }
 }

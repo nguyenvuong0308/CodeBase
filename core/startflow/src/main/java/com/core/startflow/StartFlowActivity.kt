@@ -66,13 +66,29 @@ abstract class StartFlowActivity<VB : ViewBinding> : BaseActivity<VB>() {
         onRetry: () -> Unit,
         onCancel: (() -> Unit)? = null
     ) {
+        val existingDialog = supportFragmentManager.findFragmentByTag(NETWORK_REQUIRED_DIALOG_TAG)
+                as? RequireTurnOnNetworkBottomSheetFragment
+        if (existingDialog != null) {
+            existingDialog.onRetry = onRetry
+            existingDialog.onCancel = onCancel
+            return
+        }
+        if (supportFragmentManager.isStateSaved) {
+            return
+        }
         RequireTurnOnNetworkBottomSheetFragment().apply {
             this.onRetry = onRetry
             this.onCancel = onCancel
-        }.show(
+        }.showNow(
             supportFragmentManager,
-            RequireTurnOnNetworkBottomSheetFragment::class.java.simpleName + System.currentTimeMillis()
+            NETWORK_REQUIRED_DIALOG_TAG
         )
+    }
+
+    protected fun dismissRequireTurnOnNetworkBottomSheetFragment() {
+        (supportFragmentManager.findFragmentByTag(NETWORK_REQUIRED_DIALOG_TAG)
+                as? RequireTurnOnNetworkBottomSheetFragment)
+            ?.dismissAllowingStateLoss()
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
@@ -86,5 +102,9 @@ abstract class StartFlowActivity<VB : ViewBinding> : BaseActivity<VB>() {
                 throw e
             }
         }
+    }
+
+    private companion object {
+        const val NETWORK_REQUIRED_DIALOG_TAG = "RequireTurnOnNetworkBottomSheetFragment"
     }
 }
