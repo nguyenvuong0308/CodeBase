@@ -53,6 +53,12 @@ class NativeGalleryPreviewActivity : CoreActivity<ActivityNativeGalleryPreviewBi
 
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
         when (adResource) {
+            is AdLoadBannerNativeUiResource.NativeAdRefreshStarted -> {
+                if (templateKey != NativeGalleryPreviewConfig.NATIVE_PIP_KEY) {
+                    viewBinding.layoutNative.processAdResource(adResource, TEST_PLACE_NAME)
+                }
+            }
+
             is AdLoadBannerNativeUiResource.Loading -> {
                 if (templateKey != NativeGalleryPreviewConfig.NATIVE_PIP_KEY) {
                     viewBinding.layoutNative.processAdResource(

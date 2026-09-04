@@ -32,6 +32,10 @@ class NativeSmallBannerCtaRightTestActivity :
 
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
         when (adResource) {
+            is AdLoadBannerNativeUiResource.NativeAdRefreshStarted -> {
+                viewBinding.layoutNative.processAdResource(adResource, TEST_PLACE_NAME)
+            }
+
             is AdLoadBannerNativeUiResource.Loading -> {
                 viewBinding.statusText.setText(com.codebasetemplate.R.string.small_banner_native_test_loading)
                 viewBinding.layoutNative.processAdResource(

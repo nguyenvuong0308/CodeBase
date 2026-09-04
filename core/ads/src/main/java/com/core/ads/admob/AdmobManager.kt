@@ -106,6 +106,13 @@ internal fun shouldUseCachedNativeAd(
     return !isExpired && !isReload
 }
 
+internal fun shouldPreserveCachedNativeAdOnLoadFailure(
+    isReload: Boolean,
+    hasCachedNativeAd: Boolean,
+): Boolean {
+    return isReload && hasCachedNativeAd
+}
+
 // Safety net: if a full-screen load neither succeeds nor fails within this window (e.g. the
 // driving Activity is destroyed mid-load and the SDK never calls back), force-release the
 // stuck ad unit so waiting placements don't stay latched on isLoading = true forever.
@@ -1594,7 +1601,17 @@ class AdmobManager @Inject constructor(
         adHolder.isLoading = true
         val waterfallAdUnitIds = adHolder.adPlace.getWaterfallAdUnitIds()
         if (waterfallAdUnitIds.isEmpty()) {
-            failBannerNativeLoadBecauseNoAdUnit(adHolder)
+            if (
+                shouldPreserveCachedNativeAdOnLoadFailure(
+                    isReload = isReload,
+                    hasCachedNativeAd = nativeAd != null,
+                )
+            ) {
+                Log.i(TAG, "Native reload has no available ad unit; keep cached ad $placeName")
+                adHolder.resetLoadState()
+            } else {
+                failBannerNativeLoadBecauseNoAdUnit(adHolder)
+            }
             return
         }
         val adUnitId = waterfallAdUnitIds[waterfallIndex]

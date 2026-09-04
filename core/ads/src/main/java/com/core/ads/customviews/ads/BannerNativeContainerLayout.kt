@@ -348,6 +348,10 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
         }
         adLoadBannerNativeUiResource = adResource
         when (adResource) {
+            is AdLoadBannerNativeUiResource.NativeAdRefreshStarted -> {
+                collapsibleNativeControllerOrNull?.onNativeRefreshStarted()
+            }
+
             is AdLoadBannerNativeUiResource.Loading -> {
                     setAdSize(
                         adResource.adType,
@@ -388,6 +392,10 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
         if (adResource.commonAdPlaceName != placeName) return
         adLoadBannerNativeUiResource = adResource
         when (adResource) {
+            is AdLoadBannerNativeUiResource.NativeAdRefreshStarted -> {
+                collapsibleNativeControllerOrNull?.onNativeRefreshStarted()
+            }
+
             is AdLoadBannerNativeUiResource.AdFailed -> {
                 // Collapsing to 0x0 keeps this VISIBLE, so the popup has to be taken down by hand.
                 collapsibleNativeControllerOrNull?.onAnchorHidden()
@@ -454,6 +462,11 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
     /** Explicitly expands or collapses the currently displayed collapsible native ad. */
     fun setNativeExpanded(expanded: Boolean) {
         collapsibleNativeController.setExpanded(expanded)
+    }
+
+    /** Keeps the inline native visible while dismissing an expanded popup for refresh. */
+    fun onNativeRefreshStarted() {
+        collapsibleNativeControllerOrNull?.onNativeRefreshStarted()
     }
 
     private fun getCurrentNativeTemplateView(): BaseNativeTemplateView? {

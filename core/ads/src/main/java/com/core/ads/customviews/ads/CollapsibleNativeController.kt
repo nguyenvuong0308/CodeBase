@@ -141,6 +141,14 @@ internal class CollapsibleNativeController(
         collapseWithoutCooldown()
     }
 
+    /**
+     * Dismisses only the expanded popup before an automatic refresh. The current native remains
+     * bound to the inline template until its replacement has loaded successfully.
+     */
+    fun onNativeRefreshStarted() {
+        collapseWithoutCooldown()
+    }
+
     private fun collapseWithoutCooldown() {
         // Already inline: rebinding here would only restart the template countdown for nothing.
         if (isCollapsedInlineVisible()) return

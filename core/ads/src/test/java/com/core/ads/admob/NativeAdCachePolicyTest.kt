@@ -35,4 +35,30 @@ class NativeAdCachePolicyTest {
             ),
         )
     }
+
+    @Test
+    fun `failed reload preserves the cached native`() {
+        assertTrue(
+            shouldPreserveCachedNativeAdOnLoadFailure(
+                isReload = true,
+                hasCachedNativeAd = true,
+            ),
+        )
+    }
+
+    @Test
+    fun `initial failure cannot preserve a missing native`() {
+        assertFalse(
+            shouldPreserveCachedNativeAdOnLoadFailure(
+                isReload = false,
+                hasCachedNativeAd = false,
+            ),
+        )
+        assertFalse(
+            shouldPreserveCachedNativeAdOnLoadFailure(
+                isReload = true,
+                hasCachedNativeAd = false,
+            ),
+        )
+    }
 }

@@ -165,6 +165,10 @@ class OnBoardingActivity2 : StartFlowActivity<StartflowActivityOnboardingBinding
         super.onBannerNativeResult(adResource)
         if (adResource.commonAdPlaceName == CoreAdPlaceName.ANCHORED_ONBOARDING_BOTTOM_V2) {
             when (adResource) {
+                is AdLoadBannerNativeUiResource.NativeAdRefreshStarted -> {
+                    viewBinding.layoutBannerNative.onNativeRefreshStarted()
+                }
+
                 is AdLoadBannerNativeUiResource.Loading -> {
                     viewBinding.layoutBannerNative.setAdSize(
                         adResource.adType,

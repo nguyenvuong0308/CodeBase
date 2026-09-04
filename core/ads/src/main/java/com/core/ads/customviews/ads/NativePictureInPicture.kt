@@ -288,6 +288,8 @@ class NativePictureInPicture @JvmOverloads constructor(
         if (isClosedByUser) return false
 
         return when (adResource) {
+            is AdLoadBannerNativeUiResource.NativeAdRefreshStarted -> true
+
             is AdLoadBannerNativeUiResource.NativeAdLoaded -> {
                 val anchorMode = AnchorMode.fromKey(adResource.nativeAdPlace.pipAnchorMode)
                     ?: config.anchorMode

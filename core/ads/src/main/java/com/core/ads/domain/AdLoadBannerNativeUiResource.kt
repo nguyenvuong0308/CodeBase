@@ -18,6 +18,15 @@ sealed class AdLoadBannerNativeUiResource(val commonAdPlaceName: IAdPlaceName) {
         val nativeTemplateSize: NativeTemplateSize
         ) : AdLoadBannerNativeUiResource(adPlaceName)
 
+    /**
+     * Signals that a native refresh has started while the previously loaded ad stays visible.
+     * Consumers may use this event to dismiss transient UI such as a collapsible popup, but must
+     * not replace the current native with a loading placeholder.
+     */
+    data class NativeAdRefreshStarted(
+        val adPlaceName: IAdPlaceName
+    ) : AdLoadBannerNativeUiResource(adPlaceName)
+
     data class AdFailed(val adPlaceName: IAdPlaceName) : AdLoadBannerNativeUiResource(adPlaceName)
 
     data class AdNetworkError(val adPlaceName: IAdPlaceName) : AdLoadBannerNativeUiResource(adPlaceName)

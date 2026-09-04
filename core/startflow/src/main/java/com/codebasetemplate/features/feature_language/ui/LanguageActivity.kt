@@ -263,7 +263,9 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
         val adState = when (adResource) {
             is AdLoadBannerNativeUiResource.BannerAdLoaded,
-            is AdLoadBannerNativeUiResource.NativeAdLoaded -> LanguageBannerAdState.AVAILABLE
+            is AdLoadBannerNativeUiResource.NativeAdLoaded,
+            is AdLoadBannerNativeUiResource.NativeAdRefreshStarted ->
+                LanguageBannerAdState.AVAILABLE
 
             is AdLoadBannerNativeUiResource.AdFailed,
             is AdLoadBannerNativeUiResource.AdNetworkError -> LanguageBannerAdState.UNAVAILABLE

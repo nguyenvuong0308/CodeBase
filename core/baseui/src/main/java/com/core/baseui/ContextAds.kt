@@ -30,7 +30,7 @@ import java.util.UUID
 import kotlin.math.max
 
 private const val TAG = "ContextAds"
-private const val NATIVE_REFRESH_HOLDER_DELAY_MS = 2_000L
+private const val NATIVE_REFRESH_OLD_AD_MIN_DISPLAY_MS = 2_000L
 
 internal class NativeRefreshPauseController {
     var isPaused: Boolean = false
@@ -46,6 +46,35 @@ internal class NativeRefreshPauseController {
 
     fun canRefresh(isWaitingLoad: Boolean, isLifecycleStarted: Boolean): Boolean {
         return !isPaused && !isWaitingLoad && isLifecycleStarted
+    }
+}
+
+internal class NativeRefreshTransitionState {
+    private val startedAtMs = mutableMapOf<IAdPlaceName, Long>()
+
+    fun start(adPlaceName: IAdPlaceName, nowMs: Long) {
+        startedAtMs[adPlaceName] = nowMs
+    }
+
+    fun isRefreshing(adPlaceName: IAdPlaceName): Boolean {
+        return startedAtMs.containsKey(adPlaceName)
+    }
+
+    fun remainingOldAdDisplayMs(
+        adPlaceName: IAdPlaceName,
+        nowMs: Long,
+        minimumDisplayMs: Long,
+    ): Long {
+        val refreshStartedAtMs = startedAtMs[adPlaceName] ?: return 0L
+        return max(0L, minimumDisplayMs - (nowMs - refreshStartedAtMs))
+    }
+
+    fun finish(adPlaceName: IAdPlaceName): Boolean {
+        return startedAtMs.remove(adPlaceName) != null
+    }
+
+    fun clear() {
+        startedAtMs.clear()
     }
 }
 
@@ -104,7 +133,7 @@ abstract class ContextAds(
         hashMapOf()
     private val bannerNativeRefreshJobs = mutableMapOf<IAdPlaceName, Job>()
     private val bannerNativeRefreshIntervals = mutableMapOf<IAdPlaceName, Int>()
-    private val nativeRefreshLoadingStartedAtMs = mutableMapOf<IAdPlaceName, Long>()
+    private val nativeRefreshTransitionState = NativeRefreshTransitionState()
     private val delayedNativeRefreshApplyJobs = mutableMapOf<IAdPlaceName, Job>()
     private val nativeRefreshPauseController = NativeRefreshPauseController()
 
@@ -190,7 +219,7 @@ abstract class ContextAds(
         bannerNativeRefreshIntervals.clear()
         delayedNativeRefreshApplyJobs.values.forEach { it.cancel() }
         delayedNativeRefreshApplyJobs.clear()
-        nativeRefreshLoadingStartedAtMs.clear()
+        nativeRefreshTransitionState.clear()
         _retryLoadReward = 0
         _isDisableAdDueManyClickFlow = null
         activityRef.clear()
@@ -240,8 +269,8 @@ abstract class ContextAds(
         return when (adResource) {
             is AdLoadBannerNativeUiResource.NativeAdLoaded -> {
                 startNativeRefreshIfNeed(adResource.adPlaceName)
-                if (nativeRefreshLoadingStartedAtMs.containsKey(adResource.adPlaceName)) {
-                    applyNativeRefreshAfterHolderDelay(adResource)
+                if (nativeRefreshTransitionState.isRefreshing(adResource.adPlaceName)) {
+                    applyNativeRefreshAfterOldAdDelay(adResource)
                     true
                 } else {
                     false
@@ -250,8 +279,8 @@ abstract class ContextAds(
             is AdLoadBannerNativeUiResource.AdFailed,
             is AdLoadBannerNativeUiResource.AdNetworkError -> {
                 finishNativeRefreshTransition(adResource.commonAdPlaceName)
-                false
             }
+            is AdLoadBannerNativeUiResource.NativeAdRefreshStarted -> false
             else -> false
         }
     }
@@ -308,7 +337,7 @@ abstract class ContextAds(
                     break
                 }
 
-                showNativeRefreshHolder(adPlaceName)
+                startNativeRefreshTransition(adPlaceName)
                 adsManager.loadBannerNativeAd(
                     activity = activity,
                     adPlaceName = adPlaceName,
@@ -320,30 +349,22 @@ abstract class ContextAds(
         }
     }
 
-    private fun showNativeRefreshHolder(adPlaceName: IAdPlaceName) {
-        val nativeAdPlace = remoteConfigRepository.getAdPlaceBy(adPlaceName) as? NativeAdPlace
-            ?: return
-        nativeRefreshLoadingStartedAtMs[adPlaceName] = SystemClock.elapsedRealtime()
+    private fun startNativeRefreshTransition(adPlaceName: IAdPlaceName) {
+        nativeRefreshTransitionState.start(adPlaceName, SystemClock.elapsedRealtime())
         delayedNativeRefreshApplyJobs.remove(adPlaceName)?.cancel()
         onBannerNativeResult(
-            AdLoadBannerNativeUiResource.Loading(
-                adPlaceName = adPlaceName,
-                adType = nativeAdPlace.adType,
-                bannerSize = com.core.config.domain.data.BannerSize.Anchored,
-                nativeTemplateSize = nativeAdPlace.nativeTemplateSize
-            )
+            AdLoadBannerNativeUiResource.NativeAdRefreshStarted(adPlaceName)
         )
     }
 
-    private fun applyNativeRefreshAfterHolderDelay(
+    private fun applyNativeRefreshAfterOldAdDelay(
         adResource: AdLoadBannerNativeUiResource.NativeAdLoaded
     ) {
         val adPlaceName = adResource.adPlaceName
-        val loadingStartedAtMs = nativeRefreshLoadingStartedAtMs[adPlaceName]
-            ?: SystemClock.elapsedRealtime()
-        val delayMs = max(
-            0L,
-            NATIVE_REFRESH_HOLDER_DELAY_MS - (SystemClock.elapsedRealtime() - loadingStartedAtMs)
+        val delayMs = nativeRefreshTransitionState.remainingOldAdDisplayMs(
+            adPlaceName = adPlaceName,
+            nowMs = SystemClock.elapsedRealtime(),
+            minimumDisplayMs = NATIVE_REFRESH_OLD_AD_MIN_DISPLAY_MS,
         )
         delayedNativeRefreshApplyJobs.remove(adPlaceName)?.cancel()
         delayedNativeRefreshApplyJobs[adPlaceName] = lifecycleScope.launch {
@@ -360,12 +381,13 @@ abstract class ContextAds(
     private fun finishNativeRefreshTransition(
         adPlaceName: IAdPlaceName,
         cancelDelayedApply: Boolean = true
-    ) {
-        nativeRefreshLoadingStartedAtMs.remove(adPlaceName)
+    ): Boolean {
+        val wasRefreshing = nativeRefreshTransitionState.finish(adPlaceName)
         val delayedApplyJob = delayedNativeRefreshApplyJobs.remove(adPlaceName)
         if (cancelDelayedApply) {
             delayedApplyJob?.cancel()
         }
+        return wasRefreshing
     }
 
     private fun cancelNativeRefresh(adPlaceName: IAdPlaceName) {

@@ -46,6 +46,10 @@ class CollapsibleNativeTestActivity : CoreActivity<ActivityNativeCollapsibleTest
 
     override fun onBannerNativeResult(adResource: AdLoadBannerNativeUiResource) {
         when (adResource) {
+            is AdLoadBannerNativeUiResource.NativeAdRefreshStarted -> {
+                viewBinding.layoutNative.processAdResource(adResource, TEST_PLACE_NAME)
+            }
+
             is AdLoadBannerNativeUiResource.Loading -> {
                 setControlsEnabled(false)
                 viewBinding.statusText.setText(R.string.collapsible_native_test_status_loading)
