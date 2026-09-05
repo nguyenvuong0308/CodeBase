@@ -47,8 +47,8 @@
                 android:layout_below="@+id/primary"
                 android:layout_alignStart="@+id/primary"
                 android:layout_alignEnd="@+id/primary"
+                android:maxLines="@integer/material_motion_duration_long_1"
                 android:gravity="center_vertical"
-                android:lines="2"
                 tools:text="Install Flood-It App for free! Free Popurlar Casual Game " />
 
             <com.google.android.gms.ads.nativead.MediaView
