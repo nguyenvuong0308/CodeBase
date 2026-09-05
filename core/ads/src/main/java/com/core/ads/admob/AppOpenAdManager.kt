@@ -113,14 +113,14 @@ class AppOpenAdManager @Inject constructor(
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     fun onStart() {
-        if (isFirstOpenApp || !reOpenShowCondition.isCanShow()) {
-            return
-        }
+        if(isFirstOpenApp) return
         currentActivity?.let { activity ->
             applicationScope.launch {
                 delay(remoteConfigRepository.getAppOpenAdConfig().timeMillisDelayBeforeShow)
                 if(!reopenAction.isCustomAction(activity)) {
-                    showAdIfAvailable(activity, CoreAdPlaceName.APP_REOPEN)
+                    if (!reOpenShowCondition.isCanShow()) {
+                        showAdIfAvailable(activity, CoreAdPlaceName.APP_REOPEN)
+                    }
                 } else {
                     if(!adManager.isHasFullscreenAdShowing()) {
                         reopenAction.reopenAction(activity)
