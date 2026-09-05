@@ -5,6 +5,7 @@ import com.core.config.data.model.LanguageActivityConfigModel
 data class LanguageActivityConfig(
     val version: Int = LANGUAGE_ACTIVITY_VERSION_2,
     val timeShowLoadingLfo: Int? = null,
+    val isShowClickGuide: Boolean = true,
 ) {
     val isV2: Boolean
         get() = version == LANGUAGE_ACTIVITY_VERSION_2
@@ -22,6 +23,7 @@ data class LanguageActivityConfig(
             return LanguageActivityConfig(
                 version = version,
                 timeShowLoadingLfo = model?.timeShowLoadingLfo,
+                isShowClickGuide = model?.isShowClickGuide ?: true,
             )
         }
     }

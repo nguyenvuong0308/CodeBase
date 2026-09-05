@@ -584,7 +584,7 @@ Mapper → cache → AdsManager</code></pre>
           <tr><td><code>banner_ad_config</code></td><td><span class="badge json">String · JSON object</span></td><td>Retry và hide-on-error cho banner.</td></tr>
           <tr><td><code>request_consent_config</code></td><td><span class="badge json">String · JSON object</span></td><td>UMP consent và debug EEA/test device.</td></tr>
           <tr><td><code>onboarding_config</code></td><td><span class="badge json">String · JSON object</span></td><td>Version UI onboarding và close/swipe behavior.</td></tr>
-          <tr><td><code>language_activity_config</code></td><td><span class="badge json">String · JSON object</span></td><td>Version UI language và thời gian loading LFO.</td></tr>
+          <tr><td><code>language_activity_config</code></td><td><span class="badge json">String · JSON object</span></td><td>Version UI language, thời gian loading LFO và trạng thái hiển thị Lottie hướng dẫn click group.</td></tr>
         </tbody>
       </table>
     </section>
@@ -1108,8 +1108,17 @@ fun provideAdPlacesRemoteConfigKeyProvider(
 }</code></pre>
       <pre><code>{
   "version": 2,
-  "time_show_loading_lfo": 3
+  "time_show_loading_lfo": 3,
+  "is_show_click_guide": true
 }</code></pre>
+      <table>
+        <thead><tr><th>Field</th><th>Kiểu / mặc định</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>version</code></td><td>Integer · <code>2</code></td><td>Chọn phiên bản giao diện Language. Giá trị <code>2</code> sử dụng flow Language V2.</td></tr>
+          <tr><td><code>time_show_loading_lfo</code></td><td>Integer · <code>3</code></td><td>Số giây hiển thị trạng thái loading của Language flow.</td></tr>
+          <tr><td><code>is_show_click_guide</code></td><td>Boolean · <code>true</code></td><td><code>true</code> hiển thị Lottie <code>click.json</code> trên group thứ 3 của <code>LanguageActivityV21</code>; <code>false</code> ẩn hướng dẫn. Nếu thiếu field, app mặc định bật.</td></tr>
+        </tbody>
+      </table>
       <p>Quy trình đầy đủ cho Language, bao gồm resource override, navigation và bảng <code>place_name</code> V1/V2: <a href="../startflow-language-ui-customization.html"><code>docs/startflow-language-ui-customization.html</code></a>.</p>
     </section>
 

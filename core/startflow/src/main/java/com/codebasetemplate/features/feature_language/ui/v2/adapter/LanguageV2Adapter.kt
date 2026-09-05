@@ -12,7 +12,9 @@ import com.core.startflow.databinding.StartflowItemLanguageGroupV2Binding
 import com.core.startflow.databinding.StartflowItemLanguageOptionV2Binding
 import java.util.Locale
 
-class LanguageV2Adapter : ListAdapter<LanguageRow, RecyclerView.ViewHolder>(DIFF) {
+class LanguageV2Adapter(
+    private val clickGuideGroupIndex: Int = RecyclerView.NO_POSITION,
+) : ListAdapter<LanguageRow, RecyclerView.ViewHolder>(DIFF) {
 
     var onSelectionChanged: ((LanguageOption) -> Unit)? = null
     var onGroupClicked: ((LanguageGroup) -> Boolean)? = null
@@ -166,6 +168,17 @@ class LanguageV2Adapter : ListAdapter<LanguageRow, RecyclerView.ViewHolder>(DIFF
             bindFlag(binding.languageGroupFlagThree, flags.getOrNull(2)?.countryCode)
             binding.languageGroupFlagTwo.visibility = if (flags.size > 1) View.VISIBLE else View.GONE
             binding.languageGroupFlagThree.visibility = if (flags.size > 2) View.VISIBLE else View.GONE
+            val showClickGuide = shouldShowClickGuide(
+                groupIndex = groups.indexOfFirst { it.id == group.id },
+                clickGuideGroupIndex = clickGuideGroupIndex
+            )
+            binding.languageGroupClickGuide.visibility =
+                if (showClickGuide) View.VISIBLE else View.GONE
+            if (showClickGuide) {
+                binding.languageGroupClickGuide.playAnimation()
+            } else {
+                binding.languageGroupClickGuide.cancelAnimation()
+            }
             binding.languageExpandIcon.animate()
                 .rotation(if (row.isExpanded) 180f else 0f)
                 .setDuration(180L)
@@ -312,6 +325,14 @@ class LanguageV2Adapter : ListAdapter<LanguageRow, RecyclerView.ViewHolder>(DIFF
             return options.distinctBy {
                 it.countryCode.uppercase(Locale.US)
             }.take(3)
+        }
+
+        internal fun shouldShowClickGuide(
+            groupIndex: Int,
+            clickGuideGroupIndex: Int,
+        ): Boolean {
+            return clickGuideGroupIndex != RecyclerView.NO_POSITION &&
+                groupIndex == clickGuideGroupIndex
         }
 
         fun countryFlagEmoji(countryCode: String): String {

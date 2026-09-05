@@ -31,6 +31,7 @@
     <color name="startflow_language_v2_group_background">#F2F2F2</color>
     <color name="startflow_language_v2_group_title">#202027</color>
     <color name="startflow_language_v2_group_subtitle">#3F3B45</color>
+    <color name="startflow_language_v2_click_guide_tint">#08A8E3</color>
     <color name="startflow_language_v2_flag_background">#FFFFFFFF</color>
     <color name="startflow_language_v2_expand_icon">#858585</color>
     <color name="startflow_language_v2_branch">#8D8D8D</color>

@@ -2,6 +2,7 @@ package com.codebasetemplate.features.feature_language.ui.v2
 
 import android.content.Context
 import android.content.Intent
+import androidx.recyclerview.widget.RecyclerView
 import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
 import com.codebasetemplate.features.feature_language.ui.v2.adapter.LanguageGroup
@@ -20,6 +21,11 @@ class LanguageActivityV21 : BaseLanguageActivityV2FlowActivity() {
 
     override val trackingCompleteEventName: String
         get() = EventTracking.EVENT_LFO1_COMPLETE
+
+    override val clickGuideGroupIndex: Int
+        get() = resolveClickGuideGroupIndex(
+            isEnabled = remoteConfigRepository.getLanguageActivityConfig().isShowClickGuide
+        )
 
     override fun onGroupClick(group: LanguageGroup): Boolean {
         logTrackingComplete()
@@ -52,6 +58,12 @@ class LanguageActivityV21 : BaseLanguageActivityV2FlowActivity() {
     }
 
     companion object {
+        internal const val CLICK_GUIDE_GROUP_INDEX = 2
+
+        internal fun resolveClickGuideGroupIndex(isEnabled: Boolean): Int {
+            return if (isEnabled) CLICK_GUIDE_GROUP_INDEX else RecyclerView.NO_POSITION
+        }
+
         fun intentStart(
             context: Context,
             fromSetting: Boolean = false,

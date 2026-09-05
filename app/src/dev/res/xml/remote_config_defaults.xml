@@ -463,7 +463,7 @@
             "border_color": "#E5E7EB",
             "control_close_position": "right",
             "collapsible_expand_cooldown_second": 10,
-            "refresh_time_second": 100,
+            "refresh_time_second": 10,
             "expired_time_second": 10
             },
             {
@@ -521,8 +521,9 @@
             },
             {
             "place_name": "anchored_bottom_home",
-            "ad_id": "ca-app-pub-3940256099942544/6300978111",
-            "ad_type": "banner",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native",
+            "native_template_size": "small",
             "banner_size": "standard_large",
             "is_tracking_click": true,
             "is_enable": true,
@@ -535,6 +536,7 @@
             "border_color": "#E5E7EB",
             "control_close_position": "left",
             "collapsible_expand_cooldown_second": 10,
+            "refresh_time_second": 10,
             "expired_time_second": 10
             },
             {
@@ -552,6 +554,7 @@
             "border_color": "#FFFFFF",
             "expired_time_second": 60,
             "count_down_timer": 3,
+            "refresh_time_second": 10,
             "pip_anchor_mode": "fixed",
             "pip_layout_format": "media_card",
             "background_color_ads_notify_view": "#FF7A00",
@@ -875,8 +878,9 @@
         <key>language_activity_config</key>
         <value>
             {
-            "version": 1,
-            "time_show_loading_lfo": 3
+            "version": 2,
+            "time_show_loading_lfo": 3,
+            "is_show_click_guide": false
             }
         </value>
     </entry>

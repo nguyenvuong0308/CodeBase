@@ -129,6 +129,9 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
     protected open val shouldFadeInInitialLanguageList: Boolean
         get() = false
 
+    protected open val clickGuideGroupIndex: Int
+        get() = RecyclerView.NO_POSITION
+
     protected open fun initialExpandedGroupId(languageGroups: List<LanguageGroup>): String? {
         return null
     }
@@ -191,7 +194,9 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
             onApplyClicked()
         }
 
-        supportedLanguageAdapter = LanguageV2Adapter().also { adapter ->
+        supportedLanguageAdapter = LanguageV2Adapter(
+            clickGuideGroupIndex = clickGuideGroupIndex
+        ).also { adapter ->
             adapter.onGroupClicked = { group ->
                 onGroupClick(group)
             }

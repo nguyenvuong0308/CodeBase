@@ -9,4 +9,6 @@ data class LanguageActivityConfigModel(
     val version: Int?,
     @Json(name = "time_show_loading_lfo")
     val timeShowLoadingLfo: Int?,
+    @Json(name = "is_show_click_guide")
+    val isShowClickGuide: Boolean?,
 )
