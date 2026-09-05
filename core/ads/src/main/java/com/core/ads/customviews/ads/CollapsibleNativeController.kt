@@ -7,6 +7,7 @@ import android.os.SystemClock
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.PopupWindow
 import androidx.appcompat.widget.AppCompatImageView
@@ -221,6 +222,8 @@ internal class CollapsibleNativeController(
             ).apply {
                 isOutsideTouchable = false
                 isClippingEnabled = true
+                // Non-focusable popups otherwise default to being layered above the IME.
+                inputMethodMode = PopupWindow.INPUT_METHOD_NEEDED
                 setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                 runCatching {
                     elevation = anchorView.resources
