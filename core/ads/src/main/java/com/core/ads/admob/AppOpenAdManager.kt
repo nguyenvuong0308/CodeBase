@@ -118,7 +118,7 @@ class AppOpenAdManager @Inject constructor(
             applicationScope.launch {
                 delay(remoteConfigRepository.getAppOpenAdConfig().timeMillisDelayBeforeShow)
                 if(!reopenAction.isCustomAction(activity)) {
-                    if (!reOpenShowCondition.isCanShow()) {
+                    if (reOpenShowCondition.isCanShow()) {
                         showAdIfAvailable(activity, CoreAdPlaceName.APP_REOPEN)
                     }
                 } else {
