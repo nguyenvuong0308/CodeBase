@@ -17,6 +17,7 @@ object AnalyticsEvent {
 
     const val EVENT_ACTION_SAVE_LANGUAGE_FIRST = "save_language_first"
     const val EVENT_ACTION_PASS_INTRO = "pass_intro_first"
+    const val EVENT_ACTION_PASS_INTRO_FIRST_NEW_USER = "pass_intro_first_new_user"
 
     const val EVENT_CLICK_SHORT_CUT_1 = "short_cut_1"
     const val EVENT_CLICK_SHORT_CUT= "short_cut_"

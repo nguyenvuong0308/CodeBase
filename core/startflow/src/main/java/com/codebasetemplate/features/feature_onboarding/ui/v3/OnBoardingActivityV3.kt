@@ -21,6 +21,7 @@ import com.codebasetemplate.features.feature_onboarding.ui.model.OnBoardingItem
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingEvent
 import com.codebasetemplate.features.feature_onboarding.ui.v1.OnBoardingViewModel
 import com.codebasetemplate.util.EventTracking
+import com.core.preference.SharedPrefs
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -145,6 +146,10 @@ class OnBoardingActivityV3 : StartFlowActivity<StartflowActivityOnboardingV3Bind
         showInterAd(
             CoreAdPlaceName.ACTION_NEXT_IN_INTRODUCTION
         ) {
+            if (!SharedPrefs.instance.get("first_pass_new_user", false)) {
+                SharedPrefs.instance.put("first_pass_new_user", true)
+                analyticsManager.logEvent(AnalyticsEvent.EVENT_ACTION_PASS_INTRO_FIRST_NEW_USER)
+            }
             openMain()
         }
     }
