@@ -113,6 +113,19 @@ internal fun shouldPreserveCachedNativeAdOnLoadFailure(
     return isReload && hasCachedNativeAd
 }
 
+internal fun buildAdEventName(baseName: String, action: String): String {
+    val suffix = "_$action"
+    val maxBaseNameLength = 40 - suffix.length // Firebase event name limit = 40
+    val safeBaseName = baseName
+        .takeLast(maxBaseNameLength)
+        .replace(Regex("[^A-Za-z0-9_]"), "_")
+
+    return "$safeBaseName$suffix"
+}
+
+internal fun getDismissAction(isNative: Boolean): String =
+    if (isNative) "Native_Dismissed" else "Dismissed"
+
 // Safety net: if a full-screen load neither succeeds nor fails within this window (e.g. the
 // driving Activity is destroyed mid-load and the SDK never calls back), force-release the
 // stuck ad unit so waiting placements don't stay latched on isLoading = true forever.
@@ -545,6 +558,9 @@ class AdmobManager @Inject constructor(
             activity.showLoaderNew(backgroundColor = nativePlace?.backgroundFullColor?.toColorInt())
             DialogNativeFakeInterstitial.newInstance(adPlaceName).apply {
                 onClose = {
+                    if (adHolder.adPlace.isTrackingShow) {
+                        sendEventDismiss(adHolder.adPlace.placeName, true)
+                    }
                     adHolder.isShowing = false
                     notifyAdFullScreenCompleted(
                         adPlaceName = placeName,
@@ -753,6 +769,9 @@ class AdmobManager @Inject constructor(
                         val nativeAfterIdentifier = adHolder.identifier
                         val isAutoLoadAfterDismiss = adHolder.adPlace.isAutoLoadAfterDismiss
                         Log.i(TAG, "Interstitial dismissed $placeName")
+                        if (adHolder.adPlace.isTrackingShow) {
+                            sendEventDismiss(placeName, false)
+                        }
                         adHolder.isShowing = false
                         PreventShowManyInterstitialAds.increaseNumberOfShowingInterAdInSession()
                         PreventShowManyInterstitialAds.startCountDownTimerIfNeed(
@@ -854,6 +873,9 @@ class AdmobManager @Inject constructor(
                         super.onAdDismissedFullScreenContent()
                         val placeName = adHolder.adPlace.placeName
                         Log.i(TAG, "RewardedInterstitial dismissed $placeName")
+                        if (adHolder.adPlace.isTrackingShow) {
+                            sendEventDismiss(placeName, false)
+                        }
                         adHolder.isShowing = false
 
                         if (adHolder.adPlace.isAutoLoadAfterDismiss) {
@@ -935,6 +957,9 @@ class AdmobManager @Inject constructor(
                     super.onAdDismissedFullScreenContent()
                     val placeName = adHolder.adPlace.placeName
                     Log.i(TAG, "Rewarded dismissed $placeName")
+                    if (adHolder.adPlace.isTrackingShow) {
+                        sendEventDismiss(placeName, false)
+                    }
                     adHolder.isShowing = false
                     notifyAdFullScreenDismissed(
                         adPlaceName = placeName,
@@ -1069,6 +1094,9 @@ class AdmobManager @Inject constructor(
         fun completeOnce() {
             if (isCompleted) return
             isCompleted = true
+            if (nativePlace.isTrackingShow) {
+                sendEventDismiss(nativePlace.placeName, true)
+            }
             nativeHolder.isShowing = false
             activity.removeLoaderNew()
             // Native sau interstitial chỉ được dùng một lần. Hủy ad vừa show và bắt đầu load ad
@@ -2242,21 +2270,7 @@ class AdmobManager @Inject constructor(
 
     private fun sendAdEvent(adPlaceName: IAdPlaceName, action: String) {
         runCatching {
-            val suffix = "_$action"
-            val maxLength = 40 - suffix.length // Firebase limit = 40
-            val baseName = adPlaceName.name
-
-            // Cắt từ cuối, đảm bảo không vượt quá maxLength
-            val safeBase = if (baseName.length > maxLength) {
-                baseName.takeLast(maxLength)
-            } else {
-                baseName
-            }
-
-            // Chỉ giữ lại ký tự hợp lệ [A-Za-z0-9_], thay cái khác bằng "_"
-            val safeName = safeBase.replace(Regex("[^A-Za-z0-9_]"), "_")
-
-            analyticsManager.logEvent("${safeName}$suffix")
+            analyticsManager.logEvent(buildAdEventName(adPlaceName.name, action))
         }
     }
 
@@ -2265,6 +2279,9 @@ class AdmobManager @Inject constructor(
 
     fun sendEventShow(adPlaceName: IAdPlaceName) =
         sendAdEvent(adPlaceName, "Showed")
+
+    fun sendEventDismiss(adPlaceName: IAdPlaceName, isNative: Boolean) =
+        sendAdEvent(adPlaceName, getDismissAction(isNative))
 
     private fun notifyConsentCompleteOnce() {
         if (isConsentCompletionNotified) return
