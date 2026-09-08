@@ -45,7 +45,7 @@ internal class AdPlaceModelMapper @Inject constructor(
         val isIgnoreInterval = model.isIgnoreInterval ?: false
         val isTutorialFlow = model.isTutorialFlow ?: false
         val isTrackingClick = model.isTrackingClick ?: false
-        val isTrackingShow = model.isTrackingShow ?: false
+        val isTrackingShow = model.isTrackingShow ?: true
         return when(adType) {
             AdType.RewardedVideo -> RewardedVideoAdPlace(
                 placeName = placeName,
