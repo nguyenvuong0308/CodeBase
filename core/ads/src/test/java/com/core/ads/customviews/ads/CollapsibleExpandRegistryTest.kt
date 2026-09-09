@@ -7,15 +7,29 @@ import org.junit.Test
 class CollapsibleExpandRegistryTest {
 
     @Test
-    fun `expanded item is remembered without affecting another item`() {
+    fun `expanded item is remembered for the same container`() {
         val registry = CollapsibleExpandRegistry<Any>()
+        val containerIdentity = Any()
         val expandedItem = Any()
         val otherItem = Any()
 
-        registry.markExpanded(expandedItem)
+        registry.markExpanded(expandedItem, containerIdentity)
 
-        assertTrue(registry.hasExpanded(expandedItem))
-        assertFalse(registry.hasExpanded(otherItem))
+        assertTrue(registry.hasExpanded(expandedItem, containerIdentity))
+        assertFalse(registry.hasExpanded(otherItem, containerIdentity))
+    }
+
+    @Test
+    fun `same ad can expand again in a different container`() {
+        val registry = CollapsibleExpandRegistry<Any>()
+        val firstContainerIdentity = Any()
+        val nextContainerIdentity = Any()
+        val reusedAd = Any()
+
+        registry.markExpanded(reusedAd, firstContainerIdentity)
+
+        assertTrue(registry.hasExpanded(reusedAd, firstContainerIdentity))
+        assertFalse(registry.hasExpanded(reusedAd, nextContainerIdentity))
     }
 
     @Test

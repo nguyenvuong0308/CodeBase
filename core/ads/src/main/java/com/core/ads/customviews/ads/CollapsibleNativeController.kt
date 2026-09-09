@@ -14,7 +14,6 @@ import androidx.appcompat.widget.AppCompatImageView
 import com.core.ads.R
 import com.core.config.domain.data.NativeExpandTemplate
 import com.google.android.gms.ads.nativead.NativeAd
-import java.util.Collections
 import java.util.WeakHashMap
 
 /**
@@ -25,6 +24,7 @@ import java.util.WeakHashMap
  */
 internal class CollapsibleNativeController(
     private val anchorView: View,
+    private val containerIdentity: Any,
     private val onClose: () -> Unit,
 ) {
 
@@ -388,11 +388,17 @@ internal class CollapsibleNativeController(
     }
 
     private fun hasNativeAdShownExpanded(nativeAd: NativeAd): Boolean {
-        return expandRegistry.hasExpanded(nativeAd)
+        return expandRegistry.hasExpanded(
+            item = nativeAd,
+            ownerIdentity = containerIdentity,
+        )
     }
 
     private fun markNativeAdExpandedShown(nativeAd: NativeAd) {
-        expandRegistry.markExpanded(nativeAd)
+        expandRegistry.markExpanded(
+            item = nativeAd,
+            ownerIdentity = containerIdentity,
+        )
     }
 }
 
@@ -440,8 +446,7 @@ internal class CollapsibleExpandState {
 
 internal class CollapsibleExpandRegistry<T : Any> {
     private val lastCloseTimes = mutableMapOf<String, Long>()
-    private val expandedItems: MutableSet<T> =
-        Collections.newSetFromMap(WeakHashMap<T, Boolean>())
+    private val expandedItemOwners = WeakHashMap<T, Any>()
 
     fun isCooldownActive(
         key: String,
@@ -456,11 +461,11 @@ internal class CollapsibleExpandRegistry<T : Any> {
         lastCloseTimes[key] = nowMillis
     }
 
-    fun hasExpanded(item: T): Boolean {
-        return expandedItems.contains(item)
+    fun hasExpanded(item: T, ownerIdentity: Any): Boolean {
+        return expandedItemOwners[item] === ownerIdentity
     }
 
-    fun markExpanded(item: T) {
-        expandedItems.add(item)
+    fun markExpanded(item: T, ownerIdentity: Any) {
+        expandedItemOwners[item] = ownerIdentity
     }
 }

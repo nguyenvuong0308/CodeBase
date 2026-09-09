@@ -47,11 +47,13 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
      * before this layout finishes constructing.
      */
     private var collapsibleNativeControllerOrNull: CollapsibleNativeController? = null
+    private val collapsibleContainerIdentity = Any()
 
     private val collapsibleNativeController: CollapsibleNativeController
         get() = collapsibleNativeControllerOrNull
             ?: CollapsibleNativeController(
                 anchorView = this,
+                containerIdentity = collapsibleContainerIdentity,
                 onClose = { onClose?.invoke() },
             ).also { collapsibleNativeControllerOrNull = it }
 
