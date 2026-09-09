@@ -16,6 +16,7 @@ import com.core.ads.extensions.updateRadius
 import com.core.ads.glidetransformation.RoundedCornersTransformation
 import com.core.dimens.R
 import com.core.utilities.dpToPx
+import com.core.utilities.isValidGlideContext
 import com.google.android.gms.ads.nativead.NativeAd
 
 class NativeSmallCtaRightTemplateView @JvmOverloads constructor(
@@ -44,20 +45,22 @@ class NativeSmallCtaRightTemplateView @JvmOverloads constructor(
         nativeAd.icon?.let {
             binding.icon.visibility = VISIBLE
 
-            Glide.with(this)
-                .load(it.drawable)
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .apply(
-                    RequestOptions.bitmapTransform(
-                        RoundedCornersTransformation(
-                            context.resources.getDimensionPixelSize(
-                                R.dimen._8dp
-                            ), 0, RoundedCornersTransformation.CornerType.ALL
+            if (context.isValidGlideContext()) {
+                Glide.with(context.applicationContext)
+                    .load(it.drawable)
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .apply(
+                        RequestOptions.bitmapTransform(
+                            RoundedCornersTransformation(
+                                context.resources.getDimensionPixelSize(
+                                    R.dimen._8dp
+                                ), 0, RoundedCornersTransformation.CornerType.ALL
+                            )
                         )
                     )
-                )
-                .into(binding.icon)
+                    .into(binding.icon)
+            }
         }
 
         nativeAd.body?.let {

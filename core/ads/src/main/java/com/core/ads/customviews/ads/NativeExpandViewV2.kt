@@ -113,7 +113,7 @@ internal class NativeExpandViewV2 @JvmOverloads constructor(
     }
 
     private fun loadIcon(imageView: ImageView, drawable: Any?) {
-        Glide.with(this)
+        Glide.with(context.applicationContext)
             .load(drawable)
             .override(resources.getDimensionPixelSize(R.dimen._46dp))
             .skipMemoryCache(true)

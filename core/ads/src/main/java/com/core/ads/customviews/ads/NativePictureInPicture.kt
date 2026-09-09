@@ -551,7 +551,7 @@ class NativePictureInPicture @JvmOverloads constructor(
     ) {
         if (!context.isValidGlideContext()) return
 
-        Glide.with(this)
+        Glide.with(context.applicationContext)
             .load(drawable)
             .override(resources.getDimensionPixelSize(binding.iconSizeResId))
             .skipMemoryCache(true)

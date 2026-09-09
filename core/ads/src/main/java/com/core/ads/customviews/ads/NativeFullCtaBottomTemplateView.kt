@@ -56,7 +56,7 @@ class NativeFullCtaBottomTemplateView @JvmOverloads constructor(
         nativeAd.icon?.let {
             binding.icon.visibility = VISIBLE
             if (context.isValidGlideContext()) {
-                Glide.with(this)
+                Glide.with(context.applicationContext)
                     .load(it.drawable)
                     .override(resources.getDimensionPixelSize(com.core.dimens.R.dimen._44dp))
                     .skipMemoryCache(true)

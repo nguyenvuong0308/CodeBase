@@ -131,7 +131,7 @@ internal class CollapsibleNativeController(
     }
 
     fun onAnchorDetached() {
-        collapseWithoutCooldown()
+        collapseWithoutCooldown(CollapsibleCollapseTrigger.ANCHOR_DETACHED)
     }
 
     /**
@@ -139,7 +139,7 @@ internal class CollapsibleNativeController(
      * separate window, so hiding the anchor alone would leave it floating on screen.
      */
     fun onAnchorHidden() {
-        collapseWithoutCooldown()
+        collapseWithoutCooldown(CollapsibleCollapseTrigger.ANCHOR_HIDDEN)
     }
 
     /**
@@ -147,14 +147,14 @@ internal class CollapsibleNativeController(
      * bound to the inline template until its replacement has loaded successfully.
      */
     fun onNativeRefreshStarted() {
-        collapseWithoutCooldown()
+        collapseWithoutCooldown(CollapsibleCollapseTrigger.NATIVE_REFRESH_STARTED)
     }
 
-    private fun collapseWithoutCooldown() {
+    private fun collapseWithoutCooldown(trigger: CollapsibleCollapseTrigger) {
         // Already inline: rebinding here would only restart the template countdown for nothing.
         if (isCollapsedInlineVisible()) return
         if (inlineTemplateView != null) {
-            showCollapsedInline()
+            showCollapsedInline(rebindNativeAd = trigger.shouldRebindNativeAd)
         } else {
             dismissExpandedPopup()
         }
@@ -301,7 +301,10 @@ internal class CollapsibleNativeController(
         showCollapsedInline(markExpandedClosed = true)
     }
 
-    private fun showCollapsedInline(markExpandedClosed: Boolean = false) {
+    private fun showCollapsedInline(
+        markExpandedClosed: Boolean = false,
+        rebindNativeAd: Boolean = true,
+    ) {
         if (markExpandedClosed) {
             markExpandedClosed()
         }
@@ -309,7 +312,9 @@ internal class CollapsibleNativeController(
         dismissExpandedPopup()
         val inlineTemplate = inlineTemplateView ?: return
         inlineTemplate.visibility = View.VISIBLE
-        currentNativeAd?.let(inlineTemplate::setNativeAd)
+        if (rebindNativeAd) {
+            currentNativeAd?.let(inlineTemplate::setNativeAd)
+        }
     }
 
     private fun isCollapsedInlineVisible(): Boolean {
@@ -389,6 +394,18 @@ internal class CollapsibleNativeController(
     private fun markNativeAdExpandedShown(nativeAd: NativeAd) {
         expandRegistry.markExpanded(nativeAd)
     }
+}
+
+/**
+ * Describes why an expanded ad is being collapsed.
+ *
+ * Detaching happens while the host Activity may already be destroyed. The inline template is
+ * already bound, so binding it again can incorrectly start image loading against that Activity.
+ */
+internal enum class CollapsibleCollapseTrigger(val shouldRebindNativeAd: Boolean) {
+    ANCHOR_DETACHED(shouldRebindNativeAd = false),
+    ANCHOR_HIDDEN(shouldRebindNativeAd = true),
+    NATIVE_REFRESH_STARTED(shouldRebindNativeAd = true),
 }
 
 internal class CollapsibleExpandState {

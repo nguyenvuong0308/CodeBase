@@ -45,7 +45,7 @@ class NativeMiniCtaRightTemplateView @JvmOverloads constructor(
         nativeAd.icon?.let {
             binding.icon.visibility = VISIBLE
 
-            Glide.with(this)
+            Glide.with(context.applicationContext)
                 .load(it.drawable)
                 .skipMemoryCache(true)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)

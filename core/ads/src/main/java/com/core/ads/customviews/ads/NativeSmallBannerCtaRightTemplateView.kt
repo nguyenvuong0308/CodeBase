@@ -40,7 +40,7 @@ class NativeSmallBannerCtaRightTemplateView @JvmOverloads constructor(
         binding.icon.visibility = GONE
         nativeAd.icon?.let { icon ->
             binding.icon.visibility = VISIBLE
-            Glide.with(this)
+            Glide.with(context.applicationContext)
                 .load(icon.drawable)
                 .skipMemoryCache(true)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)

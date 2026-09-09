@@ -51,7 +51,7 @@ class NativeMediumMediaCtaRightTemplateView @JvmOverloads constructor(
         nativeAd.icon?.drawable?.let { iconDrawable ->
             binding.icon.visibility = VISIBLE
             if (context.isValidGlideContext()) {
-                Glide.with(this)
+                Glide.with(context.applicationContext)
                     .load(iconDrawable)
                     .override(resources.getDimensionPixelSize(DimenR.dimen._44dp))
                     .skipMemoryCache(true)
