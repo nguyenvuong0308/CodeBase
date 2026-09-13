@@ -89,6 +89,7 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
     private var isPageEnd by argument<Boolean>()
     private var isShowAd by argument<Boolean>()
     private var fullAds by argument<Boolean>()
+    private var state: OnBoardingV3PageState ?= null
 
     override fun bindingProvider(
         inflater: LayoutInflater,
@@ -122,6 +123,7 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
             config = onBoardingConfig,
             isFullAds = fullAds
         )
+        this.state = state
 
         val renderScope = OnBoardingV3RenderScope(
             inflater = layoutInflater,
@@ -284,8 +286,8 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
         spec.actionTextAppearanceRes?.let { appearance ->
             actionViews.forEach { it.setTextAppearance(appearance) }
         }
-
-        tvTitle.visibleIf(spec.isTitleVisible)
+        val positionNext = state?.config?.positionNext
+        tvTitle.visibleIf(spec.isTitleVisible && positionNext != OnBoardingConfig.POSITION_NEXT_TOP_V2)
         tvTitleTop.visibleIf(spec.isTitleVisible)
         tvSubTitleTop.visibleIf(spec.isSubtitleVisible && tvSubTitleTop.text.isNotEmpty())
         spec.titleTextColor?.let {

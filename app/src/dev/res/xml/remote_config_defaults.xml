@@ -865,7 +865,7 @@
         <value>
             {
             "version": 3,
-            "position_next": "top",
+            "position_next": "top_v2",
             "is_show_close": true,
             "is_show_swipe": false,
             "delay_show_close_swipe_seconds": 1,
