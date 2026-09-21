@@ -3,6 +3,7 @@ package com.core.ads.admob
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.os.Looper
 import android.os.CountDownTimer
 import android.os.SystemClock
 import android.util.Log
@@ -147,6 +148,11 @@ class AdmobManager @Inject constructor(
             private set
     }
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    // Isolates SDK construction so JVM tests can supply a loader without instrumenting GMS bytecode.
+    internal var nativeAdLoaderBuilder: (Activity, String) -> AdLoader.Builder = { activity, adUnitId ->
+        AdLoader.Builder(activity, adUnitId)
+    }
     private val isTurnOnAdPlacesDisabledWhenDetectTestAd: Boolean
         get() = remoteConfigRepository.isTurnOnAdPlacesDisabledWhenDetectTestAd()
 
@@ -488,6 +494,16 @@ class AdmobManager @Inject constructor(
         isWaitLoadToShow: Boolean
     ) {
         val adPlace = remoteConfigRepository.getAdPlaceBy(adPlaceName)
+        if (adPlace.isNativeInterstitialType()) {
+            runOnMain {
+                PreventShowManyInterstitialAds.recordMeaningfulAction()
+                showNativeInterstitial(
+                    activity, fragmentManager, adPlace as NativeAdPlace, identifier,
+                    isWaitLoadToShow || remoteConfigRepository.getInterstitialAdConfig().isWaitLoadToShow,
+                )
+            }
+            return
+        }
 
         if (isNotAbleToVisibleAdsToUser(adPlaceName) || isHasFullscreenAdShowing()) {
             notifyAdFullScreenCompleted(adPlaceName, isHasFullscreenAdShowing())
@@ -596,6 +612,15 @@ class AdmobManager @Inject constructor(
         isRequestFromExternal: Boolean
     ) {
         val adPlace = remoteConfigRepository.getAdPlaceBy(adPlaceName)
+        if (adPlace.isNativeInterstitialType()) {
+            runOnMain {
+                notifyAdFullScreenRequestShowing(adPlace)
+                val holder = getOrCreateAdBannerNativeHolderBy(adPlace) as NativeAdHolder
+                holder.needRetry = false
+                loadNativeAdIfNeed(activity, holder, isReload = false)
+            }
+            return
+        }
         notifyAdFullScreenRequestShowing(adPlace)
 
         val adHolder = getOrCreateAdHolderFullScreenBy(adPlace, isNeedUpdateAdPlace)
@@ -1023,6 +1048,89 @@ class AdmobManager @Inject constructor(
             } else {
                 notifyAdFullScreenCompleted(placeName, false)
             }
+        }
+    }
+
+    private fun showNativeInterstitial(
+        activity: Activity,
+        fragmentManager: FragmentManager,
+        adPlace: NativeAdPlace,
+        identifier: String,
+        waitForLoad: Boolean,
+    ) {
+        val placeName = adPlace.placeName
+        if (activity.isFinishing || activity.isDestroyed || fragmentManager.isStateSaved ||
+            isNotAbleToVisibleResolvedAdPlace(adPlace) || isHasFullscreenAdShowing() ||
+            isCanNotShowInterAd(adPlace)
+        ) {
+            notifyAdFullScreenCompleted(placeName, false, false)
+            return
+        }
+        val holder = getOrCreateAdBannerNativeHolderBy(adPlace) as NativeAdHolder
+        holder.needRetry = false
+        val ttlMillis = (adPlace.expiredTimeSecond
+            ?: remoteConfigRepository.getNativeAdConfig().expiredTimeSecond).toLong() * 1_000L
+        if (holder.nativeAd != null && holder.isAdExpired(ttlMillis)) holder.clearNativeAd()
+
+        if (holder.nativeAd == null) {
+            if (!waitForLoad) {
+                notifyAdFullScreenCompleted(placeName, false, false)
+                return
+            }
+            // One pending show per placement; repeated requests must not replace its callback.
+            if (holder.isWaitLoadToShow) return
+            holder.isWaitLoadToShow = true
+            activity.showLoader()
+            holder.onFullscreenLoadFinished = { loaded ->
+                if (!activity.isFinishing && !activity.isDestroyed) activity.removeLoader()
+                if (loaded) {
+                    showNativeInterstitial(activity, fragmentManager, adPlace, identifier, false)
+                } else {
+                    notifyAdFullScreenCompleted(placeName, false, false)
+                }
+            }
+            notifyAdFullScreenRequestShowing(adPlace)
+            loadNativeAdIfNeed(activity, holder, isReload = false)
+            return
+        }
+
+        holder.isShowing = true
+        activity.showLoaderNew(backgroundColor = adPlace.backgroundFullColor?.let {
+            runCatching { it.toColorInt() }.getOrNull()
+        })
+        var shown = false
+        var completed = false
+        fun complete() {
+            if (completed) return
+            completed = true
+            holder.reset()
+            activity.removeLoaderNew()
+            if (shown) {
+                if (adPlace.isTrackingShow) sendEventDismiss(placeName, true)
+                PreventShowManyInterstitialAds.increaseNumberOfShowingInterAdInSession()
+                PreventShowManyInterstitialAds.startCountDownTimerIfNeed(
+                    remoteConfigRepository.getInterstitialAdConfig().timePerSession
+                )
+                PreventShowManyInterstitialAds.updateLastTimeShowedInterAd()
+                notifyAdFullScreenDismissed(placeName, false, 0)
+                if (adPlace.isAutoLoadAfterDismiss) {
+                    loadFullscreenAd(activity, placeName, identifier)
+                }
+            }
+            notifyAdFullScreenCompleted(placeName, shown, false)
+        }
+        runCatching {
+            DialogNativeFakeInterstitial.newInstance(placeName).apply {
+                onShown = {
+                    shown = true
+                    notifyAdFullScreenSucceedToShow(placeName)
+                    if (adPlace.isTrackingShow) sendEventShow(placeName)
+                }
+                onClose = { complete() }
+            }.show(fragmentManager, "DialogNativeInterstitial_$identifier")
+        }.onFailure {
+            notifyAdFullScreenNotValidOrLoadFailed(placeName)
+            complete()
         }
     }
 
@@ -1580,9 +1688,13 @@ class AdmobManager @Inject constructor(
         isReload: Boolean,
         waterfallIndex: Int = 0
     ) {
+        if (activity.isFinishing || activity.isDestroyed) {
+            failBannerNativeLoadBecauseNoAdUnit(adHolder)
+            return
+        }
         val placeName = adHolder.adPlace.placeName
         if (isNotAbleToVisibleResolvedAdPlace(adHolder.adPlace)) {
-            notifyBannerNativeFailedToLoad(placeName)
+            notifyNativeLoadFailed(adHolder)
             adHolder.reset()
             return
         }
@@ -1604,12 +1716,7 @@ class AdmobManager @Inject constructor(
         }
         Log.d(TAG, "loadNativeAdIfNeed: isReload $isReload")
 
-        if (activity.isDestroyed) {
-//            notifyBannerNativeFailedToLoad(placeName)
-            adHolder.reset()
-            return
-        }
-        if(nativeAd == null) {
+        if (nativeAd == null && !adHolder.adPlace.isNativeInterstitialType()) {
             notifyBannerNativeLoading(
                 placeName,
                 AdType.Native,
@@ -1626,7 +1733,15 @@ class AdmobManager @Inject constructor(
             Log.d(TAG, "loadNativeAdIfNeed: isLoading")
             return
         }
-        adHolder.isLoading = true
+        val loadGeneration = adHolder.beginLoad()
+        if (adHolder.adPlace.isNativeInterstitialType()) {
+            applicationScope.launch {
+                delay(FULL_SCREEN_LOAD_TIMEOUT_MS)
+                if (adHolder.acceptsLoadCallback(loadGeneration)) {
+                    failBannerNativeLoadBecauseNoAdUnit(adHolder)
+                }
+            }
+        }
         val waterfallAdUnitIds = adHolder.adPlace.getWaterfallAdUnitIds()
         if (waterfallAdUnitIds.isEmpty()) {
             if (
@@ -1642,131 +1757,162 @@ class AdmobManager @Inject constructor(
             }
             return
         }
-        val adUnitId = waterfallAdUnitIds[waterfallIndex]
+        val adUnitId = waterfallAdUnitIds.getOrNull(waterfallIndex) ?: run {
+            failBannerNativeLoadBecauseNoAdUnit(adHolder)
+            return
+        }
 
         applicationScope.launch {
-            val adLoader = withContext(Dispatchers.IO) {
-                AdLoader.Builder(activity, adUnitId)
-                    .forNativeAd { ad: NativeAd ->
-                        Log.i(TAG, "Native loaded $placeName $adUnitId")
-                        Log.i(TAG, "Native loaded $placeName ${ad.headline}")
-                        val isCurrentAdTest = TestNativeAdHeadlineUtils.containsBlockedHeadline(ad.headline)
-                        if (isTurnOnAdPlacesDisabledWhenDetectTestAd && isCurrentAdTest) {
-                            markAdPlacesDisabledWhenDetectTestAd()
-                            Log.i(TAG, "Native loaded block ad test $placeName ${ad.headline}")
-                            isTestAd = true
-                        }
-                        adHolder.nativeAd = ad
-                        adHolder.loadedAtMs = SystemClock.elapsedRealtime()
-                        ad.setOnPaidEventListener { adValue ->
-                            trackAdjustAdRevenue(
-                                adUnitId = adUnitId,
-                                loadedAdapterResponseInfo = ad.responseInfo?.loadedAdapterResponseInfo,
-                                adFormat = AD_FORMAT_NATIVE,
-                                adValueMicros = adValue.valueMicros,
-                                adValueCurrencyCode = adValue.currencyCode
-                            )
-                        }
+            if (!adHolder.acceptsLoadCallback(loadGeneration)) return@launch
+            try {
+                val adLoader = withContext(Dispatchers.IO) {
+                    nativeAdLoaderBuilder(activity, adUnitId)
+                        .forNativeAd { ad: NativeAd ->
+                            runOnMain {
+                                if (!adHolder.acceptsLoadCallback(loadGeneration)) {
+                                    ad.destroy()
+                                    return@runOnMain
+                                }
+                                if (activity.isFinishing || activity.isDestroyed) {
+                                    ad.destroy()
+                                    failBannerNativeLoadBecauseNoAdUnit(adHolder)
+                                    return@runOnMain
+                                }
+                                adHolder.isLoading = false
+                                Log.i(TAG, "Native loaded $placeName $adUnitId")
+                                Log.i(TAG, "Native loaded $placeName ${ad.headline}")
+                                val isCurrentAdTest = TestNativeAdHeadlineUtils.containsBlockedHeadline(ad.headline)
+                                if (isTurnOnAdPlacesDisabledWhenDetectTestAd && isCurrentAdTest) {
+                                    markAdPlacesDisabledWhenDetectTestAd()
+                                    Log.i(TAG, "Native loaded block ad test $placeName ${ad.headline}")
+                                    isTestAd = true
+                                }
+                                adHolder.nativeAd = ad
+                                adHolder.loadedAtMs = SystemClock.elapsedRealtime()
+                                ad.setOnPaidEventListener { adValue ->
+                                    trackAdjustAdRevenue(
+                                        adUnitId = adUnitId,
+                                        loadedAdapterResponseInfo = ad.responseInfo?.loadedAdapterResponseInfo,
+                                        adFormat = AD_FORMAT_NATIVE,
+                                        adValueMicros = adValue.valueMicros,
+                                        adValueCurrencyCode = adValue.currencyCode
+                                    )
+                                }
 
-                        if (isNotAbleToVisibleResolvedAdPlace(adHolder.adPlace)) {
-                            notifyBannerNativeFailedToLoad(placeName)
-                            adHolder.reset()
-                        } else {
-                            notifyNativeLoaded(ad, nativeAdPlace)
-                            if (adHolder.adPlace.isTrackingShow) {
-                                sendEventShow(adHolder.adPlace.placeName)
+                                if (isNotAbleToVisibleResolvedAdPlace(adHolder.adPlace)) {
+                                    notifyNativeLoadFailed(adHolder)
+                                    adHolder.reset()
+                                } else {
+                                    notifyNativeLoaded(ad, nativeAdPlace)
+                                    if (adHolder.adPlace.isTrackingShow && !adHolder.adPlace.isNativeInterstitialType()) {
+                                        sendEventShow(adHolder.adPlace.placeName)
+                                    }
+                                }
                             }
                         }
-                    }
-                    .withAdListener(object : AdListener() {
-                        override fun onAdLoaded() {
-                            super.onAdLoaded()
-                            adHolder.isLoading = false
-                        }
+                        .withAdListener(object : AdListener() {
 
-                        override fun onAdFailedToLoad(p0: LoadAdError) {
-                            super.onAdFailedToLoad(p0)
-                            Log.i(TAG, "Native load failed $placeName $adUnitId ${p0.message} $p0")
-                            adHolder.isLoading = false
-                            val nextWaterfallIndex = waterfallIndex + 1
-                            if (nextWaterfallIndex < waterfallAdUnitIds.size) {
-                                Log.i(TAG, "Native waterfall next $placeName ${waterfallAdUnitIds[nextWaterfallIndex]}")
-                                loadNativeAdIfNeed(activity, adHolder, isReload, nextWaterfallIndex)
-                                return
-                            }
-
-                            val nativeAdConfig = remoteConfigRepository.getNativeAdConfig()
-                            val isEnableRetry = nativeAdConfig.isEnableRetry
-                            val maxRetryCount = nativeAdConfig.maxRetryCount
-                            val retryIntervalSecondList = nativeAdConfig.retryIntervalSecondList
-                            if (isEnableRetry && adHolder.needRetry && retryIntervalSecondList.isNotEmpty()) {
-                                when {
-                                    (adHolder.retryCount in 0 until maxRetryCount) -> {
-                                        Log.i(
-                                            TAG,
-                                            "Native retry begin ${adHolder.retryCount} $placeName"
-                                        )
-                                        applicationScope.launch {
-                                            adHolder.retryCount++
-                                            val currentRetryCount = adHolder.retryCount
-                                            val retryDelay =
-                                                if (currentRetryCount >= retryIntervalSecondList.size) {
-                                                    retryIntervalSecondList[retryIntervalSecondList.size - 1]
-                                                } else {
-                                                    retryIntervalSecondList[currentRetryCount - 1]
-                                                }
-                                            delay(retryDelay.toMillis())
-
-                                            if (adHolder.needRetry && !isBannerNativeAdPlacedLoaded(
-                                                    adHolder.adPlace
-                                                ) && !adHolder.isLoading && !activity.isFinishing
-                                            ) {
-                                                Log.i(
-                                                    TAG,
-                                                    "Native retry load ${adHolder.retryCount} $placeName"
-                                                )
-                                                loadNativeAdIfNeed(activity, adHolder, isReload)
-                                            } else {
-                                                Log.i(
-                                                    TAG,
-                                                    "Native retry not valid ${adHolder.retryCount} $placeName"
-                                                )
-//                                        notifyBannerNativeFailedToLoad(placeName)
-                                            }
-                                        }
+                            override fun onAdFailedToLoad(p0: LoadAdError) {
+                                super.onAdFailedToLoad(p0)
+                                runOnMain {
+                                    if (!adHolder.acceptsLoadCallback(loadGeneration)) return@runOnMain
+                                    if (activity.isFinishing || activity.isDestroyed) {
+                                        failBannerNativeLoadBecauseNoAdUnit(adHolder)
+                                        return@runOnMain
+                                    }
+                                    Log.i(TAG, "Native load failed $placeName $adUnitId ${p0.message} $p0")
+                                    adHolder.isLoading = false
+                                    val nextWaterfallIndex = waterfallIndex + 1
+                                    if (nextWaterfallIndex < waterfallAdUnitIds.size) {
+                                        Log.i(TAG, "Native waterfall next $placeName ${waterfallAdUnitIds[nextWaterfallIndex]}")
+                                        loadNativeAdIfNeed(activity, adHolder, isReload, nextWaterfallIndex)
+                                        return@runOnMain
                                     }
 
-                                    else -> {
-                                        Log.i(TAG, "Native retry exceeded count$placeName")
+                                    val nativeAdConfig = remoteConfigRepository.getNativeAdConfig()
+                                    val isEnableRetry = nativeAdConfig.isEnableRetry
+                                    val maxRetryCount = nativeAdConfig.maxRetryCount
+                                    val retryIntervalSecondList = nativeAdConfig.retryIntervalSecondList
+                                    if (isEnableRetry && adHolder.needRetry && retryIntervalSecondList.isNotEmpty()) {
+                                        when {
+                                            (adHolder.retryCount in 0 until maxRetryCount) -> {
+                                                Log.i(
+                                                    TAG,
+                                                    "Native retry begin ${adHolder.retryCount} $placeName"
+                                                )
+                                                applicationScope.launch {
+                                                    if (adHolder.loadGeneration != loadGeneration) return@launch
+                                                    adHolder.retryCount++
+                                                    val currentRetryCount = adHolder.retryCount
+                                                    val retryDelay =
+                                                        if (currentRetryCount >= retryIntervalSecondList.size) {
+                                                            retryIntervalSecondList[retryIntervalSecondList.size - 1]
+                                                        } else {
+                                                            retryIntervalSecondList[currentRetryCount - 1]
+                                                        }
+                                                    delay(retryDelay.toMillis())
+
+                                                    if (adHolder.loadGeneration == loadGeneration && adHolder.needRetry && !isBannerNativeAdPlacedLoaded(
+                                                            adHolder.adPlace
+                                                        ) && !adHolder.isLoading && !activity.isFinishing
+                                                    ) {
+                                                        Log.i(
+                                                            TAG,
+                                                            "Native retry load ${adHolder.retryCount} $placeName"
+                                                        )
+                                                        loadNativeAdIfNeed(activity, adHolder, isReload)
+                                                    } else {
+                                                        Log.i(
+                                                            TAG,
+                                                            "Native retry not valid ${adHolder.retryCount} $placeName"
+                                                        )
+                                                    }
+                                                }
+                                            }
+
+                                            else -> {
+                                                Log.i(TAG, "Native retry exceeded count$placeName")
+                                                finishFailedNativeLoad(adHolder, nativeAdConfig.isHideWhenError)
+                                            }
+                                        }
+                                    } else {
+                                        Log.i(TAG, "Native not retry $placeName")
                                         finishFailedNativeLoad(adHolder, nativeAdConfig.isHideWhenError)
                                     }
                                 }
-                            } else {
-                                Log.i(TAG, "Native not retry $placeName")
-                                finishFailedNativeLoad(adHolder, nativeAdConfig.isHideWhenError)
                             }
-                        }
 
-                        override fun onAdClicked() {
-                            super.onAdClicked()
-                            if(adHolder.adPlace.isTrackingClick) {
-                                analyticsManager.logEvent(adHolder.adPlace.placeName.name + "_Clicked")
+                            override fun onAdClicked() {
+                                super.onAdClicked()
+                                if(adHolder.adPlace.isTrackingClick) {
+                                    analyticsManager.logEvent(adHolder.adPlace.placeName.name + "_Clicked")
+                                }
+                                increaseAdClickedCount()
                             }
-                            increaseAdClickedCount()
-                        }
-                    })
-                    .withNativeAdOptions(
-                        NativeAdOptions.Builder()
-                            .setRequestCustomMuteThisAd(true)
-                            .setAdChoicesPlacement(NativeAdOptions.ADCHOICES_TOP_RIGHT)
-                            .setVideoOptions(
-                                VideoOptions.Builder().setStartMuted(true).setCustomControlsRequested(true).build()
-                            )
-                            .build()
-                    )
-                    .build()
+                        })
+                        .withNativeAdOptions(
+                            NativeAdOptions.Builder()
+                                .setRequestCustomMuteThisAd(true)
+                                .setAdChoicesPlacement(NativeAdOptions.ADCHOICES_TOP_RIGHT)
+                                .setVideoOptions(
+                                    VideoOptions.Builder().setStartMuted(true).setCustomControlsRequested(true).build()
+                                )
+                                .build()
+                        )
+                        .build()
+                }
+                if (!adHolder.acceptsLoadCallback(loadGeneration)) return@launch
+                if (activity.isFinishing || activity.isDestroyed) {
+                    failBannerNativeLoadBecauseNoAdUnit(adHolder)
+                } else {
+                    adLoader.loadAd(getAdRequest())
+                }
+            } catch (error: Exception) {
+                if (adHolder.acceptsLoadCallback(loadGeneration)) {
+                    Log.w(TAG, "Native request failed $placeName", error)
+                    failBannerNativeLoadBecauseNoAdUnit(adHolder)
+                }
             }
-            adLoader.loadAd(getAdRequest())
         }
     }
 
@@ -2038,17 +2184,25 @@ class AdmobManager @Inject constructor(
      */
     private fun finishFailedNativeLoad(adHolder: NativeAdHolder, isHideWhenError: Boolean) {
         val hasCachedNativeAd = adHolder.nativeAd != null
-        if (isHideWhenError && !hasCachedNativeAd) {
-            notifyBannerNativeFailedToLoad(adHolder.adPlace.placeName)
+        if (adHolder.adPlace.isNativeInterstitialType() || (isHideWhenError && !hasCachedNativeAd)) {
+            notifyNativeLoadFailed(adHolder)
         }
         adHolder.resetLoadState()
     }
 
+    private fun notifyNativeLoadFailed(adHolder: AdHolder) {
+        if (adHolder.adPlace.isNativeInterstitialType()) {
+            notifyAdFullScreenNotValidOrLoadFailed(adHolder.adPlace.placeName)
+        } else {
+            notifyBannerNativeFailedToLoad(adHolder.adPlace.placeName)
+        }
+    }
+
     private fun failBannerNativeLoadBecauseNoAdUnit(adHolder: AdHolder) {
         val placeName = adHolder.adPlace.placeName
-        Log.i(TAG, "BannerNative no available ad unit $placeName")
+        Log.i(TAG, "BannerNative load unavailable $placeName")
+        notifyNativeLoadFailed(adHolder)
         adHolder.reset()
-        notifyBannerNativeFailedToLoad(placeName)
     }
 
     private fun getFullScreenAdUnitKey(adPlace: AdPlace, adUnitId: String): FullScreenAdUnitKey {
@@ -2351,6 +2505,11 @@ class AdmobManager @Inject constructor(
 
     }
 
+    private fun runOnMain(block: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) block()
+        else applicationScope.launch { block() }
+    }
+
     private fun syncStoredGdprConsent() {
         val consentGranted = when (consentInformation.consentStatus) {
             ConsentInformation.ConsentStatus.NOT_REQUIRED,
@@ -2393,9 +2552,11 @@ class AdmobManager @Inject constructor(
     private fun getOrCreateAdBannerNativeHolderBy(adPlace: AdPlace): AdHolder {
         var adHolder = adHolderBannerNativeMap[adPlace.placeName]
         if (adHolder == null || adHolder.adPlace.adType != adPlace.adType) {
+            adHolder?.needRetry = false
+            adHolder?.reset()
             adHolder = when (adPlace.adType) {
                 AdType.Banner -> BannerAdHolder(adPlace = adPlace)
-                AdType.Native -> NativeAdHolder(adPlace = adPlace)
+                AdType.Native, AdType.NativeInterstitial -> NativeAdHolder(adPlace = adPlace)
 //                AdType.AppOpen -> AppOpenAdHolder(adPlace = adPlace)
 //                else -> RewardedAdHolder(adPlace = adPlace)
                 else -> NativeAdHolder(adPlace = adPlace)
@@ -2427,6 +2588,7 @@ class AdmobManager @Inject constructor(
     }
 
     private fun isFullScreenAdPlacedLoaded(adPlace: AdPlace): Boolean {
+        if (adPlace.isNativeInterstitialType()) return isBannerNativeAdPlacedLoaded(adPlace)
         val adHolder = adHolderFullScreenMap[adPlace.placeName]
         val isPlacementAdLoaded = when (adPlace.adType) {
             AdType.Interstitial -> adHolder is InterstitialAdHolder && adHolder.interstitialAd != null
@@ -2441,7 +2603,7 @@ class AdmobManager @Inject constructor(
         val adHolder = adHolderBannerNativeMap[adPlace.placeName] ?: return false
         return when (adPlace.adType) {
             AdType.Banner -> adHolder is BannerAdHolder && adHolder.bannerAd != null
-            AdType.Native -> adHolder is NativeAdHolder && adHolder.nativeAd != null
+            AdType.Native, AdType.NativeInterstitial -> adHolder is NativeAdHolder && adHolder.nativeAd != null
             else -> false
         }
     }
@@ -2484,6 +2646,13 @@ class AdmobManager @Inject constructor(
 
     private fun notifyNativeLoaded(nativeAd: NativeAd, nativeAdPlace: NativeAdPlace) {
         applicationScope.launch {
+            val holder = adHolderBannerNativeMap[nativeAdPlace.placeName] as? NativeAdHolder
+            if (holder == null || holder.nativeAd !== nativeAd) return@launch
+            if (nativeAdPlace.isNativeInterstitialType()) {
+                _adFullScreenFlow.emit(AdFullScreenUiResource.AdLoaded(nativeAdPlace.placeName))
+                holder.finishFullscreenLoad(true)
+                return@launch
+            }
             _adLoadBannerNativeFlow.emit(
                 AdLoadBannerNativeUiResource.NativeAdLoaded(
                     nativeAd,

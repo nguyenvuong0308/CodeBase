@@ -113,14 +113,16 @@ class MainChildOfHostFragment : BaseChildOfHostFragment<CoreFragmentMainBinding,
             AppAdPlaceName.ANCHORED_NATIVE_IN_LIST_TEST,
             AppAdPlaceName.ANCHORED_BANNER_TEST,
             AppAdPlaceName.ANCHORED_NATIVE_TEST,
-            AppAdPlaceName.FULLSCREEN_NATIVE_INTERSTITIAL,
 
         )
     }
 
     /***/
     override fun providerInterAdPlaceName(): List<IAdPlaceName> {
-        return listOf(AppAdPlaceName.FULLSCREEN_TEST)
+        return listOf(
+            AppAdPlaceName.FULLSCREEN_TEST,
+            AppAdPlaceName.FULLSCREEN_NATIVE_INTERSTITIAL,
+        )
     }
 
     override fun providerRewardAdPlaceName(): List<IAdPlaceName> {

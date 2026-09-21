@@ -8,6 +8,7 @@ sealed class AdType {
         fun getAdTypeBy(key: String) = when (key) {
             Banner.key -> Banner
             Native.key -> Native
+            NativeInterstitial.key -> NativeInterstitial
             Interstitial.key -> Interstitial
             RewardedInterstitial.key -> RewardedInterstitial
             RewardedVideo.key -> RewardedVideo
@@ -22,6 +23,10 @@ sealed class AdType {
 
     object Native : AdType() {
         override val key = "native"
+    }
+
+    object NativeInterstitial : AdType() {
+        override val key = "native_interstitial"
     }
 
     object Interstitial : AdType() {

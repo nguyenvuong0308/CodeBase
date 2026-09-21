@@ -115,8 +115,28 @@ data class NativeAdHolder(
     var nativeAd: NativeAd? = null,
     var loadedAtMs: Long = 0L,
 ): AdHolder() {
+    internal var loadGeneration: Long = 0
+        private set
+    internal var onFullscreenLoadFinished: ((Boolean) -> Unit)? = null
+
+    internal fun beginLoad(): Long {
+        isLoading = true
+        return ++loadGeneration
+    }
+
+    internal fun acceptsLoadCallback(generation: Long): Boolean =
+        isLoading && loadGeneration == generation
+
+    internal fun finishFullscreenLoad(isLoaded: Boolean) {
+        val callback = onFullscreenLoadFinished
+        onFullscreenLoadFinished = null
+        isWaitLoadToShow = false
+        callback?.invoke(isLoaded)
+    }
+
     override fun reset() {
         resetLoadState()
+        isShowing = false
         clearNativeAd()
 //        needRetry = true // Quyền retry của native do flow gọi load quyết định.
     }
@@ -126,9 +146,10 @@ data class NativeAdHolder(
      * native cũ vẫn đang được container hiển thị: xoá nó sẽ làm hỏng quảng cáo đang trên màn hình.
      */
     fun resetLoadState() {
+        loadGeneration++
         isLoading = false
-        isWaitLoadToShow = false
         retryCount = 0
+        finishFullscreenLoad(false)
     }
 
     fun clearNativeAd() {

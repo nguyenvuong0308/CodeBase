@@ -53,6 +53,7 @@ class DialogNativeFakeInterstitial : DialogFragment() {
         remoteConfigRepository.getAppConfig().isHideNavigationBar
     }
     var onClose: (() -> Unit)? = null
+    var onShown: (() -> Unit)? = null
 
     private val adPlaceNameString by lazy {
         arguments?.getString(ARG_AD_PLACE_NAME) ?: ""
@@ -113,6 +114,7 @@ class DialogNativeFakeInterstitial : DialogFragment() {
             onClose?.invoke()
             dismissAllowingStateLoss()
         }
+        onShown?.invoke()
 
         viewBinding?.root?.let {
             ViewCompat.setOnApplyWindowInsetsListener(it) { v, insets ->
