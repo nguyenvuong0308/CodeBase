@@ -45,6 +45,10 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {
@@ -59,11 +63,13 @@ dependencies {
     implementation(libs.material)
 
     testImplementation(libs.junit)
+    testImplementation("org.robolectric:robolectric:4.16.1")
+    testImplementation("org.mockito:mockito-core:5.23.0")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
     // Google play service
-    implementation(libs.play.services.ads)
+    implementation(libs.ads.mobile.sdk)
 
     //Hilt
     implementation(libs.hilt.android)

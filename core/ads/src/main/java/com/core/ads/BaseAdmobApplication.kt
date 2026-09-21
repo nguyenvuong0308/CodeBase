@@ -9,8 +9,7 @@ import com.core.ads.extensions.md5
 import com.core.preference.SharedPrefs
 import com.core.utilities.isAppDebuggable
 import com.core.utilities.util.Timber
-import com.google.android.gms.ads.MobileAds
-import com.google.android.gms.ads.RequestConfiguration
+import com.google.android.libraries.ads.mobile.sdk.common.RequestConfiguration
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.FirebaseAnalytics.ConsentType
@@ -63,12 +62,13 @@ abstract class BaseAdmobApplication : Application() {
             deviceTestList.add(md5(getAndroidId(this)).uppercase())
             deviceTestList.add("161B90FEB622DEDE256FE344E5585390")
 
-            val requestConfiguration = RequestConfiguration.Builder()
-                .setTestDeviceIds(deviceTestList)
-                .build()
-            MobileAds.setRequestConfiguration(requestConfiguration)
         }
     }
+
+    fun createAdsRequestConfiguration(): RequestConfiguration =
+        RequestConfiguration.Builder()
+            .setTestDeviceIds(deviceTestList)
+            .build()
 
     /**
      * Khởi tạo các cấu hình khác

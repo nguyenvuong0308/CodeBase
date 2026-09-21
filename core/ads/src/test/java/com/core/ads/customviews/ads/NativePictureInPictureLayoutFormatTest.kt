@@ -206,6 +206,6 @@ class NativePictureInPictureLayoutFormatTest {
 
     private companion object {
         const val ANDROID_NAMESPACE = "http://schemas.android.com/apk/res/android"
-        const val NATIVE_AD_VIEW_TAG = "com.google.android.gms.ads.nativead.NativeAdView"
+        const val NATIVE_AD_VIEW_TAG = "com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView"
     }
 }

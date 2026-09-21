@@ -4,17 +4,20 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
+import android.os.Looper
+import com.google.android.libraries.ads.mobile.sdk.MobileAds
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.google.android.gms.ads.AdError
-import com.google.android.gms.ads.AdapterResponseInfo
-import com.google.android.gms.ads.FullScreenContentCallback
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.appopen.AppOpenAd
-import com.google.android.gms.ads.appopen.AppOpenAd.AppOpenAdLoadCallback
+import com.google.android.libraries.ads.mobile.sdk.appopen.AppOpenAd
+import com.google.android.libraries.ads.mobile.sdk.appopen.AppOpenAdEventCallback
+import com.google.android.libraries.ads.mobile.sdk.common.AdLoadCallback
+import com.google.android.libraries.ads.mobile.sdk.common.AdSourceResponseInfo
+import com.google.android.libraries.ads.mobile.sdk.common.AdValue
+import com.google.android.libraries.ads.mobile.sdk.common.FullScreenContentError
+import com.google.android.libraries.ads.mobile.sdk.common.LoadAdError
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.core.ads.domain.AdOpenAdUiResource
 import com.core.ads.domain.AdsManager
@@ -156,6 +159,10 @@ class AppOpenAdManager @Inject constructor(
 
     /** Restores app-open state to its initial-launch defaults. */
     fun setupDefaultValue() {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            runOnMain { setupDefaultValue() }
+            return
+        }
         isFirstOpenApp = true
         adManager.setupAppOpenAdDefaultValue()
     }
@@ -169,6 +176,14 @@ class AppOpenAdManager @Inject constructor(
      * @param waterfallIndex index of the ad unit to try in the placement's waterfall.
      */
     fun fetchAd(activity: Activity, adPlaceName: IAdPlaceName, waterfallIndex: Int = 0) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            runOnMain { fetchAd(activity, adPlaceName, waterfallIndex) }
+            return
+        }
+        if (!MobileAds.isInitialized || activity.isFinishing || activity.isDestroyed) {
+            notifyAdNotValidOrLoadFailed(adPlaceName)
+            return
+        }
         if(reopenAction.isCustomAction(activity) && adPlaceName == CoreAdPlaceName.APP_REOPEN) return
 
         if (adManager.isNotAbleToVisibleAdsToUser(adPlaceName)) {
@@ -191,7 +206,10 @@ class AppOpenAdManager @Inject constructor(
             failAppOpenLoadBecauseNoAdUnit(adHolder)
             return
         }
-        val adUnitId = waterfallAdUnitIds[waterfallIndex]
+        val adUnitId = waterfallAdUnitIds.getOrNull(waterfallIndex) ?: run {
+            failAppOpenLoadBecauseNoAdUnit(adHolder)
+            return
+        }
         val adUnitHolder = appOpenAdUnitHolderMap.getOrPut(adUnitId) { AppOpenAdUnitHolder() }
         if (adUnitHolder.isLoading) {
             markAppOpenAdUnitWaiter(adHolder.adPlace, adUnitHolder, activity)
@@ -200,68 +218,62 @@ class AppOpenAdManager @Inject constructor(
         adUnitHolder.isLoading = true
         markAppOpenAdUnitWaiter(adHolder.adPlace, adUnitHolder, activity)
         scheduleAppOpenLoadTimeout(adUnitHolder, adUnitId)
-        val loadCallback = object : AppOpenAdLoadCallback() {
+        val loadId = adUnitHolder.loadId
+        val loadCallback = object : AdLoadCallback<AppOpenAd> {
             /** Caches the loaded ad, records revenue events, and releases all shared waiters. */
             override fun onAdLoaded(ad: AppOpenAd) {
-                super.onAdLoaded(ad)
-                Log.i(TAG, "AppOpenAd loaded $adPlaceName $adUnitId")
-                ad.setOnPaidEventListener { adValue ->
-                    trackAdjustAdRevenue(
-                        adUnitId = adUnitId,
-                        loadedAdapterResponseInfo = ad.responseInfo?.loadedAdapterResponseInfo,
-                        adFormat = AD_FORMAT_APP_OPEN,
-                        adValueMicros = adValue.valueMicros,
-                        adValueCurrencyCode = adValue.currencyCode
-                    )
-                }
-                ad.setImmersiveMode(true)
-                adUnitHolder.isLoading = false
-                adUnitHolder.appOpenAd = ad
-                adUnitHolder.loadTime = Date().time
-                onAppOpenAdUnitLoaded(adHolder.adPlace, adUnitHolder)
-                if (adHolder.isWaitLoadToShow) {
-                    showAdIfAvailable(activity, adPlaceName)
-                    adHolder.isWaitLoadToShow = false
+                runOnMain {
+                    if (adUnitHolder.loadId != loadId || !adUnitHolder.isLoading) return@runOnMain
+                    Log.i(TAG, "AppOpenAd loaded $adPlaceName $adUnitId")
+                    ad.setImmersiveMode(true)
+                    adUnitHolder.isLoading = false
+                    adUnitHolder.appOpenAd = ad
+                    adUnitHolder.loadTime = Date().time
+                    onAppOpenAdUnitLoaded(adHolder.adPlace, adUnitHolder)
+                    if (adHolder.isWaitLoadToShow) {
+                        showAdIfAvailable(activity, adPlaceName)
+                        adHolder.isWaitLoadToShow = false
+                    }
                 }
             }
 
             /** Advances the waterfall or applies the configured retry policy after a load error. */
             override fun onAdFailedToLoad(p0: LoadAdError) {
-                super.onAdFailedToLoad(p0)
-                adUnitHolder.isLoading = false
-                val nextWaterfallIndex = waterfallIndex + 1
-                if (nextWaterfallIndex < waterfallAdUnitIds.size) {
-                    resumeSiblingAppOpenWaitersOnFail(adUnitHolder, adPlaceName, adUnitId)
-                    Log.i(TAG, "AppOpenAd waterfall next $adPlaceName ${waterfallAdUnitIds[nextWaterfallIndex]}")
-                    fetchAd(activity, adPlaceName, nextWaterfallIndex)
-                    return
-                }
-                onAppOpenAdUnitFailed(adHolder.adPlace, adUnitHolder, adUnitId)
-                val maxRetryCount = remoteConfigRepository.getSplashScreenConfig().maxRetryCount
-                val retryFixedDelay = remoteConfigRepository.getSplashScreenConfig().retryFixedDelay
-                when {
-                    (adHolder.retryCount in 0 until maxRetryCount) && remoteConfigRepository.getSplashScreenConfig().isEnableRetry -> {
-                        adHolder.retryCount++
-                        Log.i(TAG, "AppOpenAd retry load ${adHolder.retryCount} $adPlaceName")
-                        applicationScope.launch {
-                            delay(retryFixedDelay)
-                            fetchAd(activity, adPlaceName)
-                        }
+                runOnMain {
+                    if (adUnitHolder.loadId != loadId || !adUnitHolder.isLoading) return@runOnMain
+                    adUnitHolder.isLoading = false
+                    val nextWaterfallIndex = waterfallIndex + 1
+                    if (nextWaterfallIndex < waterfallAdUnitIds.size) {
+                        resumeSiblingAppOpenWaitersOnFail(adUnitHolder, adPlaceName, adUnitId)
+                        Log.i(TAG, "AppOpenAd waterfall next $adPlaceName ${waterfallAdUnitIds[nextWaterfallIndex]}")
+                        fetchAd(activity, adPlaceName, nextWaterfallIndex)
+                        return@runOnMain
                     }
+                    onAppOpenAdUnitFailed(adHolder.adPlace, adUnitHolder, adUnitId)
+                    val maxRetryCount = remoteConfigRepository.getSplashScreenConfig().maxRetryCount
+                    val retryFixedDelay = remoteConfigRepository.getSplashScreenConfig().retryFixedDelay
+                    when {
+                        (adHolder.retryCount in 0 until maxRetryCount) && remoteConfigRepository.getSplashScreenConfig().isEnableRetry -> {
+                            adHolder.retryCount++
+                            Log.i(TAG, "AppOpenAd retry load ${adHolder.retryCount} $adPlaceName")
+                            applicationScope.launch {
+                                delay(retryFixedDelay)
+                                fetchAd(activity, adPlaceName)
+                            }
+                        }
 
-                    else -> {
-                        Log.i(TAG, "AppOpenAd load failed $adPlaceName")
-                        notifyAdNotValidOrLoadFailed(adPlaceName)
-                        adHolder.reset()
+                        else -> {
+                            Log.i(TAG, "AppOpenAd load failed $adPlaceName")
+                            notifyAdNotValidOrLoadFailed(adPlaceName)
+                            adHolder.reset()
+                        }
                     }
                 }
             }
         }
         Log.i(TAG, "AppOpenAd start load $adPlaceName $adUnitId")
         AppOpenAd.load(
-            context,
-            adUnitId,
-            adManager.getAdRequest(),
+            adManager.getAdRequest(adUnitId),
             loadCallback
         )
     }
@@ -271,6 +283,14 @@ class AppOpenAdManager @Inject constructor(
      * If no ad is ready, it starts loading one when a network connection is available.
      */
     fun showAdIfAvailable(activity: Activity, adPlaceName: IAdPlaceName) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            runOnMain { showAdIfAvailable(activity, adPlaceName) }
+            return
+        }
+        if (!MobileAds.isInitialized || activity.isFinishing || activity.isDestroyed) {
+            notifyAdNotValidOrLoadFailed(adPlaceName)
+            return
+        }
         if (adManager.isNotAbleToVisibleAdsToUser(adPlaceName) || adManager.isHasFullscreenAdShowing()) {
             notifyAdNotValidOrLoadFailed(adPlaceName)
             return
@@ -294,47 +314,67 @@ class AppOpenAdManager @Inject constructor(
                 return
             }
 
-            val fullScreenContentCallback = object : FullScreenContentCallback() {
+            val adEventCallback = object : AppOpenAdEventCallback {
                 /** Clears display state and notifies observers after the user closes the ad. */
                 override fun onAdDismissedFullScreenContent() {
-                    super.onAdShowedFullScreenContent()
-                    Log.i(TAG, "AppOpenAd dismissed $adPlaceName")
-                    PreventShowManyInterstitialAds.updateLastTimeShowedAppOpenAd()
-                    activity.removeDimForReopenApp()
-                    adHolder.isShowing = false
-                    adHolder.reset()
-                    notifyAdOpenAppDismissed(adPlaceName)
+                    runOnMain {
+                        Log.i(TAG, "AppOpenAd dismissed $adPlaceName")
+                        PreventShowManyInterstitialAds.updateLastTimeShowedAppOpenAd()
+                        if (!activity.isFinishing && !activity.isDestroyed) activity.removeDimForReopenApp()
+                        adHolder.isShowing = false
+                        adHolder.reset()
+                        notifyAdOpenAppDismissed(adPlaceName)
+                    }
                 }
 
                 /** Clears the unusable ad and reports that the placement could not be shown. */
-                override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                    super.onAdShowedFullScreenContent()
-                    Log.i(TAG, "AppOpenAd failed to show $adPlaceName")
-                    Firebase.crashlytics.log("AppOpenAd failed to show $adPlaceName: ${adError.message}")
-                    adHolder.isShowing = false
-                    adHolder.reset()
-                    notifyAdNotValidOrLoadFailed(adPlaceName)
+                override fun onAdFailedToShowFullScreenContent(adError: FullScreenContentError) {
+                    runOnMain {
+                        Log.i(TAG, "AppOpenAd failed to show $adPlaceName")
+                        Firebase.crashlytics.log("AppOpenAd failed to show $adPlaceName: ${adError.message}")
+                        adHolder.isShowing = false
+                        adHolder.reset()
+                        notifyAdNotValidOrLoadFailed(adPlaceName)
+                    }
                 }
 
                 /** Dims the underlying Activity and publishes the visible-ad state. */
                 override fun onAdShowedFullScreenContent() {
-                    super.onAdShowedFullScreenContent()
-                    Log.i(TAG, "AppOpenAd showed $adPlaceName")
-                    activity.showDimForReopenApp()
-                    notifyAdOpenAppShowing(adPlaceName)
+                    runOnMain {
+                        Log.i(TAG, "AppOpenAd showed $adPlaceName")
+                        if (!activity.isFinishing && !activity.isDestroyed) activity.showDimForReopenApp()
+                        notifyAdOpenAppShowing(adPlaceName)
+                    }
                 }
 
                 /** Updates the global click counter used by ad-frequency safeguards. */
                 override fun onAdClicked() {
-                    super.onAdClicked()
-                    adManager.increaseAdClickedCount()
+                    runOnMain(adManager::increaseAdClickedCount)
+                }
+
+                override fun onAdPaid(adValue: AdValue) {
+                    runOnMain {
+                        trackAdjustAdRevenue(
+                            adUnitId = appOpenAd.adUnitId,
+                            loadedAdapterResponseInfo = appOpenAd.getResponseInfo().loadedAdSourceResponseInfo,
+                            adFormat = AD_FORMAT_APP_OPEN,
+                            adValueMicros = adValue.valueMicros,
+                            adValueCurrencyCode = adValue.currencyCode
+                        )
+                    }
                 }
             }
             adHolder.isShowing = true
 
             Log.i(TAG, "AppOpenAd start show $adPlaceName")
-            appOpenAd.fullScreenContentCallback = fullScreenContentCallback
-            appOpenAd.show(activity)
+            appOpenAd.adEventCallback = adEventCallback
+            try {
+                appOpenAd.show(activity)
+            } catch (error: Exception) {
+                Log.e(TAG, "Unable to show app-open ad", error)
+                adHolder.reset()
+                notifyAdNotValidOrLoadFailed(adPlaceName)
+            }
         } else {
             if (context.isNetworkConnected()) {
                 fetchAd(activity, adPlaceName)
@@ -551,17 +591,22 @@ class AppOpenAdManager @Inject constructor(
     /** Forwards the paid-event value and mediation source to Adjust revenue analytics. */
     private fun trackAdjustAdRevenue(
         adUnitId: String,
-        loadedAdapterResponseInfo: AdapterResponseInfo?,
+        loadedAdapterResponseInfo: AdSourceResponseInfo?,
         adFormat: String,
         adValueMicros: Long,
         adValueCurrencyCode: String
     ) {
         adjustAnalytics.trackRevenueNetwork(
             adUnitId = adUnitId,
-            adSourceName = loadedAdapterResponseInfo?.adSourceName,
+            adSourceName = loadedAdapterResponseInfo?.name,
             adFormat = adFormat,
             adValueMicros = adValueMicros,
             adValueCurrencyCode = adValueCurrencyCode
         )
+    }
+
+    private fun runOnMain(block: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) block()
+        else applicationScope.launch { block() }
     }
 }

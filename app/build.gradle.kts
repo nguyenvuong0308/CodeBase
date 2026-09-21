@@ -108,7 +108,7 @@ dependencies {
     implementation(libs.firebase.sessions)
 
     // Google play service
-    implementation(libs.play.services.ads)
+    implementation(libs.ads.mobile.sdk)
 
     // in app
     implementation(libs.billing.ktx)

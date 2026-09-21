@@ -27,7 +27,7 @@ roomKtx = "2.8.4"
 
 #----------------- Google & Firebase Services -----------------#
 firebaseBom = "34.17.0"
-playServicesAds = "25.4.0"
+adsMobileSdk = "1.4.0"
 playServicesAdsIdentifier = "18.3.0"
 playServicesBase = "18.10.0"
 playServicesBasement = "18.10.0"
@@ -138,7 +138,7 @@ firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 firebase-sessions = { module = "com.google.firebase:firebase-sessions" }
 
 # --- Google Play Services & Ads ---
-play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
+ads-mobile-sdk = { module = "com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk", version.ref = "adsMobileSdk" }
 play-services-ads-identifier = { module = "com.google.android.gms:play-services-ads-identifier", version.ref = "playServicesAdsIdentifier" }
 play-services-base = { module = "com.google.android.gms:play-services-base", version.ref = "playServicesBase" }
 play-services-basement = { module = "com.google.android.gms:play-services-basement", version.ref = "playServicesBasement" }

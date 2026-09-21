@@ -41,9 +41,9 @@ import com.core.config.domain.data.IAdPlaceName
 import com.core.config.domain.data.NativeAdPlace
 import com.core.utilities.dpToPx
 import com.core.utilities.isValidGlideContext
-import com.google.android.gms.ads.nativead.MediaView
-import com.google.android.gms.ads.nativead.NativeAd
-import com.google.android.gms.ads.nativead.NativeAdView
+import com.google.android.libraries.ads.mobile.sdk.nativead.MediaView
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -542,7 +542,7 @@ class NativePictureInPicture @JvmOverloads constructor(
         }
 
         registerNativeAdAssets(binding)
-        binding.nativeAdView.setNativeAd(nativeAd)
+        binding.nativeAdView.registerNativeAd(nativeAd, binding.mediaView)
     }
 
     private fun loadIcon(
@@ -618,7 +618,6 @@ class NativePictureInPicture @JvmOverloads constructor(
         binding.nativeAdView.callToActionView = binding.cta
         binding.nativeAdView.headlineView = binding.primary
         binding.nativeAdView.iconView = binding.icon
-        binding.nativeAdView.mediaView = binding.mediaView
         binding.nativeAdView.bodyView = binding.body
         binding.nativeAdView.advertiserView = binding.advertiser
     }

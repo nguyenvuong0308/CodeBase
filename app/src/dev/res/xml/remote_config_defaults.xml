@@ -620,14 +620,14 @@
             "high_floor_ad_ids": [
                 "ca-app-pub-3940256099942544/1033173719"
             ],
-            "is_enable": false,
+            "is_enable": true,
             "is_auto_load_after_dismiss": true
             },
             {
             "place_name": "action_app_open",
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "ad_type": "interstitial",
-            "is_enable": false,
+            "is_enable": true,
             "is_auto_load_after_dismiss": true
             },
             {

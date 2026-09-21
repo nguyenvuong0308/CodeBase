@@ -6,8 +6,8 @@ import com.core.ads.model.AppOpenAdHolder
 import com.core.ads.model.NativeAdHolder
 import com.core.config.domain.data.AdPlace
 import com.core.config.domain.data.IAdPlaceName
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.common.AdRequest
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -37,7 +37,7 @@ interface AdsManager {
 
     fun isCanNotShowInterAd(adPlace: AdPlace): Boolean
 
-    fun getAdRequest(isCollapsible: Boolean = false): AdRequest
+    fun getAdRequest(adUnitId: String, isCollapsible: Boolean = false): AdRequest
 
     fun loadFullscreenAd(
         activity: Activity,

@@ -1,14 +1,15 @@
 package com.core.ads.model
 
 import android.os.SystemClock
+import android.util.Log
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
-import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.appopen.AppOpenAd
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.nativead.NativeAd
-import com.google.android.gms.ads.rewarded.RewardedAd
-import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
+import com.google.android.libraries.ads.mobile.sdk.appopen.AppOpenAd
+import com.google.android.libraries.ads.mobile.sdk.banner.AdView
+import com.google.android.libraries.ads.mobile.sdk.interstitial.InterstitialAd
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.rewarded.RewardedAd
+import com.google.android.libraries.ads.mobile.sdk.rewardedinterstitial.RewardedInterstitialAd
 import com.core.config.domain.data.AdPlace
 import java.util.Date
 
@@ -20,6 +21,23 @@ sealed class AdHolder {
     var isWaitLoadToShow: Boolean = false
     var retryCount: Int = 0
     var needRetry: Boolean = true
+
+    // Accessed on Main only. Reset/release and a new load invalidate older SDK callbacks.
+    internal var loadGeneration: Long = 0
+        private set
+
+    internal fun beginLoad(): Long {
+        isLoading = true
+        return ++loadGeneration
+    }
+
+    internal fun acceptsLoadCallback(generation: Long): Boolean =
+        isLoading && loadGeneration == generation
+
+    protected fun invalidateLoad() {
+        loadGeneration++
+        isLoading = false
+    }
 
     abstract fun reset()
 
@@ -33,7 +51,8 @@ internal data class RewardedAdHolder(
     var amount: Int = 0,
 ): AdHolder() {
     override fun reset() {
-        isLoading = false
+        invalidateLoad()
+        isShowing = false
         isWaitLoadToShow = false
         rewardedAd = null
         isEarnedReward = false
@@ -52,7 +71,8 @@ internal data class RewardedInterstitialAdHolder(
     var amount: Int = 0,
 ): AdHolder() {
     override fun reset() {
-        isLoading = false
+        invalidateLoad()
+        isShowing = false
         isWaitLoadToShow = false
         rewardedInterstitialAd = null
         isEarnedReward = false
@@ -71,7 +91,8 @@ internal data class InterstitialAdHolder(
     var identifier: String = "",
 ): AdHolder() {
     override fun reset() {
-        isLoading = false
+        invalidateLoad()
+        isShowing = false
         isWaitLoadToShow = false
         interstitialAd = null
         fragmentManager = null
@@ -88,26 +109,41 @@ internal data class BannerAdHolder(
     var bannerAd: AdView? = null,
     var identifier: String? = null,
 ): AdHolder() {
+    var loadingBannerAd: AdView? = null
+
+    fun destroyLoadingBanner() {
+        val loading = loadingBannerAd
+        loadingBannerAd = null
+        loading?.destroySafely()
+    }
+
     override fun reset() {
-        isLoading = false
+        invalidateLoad()
+        isShowing = false
         isWaitLoadToShow = false
-        runCatching {
-            val parentAdView = bannerAd?.parent
-            if (parentAdView != null) {
-                (parentAdView as ViewGroup).endViewTransition(bannerAd)
-                parentAdView.layoutTransition = null
-                parentAdView.removeView(bannerAd)
-            }
-        }
-        // Calling this method might cause a crash in admob built-in classes:
-        // java.lang.IllegalStateException: The specified child already has a parent
-//        bannerAd?.destroy()
+        val loaded = bannerAd
         bannerAd = null
+        if (loadingBannerAd !== loaded) destroyLoadingBanner()
+        loadingBannerAd = null
+        loaded?.destroySafely()
         retryCount = 0
 //        needRetry = true // native don't need reset this field
     }
 
     override fun isAdLoaded() = bannerAd != null
+}
+
+// Detach before destroying: the SDK may otherwise encounter an already-parented child.
+internal fun AdView.destroySafely() {
+    runCatching {
+        (parent as? ViewGroup)?.let {
+            it.endViewTransition(this)
+            it.layoutTransition = null
+            it.removeView(this)
+        }
+    }.onFailure { Log.w("AdHolder", "Unable to detach banner", it) }
+    runCatching { destroy() }
+        .onFailure { Log.w("AdHolder", "Unable to destroy banner", it) }
 }
 
 data class NativeAdHolder(
@@ -117,6 +153,7 @@ data class NativeAdHolder(
 ): AdHolder() {
     override fun reset() {
         resetLoadState()
+        isShowing = false
         clearNativeAd()
 //        needRetry = true // Quyền retry của native do flow gọi load quyết định.
     }
@@ -126,7 +163,7 @@ data class NativeAdHolder(
      * native cũ vẫn đang được container hiển thị: xoá nó sẽ làm hỏng quảng cáo đang trên màn hình.
      */
     fun resetLoadState() {
-        isLoading = false
+        invalidateLoad()
         isWaitLoadToShow = false
         retryCount = 0
     }
@@ -150,7 +187,8 @@ data class AppOpenAdHolder(
     var loadTime: Long = 0L
 ): AdHolder() {
     override fun reset() {
-        isLoading = false
+        invalidateLoad()
+        isShowing = false
         isWaitLoadToShow = false
         appOpenAd = null
         retryCount = 0

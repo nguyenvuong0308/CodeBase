@@ -23,8 +23,8 @@ import com.core.utilities.gone
 import com.core.utilities.util.Timber
 import com.core.utilities.visible
 import com.core.utilities.visibleIf
-import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.banner.AdView
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
 
 class BannerNativeContainerLayout @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

@@ -1,7 +1,7 @@
 package com.core.ads.domain
 
-import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.banner.AdView
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
 import com.core.config.domain.data.BannerAdPlace
 import com.core.config.domain.data.IAdPlaceName
 import com.core.config.domain.data.AdType

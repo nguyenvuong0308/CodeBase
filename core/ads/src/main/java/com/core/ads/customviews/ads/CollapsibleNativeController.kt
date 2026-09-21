@@ -13,7 +13,7 @@ import android.widget.PopupWindow
 import androidx.appcompat.widget.AppCompatImageView
 import com.core.ads.R
 import com.core.config.domain.data.NativeExpandTemplate
-import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
 import java.util.WeakHashMap
 
 /**
