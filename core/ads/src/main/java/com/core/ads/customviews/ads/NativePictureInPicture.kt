@@ -30,6 +30,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.core.ads.databinding.GntPictureInPictureMediaCardTemplateViewBinding
+import com.core.ads.databinding.GntPictureInPictureBannerTemplateViewBinding
 import com.core.ads.databinding.GntPictureInPictureTemplateViewBinding
 import com.core.ads.domain.AdLoadBannerNativeUiResource
 import com.core.ads.domain.AdsManager
@@ -52,6 +53,7 @@ import dagger.hilt.components.SingletonComponent
 import java.lang.ref.WeakReference
 import kotlin.math.abs
 import kotlin.math.hypot
+import kotlin.random.Random
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -76,21 +78,35 @@ class NativePictureInPicture @JvmOverloads constructor(
         val closeCountDownSeconds: Long = DEFAULT_CLOSE_COUNTDOWN_SECONDS,
         val layoutFormat: LayoutFormat = LayoutFormat.Compact,
         val heightResId: Int? = null
-    )
+    ) {
+        internal fun resolveForDisplay(random: Random = Random.Default): Config {
+            if (layoutFormat != LayoutFormat.Shuffle) return this
+            return copy(
+                layoutFormat = LayoutFormat.entries.filterNot { it == LayoutFormat.Shuffle }
+                    .random(random)
+            )
+        }
+    }
 
     enum class LayoutFormat(val key: String) {
         Compact("compact"),
-        MediaCard("media_card");
+        MediaCard("media_card"),
+        Banner("banner"),
+        Shuffle("shuffle");
 
         internal fun resolveWidthResId(sizeResId: Int): Int = when (this) {
             Compact -> sizeResId
             MediaCard -> DimenR.dimen._208dp
+            Banner -> DimenR.dimen._320dp
+            Shuffle -> error("Resolve shuffle before measuring the PIP layout")
         }
 
         internal fun resolveHeightResId(sizeResId: Int, heightResId: Int?): Int {
             return heightResId ?: when (this) {
                 Compact -> sizeResId
                 MediaCard -> DimenR.dimen._208dp
+                Banner -> DimenR.dimen._56dp
+                Shuffle -> error("Resolve shuffle before measuring the PIP layout")
             }
         }
 
@@ -99,11 +115,12 @@ class NativePictureInPicture @JvmOverloads constructor(
             minimumMediaSizePx: Int,
             mediaHorizontalMarginsPx: Int = 0
         ): Int = when (this) {
-            Compact -> requestedWidthPx
+            Compact, Banner -> requestedWidthPx
             MediaCard -> maxOf(
                 requestedWidthPx,
                 minimumMediaSizePx + mediaHorizontalMarginsPx
             )
+            Shuffle -> error("Resolve shuffle before measuring the PIP layout")
         }
 
         internal fun coerceHeightPx(
@@ -111,11 +128,12 @@ class NativePictureInPicture @JvmOverloads constructor(
             minimumMediaSizePx: Int,
             nonMediaContentHeightPx: Int
         ): Int = when (this) {
-            Compact -> requestedHeightPx
+            Compact, Banner -> requestedHeightPx
             MediaCard -> maxOf(
                 requestedHeightPx,
                 minimumMediaSizePx + nonMediaContentHeightPx
             )
+            Shuffle -> error("Resolve shuffle before measuring the PIP layout")
         }
 
         companion object {
@@ -160,7 +178,8 @@ class NativePictureInPicture @JvmOverloads constructor(
         val background: View
         val nativeAdView: NativeAdView
         val primary: TextView
-        val cta: TextView
+        val cta: View
+        val ctaText: TextView? get() = cta as? TextView
         val icon: ImageView
         val body: TextView?
         val advertiser: TextView?
@@ -217,6 +236,28 @@ class NativePictureInPicture @JvmOverloads constructor(
         override val actionProgress: CircularProgressIndicator = binding.actionProgress
         override val iconSizeResId: Int = DimenR.dimen._30dp
         override val iconRadiusResId: Int = DimenR.dimen._4dp
+    }
+
+    private class BannerLayoutBinding(
+        private val binding: GntPictureInPictureBannerTemplateViewBinding
+    ) : PictureInPictureLayoutBinding {
+        override val root: View = binding.root
+        override val background: View = binding.background
+        override val nativeAdView: NativeAdView = binding.nativeAdView
+        override val primary: TextView = binding.primary
+        override val cta: ImageView = binding.cta
+        override val icon: ImageView = binding.icon
+        override val body: TextView? = null
+        override val advertiser: TextView? = null
+        override val adNotificationView: TextView = binding.adNotificationView
+        override val layoutCta: View = binding.cta
+        override val ctaArrow: ImageView = binding.cta
+        override val mediaView: MediaView? = null
+        override val closeButton: ImageView = binding.closeButton
+        override val closeButtonContainer: View = binding.closeButtonContainer
+        override val actionProgress: CircularProgressIndicator = binding.actionProgress
+        override val iconSizeResId: Int = DimenR.dimen._34dp
+        override val iconRadiusResId: Int = DimenR.dimen._6dp
     }
 
     private lateinit var activeLayoutBinding: PictureInPictureLayoutBinding
@@ -370,11 +411,12 @@ class NativePictureInPicture @JvmOverloads constructor(
         config: Config = Config()
     ): Boolean {
         if (isClosedByUser) return false
-        currentConfig = config
-        applyLayoutFormat(config.layoutFormat)
+        val displayConfig = config.resolveForDisplay()
+        currentConfig = displayConfig
+        applyLayoutFormat(displayConfig.layoutFormat)
         setNativeAd(nativeAd)
         styles?.let(::applyStyles)
-        return show(activity, config)
+        return show(activity, displayConfig)
     }
 
     fun show(activity: Activity, config: Config = Config()): Boolean {
@@ -384,19 +426,20 @@ class NativePictureInPicture @JvmOverloads constructor(
             return false
         }
 
-        currentConfig = config
-        applyLayoutFormat(config.layoutFormat)
+        val displayConfig = config.resolveForDisplay()
+        currentConfig = displayConfig
+        applyLayoutFormat(displayConfig.layoutFormat)
 
         val decorView = activity.window.decorView
         if (decorView.windowToken == null) {
             decorView.post {
-                show(activity, config)
+                show(activity, displayConfig)
             }
             return false
         }
 
         val manager = activity.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val params = createLayoutParams(activity, config)
+        val params = createLayoutParams(activity, displayConfig)
 
         if (isAddedToWindowManager) {
             cancelSnapAnimation()
@@ -409,7 +452,7 @@ class NativePictureInPicture @JvmOverloads constructor(
             runCatching {
                 manager.updateViewLayout(this, params)
             }
-            startCloseCountdown(config.closeCountDownSeconds)
+            startCloseCountdown(displayConfig.closeCountDownSeconds)
             return true
         }
 
@@ -427,7 +470,7 @@ class NativePictureInPicture @JvmOverloads constructor(
             manager.addView(this, params)
             isAddedToWindowManager = true
             startEntranceAnimation()
-            startCloseCountdown(config.closeCountDownSeconds)
+            startCloseCountdown(displayConfig.closeCountDownSeconds)
             true
         }.getOrDefault(false)
         if (!added) {
@@ -520,7 +563,8 @@ class NativePictureInPicture @JvmOverloads constructor(
         nativeAd: NativeAd
     ) {
         binding.primary.text = nativeAd.headline.orEmpty()
-        binding.cta.text = nativeAd.callToAction.orEmpty()
+        binding.ctaText?.text = nativeAd.callToAction.orEmpty()
+        binding.cta.contentDescription = nativeAd.callToAction.orEmpty()
 
         val body = nativeAd.body.orEmpty()
         binding.body?.let { bodyView ->
@@ -590,6 +634,12 @@ class NativePictureInPicture @JvmOverloads constructor(
             LayoutFormat.MediaCard -> MediaCardLayoutBinding(
                 GntPictureInPictureMediaCardTemplateViewBinding.inflate(inflater, this, false)
             )
+
+            LayoutFormat.Banner -> BannerLayoutBinding(
+                GntPictureInPictureBannerTemplateViewBinding.inflate(inflater, this, false)
+            )
+
+            LayoutFormat.Shuffle -> error("Resolve shuffle before inflating the PIP layout")
         }
         displayedLayoutFormat = layoutFormat
         addView(activeLayoutBinding.root)
@@ -647,7 +697,7 @@ class NativePictureInPicture @JvmOverloads constructor(
         }
 
         styles.callToActionTextTypeface?.let {
-            binding.cta.typeface = it
+            binding.ctaText?.typeface = it
         }
 
         styles.primaryTextTypefaceColor?.let {
@@ -655,7 +705,7 @@ class NativePictureInPicture @JvmOverloads constructor(
         }
 
         styles.callToActionTypefaceColor?.let {
-            binding.cta.setTextColor(it)
+            binding.ctaText?.setTextColor(it)
             binding.ctaArrow?.setColorFilter(it)
         }
 
@@ -667,7 +717,7 @@ class NativePictureInPicture @JvmOverloads constructor(
 
         val ctaTextSize = styles.callToActionTextSize
         if (ctaTextSize > 0) {
-            binding.cta.applyTextSizeFromDpDimen(ctaTextSize)
+            binding.ctaText?.applyTextSizeFromDpDimen(ctaTextSize)
         }
 
         val primaryTextSize = styles.primaryTextSize

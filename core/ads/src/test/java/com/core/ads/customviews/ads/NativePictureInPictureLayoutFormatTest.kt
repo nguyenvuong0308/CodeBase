@@ -6,10 +6,78 @@ import javax.xml.parsers.DocumentBuilderFactory
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Test
 import org.w3c.dom.Element
+import kotlin.random.Random
 
 class NativePictureInPictureLayoutFormatTest {
+
+    @Test
+    fun `shuffle key supports remote override and fallback`() {
+        val shuffle = NativePictureInPicture.LayoutFormat.Shuffle
+        assertEquals(shuffle, NativePictureInPicture.LayoutFormat.fromKey("SHUFFLE"))
+        assertEquals(shuffle, NativePictureInPicture.LayoutFormat.resolve(
+            "shuffle", NativePictureInPicture.LayoutFormat.Compact,
+        ))
+        assertEquals(shuffle, NativePictureInPicture.LayoutFormat.resolve(null, shuffle))
+        assertEquals(shuffle, NativePictureInPicture.LayoutFormat.resolve("unknown", shuffle))
+        assertEquals(NativePictureInPicture.LayoutFormat.Banner,
+            NativePictureInPicture.LayoutFormat.resolve("banner", shuffle))
+    }
+
+    @Test
+    fun `shuffle can choose every concrete format and preserves other configuration`() {
+        val config = NativePictureInPicture.Config(
+            layoutFormat = NativePictureInPicture.LayoutFormat.Shuffle,
+            sizeResId = DimenR.dimen._220dp,
+            heightResId = DimenR.dimen._80dp,
+            marginStartDp = 7f,
+            closeCountDownSeconds = 5L,
+        )
+        val random = Random(42)
+        val selected = (1..100).map {
+            val resolved = config.resolveForDisplay(random)
+            assertEquals(config.copy(layoutFormat = resolved.layoutFormat), resolved)
+            assertSame(resolved, resolved.resolveForDisplay(random))
+            resolved.layoutFormat
+        }.toSet()
+
+        assertEquals(setOf(NativePictureInPicture.LayoutFormat.Compact,
+            NativePictureInPicture.LayoutFormat.MediaCard,
+            NativePictureInPicture.LayoutFormat.Banner), selected)
+        assertEquals(NativePictureInPicture.LayoutFormat.Shuffle, config.layoutFormat)
+    }
+
+    @Test
+    fun `explicit formats never consume randomness or change configuration`() {
+        val unexpectedRandom = object : Random() {
+            override fun nextBits(bitCount: Int): Int = error("Explicit format must not draw randomly")
+        }
+        NativePictureInPicture.LayoutFormat.entries
+            .filterNot { it == NativePictureInPicture.LayoutFormat.Shuffle }
+            .forEach { format ->
+                val config = NativePictureInPicture.Config(layoutFormat = format)
+                assertSame(config, config.resolveForDisplay(unexpectedRandom))
+            }
+    }
+
+    @Test
+    fun `banner resolves remote key and keeps a short height without media minimums`() {
+        val banner = NativePictureInPicture.LayoutFormat.Banner
+        assertEquals(banner, NativePictureInPicture.LayoutFormat.fromKey("BANNER"))
+        assertEquals(banner, NativePictureInPicture.LayoutFormat.resolve(
+            "banner", NativePictureInPicture.LayoutFormat.Compact,
+        ))
+        assertEquals(banner, NativePictureInPicture.LayoutFormat.resolve("unknown", banner))
+        assertEquals(DimenR.dimen._320dp, banner.resolveWidthResId(DimenR.dimen._180dp))
+        assertEquals(DimenR.dimen._56dp, banner.resolveHeightResId(DimenR.dimen._180dp, null))
+        assertEquals(DimenR.dimen._80dp, banner.resolveHeightResId(
+            DimenR.dimen._180dp, DimenR.dimen._80dp,
+        ))
+        assertEquals(320, banner.coerceWidthPx(320, 120, 3))
+        assertEquals(56, banner.coerceHeightPx(56, 120, 89))
+    }
 
     @Test
     fun `layout format key is case insensitive and rejects unknown values`() {

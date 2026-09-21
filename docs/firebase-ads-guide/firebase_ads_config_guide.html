@@ -801,18 +801,34 @@ fun provideAdPlacesRemoteConfigKeyProvider(
         <strong>Migration:</strong> <code>medium_collapsible_cta_bottom</code> và <code>medium_collapsible_banner</code> đã bị loại bỏ. Hãy đổi sang template thông thường kết hợp với <code>is_native_collapsible=true</code>.
       </div>
 
-      <h3>Native picture-in-picture config</h3>
+      <h3 id="native-pip-config">Native picture-in-picture config</h3>
       <div class="config-keys field"><code>native_template_size</code><code>pip_anchor_mode</code><code>pip_layout_format</code><code>pip_margin_dp</code><code>pip_top_margin_dp</code></div>
-      <p>Native PIP dùng <code>native_template_size=native_pip</code>, kích thước UI 180dp × 180dp. Khi user đang kéo, margin PIP không giới hạn vùng kéo; margin chỉ được áp dụng khi hiển thị ban đầu hoặc khi thả tay để snap/validate lại vị trí.</p>
+      <p>Native PIP dùng <code>native_template_size=native_pip</code>; <code>pip_layout_format</code> quyết định giao diện và kích thước. Đặt key này trong object placement thuộc <code>banner_native_ad_places</code>. Khi user đang kéo, margin PIP không giới hạn vùng kéo; margin chỉ được áp dụng khi hiển thị ban đầu hoặc khi thả tay để snap/validate lại vị trí.</p>
       <table>
         <thead><tr><th>Field</th><th>Kiểu</th><th>Ý nghĩa</th></tr></thead>
         <tbody>
           <tr><td><code>pip_anchor_mode</code></td><td>String</td><td><code>flexible</code> snap về cạnh trái/phải; <code>fixed</code> snap về góc trên/dưới gần vị trí thả tay.</td></tr>
-          <tr><td><code>pip_layout_format</code></td><td>String</td><td><code>compact</code> hoặc <code>media_card</code>. Nếu thiếu hoặc không hợp lệ, dùng <code>NativePictureInPicture.Config.layoutFormat</code> do bên gọi cung cấp (mặc định <code>compact</code>).</td></tr>
+          <tr><td><code>pip_layout_format</code></td><td>String</td><td><code>compact</code>, <code>media_card</code>, <code>banner</code> hoặc <code>shuffle</code>, không phân biệt chữ hoa/thường. Giá trị hợp lệ từ Remote Config ưu tiên hơn <code>NativePictureInPicture.Config.layoutFormat</code>; nếu thiếu hoặc không hợp lệ thì dùng cấu hình phía code (mặc định <code>compact</code>).</td></tr>
           <tr><td><code>pip_margin_dp</code></td><td>Float</td><td>Margin start/end/bottom theo dp khi show và khi validate sau khi thả tay. Nếu thiếu, code default <code>20</code>.</td></tr>
           <tr><td><code>pip_top_margin_dp</code></td><td>Float</td><td>Margin top theo dp khi show và khi validate sau khi thả tay. Nếu thiếu, code default <code>20</code>.</td></tr>
         </tbody>
       </table>
+      <h4>Các định dạng PIP</h4>
+      <table>
+        <thead><tr><th><code>pip_layout_format</code></th><th>Giao diện</th><th>Kích thước mặc định</th></tr></thead>
+        <tbody>
+          <tr><td><code>compact</code></td><td>Thẻ vuông với tiêu đề, icon, nội dung và CTA.</td><td>180 × 180dp, theo <code>Config.sizeResId</code>.</td></tr>
+          <tr><td><code>media_card</code></td><td>Thẻ có media phía trên, thông tin quảng cáo và CTA phía dưới.</td><td>208 × 208dp trước khi áp dụng kích thước tối thiểu cho media và phần nội dung.</td></tr>
+          <tr><td><code>banner</code></td><td>Thanh ngang nền trắng, viền tím, icon và tiêu đề; nút tải tròn màu hồng bên phải, nút đóng và nhãn quảng cáo bên trái.</td><td>320 × 56dp.</td></tr>
+          <tr><td><code>shuffle</code></td><td>Chọn ngẫu nhiên một trong <code>compact</code>, <code>media_card</code>, <code>banner</code> mỗi lần gọi <code>show</code>.</td><td>Theo layout được chọn.</td></tr>
+        </tbody>
+      </table>
+      <p>Các kích thước trên dùng dimen responsive của thư viện. <code>Config.heightResId</code> cho phép ghi đè chiều cao; <code>media_card</code> vẫn áp dụng kích thước tối thiểu. Các thuộc tính style của placement có thể ghi đè màu sắc và bo góc mặc định.</p>
+      <div class="note">
+        <strong>Cách hoạt động của shuffle:</strong> Ba layout có xác suất được chọn bằng nhau; kết quả có thể trùng lần trước. Mỗi lần show chỉ chọn một layout, dùng chung cho binding quảng cáo và kích thước cửa sổ. Khi chờ cửa sổ sẵn sàng, lựa chọn được giữ nguyên. Kéo/thả hoặc đếm ngược đóng không chọn lại layout.
+      </div>
+      <h4>Ví dụ Remote Config dùng shuffle</h4>
+      <p>Thêm placement sau vào <code>banner_native_ad_places</code>. Đổi <code>"shuffle"</code> thành <code>"compact"</code>, <code>"media_card"</code> hoặc <code>"banner"</code> nếu muốn cố định giao diện.</p>
       <pre><code>{
   "place_name": "anchored_native_pip_home",
   "ad_id": "ca-app-pub-xxxxxxxxxxxxxxxx/yyyyyyyyyy",
@@ -832,9 +848,21 @@ fun provideAdPlacesRemoteConfigKeyProvider(
   "expired_time_second": 60,
   "count_down_timer": 3,
   "pip_anchor_mode": "flexible",
+  "pip_layout_format": "shuffle",
   "pip_margin_dp": 20,
   "pip_top_margin_dp": 20
 }</code></pre>
+      <h4>Ví dụ cấu hình phía Kotlin</h4>
+      <pre><code>val pipConfig = NativePictureInPicture.Config(
+    layoutFormat = NativePictureInPicture.LayoutFormat.Shuffle
+)
+
+nativePictureInPicture.show(
+    activity = activity,
+    nativeAd = nativeAd,
+    config = pipConfig
+)</code></pre>
+      <p>Nếu truyền <code>pipConfig</code> vào <code>processAdResource</code>, <code>layoutFormat</code> này là fallback khi placement không có <code>pip_layout_format</code> hợp lệ.</p>
 
       <h3>Native global config</h3>
       <div class="config-keys" data-config-key="native_ad_config"><code>native_ad_config</code></div>
