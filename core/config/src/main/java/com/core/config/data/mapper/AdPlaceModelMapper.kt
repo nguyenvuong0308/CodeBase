@@ -91,7 +91,8 @@ internal class AdPlaceModelMapper @Inject constructor(
                     ?.takeIf { model.isShowNativeAfter == true }
                     ?.let { toNativeAdPlace(it, allowRemotePlaceName = true) }
             )
-            AdType.Native -> toNativeAdPlace(model, allowRemotePlaceName = false) ?: NoneAdPlace()
+            AdType.Native, AdType.NativeInterstitial ->
+                toNativeAdPlace(model, allowRemotePlaceName = false) ?: NoneAdPlace()
             AdType.Banner -> BannerAdPlace(
                 placeName = placeName,
                 adId = adId,
@@ -143,7 +144,7 @@ internal class AdPlaceModelMapper @Inject constructor(
         allowRemotePlaceName: Boolean
     ): NativeAdPlace? {
         val adType = AdType.getAdTypeBy(model.adType ?: "")
-        if (adType != AdType.Native) return null
+        if (adType != AdType.Native && adType != AdType.NativeInterstitial) return null
         val placeName = resolvePlaceName(model.adPlace ?: "", allowRemotePlaceName)
         // Native lồng trong interstitial có thể dùng tên khai báo trực tiếp từ Firebase,
         // nhưng tên rỗng/không resolve được phải bị loại để tránh dùng chung holder NONE.

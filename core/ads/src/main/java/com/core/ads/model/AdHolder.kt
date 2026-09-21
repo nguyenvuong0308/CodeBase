@@ -151,6 +151,16 @@ data class NativeAdHolder(
     var nativeAd: NativeAd? = null,
     var loadedAtMs: Long = 0L,
 ): AdHolder() {
+    // A fullscreen show can join a native request that is already in flight.
+    internal var onFullscreenLoadFinished: ((Boolean) -> Unit)? = null
+
+    internal fun finishFullscreenLoad(isLoaded: Boolean) {
+        val callback = onFullscreenLoadFinished
+        onFullscreenLoadFinished = null
+        isWaitLoadToShow = false
+        callback?.invoke(isLoaded)
+    }
+
     override fun reset() {
         resetLoadState()
         isShowing = false
@@ -164,8 +174,8 @@ data class NativeAdHolder(
      */
     fun resetLoadState() {
         invalidateLoad()
-        isWaitLoadToShow = false
         retryCount = 0
+        finishFullscreenLoad(false)
     }
 
     fun clearNativeAd() {

@@ -601,7 +601,7 @@ Mapper → cache → AdsManager</code></pre>
           <tr><td><code>place_name</code></td><td>String</td><td>Tất cả</td><td>Tên vị trí. Nên khai báo trong <code>AppAdPlaceName</code>. Riêng <code>native_config</code> lồng trong interstitial có thể dùng remote place name mới.</td></tr>
           <tr><td><code>ad_id</code></td><td>String</td><td>Tất cả</td><td>AdMob ad unit id chính, thường là fallback cuối.</td></tr>
           <tr><td><code>high_floor_ad_ids</code></td><td>Array string</td><td>Tất cả</td><td>Danh sách ad unit ưu tiên, load trước <code>ad_id</code> theo waterfall.</td></tr>
-          <tr><td><code>ad_type</code></td><td>String</td><td>Tất cả</td><td><span class="pill">banner</span><span class="pill">native</span><span class="pill">interstitial</span><span class="pill">rewarded</span><span class="pill">rewarded_interstitial</span><span class="pill">app_open</span></td></tr>
+          <tr><td><code>ad_type</code></td><td>String</td><td>Tất cả</td><td><span class="pill">banner</span><span class="pill">native</span><span class="pill">native_interstitial</span><span class="pill">interstitial</span><span class="pill">rewarded</span><span class="pill">rewarded_interstitial</span><span class="pill">app_open</span></td></tr>
           <tr><td><code>is_enable</code></td><td>Boolean</td><td>Tất cả</td><td>Bật/tắt riêng vị trí quảng cáo.</td></tr>
           <tr><td><code>is_tracking_click</code></td><td>Boolean</td><td>Tất cả</td><td>Bật tracking click.</td></tr>
           <tr><td><code>is_tracking_show</code></td><td>Boolean</td><td>Tất cả</td><td>Bật tracking show/impression theo flow nội bộ.</td></tr>
@@ -789,12 +789,13 @@ fun provideAdPlacesRemoteConfigKeyProvider(
       </div>
 
       <h3>Native picture-in-picture config</h3>
-      <div class="config-keys field"><code>native_template_size</code><code>pip_anchor_mode</code><code>pip_margin_dp</code><code>pip_top_margin_dp</code></div>
+      <div class="config-keys field"><code>native_template_size</code><code>pip_anchor_mode</code><code>pip_layout_format</code><code>pip_margin_dp</code><code>pip_top_margin_dp</code></div>
       <p>Native PIP dùng <code>native_template_size=native_pip</code>, kích thước UI 180dp × 180dp. Khi user đang kéo, margin PIP không giới hạn vùng kéo; margin chỉ được áp dụng khi hiển thị ban đầu hoặc khi thả tay để snap/validate lại vị trí.</p>
       <table>
         <thead><tr><th>Field</th><th>Kiểu</th><th>Ý nghĩa</th></tr></thead>
         <tbody>
           <tr><td><code>pip_anchor_mode</code></td><td>String</td><td><code>flexible</code> snap về cạnh trái/phải; <code>fixed</code> snap về góc trên/dưới gần vị trí thả tay.</td></tr>
+          <tr><td><code>pip_layout_format</code></td><td>String</td><td><code>compact</code> hoặc <code>media_card</code>. Nếu thiếu hoặc không hợp lệ, dùng <code>NativePictureInPicture.Config.layoutFormat</code> do bên gọi cung cấp (mặc định <code>compact</code>).</td></tr>
           <tr><td><code>pip_margin_dp</code></td><td>Float</td><td>Margin start/end/bottom theo dp khi show và khi validate sau khi thả tay. Nếu thiếu, code default <code>20</code>.</td></tr>
           <tr><td><code>pip_top_margin_dp</code></td><td>Float</td><td>Margin top theo dp khi show và khi validate sau khi thả tay. Nếu thiếu, code default <code>20</code>.</td></tr>
         </tbody>
@@ -868,7 +869,7 @@ fun provideAdPlacesRemoteConfigKeyProvider(
     </section>
 
     <section id="fullscreen">
-      <h2>Interstitial, Rewarded, Rewarded Interstitial</h2>
+      <h2>Interstitial, Native Interstitial, Rewarded, Rewarded Interstitial</h2>
       <div class="config-keys" data-config-key="rewarded_rewardedinter_inter_ad_places"><code>rewarded_rewardedinter_inter_ad_places</code></div>
       <p>Các loại fullscreen dùng chung list <code>rewarded_rewardedinter_inter_ad_places</code>. Chọn type bằng <code>ad_type</code>.</p>
       <table>
@@ -877,9 +878,30 @@ fun provideAdPlacesRemoteConfigKeyProvider(
           <tr><td><code>interstitial</code></td><td>Interstitial</td><td><code>interstitial_ad_config</code></td></tr>
           <tr><td><code>rewarded</code></td><td>Rewarded video</td><td><code>rewarded_ad_config</code></td></tr>
           <tr><td><code>rewarded_interstitial</code></td><td>Rewarded interstitial</td><td><code>rewarded_interstitial_ad_config</code></td></tr>
-          <tr><td><code>native</code> + <code>full_interstitial_*</code></td><td>Native fake interstitial</td><td><code>native_ad_config</code> + native place fields</td></tr>
+          <tr><td><code>native_interstitial</code></td><td>Native toàn màn hình, dùng API load/show fullscreen</td><td><code>native_ad_config</code> cho TTL mặc định; <code>interstitial_ad_config</code> cho chờ load và giới hạn show; native place fields cho giao diện</td></tr>
         </tbody>
       </table>
+
+      <h3>Native interstitial độc lập</h3>
+      <p>Khai báo trong danh sách fullscreen và dùng <strong>native ad unit ID</strong>. Đăng ký preload qua <code>providerInterAdPlaceName()</code> hoặc gọi <code>loadInterstitialAds()</code>, sau đó gọi <code>showInterAd()</code>. API trực tiếp tương ứng là <code>loadFullscreenAd()</code> và <code>showAd()</code>.</p>
+      <pre><code>{
+  "place_name": "fullscreen_native_interstitial",
+  "ad_id": "ca-app-pub-3940256099942544/2247696110",
+  "ad_type": "native_interstitial",
+  "native_template_size": "full_interstitial_v3",
+  "is_enable": true,
+  "is_auto_load_after_dismiss": true,
+  "background_full_color": "#FFFFFF",
+  "control_close_position": "left",
+  "close_step_count": 1,
+  "count_down_timer": 5
+}</code></pre>
+      <div class="note">
+        <strong>Mỗi instance NativeAd chỉ hiển thị một lần.</strong> Khi vừa show, manager phát <code>AdSucceedToShow</code> và chưa reload. Khi đóng, ad được <code>destroy()</code>, xóa cache, cập nhật giới hạn interstitial và phát <code>AdDismissed</code>. Nếu <code>is_auto_load_after_dismiss=true</code> (mặc định), manager bắt đầu load ad mới rồi phát <code>AdCompleted</code>, không chờ reload hoàn tất. Nếu tắt auto reload, cần chủ động load lại hoặc bật chờ load cho lượt show sau.
+      </div>
+      <p>Load thành công/thất bại đi qua <code>adFullScreenFlow</code>. Nếu chưa có ad và không bật chờ load, show trả completed với <code>isShown=false</code>. Có thể bật chờ bằng <code>showAd(isWaitLoadToShow=true)</code> hoặc <code>interstitial_ad_config.is_wait_load_to_show=true</code>; mỗi request có timeout 30 giây. Native hết TTL không được show.</p>
+      <p>Config dev hiện dùng type này cho <code>action_app_open</code> từ lần mở app thứ hai, với V3 và countdown 5 giây. <code>splash_screen_config.ad_type</code> vẫn là <code>interstitial</code> để chọn nhánh fullscreen. Placement chỉ dùng ở splash có thể tắt <code>is_auto_load_after_dismiss</code> để tránh load thêm khi rời splash.</p>
+      <p>Native fullscreen cũ dùng <code>ad_type=native</code> vẫn được hỗ trợ. Khi chuyển sang type mới, chuyển preload từ danh sách banner/native sang danh sách interstitial. Luồng native nối tiếp sau interstitial vẫn giữ <code>native_config.ad_type=native</code>. Xem <a href="../native-interstitial-config.md">hướng dẫn Native interstitial</a> để có ví dụ Kotlin, vòng đời và lệnh test.</p>
 
       <h3>Interstitial place fields</h3>
       <div class="config-keys field"><code>plus_interval</code><code>is_ignore_interval</code><code>is_show_native_after</code><code>native_config</code></div>

@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
+import android.view.View
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.LinearLayout
@@ -17,6 +18,10 @@ import com.core.ads.customviews.ads.NativeSmallTemplateView
 import com.core.ads.domain.AdFullScreenUiResource
 import com.core.ads.domain.AdLoadBannerNativeUiResource
 import com.core.ads.domain.AdOpenAdUiResource
+import com.core.ads.domain.DialogNativeFakeInterstitial
+import com.core.config.domain.data.AdType
+import com.core.config.domain.data.NativeAdPlace
+import com.core.config.domain.data.NativeTemplateSize
 import com.core.config.domain.data.CoreAdPlaceName
 import com.core.config.domain.data.IAdPlaceName
 import com.google.android.libraries.ads.mobile.sdk.MobileAds
@@ -156,6 +161,79 @@ class AdmobDeviceSmokeTest {
         closeTestAd(events)
         onMain { assertFalse(activity.adsManager.isHasFullscreenAdShowing()) }
         log("PASS rewarded dismissal clears fullscreen showing state")
+    }
+
+    @Test
+    fun test04_actionAppOpenNativeInterstitialLoadShowClose() = withActivity { activity, scope ->
+        initializeSdk()
+        val placeName = CoreAdPlaceName.ACTION_OPEN_APP
+        requireTestUnits(activity, placeName)
+        onMain {
+            val place = activity.remoteConfigRepository.getAdPlaceBy(placeName) as NativeAdPlace
+            assertEquals(AdType.NativeInterstitial, place.adType)
+            assertEquals(NativeTemplateSize.FullInterstitialV3, place.nativeTemplateSize)
+            assertEquals(1, place.closeStepCount)
+            assertEquals(5, place.countDownTimer)
+        }
+        val events = LinkedBlockingQueue<AdFullScreenUiResource>()
+        val nativeEvents = LinkedBlockingQueue<AdLoadBannerNativeUiResource>()
+        onMain {
+            scope.launch {
+                activity.adsManager.adFullScreenFlow.collect {
+                    if (it.rootAdPlaceName == placeName) events.offer(it)
+                }
+            }
+            scope.launch {
+                activity.adsManager.adLoadBannerNativeFlow.collect {
+                    if (it.commonAdPlaceName == placeName) nativeEvents.offer(it)
+                }
+            }
+        }
+
+        activity.adsManager.loadFullscreenAd(activity, placeName, "device-action-app-open")
+        val loaded = awaitEvent(events, "action_app_open native load") {
+            it is AdFullScreenUiResource.AdLoaded || it is AdFullScreenUiResource.AdNotValidOrLoadFailed
+        }
+        assertTrue("Native fullscreen load: $loaded", loaded is AdFullScreenUiResource.AdLoaded)
+        activity.adsManager.showAd(activity, activity.supportFragmentManager, placeName, "device-action-app-open")
+        val shown = awaitEvent(events, "action_app_open native show") {
+            it is AdFullScreenUiResource.AdSucceedToShow || it is AdFullScreenUiResource.AdCompleted
+        }
+        assertTrue("Native fullscreen show: $shown", shown is AdFullScreenUiResource.AdSucceedToShow)
+        onMain {
+            assertTrue(activity.adsManager.isHasFullscreenAdShowing())
+            assertTrue(activity.supportFragmentManager.findFragmentByTag(
+                "DialogNativeInterstitial_device-action-app-open") is DialogNativeFakeInterstitial)
+        }
+        Thread.sleep(1_500)
+        screenshot("action-app-open-native-interstitial.png")
+        assertFalse("Must not complete before the close button is pressed",
+            events.any { it is AdFullScreenUiResource.AdCompleted })
+
+        val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15)
+        var clicked = false
+        while (!clicked && System.nanoTime() < deadline) {
+            onMain {
+                val dialog = activity.supportFragmentManager.findFragmentByTag(
+                    "DialogNativeInterstitial_device-action-app-open") as? DialogNativeFakeInterstitial
+                val close = dialog?.view?.findViewById<View>(com.core.ads.R.id.tvClose)
+                if (close?.isShown == true && close.isEnabled) clicked = close.performClick()
+            }
+            if (!clicked) Thread.sleep(200)
+        }
+        assertTrue("Native close button must become available after countdown", clicked)
+        val dismissed = awaitEvent(events, "action_app_open native dismiss") {
+            it is AdFullScreenUiResource.AdDismissed
+        }
+        assertTrue(dismissed is AdFullScreenUiResource.AdDismissed)
+        val completed = awaitEvent(events, "action_app_open native complete") {
+            it is AdFullScreenUiResource.AdCompleted
+        } as AdFullScreenUiResource.AdCompleted
+        assertTrue(completed.isShown)
+        assertFalse(completed.isEarnedReward)
+        onMain { assertFalse(activity.adsManager.isHasFullscreenAdShowing()) }
+        assertTrue("Fullscreen native must not require banner/native events", nativeEvents.isEmpty())
+        log("PASS action_app_open native_interstitial: real load, render, countdown, close and fullscreen callbacks")
     }
 
     private fun initializeSdk() {

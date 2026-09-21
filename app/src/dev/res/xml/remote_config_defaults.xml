@@ -599,7 +599,7 @@
     <!--action_app_open_first_open = app open đầu tiên vào app-->-->
     <!--action_app_open = từ lần thứ 2 vào app->-->
     <!--is_auto_load_after_dismiss = false app dụng cho màn splash->-->
-    <!--ad_type = interstitial - rewarded-->
+    <!--ad_type = interstitial - rewarded - native_interstitial (load/show qua API fullscreen)-->
     <!--Cấu hình native sau interstitial / native interstitial v3-->
     <!--is_show_native_after = true thì show native_config sau khi interstitial dismiss; false thì chỉ show interstitial như cũ-->
     <!--native_after_load_strategy = with_interstitial để load native cùng lúc load interstitial; on_interstitial_impression để load native khi interstitial bắt đầu show/impression-->
@@ -625,8 +625,13 @@
             },
             {
             "place_name": "action_app_open",
-            "ad_id": "ca-app-pub-3940256099942544/1033173712",
-            "ad_type": "interstitial",
+            "ad_id": "ca-app-pub-3940256099942544/2247696110",
+            "ad_type": "native_interstitial",
+            "native_template_size": "full_interstitial_v3",
+            "background_full_color": "#FFFFFF",
+            "control_close_position": "left",
+            "close_step_count": 1,
+            "count_down_timer": 5,
             "is_enable": true,
             "is_auto_load_after_dismiss": true
             },
@@ -692,7 +697,7 @@
             {
             "place_name": "fullscreen_native_interstitial",
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
-            "ad_type": "native",
+            "ad_type": "native_interstitial",
             "native_template_size": "full_interstitial_v3",
             "is_tracking_click": true,
             "is_enable": true,

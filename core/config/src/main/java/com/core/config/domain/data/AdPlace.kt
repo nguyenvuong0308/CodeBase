@@ -34,6 +34,8 @@ sealed class AdPlace {
 
     fun isNativeType() = adType is AdType.Native
 
+    fun isNativeInterstitialType() = adType is AdType.NativeInterstitial
+
     fun isInterstitialType() = adType is AdType.Interstitial
 
     fun isRewardedInterstitialType() = adType is AdType.RewardedInterstitial
