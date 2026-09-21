@@ -756,14 +756,24 @@ fun provideAdPlacesRemoteConfigKeyProvider(
           <tr><td><code>progress_bar_tint</code></td><td>String</td><td>Màu progress countdown.</td></tr>
           <tr><td><code>is_native_collapsible</code></td><td>Boolean</td><td>Bật host collapsible generic cho native template thông thường. Default <code>false</code>. Không dùng <code>is_collapsible</code> của banner.</td></tr>
           <tr><td><code>native_expand_template</code></td><td>String</td><td>Giao diện popup mở rộng: <code>native_expand_v1</code> hoặc <code>native_expand_v2</code>. Thiếu hoặc sai giá trị sẽ fallback về V1.</td></tr>
+          <tr><td><code>always_hide_inline_native</code></td><td>Boolean</td><td>Mặc định <code>false</code>. Khi native collapsible được bật, <code>true</code> luôn ẩn inline bằng <code>GONE</code>, kể cả sau khi thu gọn, refresh hoặc không mở được popup. Popup và shimmer loading vẫn hoạt động bình thường.</td></tr>
+          <tr><td><code>native_expand_margin_left_dp</code></td><td>Number</td><td>Khoảng trống trái nội dung popup expand, đơn vị dp; hỗ trợ số thập phân. Thiếu, <code>null</code> hoặc âm dùng <code>0</code>.</td></tr>
+          <tr><td><code>native_expand_margin_right_dp</code></td><td>Number</td><td>Khoảng trống phải nội dung popup expand, đơn vị dp; độc lập với bên trái. Thiếu, <code>null</code> hoặc âm dùng <code>0</code>.</td></tr>
           <tr><td><code>control_close_position</code></td><td>String</td><td><code>left</code> hoặc <code>right</code>, vị trí nút next/close ở native interstitial v3 và collapsible.</td></tr>
           <tr><td><code>collapsible_expand_cooldown_second</code></td><td>Int</td><td>Thời gian cooldown mở rộng lại của template collapsible.</td></tr>
         </tbody>
       </table>
 
       <h3>Native collapsible generic</h3>
-      <div class="config-keys field"><code>is_native_collapsible</code><code>native_expand_template</code></div>
+      <div class="config-keys field"><code>is_native_collapsible</code><code>native_expand_template</code><code>always_hide_inline_native</code><code>native_expand_margin_left_dp</code><code>native_expand_margin_right_dp</code></div>
       <p><code>is_native_collapsible=true</code> giữ <code>native_template_size</code> làm giao diện thu gọn và dùng một popup riêng cho trạng thái mở rộng. <code>native_expand_template</code> chỉ có hiệu lực khi native collapsible được bật.</p>
+      <p>Cấu hình các key này trong từng object placement của <code>banner_native_ad_places</code>, không tạo parameter Firebase độc lập. Ví dụ bên dưới chỉ hiển thị popup, ẩn inline và đặt khoảng trống trái 16dp, phải 24dp.</p>
+      <ul>
+        <li><code>always_hide_inline_native=true</code> chỉ có hiệu lực với native collapsible. Inline không chiếm chỗ khi thu gọn; vẫn có thể mở rộng chủ động. Thiếu, <code>null</code> hoặc <code>false</code> giữ hành vi inline hiện tại.</li>
+        <li>Shimmer vẫn hiển thị khi loading và được thay thế khi ad tải xong; cờ ẩn inline không giữ shimmer sau khi tải ad.</li>
+        <li>Margin tạo khoảng trống trong suốt quanh nội dung popup V1/V2, gồm cả nút thu gọn. Trái/phải không đảo theo RTL; inline và shimmer không đổi margin.</li>
+        <li>Khi bind lại với style mới, popup đang hiển thị được cập nhật margin.</li>
+      </ul>
       <table>
         <thead><tr><th><code>native_template_size</code></th><th><code>is_native_collapsible</code></th><th><code>native_expand_template</code></th><th>Kết quả</th></tr></thead>
         <tbody>
@@ -779,8 +789,11 @@ fun provideAdPlacesRemoteConfigKeyProvider(
   "ad_type": "native",
   "native_template_size": "small_cta_bottom",
   "is_native_collapsible": true,
+  "always_hide_inline_native": true,
   "native_expand_template": "native_expand_v2",
   "control_close_position": "left",
+  "native_expand_margin_left_dp": 16,
+  "native_expand_margin_right_dp": 24,
   "collapsible_expand_cooldown_second": 10,
   "is_enable": true
 }</code></pre>

@@ -460,6 +460,8 @@
             "body_text_color": "#6B7280",
             "cta_text_color": "#FFFFFF",
             "background_cta": "#5E56F5",
+            "native_expand_margin_left_dp": 40,
+            "always_hide_inline_native": true,
             "border_color": "#E5E7EB",
             "control_close_position": "right",
             "collapsible_expand_cooldown_second": 10,

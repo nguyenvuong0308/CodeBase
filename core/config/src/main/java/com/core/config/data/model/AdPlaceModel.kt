@@ -156,6 +156,15 @@ internal data class AdPlaceModel(
     @Json(name = "collapsible_expand_cooldown_second")
     val collapsibleExpandCooldownSecond: Int?,
 
+    @Json(name = "always_hide_inline_native")
+    val alwaysHideInlineNative: Boolean? = null,
+
+    @Json(name = "native_expand_margin_left_dp")
+    val nativeExpandMarginLeftDp: Float? = null,
+
+    @Json(name = "native_expand_margin_right_dp")
+    val nativeExpandMarginRightDp: Float? = null,
+
     @Json(name = "pip_anchor_mode")
     val pipAnchorMode: String?,
 

@@ -139,6 +139,9 @@ data class NativeAdPlace(
     override val isAutoLoadAfterDismiss: Boolean,
     override val isIgnoreInterval: Boolean,
     override val isTutorialFlow: Boolean,
+    val alwaysHideInlineNative: Boolean = false,
+    val nativeExpandMarginLeftDp: Float = 0f,
+    val nativeExpandMarginRightDp: Float = 0f,
 ): AdPlace()
 
 data class BannerAdPlace(

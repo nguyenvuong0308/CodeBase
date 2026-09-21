@@ -257,6 +257,11 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
             .withProgressBarTint(nativeAdPlace.progressBarTint)
             .withControlClosePosition(nativeAdPlace.controlClosePosition)
             .withCollapsibleExpandCooldownSecond(nativeAdPlace.collapsibleExpandCooldownSecond)
+            .withAlwaysHideInlineNative(nativeAdPlace.alwaysHideInlineNative)
+            .withNativeExpandMargins(
+                nativeAdPlace.nativeExpandMarginLeftDp,
+                nativeAdPlace.nativeExpandMarginRightDp,
+            )
             .withNativeExpandTemplate(nativeAdPlace.nativeExpandTemplate)
             .withAdPlaceName(nativeAdPlace.placeName.name)
             .build()

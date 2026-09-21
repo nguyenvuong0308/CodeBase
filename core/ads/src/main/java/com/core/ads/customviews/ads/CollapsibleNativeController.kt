@@ -15,6 +15,7 @@ import com.core.ads.R
 import com.core.config.domain.data.NativeExpandTemplate
 import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
 import java.util.WeakHashMap
+import kotlin.math.roundToInt
 
 /**
  * Adds collapsible popup behavior to the inline native template owned by a container.
@@ -48,6 +49,7 @@ internal class CollapsibleNativeController(
     private var collapsibleExpandCooldownSecond = 0
     private var collapsibleExpandCooldownKey = javaClass.name
     private var popupRequestVersion = 0
+    private var isInlineCollapsed = false
     private val expandState = CollapsibleExpandState()
 
     /**
@@ -117,7 +119,7 @@ internal class CollapsibleNativeController(
             if (!isAlreadyExpanded) {
                 showExpandedPopup(nativeAd)
             }
-        } else if (!isCollapsedInlineVisible()) {
+        } else if (!isCollapsedInline()) {
             showCollapsedInline()
         }
     }
@@ -152,7 +154,7 @@ internal class CollapsibleNativeController(
 
     private fun collapseWithoutCooldown(trigger: CollapsibleCollapseTrigger) {
         // Already inline: rebinding here would only restart the template countdown for nothing.
-        if (isCollapsedInlineVisible()) return
+        if (isCollapsedInline()) return
         if (inlineTemplateView != null) {
             showCollapsedInline(rebindNativeAd = trigger.shouldRebindNativeAd)
         } else {
@@ -167,6 +169,7 @@ internal class CollapsibleNativeController(
         inlineTemplateView = null
         currentNativeAd = null
         currentStyles = null
+        isInlineCollapsed = false
     }
 
     private fun applyStyles(styles: NativeTemplateStyle) {
@@ -180,12 +183,20 @@ internal class CollapsibleNativeController(
         inlineTemplateView?.applyStyles(styles)
         popupTemplateView?.applyStyles(styles)
         applyControlClosePosition()
+        popupWindow?.let { popup ->
+            applyPopupMargins(popup.contentView)
+            if (popup.isShowing) {
+                popup.update(anchorView, 0, -resolvePopupHeight(popup.contentView), -1, -1)
+            }
+        }
     }
 
     private fun showExpandedPopup(nativeAd: NativeAd) {
         val inlineTemplate = inlineTemplateView ?: return
         val requestVersion = ++popupRequestVersion
-        inlineTemplate.visibility = View.INVISIBLE
+        isInlineCollapsed = false
+        inlineTemplate.visibility =
+            if (currentStyles?.alwaysHideInlineNative == true) View.GONE else View.INVISIBLE
 
         anchorView.post {
             if (requestVersion != popupRequestVersion) return@post
@@ -265,6 +276,7 @@ internal class CollapsibleNativeController(
 
     private fun createPopupContent(expandedTemplate: BaseNativeTemplateView): FrameLayout {
         return FrameLayout(anchorView.context).apply {
+            applyPopupMargins(this)
             addView(
                 expandedTemplate,
                 FrameLayout.LayoutParams(
@@ -296,8 +308,20 @@ internal class CollapsibleNativeController(
         }
     }
 
+    private fun applyPopupMargins(content: View) {
+        val density = anchorView.resources.displayMetrics.density
+        // Transparent outer spacing keeps the expanded template and its close control together.
+        // Use physical left/right padding so these config keys have the same meaning in RTL.
+        content.setPadding(
+            ((currentStyles?.nativeExpandMarginLeftDp ?: 0f) * density).roundToInt(),
+            0,
+            ((currentStyles?.nativeExpandMarginRightDp ?: 0f) * density).roundToInt(),
+            0,
+        )
+    }
+
     private fun collapseToInline() {
-        if (isCollapsedInlineVisible()) return
+        if (isCollapsedInline()) return
         showCollapsedInline(markExpandedClosed = true)
     }
 
@@ -311,14 +335,18 @@ internal class CollapsibleNativeController(
         popupRequestVersion++
         dismissExpandedPopup()
         val inlineTemplate = inlineTemplateView ?: return
-        inlineTemplate.visibility = View.VISIBLE
-        if (rebindNativeAd) {
+        isInlineCollapsed = true
+        val hideInline = currentStyles?.alwaysHideInlineNative == true
+        inlineTemplate.visibility = if (hideInline) View.GONE else View.VISIBLE
+        if (rebindNativeAd && !hideInline) {
             currentNativeAd?.let(inlineTemplate::setNativeAd)
         }
     }
 
-    private fun isCollapsedInlineVisible(): Boolean {
-        return inlineTemplateView?.visibility == View.VISIBLE && popupWindow?.isShowing != true
+    private fun isCollapsedInline(): Boolean {
+        // A hidden inline is still collapsed. Pending expansion must remain cancellable even
+        // though both pending expansion and collapse use GONE when hiding inline is enabled.
+        return isInlineCollapsed && inlineTemplateView != null && popupWindow?.isShowing != true
     }
 
     private fun dismissExpandedPopup() {
