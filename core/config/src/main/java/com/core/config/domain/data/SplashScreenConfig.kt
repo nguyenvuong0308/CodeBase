@@ -19,5 +19,11 @@ data class SplashScreenConfig(
 
     val retryFixedDelay: Long,
 
-    val isLoadBeforeEuConsent: Boolean
+    val isLoadBeforeEuConsent: Boolean,
+
+    // Ghi đè is_enable của action_app_open_first_open và open_app_first_open; null = dùng config ad place.
+    val isEnableFirstOpen: Boolean? = null,
+
+    // Ghi đè is_enable của action_app_open và open_app; null = dùng config ad place.
+    val isEnableOpen: Boolean? = null,
     )

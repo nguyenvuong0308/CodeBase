@@ -22,6 +22,8 @@ internal class SplashScreenConfigModelMapper @Inject constructor(
             maxRetryCount = model.maxRetryCount ?: ConfigParam.SPLASH_SCREEN_CONFIG_DEFAULT_MAX_RETRY_COUNT,
             retryFixedDelay = model.retryFixedDelay ?: ConfigParam.SPLASH_SCREEN_CONFIG_DEFAULT_RETRY_FIXED_DELAY,
             isLoadBeforeEuConsent = model.isLoadBeforeEuConsent ?: ConfigParam.SPLASH_SCREEN_CONFIG_DEFAULT_IS_LOAD_BEFORE_CONSENT,
+            isEnableFirstOpen = model.isEnableFirstOpen,
+            isEnableOpen = model.isEnableOpen,
         )
     }
 

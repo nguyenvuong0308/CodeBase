@@ -33,4 +33,10 @@ internal data class SplashScreenConfigModel(
     @Json(name = "is_load_before_eu_consent")
     val isLoadBeforeEuConsent: Boolean?,
 
+    @Json(name = "is_enable_first_open")
+    val isEnableFirstOpen: Boolean? = null,
+
+    @Json(name = "is_enable_open")
+    val isEnableOpen: Boolean? = null,
+
     )

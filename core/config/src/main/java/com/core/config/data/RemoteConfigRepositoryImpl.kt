@@ -312,9 +312,10 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
 
     private fun getAdPlacesRaw(): List<AdPlace> {
         val models = remoteConfigService.getAdPlaces()
-        return models.map {
+        val adPlaces = models.map {
             adPlaceModelMapper.toData(it)
         }
+        return SplashAdPlaceEnableOverrideResolver.resolve(adPlaces, getSplashScreenConfigRaw())
     }
 
     private fun getNativeAdConfigRaw(): NativeAdTypeConfig {

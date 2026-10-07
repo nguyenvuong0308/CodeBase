@@ -1089,8 +1089,17 @@ fun provideAdPlacesRemoteConfigKeyProvider(
           <tr><td><code>min_time_wait_progress_before_show_ad</code></td><td>Thời gian progress tối thiểu trước khi show ad.</td></tr>
           <tr><td><code>is_enable_retry</code>, <code>max_retry_count</code>, <code>retry_fixed_delay</code></td><td>Retry load splash ad.</td></tr>
           <tr><td><code>is_load_before_eu_consent</code></td><td>Cho phép load trước khi hoàn tất EU consent.</td></tr>
+          <tr><td><code>is_enable_first_open</code></td><td>Boolean, tùy chọn. Ghi đè <code>is_enable</code> của <code>action_app_open_first_open</code> và <code>open_app_first_open</code>.</td></tr>
+          <tr><td><code>is_enable_open</code></td><td>Boolean, tùy chọn. Ghi đè <code>is_enable</code> của <code>action_app_open</code> và <code>open_app</code>.</td></tr>
         </tbody>
       </table>
+      <p>Hai flag <code>is_enable_first_open</code>, <code>is_enable_open</code> ưu tiên cao hơn <code>is_enable</code> trong <code>ad_places</code>, kể cả place đã bị A/B override: <code>true</code> bật, <code>false</code> tắt các place tương ứng. Bỏ trống key thì giữ nguyên <code>is_enable</code> của từng place. Flag không vượt qua các điều kiện khác như thiếu <code>ad_id</code>, tắt ads toàn app hoặc chặn theo quốc gia.</p>
+      <pre><code>{
+  "ad_type_first_open": "interstitial",
+  "ad_type": "interstitial",
+  "is_enable_first_open": false,
+  "is_enable_open": true
+}</code></pre>
 
       <h3>prevent_ad_click_config</h3>
       <div class="config-keys" data-config-key="prevent_ad_click_config"><code>prevent_ad_click_config</code></div>
