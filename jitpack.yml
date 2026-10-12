@@ -5,4 +5,4 @@ before_install:
   - chmod +x gradlew
 
 install:
-  - ./gradlew publishToMavenLocal -x test
+  - ./gradlew publishToMavenLocal -x test --refresh-dependencies --stacktrace --info
