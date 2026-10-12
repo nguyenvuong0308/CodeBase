@@ -285,6 +285,7 @@ class OnBoardingActivity : StartFlowActivity<StartflowActivityOnboardingBinding>
                 } else {
                     EventTracking.VALUE_REVISIT
                 }
+                startFlowAnalytics.onboardingViewed(screenNumber)
                 EventTracking.logEvent(
                     EventTracking.onboardingViewEvent(screenNumber),
                     Bundle().apply {
@@ -315,6 +316,11 @@ class OnBoardingActivity : StartFlowActivity<StartflowActivityOnboardingBinding>
                     else -> EventTracking.VALUE_BACKWARD
                 }
                 val screenNumber = item.position + 1
+                startFlowAnalytics.onboardingNext(
+                    screenNumber,
+                    isClick = actionMethod == EventTracking.VALUE_CLICK &&
+                        (toPosition == null || toPosition > fromPosition),
+                )
                 EventTracking.logEvent(
                     EventTracking.onboardingCompleteEvent(screenNumber),
                     Bundle().apply {

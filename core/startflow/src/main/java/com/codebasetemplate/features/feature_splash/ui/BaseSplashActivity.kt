@@ -132,6 +132,9 @@ abstract class BaseSplashActivity<VB : ViewBinding> : StartFlowActivity<VB>() {
         super.onCreate(savedInstanceState)
         splashTrackingStartedAtMs = SystemClock.elapsedRealtime()
         EventTracking.logEvent(EventTracking.EVENT_SPLASH_VIEW)
+        if (savedInstanceState == null) {
+            startFlowAnalytics.splashViewed(baseViewModel.isFirstOpenApp)
+        }
         installSplashScreen()
 
         appOpenAdManager.setupDefaultValue()

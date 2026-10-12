@@ -48,6 +48,7 @@ class NativeInterstitialTest {
     private lateinit var activity: Activity
     private lateinit var place: NativeAdPlace
     private lateinit var config: RemoteConfigRepository
+    private lateinit var analytics: AnalyticsManager
     private lateinit var fragments: FragmentManager
     private val scope = CoroutineScope(Dispatchers.Main)
     private val events = mutableListOf<AdFullScreenUiResource>()
@@ -74,8 +75,9 @@ class NativeInterstitialTest {
         `when`(place.expiredTimeSecond).thenReturn(null)
         `when`(place.nativeTemplateSize).thenReturn(NativeTemplateSize.FullInterstitialV3)
         `when`(config.getAdPlaceBy(name)).thenReturn(place)
+        analytics = mock(AnalyticsManager::class.java)
         manager = AdmobManager(RuntimeEnvironment.getApplication(), config,
-            mock(PurchasePreferences::class.java), mock(AnalyticsManager::class.java),
+            mock(PurchasePreferences::class.java), analytics,
             mock(AppPreferences::class.java), mock(AdsSdkInitializer::class.java),
             mock(AdjustAnalytics::class.java))
         manager.nativeAdLoaderBuilder = { _, _ -> newNativeLoaderBuilder() }
@@ -327,6 +329,41 @@ class NativeInterstitialTest {
         verify(cached, never()).destroy()
         assertFalse(holder().isLoading)
         assertTrue(events.isEmpty())
+    }
+
+    @Test
+    fun `splash native click respects disabled placement tracking`() {
+        val splashPlace = CoreAdPlaceName.ANCHORED_BOTTOM_SPLASH
+        `when`(place.placeName).thenReturn(splashPlace)
+        `when`(place.adType).thenReturn(AdType.Native)
+        `when`(place.isNativeInterstitialType()).thenReturn(false)
+        `when`(place.isNativeType()).thenReturn(true)
+        `when`(place.isTrackingClick).thenReturn(false)
+        `when`(config.getAdPlaceBy(splashPlace)).thenReturn(place)
+        `when`(config.getPreventAdClickConfig()).thenReturn(PreventAdClickConfig(100, 3600, 60))
+
+        manager.loadBannerNativeAd(activity, splashPlace, "splash", false, false)
+        awaitRequests(1)
+        requests.single().onNativeAdLoaded(mock(NativeAd::class.java))
+        idle()
+        verify(analytics, never()).logEvent("Splash_click_ads_native")
+
+        requests.single().adListener.onAdClicked()
+
+        verify(analytics, never()).logEvent("Splash_click_ads_native")
+        verify(analytics, never()).logEvent(splashPlace.name + "_Clicked")
+    }
+
+    @Test
+    fun `other native placements keep generic tracking without splash click event`() {
+        `when`(place.isTrackingClick).thenReturn(true)
+        `when`(config.getPreventAdClickConfig()).thenReturn(PreventAdClickConfig(100, 3600, 60))
+        loadAd()
+
+        requests.single().adListener.onAdClicked()
+
+        verify(analytics).logEvent(name.name + "_Clicked")
+        verify(analytics, never()).logEvent("Splash_click_ads_native")
     }
 
     private fun loadAd(): NativeAd {

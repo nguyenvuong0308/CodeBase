@@ -175,6 +175,11 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
         trackingViewEventName?.let { eventName ->
             EventTracking.logEvent(eventName)
         }
+        if (savedInstanceState == null && !isRecreated &&
+            trackingViewEventName == EventTracking.EVENT_LFO1_VIEW
+        ) {
+            startFlowAnalytics.languageViewed(isFromSetting)
+        }
         window.statusBarColor = Color.WHITE
         window.decorView.systemUiVisibility =
             window.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
@@ -204,6 +209,7 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
                 val group = languageGroups.firstOrNull { candidate ->
                     candidate.options.any { it.id == option.id }
                 } ?: return@selection
+                startFlowAnalytics.languageSelected(option.languageTag, isFromSetting)
                 onLanguageSelected(option, group)
             }
         }
@@ -320,6 +326,7 @@ abstract class BaseLanguageActivityV2FlowActivity : StartFlowActivity<StartflowA
 
     protected fun startApplyFlow() {
         val option = selectedOption() ?: return
+        startFlowAnalytics.languageDone(isFromSetting)
         pendingApplyOption = option
         showApplyingLanguageState()
         if (isFromSetting) {

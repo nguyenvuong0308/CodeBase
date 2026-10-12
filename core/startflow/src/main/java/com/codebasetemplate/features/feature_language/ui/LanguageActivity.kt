@@ -165,6 +165,9 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
 
     override fun initViews(savedInstanceState: Bundle?) {
         super.initViews(savedInstanceState)
+        if (savedInstanceState == null && !isRecreated) {
+            startFlowAnalytics.languageViewed(isFromSetting)
+        }
         viewBinding.run {
             if (resources.getBoolean(R.bool.startflow_language_show_image_background)) {
                 imageBackground.visible()
@@ -179,6 +182,7 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
 
                 override fun onTvAction() {
                     if (supportedLanguageAdapter.currentList.none { it.isSelected }) return
+                    startFlowAnalytics.languageDone(isFromSetting)
                     showApplyingLanguageState()
                     if (isFromSetting) {
                         processNextScreen()
@@ -195,6 +199,7 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
 
             supportedLanguageAdapter.onClickListener = {
                 toolbar.isEnableTvAction = true
+                startFlowAnalytics.languageSelected(it.languageCode, isFromSetting)
                 hasUserSelectedLanguage = true
                 updateBannerVisibility()
             }

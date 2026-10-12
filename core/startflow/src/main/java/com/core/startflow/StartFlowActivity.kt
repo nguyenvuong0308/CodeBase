@@ -7,6 +7,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
+import com.core.analytics.StartFlowAnalytics
 import com.core.baseui.BaseActivity
 import com.core.baseui.RequireTurnOnNetworkBottomSheetFragment
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +15,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 
 abstract class StartFlowActivity<VB : ViewBinding> : BaseActivity<VB>() {
+    protected val startFlowAnalytics by lazy { StartFlowAnalytics(analyticsManager) }
+
     private var onBackPressedCallback: OnBackPressedCallback? = null
 
     override fun initViews(savedInstanceState: Bundle?) {
