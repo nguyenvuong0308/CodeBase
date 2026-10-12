@@ -15,6 +15,7 @@ import com.core.startflow.R
 import com.core.startflow.StartFlowActivity
 import com.core.startflow.databinding.StartflowActivityLanguageBinding
 import com.codebasetemplate.features.feature_language.ui.adapter.SupportedLanguageAdapter
+import com.codebasetemplate.features.feature_language.ui.v2.ApplyingLanguageMessageAnimator
 import com.core.config.domain.data.CoreAdPlaceName
 import com.core.startflow.OnBoardingConfigFactory
 import com.core.startflow.StartFlowNavigator
@@ -85,6 +86,10 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
         intent.extras?.getBoolean(KEY_BACK_FROM_INTRODUCTION, false) ?: false
     }
 
+    private val isShowLanguageFlag: Boolean by lazy {
+        resources.getBoolean(R.bool.startflow_language_v1_show_flag)
+    }
+
     private var isRecreated = false
 
     private var hasCheckedNavigation = false
@@ -94,6 +99,10 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
     private var step1AdState = LanguageBannerAdState.PENDING
 
     private var step2AdState = LanguageBannerAdState.PENDING
+
+    private val applyingLanguageMessageAnimator by lazy {
+        ApplyingLanguageMessageAnimator(viewBinding.applyingLanguageMessage)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,9 +123,7 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
     private fun checkIfNavigationIsNeeded() {
         // Nếu cờ được bật
         if (appPreferences.navigateAfterChangeLanguage) {
-            viewBinding.rvLanguage.gone()
-            viewBinding.lnApplyLoading.visible()
-            viewBinding.toolbar.isEnableBack = false
+            showApplyingLanguageState()
             appPreferences.navigateAfterChangeLanguage = false
             if (isFromSetting) {
                 val intent = Intent(
@@ -171,11 +178,11 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
                 }
 
                 override fun onTvAction() {
+                    if (supportedLanguageAdapter.currentList.none { it.isSelected }) return
+                    showApplyingLanguageState()
                     if (isFromSetting) {
                         processNextScreen()
                     } else {
-                        supportedLanguageAdapter.submitList(supportedLanguageAdapter.currentList.filter { it.isSelected })
-                        lnApplyLoading.visible()
                         viewModel.startInitAndNextScreen()
                     }
                 }
@@ -183,6 +190,7 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
 
             supportedLanguageAdapter = SupportedLanguageAdapter(appExecutors).apply {
                 setHasStableIds(true)
+                isShowFlag = isShowLanguageFlag
             }
 
             supportedLanguageAdapter.onClickListener = {
@@ -219,13 +227,35 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
     private fun userChoosesToGoToSettingsAfterLanguageChange(language: SupportedLanguage) {
         // Đánh dấu rằng chúng ta muốn mở màn hình Settings sau khi đổi ngôn ngữ
         appPreferences.navigateAfterChangeLanguage = true
+        showApplyingLanguageState()
 
         applyLanguageAndContinue(
             selectedLanguageCode = language.languageCode,
             currentLanguageCode = getCurrentLanguageCode(),
             changeLanguage = { changeLanguage(language) },
             continueAfterLanguageApplied = ::checkIfNavigationIsNeeded,
+            scheduleNavigationFallback = ::scheduleNavigationFallbackAfterLanguageChange,
         )
+    }
+
+    private fun showApplyingLanguageState() {
+        viewBinding.lnApplyLoading.visible()
+        viewBinding.toolbar.isEnableBack = false
+        viewBinding.toolbar.isEnableTvAction = false
+        applyingLanguageMessageAnimator.start()
+    }
+
+    private fun scheduleNavigationFallbackAfterLanguageChange() {
+        viewBinding.root.postDelayed({
+            if (!isFinishing && !isDestroyed && appPreferences.navigateAfterChangeLanguage) {
+                checkIfNavigationIsNeeded()
+            }
+        }, NAVIGATION_AFTER_LANGUAGE_CHANGE_FALLBACK_MS)
+    }
+
+    override fun onDestroy() {
+        applyingLanguageMessageAnimator.stop()
+        super.onDestroy()
     }
 
     private fun processNextScreen() {
@@ -441,6 +471,8 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
     }
 
     companion object {
+        private const val NAVIGATION_AFTER_LANGUAGE_CHANGE_FALLBACK_MS = 700L
+
         const val KEY_IS_OPEN_FROM_SPLASH = "KEY_IS_OPEN_FROM_SPLASH"
         const val KEY_IS_FROM_SETTING = "KEY_IS_FROM_SETTING"
         const val KEY_BACK_FROM_INTRODUCTION = "KEY_BACK_FROM_INTRODUCTION"

@@ -19,6 +19,19 @@
         android:textColor="@color/core_color_language_selector"
         tools:text="English" />
 
+    <TextView
+        android:id="@+id/tvFlag"
+        android:layout_width="@dimen/_32dp"
+        android:layout_height="@dimen/_32dp"
+        android:layout_gravity="left|center_vertical"
+        android:layout_marginLeft="@dimen/_16dp"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:textSize="20dp"
+        android:visibility="gone"
+        tools:text="🇺🇸"
+        tools:visibility="visible" />
+
     <androidx.appcompat.widget.AppCompatImageView
         style="@style/DefaultIcon"
         android:layout_gravity="right|center_vertical"

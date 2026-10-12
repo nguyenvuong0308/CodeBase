@@ -132,25 +132,7 @@ class LanguageV2Adapter(
     }
 
     private fun bindFlag(view: TextView, countryCode: String?) {
-        if (countryCode.isNullOrBlank()) {
-            view.text = ""
-            view.setBackgroundResource(R.drawable.bg_language_flag_circle)
-            return
-        }
-
-        val resourceName = "flag_${countryCode.lowercase(Locale.US)}"
-        val flagResource = view.context.resources.getIdentifier(
-            resourceName,
-            "drawable",
-            view.context.packageName
-        )
-        if (flagResource != 0) {
-            view.text = ""
-            view.setBackgroundResource(flagResource)
-        } else {
-            view.text = countryFlagEmoji(countryCode)
-            view.setBackgroundResource(R.drawable.bg_language_flag_circle)
-        }
+        bindLanguageFlag(view, countryCode)
     }
 
     private inner class GroupViewHolder(

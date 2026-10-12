@@ -2,6 +2,7 @@ package com.codebasetemplate.features.feature_language.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.viewbinding.ViewBinding
 import com.core.startflow.databinding.StartflowItemLanguageLtrBinding
@@ -10,7 +11,9 @@ import com.core.baseui.adapter.DataBoundListAdapter
 import com.core.baseui.executor.AppExecutors
 import com.core.baseui.supportedlanguage.SupportedLanguage
 import com.core.utilities.visibleIf
+import com.codebasetemplate.features.feature_language.ui.v2.adapter.bindLanguageFlag
 import com.google.android.material.textview.MaterialTextView
+import com.core.dimens.R as DimensR
 
 class SupportedLanguageAdapter(
     appExecutors: AppExecutors,
@@ -35,6 +38,7 @@ class SupportedLanguageAdapter(
 
     var systemLanguageCode = ""
     var isShowHand = true
+    var isShowFlag = true
     var onClickListener: ((SupportedLanguage) -> Unit)? = null
 
     override fun getItemId(position: Int): Long {
@@ -73,6 +77,12 @@ class SupportedLanguageAdapter(
                     item = item,
                     tvLanguageName = binding.tvLanguage,
                 )
+                bindFlag(
+                    flagView = binding.tvFlag,
+                    languageView = binding.tvLanguage,
+                    item = item,
+                    isFlagOnRight = false,
+                )
                 binding.tvLanguage.isSelected = item.isSelected
                 binding.ivChecked.isSelected = item.isSelected
                 binding.lottieView.visibleIf(isShowClickHand)
@@ -87,6 +97,12 @@ class SupportedLanguageAdapter(
                 showData(
                     item = item,
                     tvLanguageName = binding.tvLanguage,
+                )
+                bindFlag(
+                    flagView = binding.tvFlag,
+                    languageView = binding.tvLanguage,
+                    item = item,
+                    isFlagOnRight = true,
                 )
                 binding.tvLanguage.isSelected = item.isSelected
                 binding.ivChecked.isSelected = item.isSelected
@@ -131,6 +147,36 @@ class SupportedLanguageAdapter(
         if(index >= 0) {
             notifyItemChanged(index)
         }
+    }
+
+    private fun bindFlag(
+        flagView: TextView,
+        languageView: TextView,
+        item: SupportedLanguage,
+        isFlagOnRight: Boolean,
+    ) {
+        val countryCode = LanguageFlagCountry.of(item.languageCode)
+        val showFlag = isShowFlag && countryCode != null
+        flagView.visibleIf(showFlag)
+        if (showFlag) {
+            bindLanguageFlag(flagView, countryCode)
+        }
+
+        val resources = languageView.resources
+        val defaultSidePadding = resources.getDimensionPixelSize(DimensR.dimen._20dp)
+        val flagSidePadding = if (showFlag) {
+            val params = flagView.layoutParams as ViewGroup.MarginLayoutParams
+            val flagMargin = if (isFlagOnRight) params.rightMargin else params.leftMargin
+            flagMargin + params.width + resources.getDimensionPixelSize(DimensR.dimen._12dp)
+        } else {
+            defaultSidePadding
+        }
+        languageView.setPadding(
+            if (isFlagOnRight) defaultSidePadding else flagSidePadding,
+            languageView.paddingTop,
+            if (isFlagOnRight) flagSidePadding else defaultSidePadding,
+            languageView.paddingBottom,
+        )
     }
 
     private fun showData(

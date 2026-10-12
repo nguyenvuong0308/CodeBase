@@ -11,6 +11,8 @@
     <item name="startflow_language_v2_screen_title" type="string">@string/core_screen_language</item>
 
     <item name="startflow_language_show_image_background" type="bool">false</item>
+    <!-- Override this resource in the app module to show/hide country flags on the V1 language screen. -->
+    <bool name="startflow_language_v1_show_flag">true</bool>
     <item name="startflow_language_image_background" type="drawable">@drawable/intro_11</item>
 
     <style name="LanguageToolbarStyleV1">

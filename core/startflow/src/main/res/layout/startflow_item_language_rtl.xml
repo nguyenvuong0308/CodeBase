@@ -19,6 +19,19 @@
         android:paddingVertical="@dimen/_13dp"
         tools:text="مرحبًا" />
 
+    <TextView
+        android:id="@+id/tvFlag"
+        android:layout_width="@dimen/_32dp"
+        android:layout_height="@dimen/_32dp"
+        android:layout_gravity="right|center_vertical"
+        android:layout_marginRight="@dimen/_16dp"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:textSize="20dp"
+        android:visibility="gone"
+        tools:text="🇸🇦"
+        tools:visibility="visible" />
+
     <androidx.appcompat.widget.AppCompatImageView
         style="@style/DefaultIcon"
         android:id="@+id/ivChecked"
