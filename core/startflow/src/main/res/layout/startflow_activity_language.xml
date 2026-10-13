@@ -26,8 +26,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:ctv_ic_back_show="false"
-            app:ctv_tv_action_enable="false"
-            app:ctv_tv_action_show="true"
             app:ctv_tv_action_text="@string/core_common_save"
             app:ctv_tv_action_text_color="@color/startflow_language_v1_toolbar_action"
             app:ctv_tv_title="@string/core_screen_language"

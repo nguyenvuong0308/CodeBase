@@ -16,6 +16,6 @@
     <item name="startflow_language_image_background" type="drawable">@drawable/intro_11</item>
 
     <style name="LanguageToolbarStyleV1">
-
+        <item name="ctv_tv_action_show">true</item>
     </style>
 </resources>
