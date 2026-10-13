@@ -16,6 +16,13 @@
     <item name="startflow_language_image_background" type="drawable">@drawable/intro_11</item>
 
     <style name="LanguageToolbarStyleV1">
-        <item name="ctv_tv_action_show">true</item>
+        <item name="ctv_ic_back_show">false</item>
+        <item name="ctv_tv_action_show">false</item>
+        <item name="ctv_tv_action_enable">false</item>
+        <item name="ctv_tv_action_text">@string/core_common_save</item>
+        <item name="ctv_tv_action_text_color">@color/startflow_language_v1_toolbar_action</item>
+        <item name="ctv_ic_action_show">false</item>
+        <item name="ctv_ic_action_enable">false</item>
+        <item name="ctv_ic_action_icon">@drawable/ic_language_v1_check</item>
     </style>
 </resources>

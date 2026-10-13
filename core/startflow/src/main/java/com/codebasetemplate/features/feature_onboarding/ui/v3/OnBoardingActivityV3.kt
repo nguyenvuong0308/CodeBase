@@ -66,7 +66,7 @@ class OnBoardingActivityV3 : StartFlowActivity<StartflowActivityOnboardingV3Bind
 
 
         viewBinding.run {
-            viewPager.isUserInputEnabled = true
+            setUserInputEnabled(true)
             viewPager.adapter = adapter
             viewPager.offscreenPageLimit = adapter.itemCount
             viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
@@ -93,6 +93,10 @@ class OnBoardingActivityV3 : StartFlowActivity<StartflowActivityOnboardingV3Bind
                 }
             }
         }
+    }
+
+    internal fun setUserInputEnabled(enabled: Boolean) {
+        viewBinding.viewPager.isUserInputEnabled = enabled
     }
 
     override fun handleObservable() {

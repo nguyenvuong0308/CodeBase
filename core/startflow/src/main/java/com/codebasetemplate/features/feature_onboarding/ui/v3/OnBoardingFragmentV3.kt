@@ -32,6 +32,7 @@ import com.core.startflow.onboarding.v3.OnBoardingV3PageActions
 import com.core.startflow.onboarding.v3.OnBoardingV3PageRenderer
 import com.core.startflow.onboarding.v3.OnBoardingV3PageState
 import com.core.startflow.onboarding.v3.OnBoardingV3PageType
+import com.core.startflow.onboarding.v3.OnBoardingV3PageUserInput
 import com.core.startflow.onboarding.v3.OnBoardingV3RenderScope
 import com.core.startflow.onboarding.v3.OnBoardingV3RenderedPage
 import com.core.startflow.onboarding.v3.OnBoardingV3UiCustomizer
@@ -71,6 +72,7 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
     lateinit var v3FullAdsPageRenderers: Set<@JvmSuppressWildcards OnBoardingV3FullAdsPageRenderer>
 
     private var renderedPage: OnBoardingV3RenderedPage? = null
+    private var pageUserInput: OnBoardingV3PageUserInput? = null
     private var latestAdResource: AdLoadBannerNativeUiResource? = null
 
     companion object {
@@ -125,12 +127,17 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
         )
         this.state = state
 
+        val userInput = OnBoardingV3PageUserInput { enabled ->
+            (requireActivity() as OnBoardingActivityV3).setUserInputEnabled(enabled)
+        }
+        pageUserInput = userInput
         val renderScope = OnBoardingV3RenderScope(
             inflater = layoutInflater,
             parent = viewBinding.root,
             lifecycleOwner = viewLifecycleOwner,
             state = state,
             actions = pageActions(state),
+            setUserInputEnabled = userInput::setEnabled,
         )
         val customPage = if (state.isFullAds) {
             v3FullAdsPageRenderers.activeOnBoardingV3FullAdsRenderer(state)?.render(renderScope)
@@ -362,7 +369,19 @@ class OnBoardingFragmentV3 : BaseFragment<StartflowFragmentOnboardingV3Binding>(
             ?: if(fullAds) viewBinding.fullNativeBanner.processAdResource(adResource, placeName) else viewBinding.layoutBannerNative.processAdResource(adResource, placeName)
     }
 
+    override fun onResume() {
+        super.onResume()
+        pageUserInput?.activate()
+    }
+
+    override fun onPause() {
+        pageUserInput?.deactivate()
+        super.onPause()
+    }
+
     override fun onDestroyView() {
+        pageUserInput?.dispose()
+        pageUserInput = null
         renderedPage?.onDispose?.invoke()
         renderedPage = null
         latestAdResource = null

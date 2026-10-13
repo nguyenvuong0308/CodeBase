@@ -3,6 +3,7 @@ package com.codebasetemplate.features.feature_language.ui
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Test
 import org.w3c.dom.Element
 
@@ -10,13 +11,32 @@ class LanguageV1SelectionLayoutTest {
     @Test
     fun `both confirmation modes start hidden with localized text and check icon available`() {
         val toolbar = element("startflow_activity_language.xml", "toolbar")
-        assertEquals("false", toolbar.getAttribute("app:ctv_tv_action_show"))
-        assertEquals("false", toolbar.getAttribute("app:ctv_tv_action_enable"))
-        assertEquals("@string/core_common_save", toolbar.getAttribute("app:ctv_tv_action_text"))
-        assertEquals("@color/startflow_language_v1_toolbar_action", toolbar.getAttribute("app:ctv_tv_action_text_color"))
-        assertEquals("false", toolbar.getAttribute("app:ctv_ic_action_show"))
-        assertEquals("false", toolbar.getAttribute("app:ctv_ic_action_enable"))
-        assertEquals("@drawable/ic_language_v1_check", toolbar.getAttribute("app:ctv_ic_action_icon"))
+        assertEquals("@style/LanguageToolbarStyleV1", toolbar.getAttribute("style"))
+        val file = listOf(
+            File("src/main/res/values/startflow_language_config.xml"),
+            File("core/startflow/src/main/res/values/startflow_language_config.xml"),
+        ).first { it.isFile }
+        val styles = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
+            .getElementsByTagName("style")
+        val style = (0 until styles.length).map { styles.item(it) as Element }
+            .first { it.getAttribute("name") == "LanguageToolbarStyleV1" }
+        val items = style.getElementsByTagName("item")
+        val values = (0 until items.length).map { items.item(it) as Element }
+            .associate { it.getAttribute("name") to it.textContent.trim() }
+        val expected = mapOf(
+            "ctv_ic_back_show" to "false",
+            "ctv_tv_action_show" to "false",
+            "ctv_tv_action_enable" to "false",
+            "ctv_tv_action_text" to "@string/core_common_save",
+            "ctv_tv_action_text_color" to "@color/startflow_language_v1_toolbar_action",
+            "ctv_ic_action_show" to "false",
+            "ctv_ic_action_enable" to "false",
+            "ctv_ic_action_icon" to "@drawable/ic_language_v1_check",
+        )
+        expected.forEach { (name, value) ->
+            assertEquals(name, value, values[name])
+            assertFalse("Layout must allow style overrides for $name", toolbar.hasAttribute("app:$name"))
+        }
     }
 
     @Test

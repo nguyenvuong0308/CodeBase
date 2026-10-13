@@ -89,6 +89,12 @@ data class OnBoardingV3RenderScope(
     val lifecycleOwner: LifecycleOwner,
     val state: OnBoardingV3PageState,
     val actions: OnBoardingV3PageActions,
+    /**
+     * Enables/disables ViewPager gestures for this page (enabled by default).
+     * Call on the main thread. Applied while this page is resumed; programmatic
+     * navigation through [actions] remains available. Ignored after view disposal.
+     */
+    val setUserInputEnabled: (Boolean) -> Unit = {},
 )
 
 /**
