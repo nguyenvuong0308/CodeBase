@@ -191,7 +191,11 @@ class AppOpenAdManager @Inject constructor(
             failAppOpenLoadBecauseNoAdUnit(adHolder)
             return
         }
-        val adUnitId = waterfallAdUnitIds[waterfallIndex]
+        // Waterfall có thể ngắn lại khi remote config đổi giữa các lượt load -> không đọc vượt index.
+        val adUnitId = waterfallAdUnitIds.getOrNull(waterfallIndex) ?: run {
+            failAppOpenLoadBecauseNoAdUnit(adHolder)
+            return
+        }
         val adUnitHolder = appOpenAdUnitHolderMap.getOrPut(adUnitId) { AppOpenAdUnitHolder() }
         if (adUnitHolder.isLoading) {
             markAppOpenAdUnitWaiter(adHolder.adPlace, adUnitHolder, activity)

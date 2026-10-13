@@ -1263,7 +1263,11 @@ class AdmobManager @Inject constructor(
             return
         }
         Log.d(TAG, "${adHolder.adPlace.placeName} waterfallAdUnitIds: $waterfallAdUnitIds  adHolder.adPlace.highFloorAdIds ${adHolder.adPlace.highFloorAdIds} waterfallIndex $waterfallIndex")
-        val adUnitId = waterfallAdUnitIds[waterfallIndex]
+        // Waterfall có thể ngắn lại khi remote config đổi giữa các lượt load -> không đọc vượt index.
+        val adUnitId = waterfallAdUnitIds.getOrNull(waterfallIndex) ?: run {
+            failFullScreenLoadBecauseNoAdUnit(activity, adHolder)
+            return
+        }
         val adUnitHolder = getOrCreateFullScreenAdUnitHolder(adHolder.adPlace, adUnitId)
         if (adUnitHolder.isLoading) {
             markFullScreenAdUnitWaiter(adHolder, adUnitHolder, activity)
@@ -1408,7 +1412,11 @@ class AdmobManager @Inject constructor(
             failFullScreenLoadBecauseNoAdUnit(activity, adHolder)
             return
         }
-        val adUnitId = waterfallAdUnitIds[waterfallIndex]
+        // Waterfall có thể ngắn lại khi remote config đổi giữa các lượt load -> không đọc vượt index.
+        val adUnitId = waterfallAdUnitIds.getOrNull(waterfallIndex) ?: run {
+            failFullScreenLoadBecauseNoAdUnit(activity, adHolder)
+            return
+        }
         val adUnitHolder = getOrCreateFullScreenAdUnitHolder(adHolder.adPlace, adUnitId)
         if (adUnitHolder.isLoading) {
             markFullScreenAdUnitWaiter(adHolder, adUnitHolder, activity)
@@ -1559,7 +1567,11 @@ class AdmobManager @Inject constructor(
             failFullScreenLoadBecauseNoAdUnit(activity, adHolder)
             return
         }
-        val adUnitId = waterfallAdUnitIds[waterfallIndex]
+        // Waterfall có thể ngắn lại khi remote config đổi giữa các lượt load -> không đọc vượt index.
+        val adUnitId = waterfallAdUnitIds.getOrNull(waterfallIndex) ?: run {
+            failFullScreenLoadBecauseNoAdUnit(activity, adHolder)
+            return
+        }
         val adUnitHolder = getOrCreateFullScreenAdUnitHolder(adHolder.adPlace, adUnitId)
         if (adUnitHolder.isLoading) {
             markFullScreenAdUnitWaiter(adHolder, adUnitHolder, activity)
@@ -2003,7 +2015,11 @@ class AdmobManager @Inject constructor(
             failBannerNativeLoadBecauseNoAdUnit(adHolder)
             return
         }
-        val adUnitId = waterfallAdUnitIds[waterfallIndex]
+        // Waterfall có thể ngắn lại khi remote config đổi giữa các lượt load -> không đọc vượt index.
+        val adUnitId = waterfallAdUnitIds.getOrNull(waterfallIndex) ?: run {
+            failBannerNativeLoadBecauseNoAdUnit(adHolder)
+            return
+        }
 
         val adSize = when (bannerAdPlace.bannerSize) {
             BannerSize.Anchored -> AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
