@@ -11,4 +11,8 @@ data class LanguageActivityConfigModel(
     val timeShowLoadingLfo: Int?,
     @Json(name = "is_show_click_guide")
     val isShowClickGuide: Boolean?,
+    @Json(name = "v1_confirm_delay_ms")
+    val v1ConfirmDelayMs: Long? = null,
+    @Json(name = "v1_action_use_text")
+    val v1ActionUseText: Boolean? = null,
 )

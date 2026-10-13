@@ -1140,13 +1140,17 @@ fun provideAdPlacesRemoteConfigKeyProvider(
       <pre><code>{
   "version": 2,
   "time_show_loading_lfo": 3,
-  "is_show_click_guide": true
+  "is_show_click_guide": true,
+  "v1_confirm_delay_ms": 3000,
+  "v1_action_use_text": false
 }</code></pre>
       <table>
         <thead><tr><th>Field</th><th>Kiểu / mặc định</th><th>Ý nghĩa</th></tr></thead>
         <tbody>
           <tr><td><code>version</code></td><td>Integer · <code>2</code></td><td>Chọn phiên bản giao diện Language. Giá trị <code>2</code> sử dụng flow Language V2.</td></tr>
           <tr><td><code>time_show_loading_lfo</code></td><td>Integer · <code>3</code></td><td>Số giây hiển thị trạng thái loading của Language flow.</td></tr>
+          <tr><td><code>v1_confirm_delay_ms</code></td><td>Integer · <code>3000</code> ms</td><td>Chỉ áp dụng Language V1 (version 1): chờ trước lần hiện đầu tiên của nút xác nhận (icon hoặc text). Trước lần hiện đầu tiên, chọn lại ngôn ngữ sẽ đếm lại từ đầu. Khi nút đã hiện, các lần chọn tiếp trong cùng Activity giữ nút hiện, không delay nữa. Chỉ tạo Activity mới mới áp dụng lại delay. Giá trị 0 hiển thị ngay; thiếu, null hoặc âm dùng mặc định 3000 ms. Không thay đổi thời gian loading LFO hay flow V2.</td></tr>
+          <tr><td><code>v1_action_use_text</code></td><td>Boolean · <code>false</code></td><td>Language V1: false hiện icon ✓; true hiện text Lưu theo ngôn ngữ app (core_common_save). Thiếu hoặc null mặc định false. Cả hai dạng đều chờ theo v1_confirm_delay_ms và dùng cùng luồng xác nhận.</td></tr>
           <tr><td><code>is_show_click_guide</code></td><td>Boolean · <code>true</code></td><td><code>true</code> hiển thị Lottie <code>click.json</code> trên group thứ 3 của <code>LanguageActivityV21</code>; <code>false</code> ẩn hướng dẫn. Nếu thiếu field, app mặc định bật.</td></tr>
         </tbody>
       </table>

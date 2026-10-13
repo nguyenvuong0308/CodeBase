@@ -49,6 +49,8 @@
         android:scaleY="1.3"
         app:lottie_rawRes="@raw/click"
         app:lottie_loop="true"
-        android:visibility="visible"
+        android:visibility="gone"
+        android:clickable="false"
+        android:focusable="false"
         android:layout_height="@dimen/_50dp"/>
 </FrameLayout>

@@ -25,13 +25,17 @@ class FirebaseAdsConfigGuideTest(unittest.TestCase):
         match = re.search(
             r'<pre><code>(\{\s*"version":\s*2,\s*'
             r'"time_show_loading_lfo":\s*3,\s*'
-            r'"is_show_click_guide":\s*true\s*\})</code></pre>',
+            r'"is_show_click_guide":\s*true,\s*'
+            r'"v1_confirm_delay_ms":\s*3000,\s*'
+            r'"v1_action_use_text":\s*false\s*\})</code></pre>',
             self.html,
         )
 
         self.assertIsNotNone(match, "Missing language_activity_config JSON example")
         config = json.loads(unescape(match.group(1)))
         self.assertIs(config["is_show_click_guide"], True)
+        self.assertEqual(config["v1_confirm_delay_ms"], 3000)
+        self.assertIs(config["v1_action_use_text"], False)
 
     def test_click_guide_config_documents_complete_boolean_contract(self) -> None:
         self.assertIn("<code>is_show_click_guide</code>", self.html)

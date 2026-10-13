@@ -36,7 +36,7 @@ class SupportedLanguageAdapter(
     }
 ) {
 
-    var systemLanguageCode = ""
+    var clickGuideLanguageCode = ""
     var isShowHand = true
     var isShowFlag = true
     var onClickListener: ((SupportedLanguage) -> Unit)? = null
@@ -66,10 +66,7 @@ class SupportedLanguageAdapter(
     }
 
     override fun bind(binding: ViewBinding, item: SupportedLanguage) {
-        if (item.languageCode == systemLanguageCode) {
-            isShowHand = isShowHand && !item.isSelected
-        }
-        val isShowClickHand = item.languageCode == systemLanguageCode && isShowHand
+        val isShowClickHand = item.languageCode == clickGuideLanguageCode && isShowHand
 
         when (binding) {
             is StartflowItemLanguageLtrBinding -> {
@@ -122,9 +119,9 @@ class SupportedLanguageAdapter(
                 hideHandClick()
             }
             if (item.isSelected) {
+                onClickListener?.invoke(item)
                 return@setOnClickListener
             }
-            onClickListener?.invoke(item)
             val oldSelected = currentList.indexOfFirst { it.isSelected }
             if (oldSelected >= 0) {
                 notifyItemChanged(oldSelected)
@@ -137,12 +134,13 @@ class SupportedLanguageAdapter(
             if (index >= 0) {
                 notifyItemChanged(index)
             }
+            onClickListener?.invoke(item)
         }
 
     }
 
     private fun hideHandClick() {
-        val index = currentList.indexOfFirst { it.languageCode == systemLanguageCode }
+        val index = currentList.indexOfFirst { it.languageCode == clickGuideLanguageCode }
         isShowHand = false
         if(index >= 0) {
             notifyItemChanged(index)

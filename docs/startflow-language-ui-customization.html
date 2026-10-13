@@ -183,13 +183,17 @@
 <span class="token-comment">// parameter: language_activity_config</span>
 {
   <span class="token-string">"version"</span>: <span class="token-value">2</span>,
-  <span class="token-string">"time_show_loading_lfo"</span>: <span class="token-value">3</span>
+  <span class="token-string">"time_show_loading_lfo"</span>: <span class="token-value">3</span>,
+  <span class="token-string">"v1_confirm_delay_ms"</span>: <span class="token-value">3000</span>,
+  <span class="token-string">"v1_action_use_text"</span>: <span class="token-value">false</span>
 }</code></pre>
         </div>
         <div class="table-wrap"><table><thead><tr><th>Field</th><th>Giá trị</th><th>Ý nghĩa</th></tr></thead><tbody>
           <tr><td><code>is_enable_change_language_screen</code></td><td><code>true/false</code></td><td>Bật/tắt Language trong start flow.</td></tr>
           <tr><td><code>language_activity_config.version</code></td><td><code>1</code> hoặc <code>2</code></td><td>Giá trị khác hợp lệ sẽ fallback V2 theo domain mapper.</td></tr>
           <tr><td><code>time_show_loading_lfo</code></td><td>Số giây hoặc bỏ trống</td><td>Thời gian loading LFO nếu flow sử dụng cấu hình này.</td></tr>
+          <tr><td><code>v1_confirm_delay_ms</code></td><td>Millisecond, mặc định <code>3000</code></td><td>V1: chỉ chờ trước lần hiện đầu tiên của nút xác nhận (icon hoặc text) trong mỗi Activity. Trước lần hiện đầu tiên, chọn lại ngôn ngữ sẽ đếm lại từ đầu. Khi nút đã hiện, chọn tiếp không ẩn nút và không delay nữa; Activity mới mới áp dụng lại delay. 0 hiện ngay; thiếu/null/âm dùng 3000. Chọn version 1 để sử dụng màn V1.</td></tr>
+          <tr><td><code>v1_action_use_text</code></td><td>Boolean, mặc định <code>false</code></td><td>V1: false hiện icon ✓; true hiện text Lưu theo ngôn ngữ app (core_common_save). Thiếu/null dùng false. Cả hai dạng đều dùng v1_confirm_delay_ms.</td></tr>
           <tr><td><code>is_enable_introduction_screen</code></td><td><code>true</code></td><td>Sau Apply đi tiếp Onboarding; nếu false đi Main.</td></tr>
         </tbody></table></div>
         <div class="note warning"><strong>Firebase không đọc object gộp như ví dụ minh họa bên ngoài.</strong> Trong console, <code>application_config</code> và <code>language_activity_config</code> là hai parameter riêng, mỗi value là JSON string hợp lệ.</div>

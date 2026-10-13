@@ -17,6 +17,10 @@
 <!--2 = Full ads-->
 <defaults>
     <entry>
+        <key>language_activity_config</key>
+        <value>{"version": 2, "is_show_click_guide": true, "v1_confirm_delay_ms": 3000, "v1_action_use_text": false}</value>
+    </entry>
+    <entry>
         <key>application_config</key>
         <value>
             {

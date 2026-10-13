@@ -3,13 +3,16 @@ package com.codebasetemplate.features.feature_language.ui
 import android.app.LocaleManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.os.LocaleList
 import android.view.LayoutInflater
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import androidx.core.os.ConfigurationCompat
 import androidx.recyclerview.widget.DefaultItemAnimator
 import com.core.startflow.R
 import com.core.startflow.StartFlowActivity
@@ -96,6 +99,25 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
 
     private var hasUserSelectedLanguage = false
 
+    private val languageConfig by lazy { remoteConfigRepository.getLanguageActivityConfig() }
+
+    private var isConfirmationReady = false
+
+    private val confirmDelay by lazy {
+        LanguageConfirmDelay(
+            postDelayed = { callback, delay -> viewBinding.root.postDelayed(callback, delay) },
+            removeCallbacks = { callback -> viewBinding.root.removeCallbacks(callback) },
+            setVisible = { visible ->
+                val state = resolveLanguageV1ActionState(languageConfig.v1ActionUseText, visible)
+                isConfirmationReady = state.canConfirm
+                viewBinding.toolbar.showAction = state.showIcon
+                viewBinding.toolbar.isEnableAction = state.showIcon
+                viewBinding.toolbar.showTvAction = state.showText
+                viewBinding.toolbar.isEnableTvAction = state.showText
+            },
+        )
+    }
+
     private var step1AdState = LanguageBannerAdState.PENDING
 
     private var step2AdState = LanguageBannerAdState.PENDING
@@ -181,17 +203,11 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
                 }
 
                 override fun onTvAction() {
-                    if (supportedLanguageAdapter.currentList.none { it.isSelected }) return
-                    startFlowAnalytics.languageDone(isFromSetting)
-                    showApplyingLanguageState()
-                    if (isFromSetting) {
-                        processNextScreen()
-                    } else {
-                        viewModel.startInitAndNextScreen()
-                    }
+                    onAction()
                 }
 
                 override fun onAction() {
+                    if (!isConfirmationReady) return
                     if (supportedLanguageAdapter.currentList.none { it.isSelected }) return
                     startFlowAnalytics.languageDone(isFromSetting)
                     showApplyingLanguageState()
@@ -209,8 +225,7 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
             }
 
             supportedLanguageAdapter.onClickListener = {
-                toolbar.isEnableTvAction = true
-                toolbar.isEnableAction = true
+                confirmDelay.onLanguageSelected(languageConfig.v1ConfirmDelayMs)
                 startFlowAnalytics.languageSelected(it.languageCode, isFromSetting)
                 hasUserSelectedLanguage = true
                 updateBannerVisibility()
@@ -256,6 +271,7 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
     }
 
     private fun showApplyingLanguageState() {
+        confirmDelay.cancel()
         viewBinding.lnApplyLoading.visible()
         viewBinding.toolbar.isEnableBack = false
         viewBinding.toolbar.isEnableTvAction = false
@@ -272,6 +288,7 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
     }
 
     override fun onDestroy() {
+        confirmDelay.cancel()
         applyingLanguageMessageAnimator.stop()
         super.onDestroy()
     }
@@ -381,6 +398,11 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
     private fun displayFirstData() {
         val currentLanguageCode = getCurrentLanguageCode()
         viewBinding.toolbar.showBack = isFromSetting
+        viewBinding.toolbar.showTvAction = false
+        viewBinding.toolbar.isEnableTvAction = false
+        viewBinding.toolbar.findViewById<View>(com.core.baseui.R.id.rivAction)
+            .contentDescription = getString(R.string.core_common_save)
+        confirmDelay.cancel()
 
         val allLanguages = arrayListOf(
             SupportedLanguage.ENGLISH,
@@ -442,21 +464,19 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
 
         allLanguages.forEach {
             it.isSelected = false
-            println("private const val DATA_${it.languageCode.uppercase()} = \"data_${it.languageCode}\"")
         }
 
-        val systemLanguageCode = appPreferences.systemLanguageCode
-        val supportedLanguageSystem = allLanguages.find { it.languageCode == systemLanguageCode }
-        supportedLanguageAdapter.systemLanguageCode = systemLanguageCode
-
-        val supportedLanguages = ArrayList<SupportedLanguage>()
-        supportedLanguages.addAll(allLanguages)
-        val indexSystem = 4
-
-        supportedLanguageSystem?.let {
-            supportedLanguages.removeAll { supportedLanguageSystem.languageCode == it.languageCode }
-            supportedLanguages.add(indexSystem, supportedLanguageSystem)
+        val systemLocales = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getSystemService(LocaleManager::class.java).systemLocales
+        } else {
+            null
         }
+        val deviceLanguageTag = systemLocales?.takeUnless { it.isEmpty }?.get(0)?.toLanguageTag()
+            ?: ConfigurationCompat.getLocales(Resources.getSystem().configuration)[0]?.toLanguageTag()
+            ?: ""
+        val supportedLanguages = orderLanguagesForDevice(allLanguages, deviceLanguageTag)
+        supportedLanguageAdapter.clickGuideLanguageCode =
+            supportedLanguages.getOrNull(LANGUAGE_GUIDE_INDEX)?.languageCode.orEmpty()
 
         if (isFromSetting) {
             supportedLanguageAdapter.isShowHand = false
