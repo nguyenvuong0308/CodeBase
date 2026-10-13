@@ -25,7 +25,7 @@
             "is_preload_banner_native_exit":true,
             "is_always_preload_banner_native_ads_when_start": true,
             "is_hide_native_banner_when_network_error": true,
-            "is_always_show_intro_and_language_screen": false,
+            "is_always_show_intro_and_language_screen": true,
             "is_always_show_intro_and_language_screen_with_interval": false,
             "is_enable_introduction_screen": true,
             "is_enable_change_language_screen": true,
@@ -98,6 +98,8 @@
             "ad_type_first_open": "interstitial",
             "ad_type": "interstitial",
             "is_enable_retry": true,
+            "is_enable_first_open": true,
+            "is_enable_open": true,
             "is_load_before_eu_consent": true,
             "min_time_wait_progress_before_show_ad": 3,
             "max_retry_count": 1
@@ -618,51 +620,20 @@
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "ad_type": "interstitial",
             "high_floor_ad_ids": [
-                "ca-app-pub-3940256099942544/1033173719"
+            "ca-app-pub-3940256099942544/1033173719"
             ],
-            "is_enable": false,
+            "is_enable": true,
             "is_auto_load_after_dismiss": true
             },
             {
             "place_name": "action_app_open",
-            "ad_id": "ca-app-pub-3940256099942544/2247696110",
-            "ad_type": "native_interstitial",
-            "native_template_size": "full_interstitial_v3",
-            "background_full_color": "#FFFFFF",
-            "control_close_position": "left",
-            "close_step_count": 1,
-            "count_down_timer": 5,
-            "is_enable": true,
-            "is_auto_load_after_dismiss": true
-            },
-            {
-            "place_name": "fullscreen_test",
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "ad_type": "interstitial",
+            "high_floor_ad_ids": [
+            "ca-app-pub-3940256099942544/1033173719"
+            ],
             "is_enable": true,
-            "is_show_native_after": true,
-            "native_after_load_strategy": "on_interstitial_impression",
-            "native_config": {
-                    "place_name": "fullscreen_test_native",
-                    "ad_id": "ca-app-pub-3940256099942544/2247696110",
-                    "ad_type": "native",
-                    "native_template_size": "full_interstitial_v3",
-                    "is_tracking_click": true,
-                    "is_enable": true,
-                    "background_color": "#CD121212",
-                    "background_full_color": "#FFFFFF",
-                    "cta_radius_dp": 5,
-                    "primary_text_color": "#1F2937",
-                    "body_text_color": "#6B7280",
-                    "cta_text_color": "#FFFFFF",
-                    "background_cta": "#22C55E",
-                    "border_color": "#00000000",
-                    "control_close_position": "left",
-                    "count_down_timer": 5,
-                    "close_step_count": 1,
-                    "step_1_count_down_timer": 2,
-                    "step_2_count_down_timer": 2
-                }
+            "is_auto_load_after_dismiss": true
             },
             {
             "place_name": "fullscreen_show_to_home",
@@ -675,8 +646,7 @@
             "ad_id": "ca-app-pub-3940256099942544/5224354917",
             "ad_type": "rewarded",
             "is_enable": true
-            }
-            ,
+            },
             {
             "place_name": "fullscreen_test_lazy_load",
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
@@ -757,7 +727,7 @@
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "is_ignore_interval": true,
             "high_floor_ad_ids": [
-                "ca-app-pub-3940256099942544/1033173719"
+            "ca-app-pub-3940256099942544/1033173719"
             ],
             "ad_type": "interstitial",
             "is_tutorial_flow": true,
@@ -883,7 +853,7 @@
         <key>language_activity_config</key>
         <value>
             {
-            "version": 2,
+            "version": 1,
             "time_show_loading_lfo": 3,
             "is_show_click_guide": false
             }
@@ -906,6 +876,6 @@
 
     <entry>
         <key>is_turn_on_ad_places_disabled_when_detect_test_ad</key>
-        <value>true</value>
+        <value>false</value>
     </entry>
 </defaults>

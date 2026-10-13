@@ -190,6 +190,17 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
                         viewModel.startInitAndNextScreen()
                     }
                 }
+
+                override fun onAction() {
+                    if (supportedLanguageAdapter.currentList.none { it.isSelected }) return
+                    startFlowAnalytics.languageDone(isFromSetting)
+                    showApplyingLanguageState()
+                    if (isFromSetting) {
+                        processNextScreen()
+                    } else {
+                        viewModel.startInitAndNextScreen()
+                    }
+                }
             }
 
             supportedLanguageAdapter = SupportedLanguageAdapter(appExecutors).apply {
@@ -199,6 +210,7 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
 
             supportedLanguageAdapter.onClickListener = {
                 toolbar.isEnableTvAction = true
+                toolbar.isEnableAction = true
                 startFlowAnalytics.languageSelected(it.languageCode, isFromSetting)
                 hasUserSelectedLanguage = true
                 updateBannerVisibility()
@@ -247,6 +259,7 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
         viewBinding.lnApplyLoading.visible()
         viewBinding.toolbar.isEnableBack = false
         viewBinding.toolbar.isEnableTvAction = false
+        viewBinding.toolbar.isEnableAction = false
         applyingLanguageMessageAnimator.start()
     }
 
