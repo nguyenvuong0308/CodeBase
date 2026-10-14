@@ -24,8 +24,8 @@ import com.core.ads.glidetransformation.RoundedCornersTransformation
 import com.core.utilities.isValidGlideContext
 import com.core.utilities.margin
 import com.core.utilities.setOnClickPreventingDouble
-import com.google.android.gms.ads.VideoController
-import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.common.VideoController
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
 
@@ -71,8 +71,7 @@ class NativeInterstitialV2View @JvmOverloads constructor(
         startCloseCountDown()
         binding.nativeAdView.callToActionView = binding.cta
         binding.nativeAdView.headlineView = binding.primary
-        binding.nativeAdView.mediaView = binding.mediaView
-        binding.mediaView.setImageScaleType(ImageView.ScaleType.FIT_CENTER)
+        binding.mediaView.imageScaleType = ImageView.ScaleType.FIT_CENTER
 
         binding.primary.text = nativeAd.headline
         binding.cta.text = nativeAd.callToAction
@@ -118,19 +117,20 @@ class NativeInterstitialV2View @JvmOverloads constructor(
 //            }
 //        }
 
-        binding.nativeAdView.setNativeAd(nativeAd)
+        binding.nativeAdView.registerNativeAd(nativeAd, binding.mediaView)
 
         // Get the video controller for the ad. One will always be provided,
         // even if the ad doesn't have a video asset.
-        val videoController = nativeAd.mediaContent?.videoController ?: return
+        val mediaContent = nativeAd.mediaContent
+        val videoController = mediaContent.videoController ?: return
 
         // Updates the UI to say whether or not this ad has a video asset.
-        if (videoController.hasVideoContent()) {
+        if (mediaContent.hasVideoContent) {
             // Create a new VideoLifecycleCallbacks object and pass it to the VideoController.
             // The VideoController will call methods on this object when events occur in the
             // video lifecycle.
             videoController.videoLifecycleCallbacks =
-                object : VideoController.VideoLifecycleCallbacks() {
+                object : VideoController.VideoLifecycleCallbacks {
                 }
         }
 

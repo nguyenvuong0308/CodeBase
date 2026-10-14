@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.google.android.gms.ads.nativead.NativeAdView
+    <com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView
         android:id="@+id/native_ad_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <com.google.android.gms.ads.nativead.MediaView
+            <com.google.android.libraries.ads.mobile.sdk.nativead.MediaView
                 android:id="@+id/media_view"
                 android:layout_width="match_parent"
                 android:background="@color/black"
@@ -162,5 +162,5 @@
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.gms.ads.nativead.NativeAdView>
+    </com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView>
 </merge>

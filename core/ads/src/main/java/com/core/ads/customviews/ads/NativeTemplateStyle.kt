@@ -149,6 +149,15 @@ class NativeTemplateStyle {
     var collapsibleExpandCooldownSecond: Int? = null
         private set
 
+    var alwaysHideInlineNative: Boolean = false
+        private set
+
+    var nativeExpandMarginLeftDp: Float = 0f
+        private set
+
+    var nativeExpandMarginRightDp: Float = 0f
+        private set
+
     var nativeExpandTemplate: NativeExpandTemplate = NativeExpandTemplate.V1
         private set
 
@@ -207,6 +216,17 @@ class NativeTemplateStyle {
 
         fun withNativeExpandTemplate(nativeExpandTemplate: NativeExpandTemplate): Builder {
             styles.nativeExpandTemplate = nativeExpandTemplate
+            return this
+        }
+
+        fun withAlwaysHideInlineNative(alwaysHideInlineNative: Boolean): Builder {
+            styles.alwaysHideInlineNative = alwaysHideInlineNative
+            return this
+        }
+
+        fun withNativeExpandMargins(leftDp: Float, rightDp: Float): Builder {
+            styles.nativeExpandMarginLeftDp = leftDp.takeIf { it.isFinite() }?.coerceAtLeast(0f) ?: 0f
+            styles.nativeExpandMarginRightDp = rightDp.takeIf { it.isFinite() }?.coerceAtLeast(0f) ?: 0f
             return this
         }
 

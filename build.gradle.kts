@@ -34,6 +34,11 @@ val jitpackPublishVariants = mapOf(
 )
 
 subprojects {
+    configurations.configureEach {
+        exclude(group = "com.google.android.gms", module = "play-services-ads")
+        exclude(group = "com.google.android.gms", module = "play-services-ads-lite")
+    }
+
     group = System.getenv("GROUP")
         ?.let { group ->
             val artifact = System.getenv("ARTIFACT")

@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.core.graphics.toColorInt
 import com.core.ads.extensions.updateBackgroundColor
 import com.core.dimens.R as DimenR
-import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
 
 abstract class BaseNativeTemplateView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0

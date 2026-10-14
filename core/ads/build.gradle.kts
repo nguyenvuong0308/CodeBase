@@ -69,7 +69,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     // Google play service
-    implementation(libs.play.services.ads)
+    implementation(libs.ads.mobile.sdk)
 
     //Hilt
     implementation(libs.hilt.android)

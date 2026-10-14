@@ -40,7 +40,7 @@ import android.os.Looper
  * an toàn thay vì ném IndexOutOfBoundsException.
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [28], application = Application::class)
+@Config(sdk = [28], application = Application::class, shadows = [ShadowAdsReadiness::class])
 @LooperMode(LooperMode.Mode.PAUSED)
 class WaterfallIndexOutOfRangeTest {
     private val name = CoreAdPlaceName.ACTION_OPEN_APP
@@ -53,6 +53,7 @@ class WaterfallIndexOutOfRangeTest {
 
     @Before
     fun setUp() {
+        ShadowAdsReadiness.ready = true
         config = mock(RemoteConfigRepository::class.java)
         val app = mock(AppConfig::class.java)
         `when`(app.isEnableAds).thenReturn(true)
@@ -138,6 +139,7 @@ class WaterfallIndexOutOfRangeTest {
 
         assertFalse(holder.isLoading)
         assertNull(holder.appOpenAd)
+        verify(adsManager).getOrCreateAppOpenAdHolderBy(place)
     }
 
     private fun <T : AdPlace> mockPlace(type: Class<T>, adType: AdType): T {

@@ -89,7 +89,7 @@ dependencies {
     ksp(libs.hilt.android.compiler)
 
     // Google play service
-    implementation (libs.play.services.ads)
+    implementation (libs.ads.mobile.sdk)
 
     // Mediation
     implementation (libs.lottie)

@@ -142,12 +142,15 @@ native nối tiếp vẫn dùng placement cha `ad_type: "interstitial"`,
 
 - Unit test: `NativeInterstitialAdPlaceMapperTest` và `NativeInterstitialTest` kiểm tra
   mapping, cache, callback, chờ load, timeout, TTL, giới hạn show và reload sau đóng.
-- Kiểm tra trên thiết bị với APK dev và Google test ad unit: mở app từ lần thứ hai,
-  xác nhận native V3 hiện ở splash, chờ countdown rồi đóng; kiểm tra app tiếp tục
-  và lần show sau dùng ad mới. Không dùng ad unit production để kiểm thử.
+- Device test: `AdmobDeviceSmokeTest.test04_actionAppOpenNativeInterstitialLoadShowClose`
+  kiểm tra SDK thật, template V3, countdown, nút đóng và callback của `action_app_open`.
+  Test yêu cầu APK dev và Google test ad unit; không dùng cho APK production.
+  Configure `action_app_open` as `native_interstitial` with a Google native test ad unit
+  before running this test; it is skipped when the placement uses the default interstitial type.
 
 ```powershell
 .\gradlew.bat :core:config:testProdDebugUnitTest :core:ads:testProdDebugUnitTest
+.\gradlew.bat :app:connectedDevDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=com.codebasetemplate.AdmobDeviceSmokeTest#test04_actionAppOpenNativeInterstitialLoadShowClose"
 ```
 
 Xem thêm [Firebase Ads configuration guide](firebase-ads-guide/firebase_ads_config_guide.html#fullscreen).

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:layout_width="320dp"
+    tools:layout_height="56dp">
+
+    <FrameLayout
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_native_picture_in_picture_banner"
+        android:padding="@dimen/_3dp">
+
+        <com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView
+            android:id="@+id/native_ad_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/_32dp"
+                android:paddingEnd="@dimen/_8dp">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/icon"
+                    android:layout_width="@dimen/_34dp"
+                    android:layout_height="@dimen/_34dp"
+                    android:layout_marginEnd="@dimen/_6dp"
+                    android:scaleType="fitCenter"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/primary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="@dimen/_8dp"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/inter_regular"
+                    android:maxLines="1"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/_14dp"
+                    tools:text="TikTok" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/cta"
+                    android:layout_width="@dimen/_32dp"
+                    android:layout_height="@dimen/_32dp"
+                    android:background="@drawable/bg_native_picture_in_picture_banner_cta"
+                    android:padding="@dimen/_8dp"
+                    android:src="@drawable/ic_native_picture_in_picture_download" />
+            </LinearLayout>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/ad_notification_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|bottom"
+                android:background="#CC242424"
+                android:includeFontPadding="false"
+                android:paddingHorizontal="@dimen/_2dp"
+                android:text="@string/native_picture_in_picture_ad_label"
+                android:textColor="@color/white"
+                android:textSize="@dimen/_10dp" />
+        </com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView>
+
+        <FrameLayout
+            android:id="@+id/close_button_container"
+            android:layout_width="@dimen/_30dp"
+            android:layout_height="@dimen/_30dp"
+            android:layout_marginTop="@dimen/_3dp"
+            android:clickable="true"
+            android:contentDescription="@android:string/cancel"
+            android:focusable="true">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/close_button"
+                android:layout_width="@dimen/_28dp"
+                android:layout_height="@dimen/_28dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_native_picture_in_picture_banner_close"
+                android:padding="@dimen/_8dp"
+                android:src="@drawable/ic_close_ads_v"
+                app:tint="@color/white" />
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/action_progress"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:indeterminate="false"
+                android:max="1000"
+                android:progress="0"
+                app:indicatorColor="#FFFFFF"
+                app:indicatorInset="0dp"
+                app:indicatorSize="@dimen/_30dp"
+                app:trackColor="#6F6F6F"
+                app:trackThickness="@dimen/_2dp" />
+        </FrameLayout>
+    </FrameLayout>
+</FrameLayout>

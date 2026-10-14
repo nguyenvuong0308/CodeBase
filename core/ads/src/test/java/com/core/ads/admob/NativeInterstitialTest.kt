@@ -17,13 +17,9 @@ import com.core.config.domain.RemoteConfigRepository
 import com.core.config.domain.data.*
 import com.core.preference.AppPreferences
 import com.core.preference.PurchasePreferences
-import com.google.android.gms.ads.AdListener
-import com.google.android.gms.ads.AdLoader
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.nativead.NativeAdOptions
-import java.util.concurrent.CopyOnWriteArrayList
-import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.common.LoadAdError
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdEventCallback
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.*
 import org.junit.After
@@ -40,24 +36,27 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.LooperMode
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [28], application = Application::class)
+@Config(sdk = [28], application = Application::class,
+    shadows = [ShadowAdsReadiness::class, ShadowNativeLoader::class])
 @LooperMode(LooperMode.Mode.PAUSED)
 class NativeInterstitialTest {
     private val name = CoreAdPlaceName.ACTION_OPEN_APP
     private lateinit var manager: AdmobManager
     private lateinit var activity: Activity
     private lateinit var place: NativeAdPlace
-    private lateinit var config: RemoteConfigRepository
     private lateinit var analytics: AnalyticsManager
+    private lateinit var config: RemoteConfigRepository
     private lateinit var fragments: FragmentManager
     private val scope = CoroutineScope(Dispatchers.Main)
     private val events = mutableListOf<AdFullScreenUiResource>()
     private val nativeEvents = mutableListOf<AdLoadBannerNativeUiResource>()
-    private val requests = CopyOnWriteArrayList<NativeRequest>()
 
     @Before
     fun setUp() {
+        ShadowAdsReadiness.ready = true
+        ShadowNativeLoader.callbacks.clear()
         PreventShowManyInterstitialAds.initIntervalTimeShowInterstitialMillis()
+        analytics = mock(AnalyticsManager::class.java)
         config = mock(RemoteConfigRepository::class.java)
         val app = mock(AppConfig::class.java)
         `when`(app.isEnableAds).thenReturn(true)
@@ -75,12 +74,10 @@ class NativeInterstitialTest {
         `when`(place.expiredTimeSecond).thenReturn(null)
         `when`(place.nativeTemplateSize).thenReturn(NativeTemplateSize.FullInterstitialV3)
         `when`(config.getAdPlaceBy(name)).thenReturn(place)
-        analytics = mock(AnalyticsManager::class.java)
         manager = AdmobManager(RuntimeEnvironment.getApplication(), config,
             mock(PurchasePreferences::class.java), analytics,
             mock(AppPreferences::class.java), mock(AdsSdkInitializer::class.java),
             mock(AdjustAnalytics::class.java))
-        manager.nativeAdLoaderBuilder = { _, _ -> newNativeLoaderBuilder() }
         activity = Robolectric.buildActivity(Activity::class.java).setup().get()
         fragments = mock(FragmentManager::class.java)
         scope.launch(start = CoroutineStart.UNDISPATCHED) { manager.adFullScreenFlow.collect { events += it } }
@@ -106,15 +103,14 @@ class NativeInterstitialTest {
 
         manager.loadFullscreenAd(activity, name, "cached")
         idle()
-        assertEquals(1, requests.size)
+        assertEquals(1, ShadowNativeLoader.callbacks.size)
         assertEquals(2, events.filterIsInstance<AdFullScreenUiResource.AdLoaded>().size)
     }
 
     @Test
     fun `load failure emits fullscreen failure even when native hide on error is disabled`() {
         manager.loadFullscreenAd(activity, name, "load")
-        awaitRequests(1)
-        requests.single().onAdFailedToLoad(mock(LoadAdError::class.java))
+        ShadowNativeLoader.callbacks.single().onAdFailedToLoad(mock(LoadAdError::class.java))
         idle()
         assertEquals(1, events.filterIsInstance<AdFullScreenUiResource.AdNotValidOrLoadFailed>().size)
         assertTrue(nativeEvents.isEmpty())
@@ -126,20 +122,19 @@ class NativeInterstitialTest {
         manager.showAd(activity, fragments, name, "show")
         idle()
         assertEquals(listOf(false), completions())
-        assertTrue(requests.isEmpty())
+        assertTrue(ShadowNativeLoader.callbacks.isEmpty())
     }
 
     @Test
     fun `show joins preload and completes only after dialog closes consuming cached ad once`() {
         manager.loadFullscreenAd(activity, name, "preload")
-        awaitRequests(1)
         val callbacks = DialogCallbacks()
         mockDialogs(callbacks).use { dialogs ->
             manager.showAd(activity, fragments, name, "show", true)
             assertTrue(holder().isWaitLoadToShow)
-            assertEquals(1, requests.size)
+            assertEquals(1, ShadowNativeLoader.callbacks.size)
             val ad = mock(NativeAd::class.java)
-            requests.single().onNativeAdLoaded(ad)
+            ShadowNativeLoader.callbacks.single().onNativeAdLoaded(ad)
             idle()
             assertEquals(1, dialogs.constructed().size)
             verify(dialogs.constructed().single()).show(fragments, "DialogNativeInterstitial_show")
@@ -162,8 +157,7 @@ class NativeInterstitialTest {
     @Test
     fun `wait load failure releases callback without needing banner native events`() {
         manager.showAd(activity, fragments, name, "wait", true)
-        awaitRequests(1)
-        requests.single().onAdFailedToLoad(mock(LoadAdError::class.java))
+        ShadowNativeLoader.callbacks.single().onAdFailedToLoad(mock(LoadAdError::class.java))
         idle()
         assertEquals(listOf(false), completions())
         assertFalse(holder().isWaitLoadToShow)
@@ -174,8 +168,7 @@ class NativeInterstitialTest {
     @Test
     fun `wait timeout completes once and destroys late SDK result`() {
         manager.showAd(activity, fragments, name, "wait", true)
-        awaitRequests(1)
-        val callback = requests.single()
+        val callback = ShadowNativeLoader.callbacks.single()
         shadowOf(Looper.getMainLooper()).idleFor(30, TimeUnit.SECONDS)
         assertEquals(listOf(false), completions())
         assertFalse(holder().isLoading)
@@ -201,9 +194,8 @@ class NativeInterstitialTest {
     @Test
     fun `saved fragment state after load skips pending show`() {
         manager.showAd(activity, fragments, name, "wait", true)
-        awaitRequests(1)
         `when`(fragments.isStateSaved).thenReturn(true)
-        requests.single().onNativeAdLoaded(mock(NativeAd::class.java))
+        ShadowNativeLoader.callbacks.single().onNativeAdLoaded(mock(NativeAd::class.java))
         idle()
         assertEquals(listOf(false), completions())
         assertFalse(holder().isShowing)
@@ -219,8 +211,7 @@ class NativeInterstitialTest {
             callbacks.shown!!.invoke()
             callbacks.close!!.invoke()
             idle()
-            awaitRequests(2)
-            assertEquals(2, requests.size)
+            assertEquals(2, ShadowNativeLoader.callbacks.size)
             assertNull(holder().nativeAd)
             assertTrue(holder().isLoading)
             assertEquals(listOf(true), completions())
@@ -257,51 +248,6 @@ class NativeInterstitialTest {
         var close: (() -> Unit)? = null
     }
 
-    @Test
-    fun `release completes pending show and rejects late native result`() {
-        manager.showAd(activity, fragments, name, "wait", true)
-        awaitRequests(1)
-        manager.releaseBannerNative(name)
-        val late = mock(NativeAd::class.java)
-        requests.single().onNativeAdLoaded(late)
-        idle()
-        assertEquals(listOf(false), completions())
-        verify(late).destroy()
-        assertNull(holder().nativeAd)
-        assertFalse(holder().isLoading)
-    }
-
-    @Test
-    fun `waterfall ignores previous request result and finishes with fallback ad`() {
-        `when`(place.highFloorAdIds).thenReturn(listOf("high-floor-unit"))
-        manager.loadFullscreenAd(activity, name, "waterfall")
-        awaitRequests(1)
-        val first = requests.first()
-        first.onAdFailedToLoad(mock(LoadAdError::class.java))
-        awaitRequests(2)
-        val late = mock(NativeAd::class.java)
-        first.onNativeAdLoaded(late)
-        val fallback = mock(NativeAd::class.java)
-        requests.last().onNativeAdLoaded(fallback)
-        idle()
-        verify(late).destroy()
-        assertSame(fallback, holder().nativeAd)
-        assertEquals(1, events.filterIsInstance<AdFullScreenUiResource.AdLoaded>().size)
-        assertTrue(events.filterIsInstance<AdFullScreenUiResource.AdNotValidOrLoadFailed>().isEmpty())
-    }
-
-    @Test
-    fun `load called from worker dispatches SDK request and callback on main`() {
-        Thread { manager.loadFullscreenAd(activity, name, "worker") }.apply { start(); join() }
-        awaitRequests(1)
-        val ad = mock(NativeAd::class.java)
-        Thread { requests.single().onNativeAdLoaded(ad) }
-            .apply { start(); join() }
-        idle()
-        assertSame(ad, holder().nativeAd)
-        assertEquals(1, events.filterIsInstance<AdFullScreenUiResource.AdLoaded>().size)
-    }
-
     private fun mockDialogs(callbacks: DialogCallbacks) =
         mockConstruction(DialogNativeFakeInterstitial::class.java) { dialog, _ ->
             doAnswer { callbacks.shown = it.getArgument(0); null }.`when`(dialog).onShown = anyArg()
@@ -309,27 +255,82 @@ class NativeInterstitialTest {
         }
 
     @Test
+    fun `release completes pending show and rejects late native result`() {
+        manager.showAd(activity, fragments, name, "wait", true)
+        idle()
+        assertEquals(1, ShadowNativeLoader.callbacks.size)
+        manager.releaseBannerNative(name)
+        val late = mock(NativeAd::class.java)
+        ShadowNativeLoader.callbacks.single().onNativeAdLoaded(late)
+        idle()
+        assertEquals(listOf(false), completions())
+        verify(late).destroy()
+        assertNull(holder().nativeAd)
+        assertFalse(holder().isLoading)
+    }
+
+
+    @Test
+    fun `waterfall ignores previous request result and finishes with fallback ad`() {
+        `when`(place.highFloorAdIds).thenReturn(listOf("high-floor-unit"))
+        manager.loadFullscreenAd(activity, name, "waterfall")
+        idle()
+        assertEquals(1, ShadowNativeLoader.callbacks.size)
+        val first = ShadowNativeLoader.callbacks.first()
+        first.onAdFailedToLoad(mock(LoadAdError::class.java))
+        idle()
+        assertEquals(2, ShadowNativeLoader.callbacks.size)
+        val late = mock(NativeAd::class.java)
+        first.onNativeAdLoaded(late)
+        val fallback = mock(NativeAd::class.java)
+        ShadowNativeLoader.callbacks.last().onNativeAdLoaded(fallback)
+        idle()
+        verify(late).destroy()
+        assertSame(fallback, holder().nativeAd)
+        assertEquals(1, events.filterIsInstance<AdFullScreenUiResource.AdLoaded>().size)
+        assertTrue(events.filterIsInstance<AdFullScreenUiResource.AdNotValidOrLoadFailed>().isEmpty())
+    }
+
+
+    @Test
+    fun `load called from worker dispatches SDK request and callback on main`() {
+        Thread { manager.loadFullscreenAd(activity, name, "worker") }.apply { start(); join() }
+        idle()
+        assertEquals(1, ShadowNativeLoader.callbacks.size)
+        val ad = mock(NativeAd::class.java)
+        Thread { ShadowNativeLoader.callbacks.single().onNativeAdLoaded(ad) }
+            .apply { start(); join() }
+        idle()
+        assertSame(ad, holder().nativeAd)
+        assertEquals(1, events.filterIsInstance<AdFullScreenUiResource.AdLoaded>().size)
+    }
+
+
+    @Test
     fun `inline native still emits native events and preserves cache on failed reload`() {
         `when`(place.adType).thenReturn(AdType.Native)
         `when`(place.isNativeInterstitialType()).thenReturn(false)
         `when`(place.isNativeType()).thenReturn(true)
         manager.loadBannerNativeAd(activity, name, "inline", false, false)
-        awaitRequests(1)
+        idle()
+        assertEquals(1, ShadowNativeLoader.callbacks.size)
         val cached = mock(NativeAd::class.java)
-        requests.single().onNativeAdLoaded(cached)
+        ShadowNativeLoader.callbacks.single().onNativeAdLoaded(cached)
         idle()
         assertEquals(1, nativeEvents.filterIsInstance<AdLoadBannerNativeUiResource.NativeAdLoaded>().size)
         assertTrue(events.isEmpty())
 
         manager.loadBannerNativeAd(activity, name, "reload", false, true)
-        awaitRequests(2)
-        requests.last().onAdFailedToLoad(mock(LoadAdError::class.java))
+        idle()
+        assertEquals(2, ShadowNativeLoader.callbacks.size)
+        ShadowNativeLoader.callbacks.last().onAdFailedToLoad(mock(LoadAdError::class.java))
         idle()
         assertSame(cached, holder().nativeAd)
         verify(cached, never()).destroy()
         assertFalse(holder().isLoading)
         assertTrue(events.isEmpty())
     }
+
 
     @Test
     fun `splash native click respects disabled placement tracking`() {
@@ -343,70 +344,43 @@ class NativeInterstitialTest {
         `when`(config.getPreventAdClickConfig()).thenReturn(PreventAdClickConfig(100, 3600, 60))
 
         manager.loadBannerNativeAd(activity, splashPlace, "splash", false, false)
-        awaitRequests(1)
-        requests.single().onNativeAdLoaded(mock(NativeAd::class.java))
+        idle()
+        assertEquals(1, ShadowNativeLoader.callbacks.size)
+        val ad = mock(NativeAd::class.java)
+        ShadowNativeLoader.callbacks.single().onNativeAdLoaded(ad)
         idle()
         verify(analytics, never()).logEvent("Splash_click_ads_native")
 
-        requests.single().adListener.onAdClicked()
+        val callback = org.mockito.ArgumentCaptor.forClass(NativeAdEventCallback::class.java)
+        verify(ad).adEventCallback = callback.capture()
+        callback.value.onAdClicked()
 
         verify(analytics, never()).logEvent("Splash_click_ads_native")
         verify(analytics, never()).logEvent(splashPlace.name + "_Clicked")
     }
 
+
     @Test
     fun `other native placements keep generic tracking without splash click event`() {
         `when`(place.isTrackingClick).thenReturn(true)
         `when`(config.getPreventAdClickConfig()).thenReturn(PreventAdClickConfig(100, 3600, 60))
-        loadAd()
+        val ad = loadAd()
 
-        requests.single().adListener.onAdClicked()
+        val callback = org.mockito.ArgumentCaptor.forClass(NativeAdEventCallback::class.java)
+        verify(ad).adEventCallback = callback.capture()
+        callback.value.onAdClicked()
 
         verify(analytics).logEvent(name.name + "_Clicked")
         verify(analytics, never()).logEvent("Splash_click_ads_native")
     }
 
+
     private fun loadAd(): NativeAd {
         manager.loadFullscreenAd(activity, name, "load")
-        awaitRequests(1)
         val ad = mock(NativeAd::class.java)
-        requests.last().onNativeAdLoaded(ad)
+        ShadowNativeLoader.callbacks.last().onNativeAdLoaded(ad)
         idle()
         return ad
-    }
-
-    private fun awaitRequests(count: Int) {
-        val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10)
-        while (requests.size < count && System.nanoTime() < deadline) {
-            idle()
-            Thread.sleep(5)
-        }
-        assertEquals(
-            "SDK request count; logs=" + org.robolectric.shadows.ShadowLog.getLogs()
-                .filter { it.tag == "AdmobManager" }.joinToString { "${it.msg}: ${it.throwable}" },
-            count, requests.size,
-        )
-    }
-
-    private fun newNativeLoaderBuilder(): AdLoader.Builder {
-        val builder = mock(AdLoader.Builder::class.java)
-        val loader = mock(AdLoader::class.java)
-        val request = NativeRequest()
-        doAnswer { request.nativeListener = it.getArgument(0); builder }
-            .`when`(builder).forNativeAd(anyArg())
-        doAnswer { request.adListener = it.getArgument(0); builder }
-            .`when`(builder).withAdListener(anyArg())
-        `when`(builder.withNativeAdOptions(any(NativeAdOptions::class.java))).thenReturn(builder)
-        `when`(builder.build()).thenReturn(loader)
-        doAnswer { requests += request; null }.`when`(loader).loadAd(any(AdRequest::class.java))
-        return builder
-    }
-
-    private class NativeRequest {
-        lateinit var nativeListener: NativeAd.OnNativeAdLoadedListener
-        lateinit var adListener: AdListener
-        fun onNativeAdLoaded(ad: NativeAd) = nativeListener.onNativeAdLoaded(ad)
-        fun onAdFailedToLoad(error: LoadAdError) = adListener.onAdFailedToLoad(error)
     }
 
     private fun holder() = requireNotNull(manager.getNativeHolder(activity, name))

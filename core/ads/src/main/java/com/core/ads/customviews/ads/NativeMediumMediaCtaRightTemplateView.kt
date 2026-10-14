@@ -15,7 +15,7 @@ import com.core.ads.extensions.updateBackgroundColor
 import com.core.ads.extensions.updateRadius
 import com.core.ads.glidetransformation.RoundedCornersTransformation
 import com.core.utilities.isValidGlideContext
-import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
 import com.core.dimens.R as DimenR
 
 /**
@@ -33,7 +33,7 @@ class NativeMediumMediaCtaRightTemplateView @JvmOverloads constructor(
     }
 
     init {
-        binding.mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP)
+        binding.mediaView.imageScaleType = ImageView.ScaleType.CENTER_CROP
     }
 
     override fun setNativeAd(nativeAd: NativeAd) {
@@ -41,7 +41,6 @@ class NativeMediumMediaCtaRightTemplateView @JvmOverloads constructor(
         binding.nativeAdView.headlineView = binding.primary
         binding.nativeAdView.bodyView = binding.body
         binding.nativeAdView.iconView = binding.icon
-        binding.nativeAdView.mediaView = binding.mediaView
 
         binding.primary.text = nativeAd.headline.orEmpty()
         binding.body.text = nativeAd.body.orEmpty()
@@ -69,7 +68,7 @@ class NativeMediumMediaCtaRightTemplateView @JvmOverloads constructor(
             }
         }
 
-        binding.nativeAdView.setNativeAd(nativeAd)
+        binding.nativeAdView.registerNativeAd(nativeAd, binding.mediaView)
     }
 
     override fun destroyNativeAd() {

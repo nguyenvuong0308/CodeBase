@@ -11,7 +11,7 @@ import com.core.ads.databinding.GntLargeMediaCtaRightBinding
 import com.core.ads.extensions.updateBackgroundColor
 import com.core.ads.extensions.updateRadius
 import com.core.dimens.R as DimenR
-import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
 
 /**
  * Inline native template with a compact headline, 200dp-high media, and a description plus CTA.
@@ -27,19 +27,18 @@ class NativeLargeMediaCtaRightTemplateView @JvmOverloads constructor(
     }
 
     init {
-        binding.mediaView.setImageScaleType(ImageView.ScaleType.CENTER_CROP)
+        binding.mediaView.imageScaleType = ImageView.ScaleType.CENTER_CROP
     }
 
     override fun setNativeAd(nativeAd: NativeAd) {
         binding.nativeAdView.callToActionView = binding.cta
         binding.nativeAdView.headlineView = binding.primary
         binding.nativeAdView.bodyView = binding.body
-        binding.nativeAdView.mediaView = binding.mediaView
 
         binding.primary.text = nativeAd.headline.orEmpty()
         binding.body.text = nativeAd.body.orEmpty()
         binding.cta.text = nativeAd.callToAction.orEmpty()
-        binding.nativeAdView.setNativeAd(nativeAd)
+        binding.nativeAdView.registerNativeAd(nativeAd, binding.mediaView)
     }
 
     override fun destroyNativeAd() {

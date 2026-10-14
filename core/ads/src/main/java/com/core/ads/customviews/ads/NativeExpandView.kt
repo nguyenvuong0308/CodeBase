@@ -16,7 +16,7 @@ import com.core.ads.extensions.updateRadius
 import com.core.ads.glidetransformation.RoundedCornersTransformation
 import com.core.dimens.R
 import com.core.utilities.isValidGlideContext
-import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
 
 /** Expanded native renderer used exclusively by [CollapsibleNativeController]. */
 internal class NativeExpandView @JvmOverloads constructor(
@@ -32,7 +32,6 @@ internal class NativeExpandView @JvmOverloads constructor(
     override fun setNativeAd(nativeAd: NativeAd) {
         binding.nativeAdView.callToActionView = binding.cta
         binding.nativeAdView.headlineView = binding.primary
-        binding.nativeAdView.mediaView = binding.mediaView
         binding.nativeAdView.bodyView = binding.body
 
         binding.primary.text = nativeAd.headline.orEmpty()
@@ -47,7 +46,7 @@ internal class NativeExpandView @JvmOverloads constructor(
             }
         }
 
-        binding.nativeAdView.setNativeAd(nativeAd)
+        binding.nativeAdView.registerNativeAd(nativeAd, binding.mediaView)
     }
 
     override fun destroyNativeAd() {

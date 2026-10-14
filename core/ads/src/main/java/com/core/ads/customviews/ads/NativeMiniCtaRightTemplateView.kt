@@ -17,7 +17,7 @@ import com.core.ads.extensions.updateRadius
 import com.core.ads.glidetransformation.RoundedCornersTransformation
 import com.core.dimens.R
 import com.core.utilities.dpToPx
-import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
 
 class NativeMiniCtaRightTemplateView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -79,7 +79,7 @@ class NativeMiniCtaRightTemplateView @JvmOverloads constructor(
 //                }
 //            }
 //        }
-        binding.nativeAdView.setNativeAd(nativeAd)
+        binding.nativeAdView.registerNativeAd(nativeAd, null)
     }
 
     /**

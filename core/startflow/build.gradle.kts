@@ -61,7 +61,7 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.material)
     implementation(libs.lottie)
-    implementation(libs.play.services.ads)
+    implementation(libs.ads.mobile.sdk)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
 

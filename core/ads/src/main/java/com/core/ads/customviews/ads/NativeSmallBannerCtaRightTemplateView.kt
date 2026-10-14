@@ -14,7 +14,7 @@ import com.core.ads.extensions.updateBackgroundColor
 import com.core.ads.extensions.updateRadius
 import com.core.ads.glidetransformation.RoundedCornersTransformation
 import com.core.dimens.R
-import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.libraries.ads.mobile.sdk.nativead.NativeAd
 
 class NativeSmallBannerCtaRightTemplateView @JvmOverloads constructor(
     context: Context,
@@ -61,7 +61,7 @@ class NativeSmallBannerCtaRightTemplateView @JvmOverloads constructor(
             binding.nativeAdView.bodyView = binding.body
         }
 
-        binding.nativeAdView.setNativeAd(nativeAd)
+        binding.nativeAdView.registerNativeAd(nativeAd, null)
     }
 
     override fun destroyNativeAd() {

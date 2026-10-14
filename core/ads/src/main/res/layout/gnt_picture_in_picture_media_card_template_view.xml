@@ -11,7 +11,7 @@
         android:layout_height="@dimen/_208dp"
         android:background="@drawable/bg_native_picture_in_picture">
 
-        <com.google.android.gms.ads.nativead.NativeAdView
+        <com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView
             android:id="@+id/native_ad_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -26,7 +26,7 @@
                     app:cardCornerRadius="@dimen/_5dp"
                     android:layout_margin="@dimen/_1_5dp"
                     android:layout_height="wrap_content">
-                    <com.google.android.gms.ads.nativead.MediaView
+                    <com.google.android.libraries.ads.mobile.sdk.nativead.MediaView
                         android:id="@+id/media_view"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/_120dp"
@@ -95,7 +95,7 @@
                         tools:text="MỞ" />
                 </FrameLayout>
             </LinearLayout>
-        </com.google.android.gms.ads.nativead.NativeAdView>
+        </com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView>
 
         <FrameLayout
             android:id="@+id/close_button_container"
