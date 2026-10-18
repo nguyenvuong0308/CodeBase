@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="com.codebasetemplate.AdmobDeviceSmokeTest" tests="8" failures="0" errors="0" skipped="0" time="318.362" timestamp="2026-10-18T09:07:26" hostname="localhost">
+  <properties>
+    <property name="device" value="Pixel 7a - 16" />
+    <property name="flavor" value="dev" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="testRegression_v4_landscape" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="11.682" />
+  <testcase name="testRegression_v4_portrait" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="9.494" />
+  <testcase name="testRegression_v5_landscape" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="8.706" />
+  <testcase name="testRegression_v5_portrait" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="9.609" />
+  <testcase name="testRegression_v6_landscape" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="9.566" />
+  <testcase name="testRegression_v6_portrait" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="9.406" />
+  <testcase name="testTemplateShuffle_landscape" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="128.305" />
+  <testcase name="testTemplateShuffle_portrait" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="130.303" />
+</testsuite>

@@ -40,6 +40,9 @@ $previews = @(
     @{ Key = 'full_interstitial_v1'; File = 'full_interstitial_v1.png' },
     @{ Key = 'full_interstitial_v2'; File = 'full_interstitial_v2.png' },
     @{ Key = 'full_interstitial_v3'; File = 'full_interstitial_v3.png' },
+    @{ Key = 'full_interstitial_v4'; File = 'full_interstitial_v4.png' },
+    @{ Key = 'full_interstitial_v5'; File = 'full_interstitial_v5.png' },
+    @{ Key = 'full_interstitial_v6'; File = 'full_interstitial_v6.png' },
     @{
         Key = 'medium_cta_bottom'
         File = 'medium_collapsible_cta_bottom.png'

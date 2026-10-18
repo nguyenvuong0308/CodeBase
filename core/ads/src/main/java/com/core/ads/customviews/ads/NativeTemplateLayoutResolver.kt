@@ -35,6 +35,10 @@ internal fun resolveNativeShimmerLayout(
     NativeTemplateSize.FullInterstitialV1,
     NativeTemplateSize.FullInterstitialV2,
     NativeTemplateSize.FullInterstitialV3,
+    NativeTemplateSize.FullInterstitialV4,
+    NativeTemplateSize.FullInterstitialV5,
+    NativeTemplateSize.FullInterstitialV6,
+    NativeTemplateSize.FullInterstitialShuffle,
     -> R.layout.gnt_full_cta_bottom_template_view_shimmer
 
     is NativeTemplateSize.CustomKey -> customLayout(nativeTemplateSize)

@@ -1,0 +1,53 @@
+V4/V5/V6 regression verification - 2026-10-18
+Device: Pixel 7a (35041JEHN01257), Android 16 / API 36.
+
+Changes:
+- Both orientation layouts now place the icon/headline inside an independent identity row.
+  Body content is anchored below that row, so a GONE icon cannot collapse the headline anchor.
+- Before applying a new palette, restore the previous base colors/drawables, then apply current
+  base fields and the selected palette. Drawable copies preserve gradients, corner radii and strokes.
+  Text colors retain ColorStateLists. No hardcoded theme colors were added to production code.
+- Screenshot regression tests wait for a committed frame before measuring and capturing changes.
+
+Added unit regression coverage (4 tests, all pass):
+- Optional icon/body/CTA combinations in all six V4/V5/V6 orientation layouts.
+- Missing/null/empty/invalid palettes and disabled/unknown theme restore XML or explicit base colors.
+- Partial palettes do not inherit omitted colors from the preceding palette.
+- Gradient preservation, compact close, pause/resume, repeated binding and countdown protection.
+
+Commands run from repository root:
+1. Focused tests:
+.\gradlew.bat :core:ads:testProdDebugUnitTest --tests '*NativeInterstitialAssetAndThemeRegressionTest' --tests '*NativeRemoteColorSafetyTest' --tests '*NativeThemeShuffleTest' --tests '*NativeInterstitialConceptViewTest' --tests '*NativeInterstitialCompactCloseTest' --console=plain
+2. Full core test suites:
+.\gradlew.bat :core:config:testProdDebugUnitTest :core:ads:testProdDebugUnitTest --console=plain
+Result: config 56 + ads 143 = 199 tests; zero failures/errors/skips.
+3. Device tests:
+$methods = foreach ($version in 4..6) { foreach ($orientation in @('portrait','landscape')) { "com.codebasetemplate.AdmobDeviceSmokeTest#testRegression_v${version}_${orientation}" } }
+$methods += @('com.codebasetemplate.AdmobDeviceSmokeTest#testTemplateShuffle_portrait','com.codebasetemplate.AdmobDeviceSmokeTest#testTemplateShuffle_landscape')
+.\gradlew.bat :app:connectedDevDebugAndroidTest ('-Pandroid.testInstrumentationRunnerArguments.class=' + ($methods -join ',')) --console=plain
+Result: 8/8 pass (device-tests-full.xml).
+4. After synchronizing screenshot capture with frame commit, reran all 6 regression device cases:
+$methods = foreach ($version in 4..6) { foreach ($orientation in @('portrait','landscape')) { "com.codebasetemplate.AdmobDeviceSmokeTest#testRegression_v${version}_${orientation}" } }
+.\gradlew.bat :app:connectedDevDebugAndroidTest ('-Pandroid.testInstrumentationRunnerArguments.class=' + ($methods -join ',')) --console=plain
+Result: 6/6 pass (device-tests-regression.xml). These are the final screenshots in this directory.
+
+Screenshots and verification:
+- 18 unmodified device PNGs: V4/V5/V6 x portrait/landscape x normal/no-icon/theme-fallback.
+- Portrait 1080x2400; landscape 2400x1080.
+- No-icon cases simulate optional asset absence by hiding the icon on a real Google test ad.
+  The SDK creative text is not altered. These are not claims that the SDK returned icon-less ads.
+- Theme fallback: apply a diagnostic palette, then light:null with omitted base color fields;
+  restored colors match the previously configured base (which can be dark).
+- Each no-icon image differs from its normal image. Each theme-fallback image is byte-identical
+  to its no-icon baseline, confirming the entire rendered screen is restored after palette removal.
+- Visually reviewed all 12 unique PNGs; the other 6 are exact fallback duplicates as checked above.
+- CTA, Close, headline and body remain visible with no overlaps; intentional body ellipsis remains.
+- Device stay-awake setting restored to its prior value: 0.
+
+Diff review:
+- Rechecked six XML layouts, optional-asset bindings, palette restoration, mutable drawable copying,
+  malformed color/null palette paths, countdown lifecycle and the instrumentation capture timing.
+- No additional blocking defect found in the changes made for these two fixes.
+- git diff --check passed. Only the existing LF/CRLF notice in dev remote_config_defaults.xml remains.
+- V1/V2/V3 production code and layouts were not changed in this fix.
+- Scope is core ads/config tests and selected Pixel 7a instrumentation cases, not every app test.

@@ -41,7 +41,8 @@ $requiredSections = @(
     'app-open',
     'other',
     'onboarding-ui',
-    'gallery'
+    'gallery',
+    'native-fake-interstitial'
 )
 
 $sectionIds = [regex]::Matches($html, '<section\s+id="([^"]+)"') |
@@ -134,6 +135,21 @@ $builtInNativeTemplateKeys = [regex]::Matches(
 ) | ForEach-Object { $_.Groups[1].Value }
 $captureScriptText = Get-Content -Raw -Encoding UTF8 -LiteralPath $captureScriptPath
 foreach ($templateKey in $builtInNativeTemplateKeys) {
+    if ($templateKey -eq 'full_interstitial_shuffle') {
+        # A selector has three possible layouts, so validate its outcome gallery.
+        Assert-Guide ($galleryHtml.Contains('href="#native-template-shuffle"')) 'Gallery must link to the template shuffle outcomes.'
+        Assert-Guide ($html.Contains('id="native-template-shuffle"')) 'Template shuffle documentation is missing.'
+        foreach ($version in 4..6) {
+            foreach ($theme in @('light', 'dark')) {
+                foreach ($orientation in @('portrait', 'landscape')) {
+                    foreach ($state in @('waiting', 'ready')) {
+                        Assert-Guide ($html.Contains("guide-template-shuffle-$orientation-v$version-$theme-$state.png")) 'A template/theme shuffle outcome screenshot is missing.'
+                    }
+                }
+            }
+        }
+        continue
+    }
     Assert-Guide ($galleryHtml -match "native-screenshots/$([regex]::Escape($templateKey))\.png") "Gallery is missing built-in template: $templateKey."
     Assert-Guide ($captureScriptText -match "Key\s*=\s*'$([regex]::Escape($templateKey))'") "Capture script is missing built-in template: $templateKey."
 }

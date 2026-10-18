@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.core.ads.customviews.ads.NativeInterstitialAssetAndThemeRegressionTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-18T09:00:02.849Z" hostname="DESKTOP-9ACPMAB" time="1.683">
+  <properties/>
+  <testcase name="partial palette restores omitted colors instead of inheriting previous theme" classname="com.core.ads.customviews.ads.NativeInterstitialAssetAndThemeRegressionTest" time="0.569"/>
+  <testcase name="leaving palette restores XML defaults or base colors including missing null and invalid palettes" classname="com.core.ads.customviews.ads.NativeInterstitialAssetAndThemeRegressionTest" time="0.543"/>
+  <testcase name="theme restoration preserves gradients and compact close through pause resume and rebind" classname="com.core.ads.customviews.ads.NativeInterstitialAssetAndThemeRegressionTest" time="0.216"/>
+  <testcase name="optional icon body and CTA do not clip or overlap headline in either orientation" classname="com.core.ads.customviews.ads.NativeInterstitialAssetAndThemeRegressionTest" time="0.354"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

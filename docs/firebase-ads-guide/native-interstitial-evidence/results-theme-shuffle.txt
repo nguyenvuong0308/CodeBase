@@ -1,0 +1,90 @@
+Native interstitial — theme and template shuffle — 2026-10-18
+
+Device: Pixel 7a, Android 16 / API 36, serial 35041JEHN01257.
+Portrait 1080x2400; landscape 2400x1080.
+
+Implemented:
+- native_theme: shuffle chooses light/dark per bind (50/50); light/dark select a
+  fixed palette. Missing/null/blank/invalid mode retains base placement colors.
+- native_theme_colors supplies both palettes remotely. No hardcoded theme colors.
+  Missing/null/invalid color entries retain base values; palette progress tint
+  falls back to valid palette primary_text_color, then the original tint.
+- native_template_size: full_interstitial_shuffle creates V4/V5/V6 with probability
+  1/3 each. The selected view remains stable through countdown/restyle/pause/resume.
+- Theme, template and Close-position random draws are independent. Repeats between
+  ads are allowed. Portrait/landscape use each selected template's existing XML.
+- Fixed V1/V2/V3 and existing V4/V5/V6 options remain supported.
+- Fixed media ColorDrawable recoloring when switching from base to selected palette.
+
+PASS: 189 full unit tests: core/config 55 + core/ads 134; zero failures/errors/skips.
+PASS: 11/11 Android tests, zero failures/errors/skips, in the final run.
+  6 theme tests: fixed V4/V5/V6 × portrait/landscape, real random binds until both
+    light and dark are observed (maximum 20 binds per test).
+  2 template tests: portrait/landscape, real random template AND theme draws until
+    all six V4/V5/V6 × light/dark outcomes are observed (maximum 60 binds per test).
+  3 regressions: v4-dark-left-close-compact, v5-light-right-countdown,
+    v6-dark-shuffle-close-compact, each in both orientations.
+  No forced template/theme or test-only RNG override is used on the device.
+PASS: 22 Python documentation tests: exact JSON/config/outcome/PNG correspondence.
+PASS: offline DOM tests: tabs, both new hash anchors, keyboard, 72 existing case
+  filters and copy actions, 216 orientation selections.
+PASS: guide validator: 22 static keys, 128 model fields, 97 JSON examples, 368 images.
+PASS: capture script PowerShell parser and git diff --check.
+
+Screenshots:
+- 48 new shuffle PNGs and 24 evidence JSON files: 24 theme-only screenshots and
+  24 combined template/theme screenshots, each with waiting/ready states.
+- 12 regression screenshots refreshed from this final run.
+- Native Fake Interstitial guide now has 336 PNGs and 168 evidence JSON files;
+  the other 32 gallery images are retained. Existing unrelated captures remain.
+- Each new evidence JSON includes the exact full config, actualTemplate,
+  actualTheme, actualClosePosition and ready Close geometry. Evidence is written
+  only after all rendering assertions and successful dismissal.
+- All 12 combined template/theme/orientation ready images and representative
+  fixed-template theme/waiting images were visually inspected. Device assertions
+  check configured text/background/media/CTA colors, stable theme/template/Close,
+  visible bounds, media size, no overlap, no early Close, and final dismissal.
+
+Tests added/extended:
+- NativeThemeShuffleTest: deterministic RNG branches and one draw per bind/factory,
+  fixed/invalid modes, palette fallback/isolation, all supported color fields,
+  all templates/orientations, stable lifecycle and media recoloring regression.
+- NativeInterstitialAdPlaceMapperTest: nested palettes and missing-field defaults;
+  full_interstitial_shuffle accepted in the fullscreen whitelist.
+- NativeInterstitialGuideCasesTest: all 76 full placement examples through the
+  production Moshi adapter and mapper.
+- AdmobDeviceSmokeTest: 8 new random-capture tests plus the 3 existing regressions.
+
+Regression proof: removing the ColorDrawable media fix made the new media-color
+assertion fail (5 focused tests, 1 failure). Restoring the fix passed the full unit
+suite and final device run. An earlier JUnit helper return-type error was fixed;
+initial device sleep failures were resolved by waking/unlocking the phone and
+keeping it awake temporarily. The original stay-awake setting (0) was restored
+and verified after the final successful run.
+
+Final report: device-tests-theme-template-shuffle.xml (11 tests).
+Final Gradle log: build/native-shuffle-final.log (BUILD SUCCESSFUL, 7m 52s).
+
+Commands (PowerShell from repository root):
+$env:ANDROID_SERIAL = '35041JEHN01257'
+$methods = foreach ($version in 4..6) { foreach ($orientation in @('portrait','landscape')) { "com.codebasetemplate.AdmobDeviceSmokeTest#testThemeShuffle_v${version}_${orientation}" } }
+$methods += @('com.codebasetemplate.AdmobDeviceSmokeTest#testTemplateShuffle_portrait','com.codebasetemplate.AdmobDeviceSmokeTest#testTemplateShuffle_landscape','com.codebasetemplate.AdmobDeviceSmokeTest#testGuide_v4_dark_left_close_compact','com.codebasetemplate.AdmobDeviceSmokeTest#testGuide_v5_light_right_countdown','com.codebasetemplate.AdmobDeviceSmokeTest#testGuide_v6_dark_shuffle_close_compact')
+$filter = '-Pandroid.testInstrumentationRunnerArguments.class=' + ($methods -join ',')
+.\gradlew.bat :core:config:testProdDebugUnitTest :core:ads:testProdDebugUnitTest :app:connectedDevDebugAndroidTest $filter --console=plain
+.\docs\firebase-ads-guide\capture_native_theme_shuffle.ps1 -Serial 35041JEHN01257 -Adb 'C:\Users\nguye\AppData\Local\Android\Sdk\platform-tools\adb.exe' -CollectOnly
+python -B -m unittest discover -s docs/tests -p 'test_*guide.py'
+node docs/tests/test_native_interstitial_guide_dom.cjs
+.\docs\firebase-ads-guide\test_firebase_ads_config_guide.ps1
+git diff --check
+
+Reproduce all 8 shuffle tests and collect their images:
+.\docs\firebase-ads-guide\capture_native_theme_shuffle.ps1 -Serial <SERIAL> -Adb <ADB_PATH> -Python <PYTHON_PATH>
+The script wakes the device, temporarily keeps it awake and restores the previous
+setting afterward. Run the Python documentation tests after collection.
+
+Scope:
+Google test native ads with model fixtures through production factory/style/render;
+JSON parsing is separately verified via production Moshi/mapper. No Firebase config
+was published. Creative media may vary. Random samples demonstrate outcome coverage,
+not a statistical uniformity test. HTML was checked by offline DOM/data tests;
+browser visual rendering was not verified (prior file:// browser policy rejection).

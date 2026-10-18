@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="com.codebasetemplate.AdmobDeviceSmokeTest" tests="11" failures="0" errors="0" skipped="0" time="412.883" timestamp="2026-10-18T05:20:46" hostname="localhost">
+  <properties>
+    <property name="device" value="Pixel 7a - 16" />
+    <property name="flavor" value="dev" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="testGuide_v4_dark_left_close_compact" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="19.045" />
+  <testcase name="testGuide_v5_light_right_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.572" />
+  <testcase name="testGuide_v6_dark_shuffle_close_compact" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.577" />
+  <testcase name="testTemplateShuffle_landscape" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="126.535" />
+  <testcase name="testTemplateShuffle_portrait" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="92.997" />
+  <testcase name="testThemeShuffle_v4_landscape" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.426" />
+  <testcase name="testThemeShuffle_v4_portrait" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.413" />
+  <testcase name="testThemeShuffle_v5_landscape" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="16.976" />
+  <testcase name="testThemeShuffle_v5_portrait" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="42.544" />
+  <testcase name="testThemeShuffle_v6_landscape" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.276" />
+  <testcase name="testThemeShuffle_v6_portrait" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="26.49" />
+</testsuite>

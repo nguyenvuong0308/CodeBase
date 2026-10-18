@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="com.codebasetemplate.AdmobDeviceSmokeTest" tests="36" failures="0" errors="0" skipped="0" time="629.44" timestamp="2026-10-18T04:08:30" hostname="localhost">
+  <properties>
+    <property name="device" value="Pixel 7a - 16" />
+    <property name="flavor" value="dev" />
+    <property name="project" value=":app" />
+  </properties>
+  <testcase name="testGuide_v4_dark_left_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="19.246" />
+  <testcase name="testGuide_v4_dark_left_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.792" />
+  <testcase name="testGuide_v4_dark_right_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.597" />
+  <testcase name="testGuide_v4_dark_right_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.447" />
+  <testcase name="testGuide_v4_dark_shuffle_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.583" />
+  <testcase name="testGuide_v4_dark_shuffle_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.498" />
+  <testcase name="testGuide_v4_light_left_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.468" />
+  <testcase name="testGuide_v4_light_left_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.497" />
+  <testcase name="testGuide_v4_light_right_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.159" />
+  <testcase name="testGuide_v4_light_right_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.336" />
+  <testcase name="testGuide_v4_light_shuffle_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.126" />
+  <testcase name="testGuide_v4_light_shuffle_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.258" />
+  <testcase name="testGuide_v5_dark_left_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.656" />
+  <testcase name="testGuide_v5_dark_left_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.38" />
+  <testcase name="testGuide_v5_dark_right_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.281" />
+  <testcase name="testGuide_v5_dark_right_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.65" />
+  <testcase name="testGuide_v5_dark_shuffle_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.929" />
+  <testcase name="testGuide_v5_dark_shuffle_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.314" />
+  <testcase name="testGuide_v5_light_left_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.286" />
+  <testcase name="testGuide_v5_light_left_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="18.398" />
+  <testcase name="testGuide_v5_light_right_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.103" />
+  <testcase name="testGuide_v5_light_right_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.296" />
+  <testcase name="testGuide_v5_light_shuffle_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.19" />
+  <testcase name="testGuide_v5_light_shuffle_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.175" />
+  <testcase name="testGuide_v6_dark_left_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.132" />
+  <testcase name="testGuide_v6_dark_left_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.723" />
+  <testcase name="testGuide_v6_dark_right_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.377" />
+  <testcase name="testGuide_v6_dark_right_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="18.056" />
+  <testcase name="testGuide_v6_dark_shuffle_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.171" />
+  <testcase name="testGuide_v6_dark_shuffle_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="16.977" />
+  <testcase name="testGuide_v6_light_left_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.132" />
+  <testcase name="testGuide_v6_light_left_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.255" />
+  <testcase name="testGuide_v6_light_right_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="16.997" />
+  <testcase name="testGuide_v6_light_right_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.157" />
+  <testcase name="testGuide_v6_light_shuffle_close" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.315" />
+  <testcase name="testGuide_v6_light_shuffle_countdown" classname="com.codebasetemplate.AdmobDeviceSmokeTest" time="17.133" />
+</testsuite>

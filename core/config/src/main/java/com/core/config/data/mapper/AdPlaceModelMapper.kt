@@ -149,6 +149,22 @@ internal class AdPlaceModelMapper @Inject constructor(
         // Native lồng trong interstitial có thể dùng tên khai báo trực tiếp từ Firebase,
         // nhưng tên rỗng/không resolve được phải bị loại để tránh dùng chung holder NONE.
         if (placeName == NONE) return null
+        val template = NativeTemplateSize.getSizeBy(model.nativeTemplateSize ?: "")
+        // Fullscreen dialogs are not cancelable, so their template must provide a close control.
+        val nativeTemplate = if (adType == AdType.NativeInterstitial) {
+            when (template) {
+                NativeTemplateSize.FullInterstitialV1,
+                NativeTemplateSize.FullInterstitialV2,
+                NativeTemplateSize.FullInterstitialV3,
+                NativeTemplateSize.FullInterstitialV4,
+                NativeTemplateSize.FullInterstitialV5,
+                NativeTemplateSize.FullInterstitialV6,
+                NativeTemplateSize.FullInterstitialShuffle -> template
+                else -> NativeTemplateSize.FullInterstitialV3
+            }
+        } else {
+            template
+        }
         return NativeAdPlace(
             placeName = placeName,
             adId = model.adId ?: "",
@@ -160,7 +176,7 @@ internal class AdPlaceModelMapper @Inject constructor(
             isTutorialFlow = model.isTutorialFlow ?: false,
             isNativeCollapsible = model.isNativeCollapsible == true,
             nativeExpandTemplate = NativeExpandTemplate.getBy(model.nativeExpandTemplate),
-            nativeTemplateSize = NativeTemplateSize.getSizeBy(model.nativeTemplateSize ?: ""),
+            nativeTemplateSize = nativeTemplate,
             backgroundCta = model.backgroundCta,
             borderColor = model.borderColor,
             backgroundColor = model.backgroundColor,
@@ -189,6 +205,10 @@ internal class AdPlaceModelMapper @Inject constructor(
             hideTextSkipCountDown = model.hideTextSkipCountDown,
             progressBarTint = model.progressBarTint,
             controlClosePosition = model.controlClosePosition,
+            controlCloseStyle = model.controlCloseStyle,
+            controlCloseReadyStyle = model.controlCloseReadyStyle,
+            nativeTheme = model.nativeTheme,
+            nativeThemeColors = model.nativeThemeColors,
             collapsibleExpandCooldownSecond = model.collapsibleExpandCooldownSecond,
             alwaysHideInlineNative = model.alwaysHideInlineNative ?: false,
             nativeExpandMarginLeftDp = model.nativeExpandMarginLeftDp?.coerceAtLeast(0f) ?: 0f,

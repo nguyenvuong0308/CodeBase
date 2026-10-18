@@ -6,7 +6,8 @@ sealed class NativeTemplateSize {
 
     companion object {
 
-        val builtInTemplates: List<NativeTemplateSize> = listOf(
+        // Nested template objects can be accessed before this companion is initialized.
+        val builtInTemplates: List<NativeTemplateSize> by lazy { listOf(
             Small,
             SmallCtaTop,
             SmallCtaBottom,
@@ -33,7 +34,11 @@ sealed class NativeTemplateSize {
             FullInterstitialV1,
             FullInterstitialV2,
             FullInterstitialV3,
-        )
+            FullInterstitialV4,
+            FullInterstitialV5,
+            FullInterstitialV6,
+            FullInterstitialShuffle,
+        ) }
 
         fun getSizeBy(key: String): NativeTemplateSize {
             return builtInTemplates.firstOrNull { it.key == key } ?: CustomKey(key)
@@ -142,6 +147,22 @@ sealed class NativeTemplateSize {
 
     object FullInterstitialV3: NativeTemplateSize() {
         override val key = "full_interstitial_v3"
+    }
+
+    object FullInterstitialV4: NativeTemplateSize() {
+        override val key = "full_interstitial_v4"
+    }
+
+    object FullInterstitialV5: NativeTemplateSize() {
+        override val key = "full_interstitial_v5"
+    }
+
+    object FullInterstitialV6: NativeTemplateSize() {
+        override val key = "full_interstitial_v6"
+    }
+
+    object FullInterstitialShuffle: NativeTemplateSize() {
+        override val key = "full_interstitial_shuffle"
     }
 
     class CustomKey(val customKey: String) : NativeTemplateSize() {

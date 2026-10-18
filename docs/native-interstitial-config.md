@@ -30,13 +30,125 @@ trong `AppAdPlaceName` và bảo đảm `IAppProviderAdPlaceName` resolve đư�
 | Field | Hành vi |
 | --- | --- |
 | `ad_type` | Dùng `native_interstitial` để load/show và nhận callback qua fullscreen API. |
-| `native_template_size` | Hỗ trợ các template `full_interstitial_v1`, `full_interstitial_v2`, `full_interstitial_v3`. |
+| `native_template_size` | Nhận `full_interstitial_v1` đến `full_interstitial_v6`, hoặc `full_interstitial_shuffle` để random V4/V5/V6. Thiếu, rỗng hoặc giá trị khác đều fallback về `full_interstitial_v3`; không ảnh hưởng template của `ad_type: "native"`. |
 | `is_auto_load_after_dismiss` | Mặc định `true`. Bắt đầu load ad mới sau khi đóng một ad đã hiển thị. |
 | `expired_time_second` | TTL của native cache; nếu thiếu thì dùng `native_ad_config.expired_time_second`. Ad hết hạn không được show. |
 | `is_ignore_interval` | Mặc định `false`. Khi bật, bỏ qua kiểm tra interval, số lượt trong session và meaningful actions. |
 | `close_step_count` | Với V3: `1` để countdown rồi đóng; `2` để qua bước Next rồi Close. Mặc định V3 là `2`. |
 | `count_down_timer` | Số giây countdown; ví dụ trên dùng 5 giây. |
 | `step_1_count_down_timer`, `step_2_count_down_timer` | Override thời gian từng bước của V3; khi thiếu, fallback về `count_down_timer`. |
+
+## Template V4 / V5 / V6
+
+V1/V2/V3 giữ nguyên hành vi. Ba template mới có XML độc lập trong `layout/` và
+`layout-land/`; Android chọn theo orientation của activity.
+
+| Template | Concept | Placement mẫu trong config dev |
+| --- | --- | --- |
+| `full_interstitial_v4` | Immersive: media lớn, nội dung cùng nền tối | `fullscreen_native_interstitial_v4` |
+| `full_interstitial_v5` | Clean: nền sáng, media bo góc, nội dung rõ ràng | `fullscreen_native_interstitial_v5` |
+| `full_interstitial_v6` | Spotlight: card media/nội dung, CTA tách phía dưới | `fullscreen_native_interstitial_v6` |
+
+Các màu đều lấy từ native config: `background_full_color` cho nền màn hình,
+`background_color` cho card và nền nút đóng, `media_background_color` cho media,
+`primary_text_color` cho tiêu đề/nút đóng/countdown, `body_text_color` cho mô tả,
+`background_cta` và `cta_text_color` cho CTA. Không tự thay màu theo độ tương phản.
+`background_radius` (dp) điều chỉnh bo góc card, `cta_radius_dp` điều chỉnh CTA.
+V4/V5/V6 dùng một bước countdown theo `count_down_timer` (mặc định 5 giây), tạm
+dừng khi host pause hoặc view detach; `control_close_position` hỗ trợ `left`, `right`,
+và `shuffle` cho V4/V5/V6.
+
+```json
+"control_close_position": "shuffle"
+```
+
+`shuffle` chọn ngẫu nhiên trái/phải (50/50) khi bind mỗi quảng cáo, giữ nguyên trong
+suốt countdown, pause/resume và khi áp lại style. Nhãn Ad nằm ở phía đối diện.
+Lần hiển thị tiếp theo chọn lại độc lập, có thể trùng bên với lần trước.
+Áp dụng cho cả portrait/landscape và cả `control_close_style: "close"`/`"countdown"`.
+Giá trị được trim, không phân biệt hoa/thường; `start` tương đương `left`,
+`end` tương đương `right`; thiếu/sai giá trị dùng `right`.
+Các preset dark/light giữ vị trí `left`; đổi field thành `shuffle` trong placement
+Remote Config muốn dùng, sau đó fetch/activate config trước khi hiển thị quảng cáo mới.
+Remote Config có thể chọn riêng cách hiển thị nút đóng cho từng placement V4/V5/V6:
+
+```json
+{
+  "control_close_style": "close",
+  "control_close_position": "left",
+  "count_down_timer": 5,
+  "hide_progress_count_down": false,
+  "progress_bar_tint": "#16A34A"
+}
+```
+
+- `control_close_style: "countdown"`: hiện số đếm, hết thời gian mới hiện X (hành vi cũ).
+- `control_close_style: "close"`: hiện X từ đầu cùng vòng tiến trình như V3 ở chế độ
+  một bước; X mờ và chưa bấm được cho đến hết `count_down_timer`.
+- Thiếu, null, rỗng hoặc giá trị không hợp lệ: fallback về `countdown`.
+  Giá trị được trim và không phân biệt hoa/thường.
+- `hide_text_count_down` chỉ ẩn chữ số ở chế độ `countdown`;
+  `hide_progress_count_down` ẩn vòng tiến trình ở chế độ `close`. Cả hai không cho đóng sớm.
+- Vòng tiến trình lấy `progress_bar_tint`, khi thiếu lấy `primary_text_color`.
+  Màu X vẫn lấy `primary_text_color`; nền nút lấy `background_color`.
+
+Config dev của V4/V5/V6 đang chọn `close`. Đổi field này trong placement trên Remote
+Config để áp dụng cho quảng cáo được bind sau khi config mới đã fetch/activate;
+không cần đổi template hay build lại app đã hỗ trợ field này. Thay đổi file defaults
+trong repo không tự publish lên Firebase. Các field 2-step của V3 vẫn không áp dụng
+cho V4/V5/V6. V1/V2/V3 không sử dụng `control_close_style`.
+
+### Giao diện Close sau countdown (V4/V5/V6)
+
+Thêm field này vào placement Remote Config để sau khi hết giờ chỉ còn nút X:
+
+```json
+{
+  "control_close_style": "close",
+  "control_close_ready_style": "compact",
+  "count_down_timer": 5
+}
+```
+
+- `control_close_ready_style: "compact"`: hết countdown thì ẩn vòng progress và nền
+  bao quanh. View Close có kích thước **28×28dp**, **padding 4dp**; màu X vẫn lấy từ
+  `primary_text_color`. View nằm giữa vùng chạm trong suốt 48×48dp để dễ bấm.
+- `"default"` hoặc không khai báo field: giữ giao diện hiện tại, Close 48×48dp,
+  padding 12dp, nền và progress theo các field style đang dùng.
+- Null, rỗng hoặc giá trị sai fallback `default`; bỏ khoảng trắng và không phân biệt
+  chữ hoa/thường. Không thay đổi V1/V2/V3.
+- Hoạt động với cả `control_close_style: "countdown"` và `"close"`, cả hai orientation,
+  cả `left`/`right`/`shuffle`. Giữ nguyên vị trí đã chọn trong lượt quảng cáo.
+- Chưa hết giờ: UI đếm giữ nguyên và không thể đóng sớm. Timer 0 hoặc âm: áp dụng
+  compact ngay khi bind. Bind quảng cáo mới khôi phục UI đếm; pause/resume không
+  làm mất trạng thái hoặc đặt lại thời gian.
+
+Xem [tab Native Fake Interstitial](firebase-ads-guide/firebase_ads_config_guide.html#native-fake-interstitial),
+chọn **Sau countdown → Compact · Close 28dp** để xem config đầy đủ và ảnh trước/sau
+countdown trên Pixel 7a; chọn **Hiện tại** để so sánh.
+
+## Preset dark / light cho V4–V6
+
+[native-interstitial-theme-presets.json](native-interstitial-theme-presets.json) chứa
+6 placement mẫu, cũng có trong `rewarded_rewardedinter_inter_ad_places` của config dev:
+`fullscreen_native_interstitial_v4_dark`, `fullscreen_native_interstitial_v4_light`
+và các tên tương ứng cho V5/V6. Mỗi preset dùng cùng template, Close trái, kiểu
+`close`, chờ 5 giây. Theme được quyết định hoàn toàn bằng các field màu của placement,
+không phụ thuộc dark mode của thiết bị.
+
+| Field | Dark | Light |
+| --- | --- | --- |
+| `background_color` | `#121212` (V6: `#202329`) | `#FFFFFF` |
+| `background_full_color` | `#121212` (V6: `#101216`) | `#FFFFFF` (V6: `#EEF0F4`) |
+| `media_background_color` | `#121212` | `#FFFFFF` |
+| `primary_text_color`, `progress_bar_tint` | `#FFFFFF` | `#111827` |
+| `body_text_color` | `#D1D5DB` | `#4B5563` |
+| `background_cta` | `#16A34A` | `#15803D` |
+| `cta_text_color` | `#FFFFFF` | `#FFFFFF` |
+
+Để đổi một placement đang dùng trên Firebase, copy các field màu của preset vào
+placement đó và giữ nguyên `place_name`/`ad_id`. Không thay toàn bộ danh sách ads bằng
+file preset. File mẫu dùng Google test ad ID; thay đổi trong repo không tự publish Firebase.
 
 ## Cách gọi từ BaseActivity/BaseFragment
 
@@ -96,6 +208,65 @@ adsManager.showAd(
 - Manager kiểm tra Activity, FragmentManager, điều kiện bật ads, TTL và các giới hạn
   interstitial trước khi show. Nếu không hợp lệ, tiếp tục flow với `isShown = false`.
 
+## Shuffle theme và template qua Remote Config
+
+Có thể bật độc lập hoặc kết hợp cả ba loại shuffle:
+
+```json
+{
+  "native_template_size": "full_interstitial_shuffle",
+  "native_theme": "shuffle",
+  "control_close_position": "shuffle"
+}
+```
+
+Đây là các field bổ sung vào placement, không phải config đầy đủ. Xem
+[config đầy đủ và ảnh từng kết quả](firebase-ads-guide/firebase_ads_config_guide.html#native-template-shuffle)
+để sao chép cả placement và hai palette.
+
+- `native_template_size: "full_interstitial_shuffle"`: chọn đều V4/V5/V6 (mỗi loại 1/3)
+  khi tạo view quảng cáo. Template giữ nguyên trong lượt đó; portrait/landscape dùng XML
+  riêng của template được chọn. Lượt sau có thể trùng. Dùng `full_interstitial_v4`,
+  `full_interstitial_v5` hoặc `full_interstitial_v6` để cố định layout như trước.
+- `native_theme: "shuffle"`: chọn light/dark 50/50 mỗi lần bind; `light` hoặc `dark`
+  cố định palette tương ứng. Theme giữ nguyên qua countdown, pause/resume và áp lại
+  style trong lượt đó. Thiếu/null/rỗng/sai mode giữ màu gốc. Mode trim, không phân biệt
+  hoa/thường; không theo chế độ sáng/tối hệ thống. V1/V2/V3 bỏ qua theme mới.
+- `native_theme_colors`: object chứa `light` và `dark`, mỗi object chứa các field màu:
+  `background_color`, `background_full_color`, `media_background_color`,
+  `primary_text_color`, `body_text_color`, `cta_text_color`, `background_cta`,
+  `cta_border_color`, `border_color`, `background_color_ads_notify_view`,
+  `text_color_ads_notify_view`, `progress_bar_tint`. Tên palette/field viết đúng chữ thường.
+  Giá trị là chuỗi màu Android hợp lệ. Palette ghi đè các field màu cùng tên của placement;
+  field thiếu/null/sai màu hoặc thiếu palette giữ màu gốc. Riêng tint progress thiếu/sai
+  dùng primary_text_color hợp lệ của palette rồi mới dùng tint gốc.
+- Palette không đổi radius, kích thước chữ, timer, ad ID hoặc ảnh/video quảng cáo.
+  Không có bảng màu light/dark hardcode trong app. Khi shuffle template, cùng palette
+  áp dụng cho template được chọn. Shuffle template/theme/Close dùng các lần random độc lập.
+
+Ví dụ palette tối thiểu (nên dùng bộ đầy đủ trong guide để các màu đồng bộ):
+
+```json
+{
+  "native_theme": "shuffle",
+  "native_theme_colors": {
+    "light": { "background_color": "#FFFFFF", "primary_text_color": "#111827", "body_text_color": "#4B5563" },
+    "dark": { "background_color": "#202329", "primary_text_color": "#F8FAFC", "body_text_color": "#CBD5E1" }
+  }
+}
+```
+
+Đổi config trên Firebase, fetch/activate trước lượt hiển thị mới. Bộ ảnh kiểm thử dùng
+Google test ads và config fixture qua production factory/style/render; không publish Firebase.
+Các lượt random thật được lặp để thu đủ hai theme và sáu tổ hợp template × theme,
+không có đảm bảo đổi theme/template mỗi lần.
+
+Chạy lại và thu ảnh trên device:
+
+```powershell
+.\docs\firebase-ads-guide\capture_native_theme_shuffle.ps1 -Serial <SERIAL> -Adb <ADB_PATH> -Python <PYTHON_PATH>
+```
+
 ## Vòng đời: mỗi NativeAd chỉ hiển thị một lần
 
 Quy tắc này áp dụng cho **instance NativeAd của type `native_interstitial`**, không phải
@@ -141,7 +312,12 @@ native nối tiếp vẫn dùng placement cha `ad_type: "interstitial"`,
 ## Kiểm thử
 
 - Unit test: `NativeInterstitialAdPlaceMapperTest` và `NativeInterstitialTest` kiểm tra
-  mapping, cache, callback, chờ load, timeout, TTL, giới hạn show và reload sau đóng.
+  mapping (giữ V1–V6, fallback khi thiếu/sai template và giữ nguyên native thường),
+  cache, callback, chờ load, timeout, TTL, giới hạn show và reload sau đóng.
+- Device test: `NativeInterstitialTemplateDeviceTest` kiểm tra JSON/mapping fallback
+  trên Android. `AdmobDeviceSmokeTest.test05_nativeInterstitialLoadShowClose` dùng
+  placement dev `fullscreen_native_interstitial` để kiểm tra SDK thật, countdown,
+  Next/Close và callback fullscreen; không phụ thuộc type của `action_app_open`.
 - Device test: `AdmobDeviceSmokeTest.test04_actionAppOpenNativeInterstitialLoadShowClose`
   kiểm tra SDK thật, template V3, countdown, nút đóng và callback của `action_app_open`.
   Test yêu cầu APK dev và Google test ad unit; không dùng cho APK production.
@@ -150,6 +326,8 @@ native nối tiếp vẫn dùng placement cha `ad_type: "interstitial"`,
 
 ```powershell
 .\gradlew.bat :core:config:testProdDebugUnitTest :core:ads:testProdDebugUnitTest
+.\gradlew.bat :core:config:connectedDevDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=com.core.config.data.mapper.NativeInterstitialTemplateDeviceTest"
+.\gradlew.bat :app:connectedDevDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=com.codebasetemplate.AdmobDeviceSmokeTest#test05_nativeInterstitialLoadShowClose"
 .\gradlew.bat :app:connectedDevDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=com.codebasetemplate.AdmobDeviceSmokeTest#test04_actionAppOpenNativeInterstitialLoadShowClose"
 ```
 

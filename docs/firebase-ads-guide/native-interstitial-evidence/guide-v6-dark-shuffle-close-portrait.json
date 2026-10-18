@@ -1,0 +1,43 @@
+{
+  "caseId": "v6-dark-shuffle-close",
+  "orientation": "portrait",
+  "config": {
+    "place_name": "fullscreen_native_interstitial_v6_dark",
+    "ad_id": "ca-app-pub-3940256099942544\/2247696110",
+    "ad_type": "native_interstitial",
+    "native_template_size": "full_interstitial_v6",
+    "is_enable": true,
+    "is_tracking_click": true,
+    "background_color": "#202329",
+    "background_full_color": "#101216",
+    "media_background_color": "#121212",
+    "background_radius": 24,
+    "primary_text_color": "#FFFFFF",
+    "body_text_color": "#D1D5DB",
+    "cta_text_color": "#FFFFFF",
+    "background_cta": "#16A34A",
+    "cta_radius_dp": 12,
+    "border_color": "#00000000",
+    "background_color_ads_notify_view": "#FACC15",
+    "text_color_ads_notify_view": "#111827",
+    "control_close_position": "shuffle",
+    "control_close_style": "close",
+    "count_down_timer": 5,
+    "progress_bar_tint": "#FFFFFF",
+    "hide_text_count_down": false,
+    "hide_progress_count_down": false,
+    "is_auto_load_after_dismiss": false
+  },
+  "actualClosePosition": "left",
+  "readyAppearance": {
+    "closeSizePx": 126,
+    "closePaddingPx": 32,
+    "progressVisible": true,
+    "hasBackground": true,
+    "touchSizePx": 126,
+    "density": 2.625
+  },
+  "passed": true,
+  "device": "Pixel 7a",
+  "api": 36
+}

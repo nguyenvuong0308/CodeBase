@@ -7,7 +7,7 @@ import androidx.core.graphics.toColorInt
 import com.core.config.domain.data.NativeExpandTemplate
 
 /** A class containing the optional styling options for the Native Template.  */
-class NativeTemplateStyle {
+class NativeTemplateStyle : Cloneable {
     // Call to action typeface.
     var callToActionTextTypeface: Typeface? = null
         private set
@@ -146,6 +146,14 @@ class NativeTemplateStyle {
     var controlClosePosition: String? = null
         private set
 
+    // V4–V6: missing or unsupported values preserve the numeric countdown.
+    var controlCloseStyle: String = "countdown"
+        private set
+
+    // V4–V6: opt in to the smaller, undecorated Close after the countdown.
+    var controlCloseReadyStyle: String = "default"
+        private set
+
     var collapsibleExpandCooldownSecond: Int? = null
         private set
 
@@ -164,6 +172,34 @@ class NativeTemplateStyle {
     var adPlaceName: String? = null
         private set
 
+
+    var nativeTheme: String? = null
+        private set
+    var nativeThemeColors: Map<String, Map<String, String?>> = emptyMap()
+        private set
+
+    // Copy before overriding so one ad never changes another ad's base style.
+    internal fun forTheme(theme: String?): NativeTemplateStyle {
+        val colors = nativeThemeColors[theme] ?: return this
+        val result = super.clone() as NativeTemplateStyle
+        fun color(key: String): String? = colors[key]?.trim()?.takeIf {
+            runCatching { Color.parseColor(it) }.isSuccess
+        }
+        color("background_color")?.let { result.backgroundColor = it }
+        color("background_full_color")?.let { result.backgroundFullColor = it }
+        color("media_background_color")?.let { result.mediaBackgroundColor = it }
+        color("primary_text_color")?.let { result.primaryTextTypefaceColor = it }
+        color("body_text_color")?.let { result.tertiaryTextTypefaceColor = it }
+        color("cta_text_color")?.let { result.callToActionTypefaceColor = Color.parseColor(it) }
+        color("background_cta")?.let { result.callToActionBackgroundColor = it }
+        color("cta_border_color")?.let { result.callToActionBorderColor = it }
+        color("border_color")?.let { result.borderColor = it }
+        color("background_color_ads_notify_view")?.let { result.backgroundColorAdsNotifyView = it }
+        color("text_color_ads_notify_view")?.let { result.textColorAdsNotifyView = it }
+        // Follow the selected title color when a palette omits its progress tint.
+        result.progressBarTint = color("progress_bar_tint") ?: color("primary_text_color") ?: progressBarTint
+        return result
+    }
 
     /** A class that provides helper methods to build a style object.  */
     class Builder {
@@ -206,6 +242,32 @@ class NativeTemplateStyle {
 
         fun withControlClosePosition(controlClosePosition: String?): Builder {
             styles.controlClosePosition = controlClosePosition
+            return this
+        }
+
+        fun withNativeTheme(mode: String?, colors: Map<String, Map<String, String?>?>?): Builder {
+            styles.nativeTheme = mode
+            styles.nativeThemeColors = colors?.mapNotNull { (name, palette) ->
+                palette?.let { name to it.toMap() }
+            }?.toMap() ?: emptyMap()
+            return this
+        }
+
+        fun withControlCloseReadyStyle(value: String?): Builder {
+            styles.controlCloseReadyStyle = if (value?.trim()?.equals("compact", ignoreCase = true) == true) {
+                "compact"
+            } else {
+                "default"
+            }
+            return this
+        }
+
+        fun withControlCloseStyle(controlCloseStyle: String?): Builder {
+            styles.controlCloseStyle = if (controlCloseStyle?.trim()?.equals("close", ignoreCase = true) == true) {
+                "close"
+            } else {
+                "countdown"
+            }
             return this
         }
 

@@ -1,0 +1,86 @@
+Latest theme/template shuffle results: results-theme-shuffle.txt
+The report below records the earlier compact-close matrix run.
+
+Native Fake Interstitial guide — compact ready Close — 2026-10-18
+
+Device: Pixel 7a, Android 16 (API 36), serial 35041JEHN01257, density 2.625.
+Portrait: 1080x2400. Landscape: 2400x1080.
+Matrix: V4/V5/V6 × dark/light × left/right/shuffle × countdown/close × default/compact.
+Guide totals: 72 configs, 144 displays, 288 original PNG screenshots (waiting + ready).
+
+Implementation:
+- control_close_ready_style: "compact" removes the close surface and progress only
+  when countdown completes; the Close view is 28dp with 4dp padding, centered in
+  the existing transparent 48dp touch area. Close color continues to use config.
+- "default", missing, null, blank or invalid values preserve existing behavior.
+  The value is trimmed and case-insensitive. V1/V2/V3 are unchanged.
+- Waiting state, early-close protection, numeric/progress mode, left/right/shuffle,
+  pause/resume and a new ad bind retain their existing behavior.
+
+PASS: 183 full JVM tests (54 core/config + 129 core/ads), zero failures or skips.
+PASS: 39/39 Android instrumentation tests, zero failures or skips.
+      36 compact configs + 3 default regression configs, both orientations:
+      78 displays and 156 fresh screenshots in this run.
+      Default regression configs: v4-dark-left-close, v5-light-right-countdown,
+      v6-dark-shuffle-close. The remaining 33 default configs retain their passing
+      evidence/screenshots from the prior 36/36 device run (see results-default.txt).
+PASS: 20 Python documentation tests, including exact config/image/evidence matching.
+PASS: offline DOM integration: tabs/hash/keyboard, 72 filters and copy actions,
+      216 orientation selections.
+PASS: guide validator: 22 static keys, 126 model fields, 93 JSON examples, 320 images
+      (288 Native Fake Interstitial images + 32 existing gallery images).
+PASS: collection script retrieved all 288 screenshots and 144 evidence JSON files.
+PASS: git diff --check (only an existing LF/CRLF warning).
+
+Added/extended tests:
+- 5 compact-close JVM tests cover V4/V5/V6, both orientations and waiting modes,
+  all positions, timing, fallback/restyling, rebind, lifecycle, zero/negative timer,
+  density rounding, configured colors and a single dismissal callback.
+- Mapper tests cover the new field, missing/null/invalid values, and all 72 full
+  guide configs through the production Moshi adapter and mapper.
+- 36 compact device cases assert 28dp/4dp geometry, transparent background,
+  hidden progress, configured colors, retained side and visible content bounds.
+  They send real DOWN/UP events inside the 48dp touch area but outside the 28dp
+  icon and require successful dismissal. No ad asset is clicked.
+- Pixel 7a ready evidence confirms 74px Close / 11px padding / 126px touch area
+  at density 2.625, using Android dimension pixel-size rounding.
+
+Evidence:
+- device-tests-ready-style.xml: this run's Android JUnit report (39 tests).
+- device-tests.xml and results-default.txt: prior default matrix run (36 tests).
+- guide-<case>-<orientation>.json: exact config, actual close side, ready geometry
+  for new captures; written only after render/assertions/dismissal pass.
+- ../native-interstitial-screenshots/: original UiAutomation screenshots.
+- ../native-interstitial-cases.json: 72 configs, identical to instrumentation asset.
+- Default configs intentionally omit the new field to verify backward compatibility.
+
+Commands run from repository root (PowerShell):
+
+$env:ANDROID_SERIAL = '35041JEHN01257'
+$cases = Get-Content -Raw docs/firebase-ads-guide/native-interstitial-cases.json | ConvertFrom-Json
+$selected = @($cases | Where-Object { $_.readyStyle -eq 'compact' -or $_.id -in @('v4-dark-left-close','v5-light-right-countdown','v6-dark-shuffle-close') })
+$methods = $selected | ForEach-Object { 'com.codebasetemplate.AdmobDeviceSmokeTest#testGuide_' + ($_.id -replace '-', '_') }
+$filter = '-Pandroid.testInstrumentationRunnerArguments.class=' + ($methods -join ',')
+.\gradlew.bat :core:config:testProdDebugUnitTest :core:ads:testProdDebugUnitTest :app:connectedDevDebugAndroidTest $filter --console=plain
+
+.\docs\firebase-ads-guide\capture_native_interstitial_guide.ps1 -Serial 35041JEHN01257 -Adb 'C:\Users\nguye\AppData\Local\Android\Sdk\platform-tools\adb.exe' -CollectOnly
+& 'C:\Users\nguye\AppData\Local\Programs\Python\Python312\python.exe' -B -m unittest discover -s docs/tests -p 'test_*guide.py'
+node docs/tests/test_native_interstitial_guide_dom.cjs
+.\docs\firebase-ads-guide\test_firebase_ads_config_guide.ps1
+git diff --check
+
+Reproduce new compact captures only:
+.\docs\firebase-ads-guide\capture_native_interstitial_guide.ps1 -Serial <PIXEL_7A_SERIAL> -Adb <ADB_PATH> -Python <PYTHON_PATH> -ReadyStyle compact
+Omit -ReadyStyle to run all 72 configs. Use -CollectOnly only after a completed run.
+Run Python documentation tests after collecting to verify exact config correspondence.
+
+Scope and limits:
+- Google native test ads with model config fixtures through production factory,
+  style and render code. JVM tests separately verify the JSON parsing/mapper.
+  No Firebase config was published.
+- Media content can vary between requests; theme colors do not recolor media.
+- Representative compact screenshots for every template/theme/orientation were
+  visually inspected; all new displays were checked by device assertions.
+- Browser tool policy previously rejected file:// navigation. The HTML guide was
+  checked with offline DOM/structure/data tests; browser visual rendering was not
+  verified. Original Android screenshots were inspected directly.

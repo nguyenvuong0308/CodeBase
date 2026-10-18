@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.core.ads.customviews.ads.NativeRemoteColorSafetyTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-18T09:00:13.579Z" hostname="DESKTOP-9ACPMAB" time="0.605">
+  <properties/>
+  <testcase name="invalid colors on first bind and repeat bind do not break countdown or close" classname="com.core.ads.customviews.ads.NativeRemoteColorSafetyTest" time="0.248"/>
+  <testcase name="null palettes are dropped and valid palettes are defensively copied" classname="com.core.ads.customviews.ads.NativeRemoteColorSafetyTest" time="0.027"/>
+  <testcase name="valid selected palette can override malformed base and null palette falls back safely" classname="com.core.ads.customviews.ads.NativeRemoteColorSafetyTest" time="0.157"/>
+  <testcase name="progress uses valid title then current title when both remote colors are invalid" classname="com.core.ads.customviews.ads.NativeRemoteColorSafetyTest" time="0.026"/>
+  <testcase name="each malformed base color is ignored without skipping later fields in V4 V5 V6" classname="com.core.ads.customviews.ads.NativeRemoteColorSafetyTest" time="0.147"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

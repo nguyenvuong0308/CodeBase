@@ -256,6 +256,9 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
             .withHideProgressCountDown(nativeAdPlace.hideProgressCountDown)
             .withProgressBarTint(nativeAdPlace.progressBarTint)
             .withControlClosePosition(nativeAdPlace.controlClosePosition)
+            .withControlCloseStyle(nativeAdPlace.controlCloseStyle)
+            .withControlCloseReadyStyle(nativeAdPlace.controlCloseReadyStyle)
+            .withNativeTheme(nativeAdPlace.nativeTheme, nativeAdPlace.nativeThemeColors)
             .withCollapsibleExpandCooldownSecond(nativeAdPlace.collapsibleExpandCooldownSecond)
             .withAlwaysHideInlineNative(nativeAdPlace.alwaysHideInlineNative)
             .withNativeExpandMargins(
@@ -319,6 +322,14 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
             NativeTemplateSize.FullInterstitialV2 -> NativeInterstitialV2View(context)
 
             NativeTemplateSize.FullInterstitialV3 -> NativeInterstitialV3View(context)
+
+            NativeTemplateSize.FullInterstitialV4 -> NativeInterstitialV4View(context)
+
+            NativeTemplateSize.FullInterstitialV5 -> NativeInterstitialV5View(context)
+
+            NativeTemplateSize.FullInterstitialV6 -> NativeInterstitialV6View(context)
+
+            NativeTemplateSize.FullInterstitialShuffle -> createShuffledNativeInterstitial(context)
 
             is NativeTemplateSize.CustomKey -> customNativeAds.createNativeAds(context, nativeAdPlace)
         }

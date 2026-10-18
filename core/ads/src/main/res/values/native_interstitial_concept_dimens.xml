@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="native_interstitial_close_default_size">48dp</dimen>
+    <dimen name="native_interstitial_close_default_padding">12dp</dimen>
+    <dimen name="native_interstitial_close_compact_size">28dp</dimen>
+    <dimen name="native_interstitial_close_compact_padding">4dp</dimen>
+</resources>

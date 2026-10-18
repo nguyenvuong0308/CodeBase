@@ -1,0 +1,57 @@
+Native Fake Interstitial guide — 2026-10-18
+
+Device: Pixel 7a, Android 16 (API 36).
+Portrait: 1080x2400. Landscape: 2400x1080.
+Matrix: V4/V5/V6 × dark/light × left/right/shuffle × countdown/close.
+36 configs, 72 displays, 144 original PNG screenshots (waiting + ready).
+
+PASS: 36/36 Android instrumentation tests; each test runs both orientations.
+PASS: 17 focused JVM tests (1 guide mapper + 12 concept view + 4 close position resolver).
+PASS: 20 Python documentation tests, including config/image/evidence correspondence.
+PASS: offline DOM integration test: tabs, hash, keyboard, 36 config filters and copies,
+      108 orientation selections.
+PASS: guide validator: 22 static keys, 125 model fields, 57 JSON examples, 176 image links.
+
+Device assertions: correct template/orientation, colors from config, close side,
+opposite Ad badge, stable side through countdown, numeric/progress visibility,
+early tap rejected, enabled close after countdown, callback/dismissal, visible
+CTA/title/body/media/close bounds, media size and no overlap with text or CTA.
+Shuffle samples in this run: left 9, right 15 (24 independent displays).
+This sample is not a statistical uniformity test; deterministic unit tests cover both branches.
+
+Evidence:
+- device-tests.xml: actual Android JUnit report (36 tests, zero failures).
+- guide-<case>-<orientation>.json: exact config and actual close side, written only
+  after the corresponding device render/assertions/dismissal passed.
+- ../native-interstitial-screenshots/: original UiAutomation screenshots.
+- ../native-interstitial-cases.json: canonical 36 configs, identical to the test asset.
+
+Commands run from repository root (PowerShell):
+
+.\gradlew.bat :core:config:testProdDebugUnitTest --tests '*NativeInterstitialGuideCasesTest' :core:ads:testProdDebugUnitTest --tests '*NativeInterstitialConceptViewTest' --tests '*NativeClosePositionResolverTest' --console=plain
+
+$cases = Get-Content -Raw docs/firebase-ads-guide/native-interstitial-cases.json | ConvertFrom-Json
+$methods = $cases | ForEach-Object { 'com.codebasetemplate.AdmobDeviceSmokeTest#testGuide_' + ($_.id -replace '-', '_') }
+$filter = '-Pandroid.testInstrumentationRunnerArguments.class=' + ($methods -join ',')
+.\gradlew.bat :app:connectedDevDebugAndroidTest $filter --console=plain
+
+python -B -m unittest discover -s docs/tests -p 'test_*guide.py'
+npm install --prefix build/native-guide-dom --no-save --package-lock=false linkedom@0.18.12
+node docs/tests/test_native_interstitial_guide_dom.cjs
+.\docs\firebase-ads-guide\test_firebase_ads_config_guide.ps1
+
+Reproduce device run and collect screenshots together:
+.\docs\firebase-ads-guide\capture_native_interstitial_guide.ps1 -Serial <PIXEL_7A_SERIAL> -Adb <ADB_PATH> -Python <PYTHON_PATH>
+Use -CollectOnly only to retrieve a completed run. The collection script was also
+run successfully for this report. Run the Python tests afterward to verify exact
+config correspondence.
+
+Scope and limits:
+- Google native test ads, using model config fixtures through the production
+  factory/style/render pipeline. The unit test separately checks every JSON via
+  the production Moshi adapter and mapper. No Firebase config was published.
+- The ad creative can vary between requests; theme colors do not recolor media.
+- Representative original screenshots for every template/theme/orientation were
+  visually inspected; all 72 displays were checked by device assertions.
+- Browser tool policy rejected file:// navigation, so the HTML guide was checked
+  with offline DOM/structure/data tests; browser visual rendering was not verified.

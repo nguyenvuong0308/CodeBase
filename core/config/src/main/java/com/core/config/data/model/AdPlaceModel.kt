@@ -153,6 +153,18 @@ internal data class AdPlaceModel(
     @Json(name = "control_close_position")
     val controlClosePosition: String?,
 
+    @Json(name = "control_close_style")
+    val controlCloseStyle: String? = null,
+
+    @Json(name = "native_theme")
+    val nativeTheme: String? = null,
+
+    @Json(name = "native_theme_colors")
+    val nativeThemeColors: Map<String, Map<String, String?>?>? = null,
+
+    @Json(name = "control_close_ready_style")
+    val controlCloseReadyStyle: String? = null,
+
     @Json(name = "collapsible_expand_cooldown_second")
     val collapsibleExpandCooldownSecond: Int?,
 
