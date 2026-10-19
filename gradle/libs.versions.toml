@@ -27,7 +27,7 @@ roomKtx = "2.8.4"
 
 #----------------- Google & Firebase Services -----------------#
 firebaseBom = "34.17.0"
-adsMobileSdk = "1.4.0"
+adsMobileSdk = "1.5.0"
 playServicesAdsIdentifier = "18.3.0"
 playServicesBase = "18.10.0"
 playServicesBasement = "18.10.0"

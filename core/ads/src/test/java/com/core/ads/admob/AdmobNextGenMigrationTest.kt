@@ -1,11 +1,27 @@
 package com.core.ads.admob
 
 import java.io.File
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AdmobNextGenMigrationTest {
+
+    @Test
+    fun `version catalog pins the upgraded next gen SDK`() {
+        val catalog = repositoryFile("gradle/libs.versions.toml").readText()
+        val version = Regex("""(?m)^adsMobileSdk\s*=\s*"([^"]+)"\s*$""")
+            .find(catalog)?.groupValues?.get(1)
+
+        assertEquals("1.5.0", version)
+        assertTrue(
+            catalog.lineSequence().any {
+                it.startsWith("ads-mobile-sdk =") &&
+                    it.contains("version.ref = \"adsMobileSdk\"")
+            }
+        )
+    }
 
     @Test
     fun `version catalog uses next gen SDK and not the legacy ads artifact`() {
