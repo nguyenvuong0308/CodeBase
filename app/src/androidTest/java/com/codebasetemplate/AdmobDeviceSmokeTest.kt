@@ -365,6 +365,10 @@ class AdmobDeviceSmokeTest {
     @Test fun test34_nativeInterstitialV6ShuffleLandscape() = verifyNativeInterstitialTemplate(
         NativeTemplateSize.FullInterstitialV6, NativeInterstitialV6View::class.java, landscape = true, shufflePosition = true)
 
+    @Test fun testHiddenIndicators_v4() = runGuideCase("v4-dark-left-close", hideCountdownIndicators = true)
+    @Test fun testHiddenIndicators_v5() = runGuideCase("v5-dark-left-close", hideCountdownIndicators = true)
+    @Test fun testHiddenIndicators_v6() = runGuideCase("v6-dark-left-close", hideCountdownIndicators = true)
+
     @Test fun testGuide_v4_dark_left_countdown() = runGuideCase("v4-dark-left-countdown")
     @Test fun testGuide_v4_dark_left_close() = runGuideCase("v4-dark-left-close")
     @Test fun testGuide_v4_dark_right_countdown() = runGuideCase("v4-dark-right-countdown")
@@ -516,9 +520,15 @@ class AdmobDeviceSmokeTest {
         )
     }
 
-    private fun runGuideCase(id: String) {
+    private fun runGuideCase(id: String, hideCountdownIndicators: Boolean = false) {
         val cases = org.json.JSONArray(instrumentation.context.assets.open("native-interstitial-guide-cases.json").bufferedReader().use { it.readText() })
         val case = (0 until cases.length()).map { cases.getJSONObject(it) }.single { it.getString("id") == id }
+        if (hideCountdownIndicators) {
+            case.put("id", "$id-hidden-indicators")
+            case.getJSONObject("config")
+                .put("hide_text_count_down", true)
+                .put("hide_progress_count_down", true)
+        }
         val template = when (case.getInt("version")) {
             4 -> NativeTemplateSize.FullInterstitialV4
             5 -> NativeTemplateSize.FullInterstitialV5
@@ -653,6 +663,7 @@ class AdmobDeviceSmokeTest {
                 lateinit var dialog: DialogNativeFakeInterstitial
                 var initialCloseGravity: Int? = null
                 val readyAppearance = org.json.JSONObject()
+                val waitingAppearance = org.json.JSONObject()
                 onMain {
                     val holder = requireNotNull(activity.adsManager.getNativeHolder(activity, placeName))
                     if (newConcept) assertSame("New template must be selected by config", template, (holder.adPlace as NativeAdPlace).nativeTemplateSize)
@@ -711,10 +722,23 @@ class AdmobDeviceSmokeTest {
                             assertEquals("Waiting close retains 48dp", root.resources.getDimensionPixelSize(com.core.ads.R.dimen.native_interstitial_close_default_size), waitingClose.width)
                             assertEquals("Waiting close retains 12dp padding", root.resources.getDimensionPixelSize(com.core.ads.R.dimen.native_interstitial_close_default_padding), waitingClose.paddingLeft)
                             assertNotNull("Waiting close retains background", root.findViewById<View>(com.core.ads.R.id.controlClose).background)
+                            val config = guideCase.getJSONObject("config")
                             val numeric = guideCase.getString("style") == "countdown"
-                            assertEquals("Numeric countdown visibility", numeric, root.findViewById<View>(com.core.ads.R.id.lnCountDown).isShown)
-                            assertEquals("Progress visibility", !numeric, root.findViewById<View>(com.core.ads.R.id.actionProgress).isShown)
-                            if (numeric) assertTrue("Countdown text must contain a remaining second",
+                            if (!numeric) assertEquals("Disabled close alpha follows hidden progress",
+                                if (config.getBoolean("hide_progress_count_down")) 0.3f else 0.65f,
+                                waitingClose.alpha, 0.001f)
+                            val showNumeric = numeric && !config.getBoolean("hide_text_count_down")
+                            val showProgress = !numeric && !config.getBoolean("hide_progress_count_down")
+                            assertEquals("Numeric countdown visibility", showNumeric, root.findViewById<View>(com.core.ads.R.id.lnCountDown).isShown)
+                            assertEquals("Progress visibility", showProgress, root.findViewById<View>(com.core.ads.R.id.actionProgress).isShown)
+                            val waitingProgress = root.findViewById<com.google.android.material.progressindicator.CircularProgressIndicator>(com.core.ads.R.id.actionProgress)
+                            waitingAppearance.put("closeAlpha", waitingClose.alpha.toDouble())
+                                .put("closeEnabled", waitingClose.isEnabled)
+                                .put("progressVisible", waitingProgress.isShown)
+                                .put("textVisible", root.findViewById<View>(com.core.ads.R.id.lnCountDown).isShown)
+                                .put("indicatorSizePx", waitingProgress.indicatorSize)
+                                .put("trackThicknessPx", waitingProgress.trackThickness)
+                            if (showNumeric) assertTrue("Countdown text must contain a remaining second",
                                 root.findViewById<TextView>(com.core.ads.R.id.tvCountDownTime).text.any(Char::isDigit))
                         }
                         captureNativeInterstitialScreenshot("$guidePrefix-waiting.png", landscape)
@@ -787,6 +811,7 @@ class AdmobDeviceSmokeTest {
                                         Color.parseColor(requireNotNull(color)), actual)
                                 }
                                 val closeImage = root.findViewById<android.widget.ImageView>(com.core.ads.R.id.tvClose)
+                                assertEquals("Ready close is fully opaque", 1f, closeImage.alpha, 0.001f)
                                 val closeContainer = root.findViewById<View>(com.core.ads.R.id.controlClose)
                                 if (compact) assertNull("Compact close has no outer background", closeContainer.background)
                                 else assertEquals("Default close background still comes from config",
@@ -801,6 +826,7 @@ class AdmobDeviceSmokeTest {
                                 val readyProgress = root.findViewById<View>(com.core.ads.R.id.actionProgress)
                                 assertEquals("Ready progress follows style", !compact && configuredPlace.controlCloseStyle == "close" && configuredPlace.hideProgressCountDown != true, readyProgress.isShown)
                                 readyAppearance.put("closeSizePx", closeImage.width).put("closePaddingPx", closeImage.paddingLeft)
+                                    .put("closeAlpha", closeImage.alpha.toDouble())
                                     .put("progressVisible", readyProgress.isShown).put("hasBackground", closeContainer.background != null)
                                     .put("touchSizePx", closeContainer.width).put("density", root.resources.displayMetrics.density.toDouble())
                                 assertEquals("X color must match config",
@@ -887,6 +913,7 @@ class AdmobDeviceSmokeTest {
                             .put("orientation", orientationLabel).put("config", guideCase.getJSONObject("config"))
                             .put("actualClosePosition", if (initialCloseGravity == (android.view.Gravity.CENTER_VERTICAL or android.view.Gravity.START)) "left" else "right")
                             .put("actualTemplate", "full_interstitial_v$actualVersion").put("actualTheme", actualTheme ?: "base").put("readyAppearance", readyAppearance)
+                            .put("waitingAppearance", waitingAppearance)
                             .put("passed", true).put("device", android.os.Build.MODEL).put("api", android.os.Build.VERSION.SDK_INT)
                         val pipes = instrumentation.uiAutomation.executeShellCommandRw("dd of=/data/local/tmp/native-interstitial-$orientationLabel/$guidePrefix.json")
                         ParcelFileDescriptor.AutoCloseOutputStream(pipes[1]).use { it.write(evidence.toString(2).toByteArray()) }

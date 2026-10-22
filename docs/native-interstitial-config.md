@@ -92,6 +92,35 @@ Remote Config có thể chọn riêng cách hiển thị nút đóng cho từng 
 - Vòng tiến trình lấy `progress_bar_tint`, khi thiếu lấy `primary_text_color`.
   Màu X vẫn lấy `primary_text_color`; nền nút lấy `background_color`.
 
+### Progress và alpha nút Close (V4/V5/V6)
+
+Vòng progress dùng cùng kích thước với V3: `@dimen/_25dp`, nét `@dimen/_2dp`.
+Vùng chạm Close vẫn là 48×48dp. Với `control_close_style: "close"`:
+
+| Trạng thái | Alpha nút X | Cho đóng |
+| --- | --- | --- |
+| Đang chờ, `hide_progress_count_down: false` | 65% | Không |
+| Đang chờ, `hide_progress_count_down: true` | 30% | Không |
+| Hết thời gian chờ | 100% | Có |
+
+Alpha chỉ áp dụng lên X, không làm mờ nền nút. Timer 0/âm cho đóng ngay với alpha
+100%; pause/resume giữ thời gian còn lại, bind quảng cáo mới khôi phục trạng thái chờ.
+
+Ví dụ phần cấu hình để ẩn cả số đếm và progress, giữ X mờ trong lúc chờ:
+
+```json
+{
+  "control_close_style": "close",
+  "count_down_timer": 5,
+  "hide_text_count_down": true,
+  "hide_progress_count_down": true
+}
+```
+
+`hide_text_count_down` chỉ tác động tới số ở kiểu `countdown`; hai flag không cho
+đóng sớm. [Ảnh Pixel 7a mới và config đầy đủ cho v4–v6](firebase-ads-guide/firebase_ads_config_guide.html#native-close-progress)
+so sánh cả hai flag `false`/`true`, dọc/ngang và trước/sau khi được đóng.
+
 Config dev của V4/V5/V6 đang chọn `close`. Đổi field này trong placement trên Remote
 Config để áp dụng cho quảng cáo được bind sau khi config mới đã fetch/activate;
 không cần đổi template hay build lại app đã hỗ trợ field này. Thay đổi file defaults

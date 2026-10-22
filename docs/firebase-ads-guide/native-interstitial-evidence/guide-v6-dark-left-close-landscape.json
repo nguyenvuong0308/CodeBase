@@ -29,6 +29,25 @@
     "is_auto_load_after_dismiss": false
   },
   "actualClosePosition": "left",
+  "actualTemplate": "full_interstitial_v6",
+  "actualTheme": "base",
+  "readyAppearance": {
+    "closeSizePx": 126,
+    "closePaddingPx": 32,
+    "closeAlpha": 1,
+    "progressVisible": true,
+    "hasBackground": true,
+    "touchSizePx": 126,
+    "density": 2.625
+  },
+  "waitingAppearance": {
+    "closeAlpha": 0.6499999761581421,
+    "closeEnabled": false,
+    "progressVisible": true,
+    "textVisible": false,
+    "indicatorSizePx": 75,
+    "trackThicknessPx": 6
+  },
   "passed": true,
   "device": "Pixel 7a",
   "api": 36

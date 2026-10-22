@@ -43,6 +43,43 @@ class NativeInterstitialConceptViewTest {
     @Test fun `V5 both orientations keep assets and controls visible`() = verifyLayout(5)
     @Test fun `V6 both orientations keep assets and controls visible`() = verifyLayout(6)
 
+    @Test fun `progress ring matches V3 size and stays centered in all concept templates`() {
+        for (density in listOf("mdpi", "xhdpi")) for (landscape in listOf(false, true)) {
+            val qualifiers = if (landscape) "w800dp-h360dp-land" else "w360dp-h640dp-port"
+            RuntimeEnvironment.setQualifiers("$qualifiers-$density")
+            val context = ContextThemeWrapper(RuntimeEnvironment.getApplication(),
+                com.google.android.material.R.style.Theme_MaterialComponents_Light_NoActionBar)
+            val reference = NativeInterstitialV3View(context)
+                .findViewById<CircularProgressIndicator>(R.id.actionProgress)
+            for (version in 4..6) {
+                val root = view(version)
+                root.applyStyles(NativeTemplateStyle.Builder().withControlCloseStyle("close")
+                    .withCountDownSecond(3).build())
+                root.startCloseCountdown()
+                val scale = root.resources.displayMetrics.density
+                val width = ((if (landscape) 800 else 360) * scale).toInt()
+                val height = ((if (landscape) 360 else 640) * scale).toInt()
+                root.measure(View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY))
+                root.layout(0, 0, width, height)
+                val progress = root.findViewById<CircularProgressIndicator>(R.id.actionProgress)
+                val container = root.findViewById<View>(R.id.controlClose)
+                val label = "V$version $qualifiers-$density"
+                assertEquals(label, View.VISIBLE, progress.visibility)
+                assertEquals(label, reference.layoutParams.width, progress.width)
+                assertEquals(label, reference.layoutParams.height, progress.height)
+                assertEquals(label, reference.indicatorSize, progress.indicatorSize)
+                assertEquals(label, reference.trackThickness, progress.trackThickness)
+                assertEquals(label, reference.indicatorInset, progress.indicatorInset)
+                assertEquals(label, (container.width - progress.width) / 2, progress.left)
+                assertEquals(label, (container.height - progress.height) / 2, progress.top)
+                assertEquals(label, (48 * scale).toInt(), container.width)
+                assertEquals(label, (48 * scale).toInt(), container.height)
+                root.destroyNativeAd()
+            }
+        }
+    }
+
     private fun verifyLayout(version: Int) {
         for (landscape in listOf(false, true)) {
             RuntimeEnvironment.setQualifiers(if (landscape) "w800dp-h360dp-land-mdpi" else "w360dp-h640dp-port-mdpi")
@@ -254,12 +291,48 @@ class NativeInterstitialConceptViewTest {
         }
     }
 
-    @Test fun `close style with zero or negative duration is immediately enabled`() {
-        for (version in 4..6) for (seconds in listOf(0, -1)) {
+    @Test fun `hidden progress dims disabled close to thirty percent until ready`() {
+        for (version in 4..6) for (hideText in listOf(false, true)) {
             val root = view(version)
-            root.applyStyles(NativeTemplateStyle.Builder().withControlCloseStyle("close").withCountDownSecond(seconds).build())
+            fun style(hideProgress: Boolean) = NativeTemplateStyle.Builder()
+                .withControlCloseStyle("close").withCountDownSecond(3)
+                .withHideTextCountDown(hideText).withHideProgressCountDown(hideProgress).build()
+            root.applyStyles(style(true))
+            root.startCloseCountdown()
+            val close = root.findViewById<View>(R.id.tvClose)
+            assertEquals(View.VISIBLE, close.visibility)
+            assertEquals(0.3f, close.alpha, 0f)
+            assertFalse(close.isEnabled)
+            shadowOf(Looper.getMainLooper()).idleFor(1, TimeUnit.SECONDS)
+            root.applyStyles(style(false))
+            assertEquals(0.65f, close.alpha, 0f)
+            root.applyStyles(style(true))
+            assertEquals(0.3f, close.alpha, 0f)
+            root.onHostPause()
+            shadowOf(Looper.getMainLooper()).idleFor(5, TimeUnit.SECONDS)
+            assertEquals(0.3f, close.alpha, 0f)
+            assertFalse(close.isEnabled)
+            root.onHostResume()
+            shadowOf(Looper.getMainLooper()).idleFor(2, TimeUnit.SECONDS)
+            assertEquals(1f, close.alpha, 0f)
+            assertTrue(close.isEnabled)
+            root.applyStyles(style(true))
+            assertEquals(1f, close.alpha, 0f)
+            root.startCloseCountdown()
+            assertEquals(0.3f, close.alpha, 0f)
+            assertFalse(close.isEnabled)
+            root.destroyNativeAd()
+        }
+    }
+
+    @Test fun `close style with zero or negative duration is immediately enabled`() {
+        for (version in 4..6) for (seconds in listOf(0, -1)) for (hideProgress in listOf(false, true)) {
+            val root = view(version)
+            root.applyStyles(NativeTemplateStyle.Builder().withControlCloseStyle("close")
+                .withCountDownSecond(seconds).withHideProgressCountDown(hideProgress).build())
             root.startCloseCountdown()
             assertTrue(root.findViewById<View>(R.id.tvClose).isEnabled)
+            assertEquals(1f, root.findViewById<View>(R.id.tvClose).alpha, 0f)
             assertEquals(1000, root.findViewById<CircularProgressIndicator>(R.id.actionProgress).progress)
         }
     }

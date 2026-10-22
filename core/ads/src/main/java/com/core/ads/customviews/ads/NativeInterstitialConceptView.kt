@@ -226,7 +226,11 @@ abstract class NativeInterstitialConceptView(
             close.layoutParams = params
         }
         if (close.paddingLeft != padding) close.setPadding(padding, padding, padding, padding)
-        close.alpha = if (showCloseButton && !ready) 0.65f else 1f
+        close.alpha = when {
+            !showCloseButton || ready -> 1f
+            hideProgress -> 0.3f
+            else -> 0.65f
+        }
         countdown.visibility = if (ready || hideCountdown || showCloseButton) INVISIBLE else VISIBLE
         closeProgress.visibility = if (started && showCloseButton && !hideProgress && !compact) VISIBLE else INVISIBLE
         closeProgress.progress = if (ready) 1000 else if (activeDurationMs > 0) {

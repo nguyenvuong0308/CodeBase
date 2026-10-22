@@ -11,6 +11,33 @@ START = '<!-- NATIVE_FAKE_INTERSTITIAL_START -->'
 END = '<!-- NATIVE_FAKE_INTERSTITIAL_END -->'
 
 
+def build_close_controls(cases):
+    cards = []
+    for version, hidden in itertools.product((4, 5, 6), (False, True)):
+        base = next(c for c in cases if c['id'] == f'v{version}-dark-left-close')
+        config = dict(base['config'], hide_text_count_down=hidden, hide_progress_count_down=hidden)
+        cid = base['id'] + ('-hidden-indicators' if hidden else '')
+        photos = []
+        for orientation, state in itertools.product(('portrait', 'landscape'), ('waiting', 'ready')):
+            path = f'native-interstitial-screenshots/guide-{cid}-{orientation}-{state}.png'
+            alpha = '100%' if state == 'ready' else ('30%' if hidden else '65%')
+            label = 'Được đóng' if state == 'ready' else 'Chưa được đóng'
+            photos.append(f'<figure><a href="{path}" target="_blank" rel="noopener"><img src="{path}" alt="V{version} {orientation} {state}, Close alpha {alpha}" loading="lazy"></a><figcaption>{orientation} · {label} · alpha {alpha}</figcaption></figure>')
+        cards.append(f'''<details data-close-case="{cid}"><summary>V{version} · {'Ẩn số và progress · Close 30%' if hidden else 'Hiện progress · Close 65%'}</summary>
+<div class="native-fake-photos">{''.join(photos)}</div>
+<p>Config đầy đủ dùng cho bộ ảnh này:</p><pre><code>{html.escape(json.dumps(config, ensure_ascii=False, indent=2))}</code></pre></details>''')
+    return f'''<section id="native-close-progress"><h2>Progress và độ mờ nút Close · cập nhật 22/10/2026</h2>
+<p>Ảnh chụp mới trên Pixel 7a, Android 16: V4/V5/V6, theme dark, Close trái, thời gian chờ 5 giây, giao diện sau countdown mặc định. 6 cấu hình, 12 lượt hiển thị, 24 ảnh gốc. <a href="native-interstitial-evidence/results-close-progress.txt">Kết quả và lệnh chạy lại</a>.</p>
+<table><thead><tr><th>Trạng thái với control_close_style = close</th><th>Progress</th><th>Alpha nút X</th><th>Cho đóng</th></tr></thead><tbody>
+<tr><td>Đang chờ, hide_progress_count_down = false</td><td>Hiện</td><td>65%</td><td>Không</td></tr>
+<tr><td>Đang chờ, hide_progress_count_down = true</td><td>Ẩn</td><td>30%</td><td>Không</td></tr>
+<tr><td>Hết thời gian chờ</td><td>Theo flag và ready style</td><td>100%</td><td>Có</td></tr>
+</tbody></table>
+<p>Vòng progress dùng cùng kích thước với V3: <code>@dimen/_25dp</code>, nét <code>@dimen/_2dp</code>. Vùng chạm Close vẫn 48×48dp. Alpha 30% chỉ áp dụng lên nút X, không làm mờ nền bao quanh.</p>
+<p><code>hide_text_count_down</code> chỉ ẩn số ở kiểu <code>countdown</code>. Ảnh “Ẩn số và progress” đặt cả hai flag bằng <code>true</code>; nút X vẫn hiện vì dùng kiểu <code>close</code>. Hai flag không rút ngắn timer; timer 0/âm cho đóng ngay với alpha 100%. Quảng cáo mới khôi phục trạng thái chờ.</p>
+{''.join(cards)}</section>'''
+
+
 def build_shuffle(presets, assets):
     keys = ('background_color', 'background_full_color', 'media_background_color',
             'primary_text_color', 'body_text_color', 'cta_text_color', 'background_cta',
@@ -102,17 +129,17 @@ def build():
 <section id="native-fake-interstitial">
 <p class="section-kicker">Native SDK · Fullscreen dialog</p><h2>Native Fake Interstitial</h2>
 <div class="config-keys" data-config-key="rewarded_rewardedinter_inter_ad_places"><code>rewarded_rewardedinter_inter_ad_places</code></div>
-<p><a href="#native-theme-shuffle">Mới: Shuffle light/dark theme — config và ảnh cả hai kết quả</a> · <a href="#native-template-shuffle">Shuffle template V4/V5/V6</a></p>
+<p><a href="#native-close-progress">Mới: progress cỡ V3 và Close alpha 30% khi ẩn progress</a> · <a href="#native-theme-shuffle">Shuffle light/dark theme</a> · <a href="#native-template-shuffle">Shuffle template V4/V5/V6</a></p>
 <p>72 config cho V4/V5/V6 × dark/light × trái/phải/shuffle × số/progress × Close hiện tại/compact; mỗi config có ảnh portrait và landscape trên Pixel 7a. 144 ca hiển thị, 288 ảnh chụp ở hai trạng thái. Mỗi bộ ảnh bên dưới đi kèm đúng JSON đã dùng trong ca đó.</p>
 <p><a href="native-interstitial-evidence/results.txt">Kết quả kiểm thử và lệnh chạy lại</a> · <a href="capture_native_interstitial_guide.ps1" download>Script chạy test và thu thập ảnh</a></p>
 <div class="note"><strong>Cách dùng:</strong> chọn một case, sao chép JSON và thay placement tương ứng trong danh sách fullscreen; giữ <code>place_name</code> đã đăng ký và thay <code>ad_id</code> bằng native ad unit của bạn. Các ví dụ dùng Google test native ID. Không dán cả 72 case vào một danh sách vì chúng là các phương án thay thế cho cùng placement. Publish rồi fetch/activate Remote Config trước lần hiển thị mới. Bộ ảnh này dùng config fixture trong kiểm thử, không publish Firebase.</div>
 <table><thead><tr><th>Field</th><th>Hành vi</th></tr></thead><tbody>
 <tr><td><code>native_template_size</code></td><td><code>full_interstitial_v4</code>, <code>full_interstitial_v5</code>, <code>full_interstitial_v6</code>. XML riêng cho portrait/landscape. Type <code>native_interstitial</code> nhận V1–V6 hoặc <code>full_interstitial_shuffle</code> để random V4/V5/V6; thiếu/sai template fallback V3.</td></tr>
 <tr><td><code>control_close_position</code></td><td><code>left</code>, <code>right</code>, <code>shuffle</code>. Shuffle chọn trái/phải 50/50 mỗi lần bind, giữ nguyên khi countdown/pause/resume; nhãn Ad ở phía đối diện. Các lượt độc lập có thể trùng bên. Thiếu/sai dùng right; start/end là alias.</td></tr>
-<tr><td><code>control_close_style</code></td><td><code>countdown</code>: số rồi X. <code>close</code>: X mờ với vòng progress, hết thời gian mới bấm được. Thiếu/sai dùng countdown. Hai kiểu này dành cho V4–V6.</td></tr>
+<tr><td><code>control_close_style</code></td><td><code>countdown</code>: số rồi X. <code>close</code>: X alpha 65% khi hiện progress, 30% khi ẩn progress; hết thời gian mới bấm được và alpha trở về 100%. Vòng progress dùng @dimen/_25dp, nét @dimen/_2dp như V3. Thiếu/sai dùng countdown. Hai kiểu này dành cho V4–V6.</td></tr>
 <tr><td><code>control_close_ready_style</code></td><td><code>default</code>: giữ giao diện hiện tại sau countdown. <code>compact</code>: chỉ khi hết giờ, ẩn vòng progress và nền bao quanh; nút Close 28×28dp, padding 4dp, nằm giữa vùng chạm trong suốt 48×48dp. Màu X vẫn lấy <code>primary_text_color</code>, vị trí trái/phải/shuffle không đổi. Áp dụng cho cả số và progress, portrait/landscape. Thiếu/null/rỗng/sai dùng default; chấp nhận chữ hoa và khoảng trắng. Timer 0/âm chuyển compact ngay khi bind.</td></tr>
 <tr><td><code>count_down_timer</code></td><td>Case dùng 5 giây, mặc định 5. Giá trị 0 hoặc âm cho đóng ngay ở V4–V6. Không đổi thời gian chờ khi chỉ đổi kiểu hiển thị.</td></tr>
-<tr><td><code>hide_text_count_down</code>, <code>hide_progress_count_down</code></td><td>Ẩn số hoặc vòng progress tương ứng, không cho đóng sớm. Ma trận này để false để nhìn rõ hai kiểu.</td></tr>
+<tr><td><code>hide_text_count_down</code>, <code>hide_progress_count_down</code></td><td>Ẩn số hoặc vòng progress tương ứng, không cho đóng sớm. Khi hide_progress_count_down = true, X đang chờ có alpha 30%. Ma trận 72 case để false; xem bộ ảnh mới bên dưới cho cả hai flag bằng true.</td></tr>
 <tr><td><code>primary_text_color</code>, <code>body_text_color</code>, <code>progress_bar_tint</code></td><td>Màu title/X/số, mô tả, vòng progress. Progress thiếu tint dùng primary_text_color.</td></tr>
 <tr><td>Dark / light</td><td>Do các field màu nền, media, chữ và CTA trong JSON quyết định, không phụ thuộc chế độ hệ thống. Ảnh/video của quảng cáo không được đổi màu theo theme.</td></tr>
 </tbody></table>
@@ -127,7 +154,7 @@ def build():
 <label>Orientation<select id="nf-orientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option><option value="both">Cả hai</option></select></label>
 </div><p id="nf-result" aria-live="polite"></p>
 {''.join(cards)}
-</section>{shuffle_panel}</div>
+</section>{build_close_controls(cases)}{shuffle_panel}</div>
 {END}'''
     source = GUIDE.read_text(encoding='utf-8')
     if START in source:

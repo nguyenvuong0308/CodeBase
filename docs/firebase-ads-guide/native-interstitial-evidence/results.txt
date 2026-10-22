@@ -1,3 +1,7 @@
+Latest Close/progress screenshots (2026-10-22): see results-close-progress.txt.
+This refresh covers six configs (V4/V5/V6, visible/hidden indicators), 24 images,
+and updates the main gallery representatives. The matrix runs below are historical.
+
 Latest theme/template shuffle results: results-theme-shuffle.txt
 The report below records the earlier compact-close matrix run.
 

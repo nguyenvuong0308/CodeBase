@@ -71,6 +71,39 @@ class NativeInterstitialGuideTest(unittest.TestCase):
                         self.assertEqual(b'\x89PNG\r\n\x1a\n', data[:8])
                         self.assertEqual(size, struct.unpack('>II', data[16:24]))
 
+    def test_close_progress_screenshots_match_configs_and_alpha(self):
+        for version, hidden, orientation in itertools.product((4, 5, 6), (False, True), ('portrait', 'landscape')):
+            cid = f'v{version}-dark-left-close' + ('-hidden-indicators' if hidden else '')
+            with self.subTest(case=cid, orientation=orientation):
+                base = next(c for c in self.cases if c['id'] == f'v{version}-dark-left-close')
+                expected = dict(base['config'], hide_text_count_down=hidden, hide_progress_count_down=hidden)
+                card = re.search(r'data-close-case="' + cid + r'"[\s\S]*?<pre><code>([\s\S]*?)</code></pre>', self.html)
+                self.assertIsNotNone(card)
+                self.assertEqual(expected, json.loads(unescape(card.group(1))))
+                prefix = f'guide-{cid}-{orientation}'
+                evidence = json.loads((DOCS / 'native-interstitial-evidence' / f'{prefix}.json').read_text(encoding='utf-8'))
+                self.assertEqual(expected, evidence['config'])
+                self.assertEqual(cid, evidence['caseId'])
+                self.assertEqual(orientation, evidence['orientation'])
+                self.assertEqual('Pixel 7a', evidence['device'])
+                self.assertIs(evidence['passed'], True)
+                waiting = evidence['waitingAppearance']
+                self.assertAlmostEqual(0.3 if hidden else 0.65, waiting['closeAlpha'], places=5)
+                self.assertIs(waiting['closeEnabled'], False)
+                self.assertIs(waiting['progressVisible'], not hidden)
+                self.assertIs(waiting['textVisible'], False)
+                self.assertEqual(1, evidence['readyAppearance']['closeAlpha'])
+                self.assertIs(evidence['readyAppearance']['progressVisible'], not hidden)
+                for state in ('waiting', 'ready'):
+                    name = f'{prefix}-{state}.png'
+                    self.assertIn(f'src="native-interstitial-screenshots/{name}"', self.html)
+                    data = (DOCS / 'native-interstitial-screenshots' / name).read_bytes()
+                    self.assertEqual(b'\x89PNG\r\n\x1a\n', data[:8])
+                    self.assertEqual((1080, 2400) if orientation == 'portrait' else (2400, 1080), struct.unpack('>II', data[16:24]))
+        for token in ('30%', '65%', '100%', '@dimen/_25dp', '@dimen/_2dp'):
+            self.assertIn(token, self.html)
+            self.assertIn(token, (ROOT / 'docs/native-interstitial-config.md').read_text(encoding='utf-8'))
+
     def test_tab_and_filters_are_available(self):
         self.assertIn('.content [role="tabpanel"] > section', self.html)
         self.assertNotIn('.content > section', self.html)

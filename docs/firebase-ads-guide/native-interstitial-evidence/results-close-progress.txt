@@ -1,0 +1,45 @@
+Native interstitial Close/progress update — 2026-10-22
+
+Device: Pixel 7a, Android 16 (API 36).
+Portrait: 1080x2400. Landscape: 2400x1080.
+
+Fresh captures:
+- V4/V5/V6, dark theme, close on left, control_close_style=close, default ready style.
+- Both hide flags false: disabled Close alpha 65%, visible progress sized like V3.
+- Both hide flags true: disabled Close alpha 30%, no numeric countdown or progress.
+- All cases: 5-second countdown, early taps cannot dismiss, enabled Close alpha 100%.
+- 6 test cases, 12 displays, 24 PNG screenshots and 12 passing evidence JSON files.
+- Refreshed native-screenshots/full_interstitial_v4.png through v6.png.
+
+PASS: 6/6 Android instrumentation tests, no failures, errors or skips.
+PASS: 23 Python documentation tests, including config/evidence/alpha/image matching.
+PASS: offline DOM checks: 72 matrix filters, copy actions, 216 orientation selections,
+      six new Close comparison configs and navigation to #native-close-progress.
+PASS: HTML validator: 22 static keys, 128 model fields, 103 JSON examples, 392 image references.
+
+Evidence:
+- device-tests-close-progress.xml: this run's Android JUnit report.
+- guide-v{4,5,6}-dark-left-close[-hidden-indicators]-{portrait,landscape}.json:
+  exact config, waitingAppearance (alpha, enabled/visible state, ring size/thickness),
+  readyAppearance (including alpha), actual template, device and passed status.
+- ../native-interstitial-screenshots/: corresponding -waiting.png and -ready.png files.
+- HTML section #native-close-progress: all 24 fresh images with complete configs.
+
+Reproduce from repository root (PowerShell):
+python -B docs/firebase-ads-guide/build_native_interstitial_guide.py
+.\docs\firebase-ads-guide\capture_native_interstitial_close_progress.ps1 -Serial '<PIXEL_7A_SERIAL>'
+python -B -m unittest discover -s docs/tests -p 'test_*guide.py'
+node docs/tests/test_native_interstitial_guide_dom.cjs
+.\docs\firebase-ads-guide\test_firebase_ads_config_guide.ps1
+git diff --check
+
+The capture script runs :app:connectedDevDebugAndroidTest with testGuide_v{4,5,6}_dark_left_close
+and testHiddenIndicators_v{4,5,6}, selecting only the specified Pixel 7a.
+The DOM test dependency can be installed in ignored build/ with:
+npm install --prefix build/native-guide-dom --no-save --package-lock=false linkedom@0.18.12
+
+Scope:
+- Google native test ad units through production factory/style/render code; no Firebase publish.
+- Other matrix/shuffle captures retain their historical evidence. This run refreshes only
+  the six configs above; use #native-close-progress for the latest ring geometry and alpha.
+- Screenshot creatives may differ between requests.

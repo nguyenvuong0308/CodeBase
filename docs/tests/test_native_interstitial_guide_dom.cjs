@@ -74,11 +74,23 @@ const selectValue = (id, value) => {
   location.hash = '#native-fake-interstitial';
   windowEvents.get('hashchange')();
   assert.equal(byId('guide-native-panel').hidden, false);
-  for (const hash of ['#native-theme-shuffle', '#native-template-shuffle']) {
+  for (const hash of ['#native-close-progress', '#native-theme-shuffle', '#native-template-shuffle']) {
     byId('guide-general-tab').click();
     location.hash = hash;
     windowEvents.get('hashchange')();
     assert.equal(byId('guide-native-panel').hidden, false);
+  }
+  const closeCards = [...document.querySelectorAll('[data-close-case]')];
+  assert.equal(closeCards.length, 6);
+  for (const card of closeCards) {
+    assert.equal(card.querySelectorAll('img').length, 4);
+    const config = JSON.parse(card.querySelector('pre code').textContent);
+    const hidden = card.dataset.closeCase.endsWith('-hidden-indicators');
+    assert.equal(config.hide_text_count_down, hidden);
+    assert.equal(config.hide_progress_count_down, hidden);
+    card.querySelector('.copy-button').click();
+    await Promise.resolve();
+    assert.deepEqual(JSON.parse(copied), config);
   }
   const key = new Event('keydown', { cancelable: true });
   Object.defineProperty(key, 'key', { value: 'Home' });
