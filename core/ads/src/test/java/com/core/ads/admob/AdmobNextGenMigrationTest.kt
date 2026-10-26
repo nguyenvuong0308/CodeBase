@@ -14,7 +14,7 @@ class AdmobNextGenMigrationTest {
         val version = Regex("""(?m)^adsMobileSdk\s*=\s*"([^"]+)"\s*$""")
             .find(catalog)?.groupValues?.get(1)
 
-        assertEquals("1.5.0", version)
+        assertEquals("1.6.0", version)
         assertTrue(
             catalog.lineSequence().any {
                 it.startsWith("ads-mobile-sdk =") &&

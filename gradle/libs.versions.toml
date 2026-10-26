@@ -7,7 +7,7 @@ agp = "8.13.2"
 appUpdateVersion = "2.1.0"
 appUpdateKtxVersion = "2.1.0"
 flexboxVersion = "3.0.0"
-kotlin = "2.2.21"
+kotlin = "2.3.21"
 lifecycleExtensionsVersion = "2.2.0"
 minSdk = "24"
 reviewKtxVersion = "2.0.2"
@@ -26,15 +26,15 @@ windowVersion = "1.5.1"
 roomKtx = "2.8.4"
 
 #----------------- Google & Firebase Services -----------------#
-firebaseBom = "34.17.0"
-adsMobileSdk = "1.5.0"
+firebaseBom = "35.1.0"
+adsMobileSdk = "1.6.0"
 playServicesAdsIdentifier = "18.3.0"
 playServicesBase = "18.10.0"
 playServicesBasement = "18.10.0"
 billingKtx = "9.1.0"
 userMessagingPlatform = "4.0.0"
 googleService = "4.5.0"
-crashlytics = "3.0.7"
+crashlytics = "3.0.8"
 firebasePerf = "2.0.2"
 
 #----------------- UI & Graphics -----------------#
@@ -60,8 +60,8 @@ espressoCore = "3.7.0"
 
 #adjust required
 installreferrer = "2.2"
-adjustAndroid = "5.7.0"
-adjustAndroidWebbridge = "5.7.0"
+adjustAndroid = "5.8.0"
+adjustAndroidWebbridge = "5.8.0"
 
 [libraries]
 #Adjust
@@ -173,7 +173,7 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 
 #----------------- Code Generation & Annotation Processing -----------------#
-kotlin-ksp = { id = "com.google.devtools.ksp", version = "2.2.21-2.0.4" }
+kotlin-ksp = { id = "com.google.devtools.ksp", version = "2.3.10" }
 dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 android-room = { id = "androidx.room", version.ref = "roomKtx"}
 

@@ -585,7 +585,7 @@ Mapper → cache → AdsManager</code></pre>
           <tr><td><code>tutorial_config</code></td><td><span class="badge json">String · JSON object</span></td><td>Bật/tắt nhóm ad trong tutorial flow, gồm high-floor và fallback ad unit.</td></tr>
           <tr><td><code>ads_disabled_by_country</code></td><td><span class="badge json">String · JSON array</span></td><td>Danh sách mã quốc gia tắt toàn bộ quảng cáo.</td></tr>
           <tr><td><code>ad_places_disable_when_detect_test_ad</code></td><td><span class="badge json">String · JSON array</span></td><td>Danh sách place bị ẩn khi SDK phát hiện test ad.</td></tr>
-          <tr><td><code>is_turn_on_ad_places_disabled_when_detect_test_ad</code></td><td><span class="badge boolean">Boolean</span></td><td>Bật/tắt logic ẩn place khi detect test ad.</td></tr>
+          <tr><td><code>is_turn_on_ad_places_disabled_when_detect_test_ad</code></td><td><span class="badge boolean">Boolean</span></td><td>Bật/tắt logic ẩn place khi detect test ad. Khi debug, có thể <a href="#debug-test-ad-protection">ghi đè bằng DebugRemoteConfig</a>.</td></tr>
           <tr><td><code>splash_screen_config</code></td><td><span class="badge json">String · JSON object</span></td><td>Điều khiển loại ads trên splash và timeout chờ load.</td></tr>
           <tr><td><code>banner_native_ad_places</code></td><td><span class="badge json">String · JSON array</span></td><td>Các vị trí banner/native.</td></tr>
           <tr><td><code>banner_native_ad_places_2</code></td><td><span class="badge json">String · JSON array</span></td><td>Override fallback cho banner/native nếu không có versioned key.</td></tr>
@@ -1137,6 +1137,28 @@ nativePictureInPicture.show(
           <tr><td><code>is_turn_on_ad_places_disabled_when_detect_test_ad</code></td><td>Boolean</td><td><code>true</code></td><td>Công tắc bật logic test-ad protection cho danh sách trên.</td></tr>
         </tbody>
       </table>
+
+      <h4 id="debug-test-ad-protection">Cấu hình test-ad protection khi debug</h4>
+      <p>Dùng <code>DebugRemoteConfig.isTurnOnAdPlacesDisabledWhenDetectTestAd</code> để ghi đè cục bộ giá trị của <code>is_turn_on_ad_places_disabled_when_detect_test_ad</code>. Thuộc tính có kiểu <code>Boolean?</code>, mặc định <code>null</code>; chỉ có hiệu lực khi app debuggable. Bản release bỏ qua giá trị này và tiếp tục dùng Firebase Remote Config.</p>
+      <p>Trong <code>app/src/main/java/com/codebasetemplate/App.kt</code>, đặt giá trị ở <code>App.initOtherConfig()</code> trước khi load quảng cáo. Giữ nguyên các cấu hình khác đang có trong hàm:</p>
+      <pre><code>import com.core.config.DebugRemoteConfig
+
+// Trong class App:
+override fun initOtherConfig() {
+    DebugRemoteConfig.isTurnOnAdPlacesDisabledWhenDetectTestAd = false
+
+    // Giữ các cấu hình khác của app tại đây.
+}</code></pre>
+      <table>
+        <thead><tr><th>Giá trị</th><th>Hành vi khi debug</th></tr></thead>
+        <tbody>
+          <tr><td><code>true</code></td><td>Bật chặn các place trong <code>ad_places_disable_when_detect_test_ad</code> khi phát hiện test ad. Vẫn cần cấu hình danh sách place và có test ad được phát hiện.</td></tr>
+          <tr><td><code>false</code></td><td>Tắt cơ chế chặn do phát hiện test ad. Các điều kiện bật/tắt quảng cáo khác vẫn áp dụng.</td></tr>
+          <tr><td><code>null</code> (mặc định)</td><td>Dùng giá trị Firebase Remote Config theo luồng hiện tại: lấy từ cache nếu có, nếu chưa có thì đọc từ Remote Config.</td></tr>
+        </tbody>
+      </table>
+      <p>Trong debug, <code>true</code> hoặc <code>false</code> ưu tiên cao hơn cả giá trị Firebase đã cache. Cấu hình này không sửa parameter trên Firebase Console và không thay đổi danh sách <code>ad_places_disable_when_detect_test_ad</code>.</p>
+      <p><strong>Sau khi đổi giá trị, dừng và chạy lại app</strong> để reset trạng thái test ad đã phát hiện và danh sách place đã bị chặn trong phiên trước. Chỉ gán lại giá trị khi app đang chạy không tự xóa các trạng thái này.</p>
 
       <h3>splash_screen_config</h3>
       <div class="config-keys" data-config-key="splash_screen_config"><code>splash_screen_config</code></div>

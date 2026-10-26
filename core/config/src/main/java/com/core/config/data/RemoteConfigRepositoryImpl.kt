@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.core.analytics.AnalyticsEvent
 import com.core.analytics.AnalyticsManager
+import com.core.config.DebugRemoteConfig
 import com.core.config.data.helper.ConfigParam
 import com.core.config.data.mapper.AdPlaceModelMapper
 import com.core.config.data.mapper.AppConfigModelMapper
@@ -463,6 +464,9 @@ internal class RemoteConfigRepositoryImpl @Inject constructor(
     }
 
     override fun isTurnOnAdPlacesDisabledWhenDetectTestAd(): Boolean {
+        if (applicationContext.isAppDebuggable()) {
+            DebugRemoteConfig.isTurnOnAdPlacesDisabledWhenDetectTestAd?.let { return it }
+        }
         return isTurnOnAdPlacesDisabledWhenDetectTestAdCache
             ?: isTurnOnAdPlacesDisabledWhenDetectTestAdRaw()
     }

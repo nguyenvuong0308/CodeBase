@@ -2,6 +2,7 @@ package com.codebasetemplate
 
 import com.core.ads.BaseAdmobApplication
 import com.core.ads.admob.ReOpenShowCondition
+import com.core.config.DebugRemoteConfig
 import com.core.rate.RateInApp
 import dagger.Lazy
 import dagger.hilt.android.HiltAndroidApp
@@ -21,6 +22,10 @@ class App : BaseAdmobApplication() {
     }
 
     override fun initOtherConfig() {
+        // Debug only: true = bật chặn test ad, false = tắt, null = dùng Firebase.
+        // Đổi giá trị rồi chạy lại app để reset trạng thái test ad đã phát hiện.
+        DebugRemoteConfig.isTurnOnAdPlacesDisabledWhenDetectTestAd = null
+
         RateInApp.instance.registerActivityLifecycle(this)
         RateInApp.instance.rateConfig.apply {
             isHideNavigationBar = true
