@@ -16,6 +16,7 @@ Thêm placement vào `rewarded_rewardedinter_inter_ad_places` hoặc key fullscr
   "ad_type": "native_interstitial",
   "native_template_size": "full_interstitial_v3",
   "is_enable": true,
+  "is_disable_for_low_device": false,
   "is_auto_load_after_dismiss": true,
   "background_full_color": "#FFFFFF",
   "control_close_position": "left",
@@ -32,11 +33,16 @@ trong `AppAdPlaceName` và bảo đảm `IAppProviderAdPlaceName` resolve đư�
 | `ad_type` | Dùng `native_interstitial` để load/show và nhận callback qua fullscreen API. |
 | `native_template_size` | Nhận `full_interstitial_v1` đến `full_interstitial_v6`, hoặc `full_interstitial_shuffle` để random V4/V5/V6. Thiếu, rỗng hoặc giá trị khác đều fallback về `full_interstitial_v3`; không ảnh hưởng template của `ad_type: "native"`. |
 | `is_auto_load_after_dismiss` | Mặc định `true`. Bắt đầu load ad mới sau khi đóng một ad đã hiển thị. |
+| `is_disable_for_low_device` | Cờ riêng của placement, mặc định `false` khi thiếu hoặc `null`. Chỉ chặn load/show khi cờ này và `AdmobAdsInitializer.isLowDevice` của app đều `true`; không đặt trong `native_ad_config`. |
 | `expired_time_second` | TTL của native cache; nếu thiếu thì dùng `native_ad_config.expired_time_second`. Ad hết hạn không được show. |
 | `is_ignore_interval` | Mặc định `false`. Khi bật, bỏ qua kiểm tra interval, số lượt trong session và meaningful actions. |
 | `close_step_count` | Với V3: `1` để countdown rồi đóng; `2` để qua bước Next rồi Close. Mặc định V3 là `2`. |
 | `count_down_timer` | Số giây countdown; ví dụ trên dùng 5 giây. |
 | `step_1_count_down_timer`, `step_2_count_down_timer` | Override thời gian từng bước của V3; khi thiếu, fallback về `count_down_timer`. |
+
+Xem [cách set low device ở app và đọc log](firebase-ads-guide/firebase_ads_config_guide.html#low-device-ads).
+Native lồng trong `native_config` có cờ riêng; các placement cùng loại/cùng ad unit không tự
+kế thừa cờ của nhau.
 
 ## Template V4 / V5 / V6
 

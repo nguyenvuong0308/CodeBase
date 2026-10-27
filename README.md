@@ -53,6 +53,7 @@ Available artifacts:
 - [Release notes 3.1.1](docs/release-notes-3.1.1.md)
 - [Release notes 3.0.5–3.0.9](docs/release-notes-3.0.5-3.0.9.md)
 - [Firebase Ads configuration guide](docs/firebase-ads-guide/firebase_ads_config_guide.html)
+- [Low-device ads: per-placement flags, app setup and logs](docs/firebase-ads-guide/firebase_ads_config_guide.html#low-device-ads)
 - [Ads A/B testing overrides](docs/ads-ab-testing-config.md)
 - [Native collapsible remote config](docs/native-collapsible-config.md)
 - [Native interstitial: configuration, load/show and lifecycle](docs/native-interstitial-config.md)

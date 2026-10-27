@@ -274,6 +274,7 @@ class AdmobManager @Inject constructor(
         }
 
         val adPlace = remoteConfigRepository.getAdPlaceBy(adPlaceName)
+        if (adPlace.isDisabledForLowDevice("isNotAbleToVisibleAdsToUser")) return true
         if (adPlace.isDisabledByTutorialConfig()) {
             Log.d(TAG, "isNotAbleToVisibleAdsToUser: disabled by tutorial_config ${adPlaceName.name}")
             return true
@@ -288,6 +289,7 @@ class AdmobManager @Inject constructor(
     }
 
     private fun isNotAbleToVisibleResolvedAdPlace(adPlace: AdPlace): Boolean {
+        if (adPlace.isDisabledForLowDevice("isNotAbleToVisibleResolvedAdPlace")) return true
         if (!remoteConfigRepository.getAppConfig().isEnableAds) {
             Log.d(TAG, "isNotAbleToVisibleResolvedAdPlace: isEnableAds = false")
             return true
@@ -659,9 +661,9 @@ class AdmobManager @Inject constructor(
             }
         }
         if (isNotAbleToVisibleAdsToUser(adPlaceName)) {
-            // Riêng trường hợp bị tắt bởi tutorial_config, phát thêm callback load-failed để
+            // Khi bị tắt bởi config, phát thêm callback load-failed để
             // listener (vd: tracking) phân biệt được với các lý do ẩn ad khác (VIP, country, capping...).
-            if (adPlace.isDisabledByTutorialConfig()) {
+            if (adPlace.isDisabledByTutorialConfig() || adPlace.isDisabledForLowDevice()) {
                 notifyAdFullScreenNotValidOrLoadFailed(adPlaceName)
             }
             if (!isRequestFromExternal && adHolder.isWaitLoadToShow) {
@@ -760,6 +762,12 @@ class AdmobManager @Inject constructor(
         activity: Activity,
         adHolder: InterstitialAdHolder
     ) {
+        if (adHolder.adPlace.isDisabledForLowDevice("showInterstitial")) {
+            adHolder.isWaitLoadToShow = false
+            activity.removeAdLoaderIfAlive()
+            notifyAdFullScreenCompleted(adHolder.adPlace.placeName, false, false)
+            return
+        }
         if (activity.isFinishing || activity.isDestroyed) {
             adHolder.isWaitLoadToShow = false
             notifyAdFullScreenCompleted(adHolder.adPlace.placeName, false, false)
@@ -887,6 +895,12 @@ class AdmobManager @Inject constructor(
         activity: Activity,
         adHolder: RewardedInterstitialAdHolder,
     ) {
+        if (adHolder.adPlace.isDisabledForLowDevice("showRewardedInterstitialVideo")) {
+            adHolder.isWaitLoadToShow = false
+            activity.removeAdLoaderIfAlive()
+            notifyAdFullScreenCompleted(adHolder.adPlace.placeName, false, false)
+            return
+        }
         if (activity.isFinishing || activity.isDestroyed) {
             adHolder.isWaitLoadToShow = false
             notifyAdFullScreenCompleted(adHolder.adPlace.placeName, false, false)
@@ -986,6 +1000,12 @@ class AdmobManager @Inject constructor(
         activity: Activity,
         adHolder: RewardedAdHolder,
     ) {
+        if (adHolder.adPlace.isDisabledForLowDevice("showRewardedVideo")) {
+            adHolder.isWaitLoadToShow = false
+            activity.removeAdLoaderIfAlive()
+            notifyAdFullScreenCompleted(adHolder.adPlace.placeName, false, false)
+            return
+        }
         if (activity.isFinishing || activity.isDestroyed) {
             adHolder.isWaitLoadToShow = false
             notifyAdFullScreenCompleted(adHolder.adPlace.placeName, false, false)
@@ -1294,6 +1314,10 @@ class AdmobManager @Inject constructor(
         adHolder: InterstitialAdHolder,
         waterfallIndex: Int = 0,
     ) {
+        if (adHolder.adPlace.isDisabledForLowDevice("loadInterstitialIfNeed")) {
+            failFullScreenLoad(activity, adHolder)
+            return
+        }
         if (!MobileAds.isInitialized || activity.isFinishing || activity.isDestroyed) {
             failFullScreenLoad(activity, adHolder)
             return
@@ -1441,6 +1465,10 @@ class AdmobManager @Inject constructor(
         adHolder: RewardedInterstitialAdHolder,
         waterfallIndex: Int = 0,
     ) {
+        if (adHolder.adPlace.isDisabledForLowDevice("loadRewardedInterstitialIfNeed")) {
+            failFullScreenLoad(activity, adHolder)
+            return
+        }
         if (!MobileAds.isInitialized || activity.isFinishing || activity.isDestroyed) {
             failFullScreenLoad(activity, adHolder)
             return
@@ -1588,6 +1616,10 @@ class AdmobManager @Inject constructor(
         adHolder: RewardedAdHolder,
         waterfallIndex: Int = 0,
     ) {
+        if (adHolder.adPlace.isDisabledForLowDevice("loadRewardedIfNeed")) {
+            failFullScreenLoad(activity, adHolder)
+            return
+        }
         if (!MobileAds.isInitialized || activity.isFinishing || activity.isDestroyed) {
             failFullScreenLoad(activity, adHolder)
             return
@@ -2225,6 +2257,20 @@ class AdmobManager @Inject constructor(
         return isTutorialFlow && !remoteConfigRepository.getTutorialConfig().enableAllAds
     }
 
+    // A null operation is a secondary check for callbacks; do not log the same decision again.
+    private fun AdPlace.isDisabledForLowDevice(operation: String? = null): Boolean {
+        if (!adsSdkInitializer.isLowDevice) return false
+        val isDisabled = isDisableForLowDevice
+        if (isDisabled && operation != null) {
+            Log.d(
+                TAG,
+                "LowDeviceAds: blocked operation=$operation placement=${placeName.name} " +
+                    "adType=${adType.key} isLowDevice=true is_disable_for_low_device=true"
+            )
+        }
+        return isDisabled
+    }
+
     private fun failFullScreenLoad(activity: Activity, adHolder: AdHolder) {
         val placeName = adHolder.adPlace.placeName
         Log.i(TAG, "FullScreen load unavailable $placeName")
@@ -2642,6 +2688,7 @@ class AdmobManager @Inject constructor(
 
     override fun getNativeHolder(activity: Activity, adPlaceName: IAdPlaceName): NativeAdHolder? {
         if (activity.isDestroyed) return null
+        if (remoteConfigRepository.getAdPlaceBy(adPlaceName).isDisabledForLowDevice("getNativeHolder")) return null
         return adHolderBannerNativeMap[adPlaceName] as? NativeAdHolder
     }
 
@@ -2872,6 +2919,7 @@ class AdmobManager @Inject constructor(
 
     override fun isRewardReady(adPlaceName: IAdPlaceName): Boolean {
         val adPlace = remoteConfigRepository.getAdPlaceBy(adPlaceName)
+        if (adPlace.isDisabledForLowDevice("isRewardReady")) return false
         val adHolder = getOrCreateAdHolderFullScreenBy(adPlace, true)
         return (adHolder as? RewardedAdHolder)?.rewardedAd != null ||
                 findLoadedFullScreenAdUnitHolder(adPlace) != null

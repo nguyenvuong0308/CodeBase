@@ -36,7 +36,10 @@ class NativeInterstitialGuideTest(unittest.TestCase):
                 self.assertIn(case['readyStyle'], ('default', 'compact'))
                 if case['readyStyle'] == 'compact':
                     expected['control_close_ready_style'] = 'compact'
-                self.assertEqual(expected, config)
+                # Historical capture inputs omit this newer optional field; omission means false.
+                # An explicit value still wins, so a changed low-device policy fails this check.
+                effective_config = {'is_disable_for_low_device': False, **config}
+                self.assertEqual(expected, effective_config)
                 card = re.search(r'data-case="' + re.escape(case['id']) + r'"[\s\S]*?<pre><code>([\s\S]*?)</code></pre>', self.html)
                 self.assertIsNotNone(card)
                 self.assertEqual(config, json.loads(unescape(card.group(1))))

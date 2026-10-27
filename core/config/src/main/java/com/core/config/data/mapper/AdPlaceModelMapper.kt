@@ -48,6 +48,7 @@ internal class AdPlaceModelMapper @Inject constructor(
         val isTrackingShow = model.isTrackingShow ?: true
         return when(adType) {
             AdType.RewardedVideo -> RewardedVideoAdPlace(
+                isDisableForLowDevice = model.isDisableForLowDevice ?: false,
                 placeName = placeName,
                 adId = adId,
                 highFloorAdIds = highFloorAdIds,
@@ -60,6 +61,7 @@ internal class AdPlaceModelMapper @Inject constructor(
                 isTrackingShow = isTrackingShow
             )
             AdType.RewardedInterstitial -> RewardedInterstitialAdPlace(
+                isDisableForLowDevice = model.isDisableForLowDevice ?: false,
                 placeName = placeName,
                 adId = adId,
                 highFloorAdIds = highFloorAdIds,
@@ -72,6 +74,7 @@ internal class AdPlaceModelMapper @Inject constructor(
                 isTrackingShow = isTrackingShow
             )
             AdType.Interstitial -> InterstitialAdPlace(
+                isDisableForLowDevice = model.isDisableForLowDevice ?: false,
                 placeName = placeName,
                 adId = adId,
                 highFloorAdIds = highFloorAdIds,
@@ -94,6 +97,7 @@ internal class AdPlaceModelMapper @Inject constructor(
             AdType.Native, AdType.NativeInterstitial ->
                 toNativeAdPlace(model, allowRemotePlaceName = false) ?: NoneAdPlace()
             AdType.Banner -> BannerAdPlace(
+                isDisableForLowDevice = model.isDisableForLowDevice ?: false,
                 placeName = placeName,
                 adId = adId,
                 highFloorAdIds = highFloorAdIds,
@@ -109,6 +113,7 @@ internal class AdPlaceModelMapper @Inject constructor(
                 autoReloadCollapsible = model.autoReloadCollapsible ?: false
             )
             AdType.AppOpen -> AppOpenAdPlace(
+                isDisableForLowDevice = model.isDisableForLowDevice ?: false,
                 placeName = placeName,
                 adId = adId,
                 highFloorAdIds = highFloorAdIds,
@@ -166,6 +171,7 @@ internal class AdPlaceModelMapper @Inject constructor(
             template
         }
         return NativeAdPlace(
+            isDisableForLowDevice = model.isDisableForLowDevice ?: false,
             placeName = placeName,
             adId = model.adId ?: "",
             highFloorAdIds = model.highFloorAdIds.orEmpty().filter { it.isNotBlank() },

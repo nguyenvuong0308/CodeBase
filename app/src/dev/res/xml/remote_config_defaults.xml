@@ -175,6 +175,7 @@
             [
             {
             "place_name": "anchored_change_language_bottom",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2014213617",
             "ad_type": "banner",
             "banner_size": "anchored",
@@ -190,6 +191,7 @@
             },
             {
             "place_name": "anchored_onboarding_bottom",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "is_tracking_click": true,
@@ -204,6 +206,7 @@
             },
             {
             "place_name": "anchored_onboarding_bottom_v2",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "high_floor_ad_ids": ["ca-app-pub-3940256099942544/2247696110"],
             "ad_type": "native",
@@ -220,6 +223,7 @@
             },
             {
             "place_name": "anchored_full_onboarding",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "high_floor_ad_ids": ["ca-app-pub-3940256099942544/2247696110"],
             "ad_type": "native",
@@ -237,6 +241,7 @@
             },
             {
             "place_name": "anchored_full_onboarding_v2",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "high_floor_ad_ids": ["ca-app-pub-3940256099942544/2247696110"],
             "ad_type": "native",
@@ -254,6 +259,7 @@
             },
             {
             "place_name": "flow_tutorial_201_language_1_n_native",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "high_floor_ad_ids": [
             "ca-app-pub-3940256099942544/2247696110"
@@ -272,6 +278,7 @@
             },
             {
             "place_name": "flow_tutorial_201_language_2_n_native",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "high_floor_ad_ids": [
             "ca-app-pub-3940256099942544/2247696110"
@@ -290,6 +297,7 @@
             },
             {
             "place_name": "flow_tutorial_201_language_3_n_native",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "high_floor_ad_ids": [
             "ca-app-pub-3940256099942544/2247696110"
@@ -308,6 +316,7 @@
             },
             {
             "place_name": "flow_tutorial_301_onb1_n_native",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "high_floor_ad_ids": [
             "ca-app-pub-3940256099942544/2247696110"
@@ -326,6 +335,7 @@
             },
             {
             "place_name": "flow_tutorial_302_onb2_n_native",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "high_floor_ad_ids": [
             "ca-app-pub-3940256099942544/2247696110"
@@ -344,6 +354,7 @@
             },
             {
             "place_name": "flow_tutorial_303_onb3_n_native",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "high_floor_ad_ids": [
             "ca-app-pub-3940256099942544/2247696110"
@@ -363,6 +374,7 @@
             },
             {
             "place_name": "flow_tutorial_303_onb4_n_native",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "high_floor_ad_ids": [
             "ca-app-pub-3940256099942544/2247696110"
@@ -381,6 +393,7 @@
             },
             {
             "place_name": "flow_tutorial_v1_201_language_1_n_native",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "is_tracking_click": true,
@@ -395,6 +408,7 @@
             },
             {
             "place_name": "flow_tutorial_v1_201_language_2_n_native",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "is_tracking_click": true,
@@ -409,6 +423,7 @@
             },
             {
             "place_name": "anchored_change_language_v2_from_setting_native",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "is_tracking_click": true,
@@ -423,6 +438,7 @@
             },
             {
             "place_name": "anchored_uninstall_bottom_step_1",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "is_tracking_click": true,
@@ -436,6 +452,7 @@
             },
             {
             "place_name": "anchored_uninstall_bottom_step_2",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "is_tracking_click": true,
@@ -449,6 +466,7 @@
             },
             {
             "place_name": "anchored_native_collapsible_test",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "native_template_size": "small_cta_bottom",
@@ -472,6 +490,7 @@
             },
             {
             "place_name": "anchored_native_test",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "native_template_size": "small_banner_cta_right",
@@ -488,6 +507,7 @@
             },
             {
             "place_name": "anchored_exit",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "is_tracking_click": true,
@@ -501,6 +521,7 @@
             },
             {
             "place_name": "anchored_banner_test",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2014213617",
             "ad_type": "banner",
             "is_collapsible": false,
@@ -510,6 +531,7 @@
             },
             {
             "place_name": "anchored_native_in_list_test",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "native_template_size": "small",
@@ -525,6 +547,7 @@
             },
             {
             "place_name": "anchored_bottom_home",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "native_template_size": "small",
@@ -545,6 +568,7 @@
             },
             {
             "place_name": "anchored_native_pip_home",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "native_template_size": "native_pip",
@@ -580,18 +604,21 @@
             [
             {
             "place_name": "open_app_first_open",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/9257395921",
             "ad_type": "app_open",
             "is_enable": true
             },
             {
             "place_name": "open_app",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/9257395921",
             "ad_type": "app_open",
             "is_enable": true
             },
             {
             "place_name": "reopen_app",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/9257395921",
             "ad_type": "app_open",
             "is_enable": true
@@ -619,6 +646,7 @@
             [
             {
             "place_name": "action_app_open_first_open",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "ad_type": "interstitial",
             "high_floor_ad_ids": [
@@ -629,6 +657,7 @@
             },
             {
             "place_name": "action_app_open",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "ad_type": "interstitial",
             "high_floor_ad_ids": [
@@ -639,18 +668,21 @@
             },
             {
             "place_name": "fullscreen_show_to_home",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "ad_type": "interstitial",
             "is_enable": true
             },
             {
             "place_name": "reward_test",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/5224354917",
             "ad_type": "rewarded",
             "is_enable": true
             },
             {
             "place_name": "fullscreen_test_lazy_load",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "native_template_size": "full_interstitial_v2",
@@ -668,6 +700,7 @@
             },
             {
             "place_name": "fullscreen_native_interstitial",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native_interstitial",
             "native_template_size": "full_interstitial_v3",
@@ -686,6 +719,7 @@
             },
             {
             "place_name": "fullscreen_native_interstitial_v4",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native_interstitial",
             "native_template_size": "full_interstitial_v4",
@@ -709,6 +743,7 @@
             },
             {
             "place_name": "fullscreen_native_interstitial_v5",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native_interstitial",
             "native_template_size": "full_interstitial_v5",
@@ -732,6 +767,7 @@
             },
             {
             "place_name": "fullscreen_native_interstitial_v6",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native_interstitial",
             "native_template_size": "full_interstitial_v6",
@@ -755,6 +791,7 @@
             },
 {
   "place_name": "fullscreen_native_interstitial_v4_dark",
+  "is_disable_for_low_device": false,
   "ad_id": "ca-app-pub-3940256099942544/2247696110",
   "ad_type": "native_interstitial",
   "native_template_size": "full_interstitial_v4",
@@ -779,6 +816,7 @@
 },
 {
   "place_name": "fullscreen_native_interstitial_v4_light",
+  "is_disable_for_low_device": false,
   "ad_id": "ca-app-pub-3940256099942544/2247696110",
   "ad_type": "native_interstitial",
   "native_template_size": "full_interstitial_v4",
@@ -803,6 +841,7 @@
 },
 {
   "place_name": "fullscreen_native_interstitial_v5_dark",
+  "is_disable_for_low_device": false,
   "ad_id": "ca-app-pub-3940256099942544/2247696110",
   "ad_type": "native_interstitial",
   "native_template_size": "full_interstitial_v5",
@@ -827,6 +866,7 @@
 },
 {
   "place_name": "fullscreen_native_interstitial_v5_light",
+  "is_disable_for_low_device": false,
   "ad_id": "ca-app-pub-3940256099942544/2247696110",
   "ad_type": "native_interstitial",
   "native_template_size": "full_interstitial_v5",
@@ -851,6 +891,7 @@
 },
 {
   "place_name": "fullscreen_native_interstitial_v6_dark",
+  "is_disable_for_low_device": false,
   "ad_id": "ca-app-pub-3940256099942544/2247696110",
   "ad_type": "native_interstitial",
   "native_template_size": "full_interstitial_v6",
@@ -875,6 +916,7 @@
 },
 {
   "place_name": "fullscreen_native_interstitial_v6_light",
+  "is_disable_for_low_device": false,
   "ad_id": "ca-app-pub-3940256099942544/2247696110",
   "ad_type": "native_interstitial",
   "native_template_size": "full_interstitial_v6",
@@ -899,6 +941,7 @@
 },
             {
             "place_name": "fullscreen_test_lazy_load_light",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "native_template_size": "full_interstitial_v2",
@@ -916,6 +959,7 @@
             },
             {
             "place_name": "fullscreen_test_lazy_load_dark",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/2247696110",
             "ad_type": "native",
             "native_template_size": "full_interstitial_v2",
@@ -933,12 +977,14 @@
             },
             {
             "place_name": "fullscreen_back_language_setting",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "ad_type": "interstitial",
             "is_enable": true
             },
             {
             "place_name": "action_next_in_introduction",
+            "is_disable_for_low_device": false,
             "ad_id": "ca-app-pub-3940256099942544/1033173712",
             "is_ignore_interval": true,
             "high_floor_ad_ids": [

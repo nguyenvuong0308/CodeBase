@@ -1,6 +1,7 @@
 [
   {
     "place_name": "fullscreen_native_interstitial_v4_dark",
+    "is_disable_for_low_device": false,
     "ad_id": "ca-app-pub-3940256099942544/2247696110",
     "ad_type": "native_interstitial",
     "native_template_size": "full_interstitial_v4",
@@ -25,6 +26,7 @@
   },
   {
     "place_name": "fullscreen_native_interstitial_v4_light",
+    "is_disable_for_low_device": false,
     "ad_id": "ca-app-pub-3940256099942544/2247696110",
     "ad_type": "native_interstitial",
     "native_template_size": "full_interstitial_v4",
@@ -49,6 +51,7 @@
   },
   {
     "place_name": "fullscreen_native_interstitial_v5_dark",
+    "is_disable_for_low_device": false,
     "ad_id": "ca-app-pub-3940256099942544/2247696110",
     "ad_type": "native_interstitial",
     "native_template_size": "full_interstitial_v5",
@@ -73,6 +76,7 @@
   },
   {
     "place_name": "fullscreen_native_interstitial_v5_light",
+    "is_disable_for_low_device": false,
     "ad_id": "ca-app-pub-3940256099942544/2247696110",
     "ad_type": "native_interstitial",
     "native_template_size": "full_interstitial_v5",
@@ -97,6 +101,7 @@
   },
   {
     "place_name": "fullscreen_native_interstitial_v6_dark",
+    "is_disable_for_low_device": false,
     "ad_id": "ca-app-pub-3940256099942544/2247696110",
     "ad_type": "native_interstitial",
     "native_template_size": "full_interstitial_v6",
@@ -121,6 +126,7 @@
   },
   {
     "place_name": "fullscreen_native_interstitial_v6_light",
+    "is_disable_for_low_device": false,
     "ad_id": "ca-app-pub-3940256099942544/2247696110",
     "ad_type": "native_interstitial",
     "native_template_size": "full_interstitial_v6",

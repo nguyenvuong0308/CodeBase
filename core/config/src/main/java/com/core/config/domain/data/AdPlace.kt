@@ -15,6 +15,7 @@ sealed class AdPlace {
     abstract val highFloorAdIds: List<String>
 
     abstract val isEnable: Boolean
+    abstract val isDisableForLowDevice: Boolean
 
     abstract val adType: AdType
 
@@ -59,6 +60,7 @@ data class RewardedVideoAdPlace(
     override val isAutoLoadAfterDismiss: Boolean,
     override val isIgnoreInterval: Boolean,
     override val isTutorialFlow: Boolean,
+    override val isDisableForLowDevice: Boolean = false,
 ): AdPlace() {
 }
 
@@ -73,6 +75,7 @@ data class RewardedInterstitialAdPlace(
     override val isAutoLoadAfterDismiss: Boolean,
     override val isIgnoreInterval: Boolean,
     override val isTutorialFlow: Boolean,
+    override val isDisableForLowDevice: Boolean = false,
 ): AdPlace()
 
 data class InterstitialAdPlace(
@@ -90,6 +93,7 @@ data class InterstitialAdPlace(
     val isShowNativeAfter: Boolean,
     val nativeAfterLoadStrategy: NativeAfterInterstitialLoadStrategy,
     val nativeAfterInterstitial: NativeAdPlace?,
+    override val isDisableForLowDevice: Boolean = false,
 ): AdPlace()
 
 data class NativeAdPlace(
@@ -146,6 +150,7 @@ data class NativeAdPlace(
     val alwaysHideInlineNative: Boolean = false,
     val nativeExpandMarginLeftDp: Float = 0f,
     val nativeExpandMarginRightDp: Float = 0f,
+    override val isDisableForLowDevice: Boolean = false,
 ): AdPlace()
 
 data class BannerAdPlace(
@@ -162,6 +167,7 @@ data class BannerAdPlace(
     override val isAutoLoadAfterDismiss: Boolean,
     override val isIgnoreInterval: Boolean,
     override val isTutorialFlow: Boolean,
+    override val isDisableForLowDevice: Boolean = false,
 ): AdPlace()
 
 data class AppOpenAdPlace(
@@ -176,6 +182,7 @@ data class AppOpenAdPlace(
     override val isAutoLoadAfterDismiss: Boolean,
     override val isIgnoreInterval: Boolean,
     override val isTutorialFlow: Boolean,
+    override val isDisableForLowDevice: Boolean = false,
 ): AdPlace()
 
 data class NoneAdPlace(
@@ -189,5 +196,6 @@ data class NoneAdPlace(
     override val isAutoLoadAfterDismiss: Boolean = false,
     override val isIgnoreInterval: Boolean = false,
     override val isTutorialFlow: Boolean = false,
+    override val isDisableForLowDevice: Boolean = false,
 ): AdPlace()
 

@@ -623,6 +623,7 @@ Mapper → cache → AdsManager</code></pre>
           <tr><td><code>high_floor_ad_ids</code></td><td>Array string</td><td>Tất cả</td><td>Danh sách ad unit ưu tiên, load trước <code>ad_id</code> theo waterfall.</td></tr>
           <tr><td><code>ad_type</code></td><td>String</td><td>Tất cả</td><td><span class="pill">banner</span><span class="pill">native</span><span class="pill">native_interstitial</span><span class="pill">interstitial</span><span class="pill">rewarded</span><span class="pill">rewarded_interstitial</span><span class="pill">app_open</span></td></tr>
           <tr><td><code>is_enable</code></td><td>Boolean</td><td>Tất cả</td><td>Bật/tắt riêng vị trí quảng cáo.</td></tr>
+          <tr><td><code>is_disable_for_low_device</code></td><td>Boolean, tùy chọn</td><td>Tất cả</td><td>Chặn riêng placement khi app đánh dấu <code>isLowDevice=true</code>. Thiếu hoặc <code>null</code> mặc định <code>false</code>. Đặt cùng cấp với <code>place_name</code>.</td></tr>
           <tr><td><code>is_tracking_click</code></td><td>Boolean</td><td>Tất cả</td><td>Bật tracking click.</td></tr>
           <tr><td><code>is_tracking_show</code></td><td>Boolean</td><td>Tất cả</td><td>Bật tracking show/impression theo flow nội bộ.</td></tr>
           <tr><td><code>is_auto_load_after_dismiss</code></td><td>Boolean</td><td>Fullscreen</td><td>Sau khi dismiss, tự load lại ad mới. Default code: <code>true</code>.</td></tr>
@@ -630,6 +631,47 @@ Mapper → cache → AdsManager</code></pre>
           <tr><td><code>is_tutorial_flow</code></td><td>Boolean</td><td>Tất cả</td><td>Place thuộc tutorial flow, chịu ảnh hưởng của <code>tutorial_config</code>.</td></tr>
         </tbody>
       </table>
+
+      <h3 id="low-device-ads">Tắt từng placement trên thiết bị low device</h3>
+      <p><code>is_disable_for_low_device</code> thuộc từng object ad place, không thuộc <code>native_ad_config</code>, <code>banner_ad_config</code> hay các config cấp ad type. Hai placement có cùng <code>ad_type</code>, kể cả cùng <code>ad_id</code>, vẫn có thể đặt cờ khác nhau.</p>
+      <p>Trong ví dụ này, thiết bị low device bị chặn placement <code>anchored_bottom_home</code>; placement <code>anchored_native_in_list_test</code> không bị chặn bởi điều kiện low device:</p>
+      <pre><code>[
+  {
+    "place_name": "anchored_bottom_home",
+    "ad_id": "ca-app-pub-3940256099942544/2247696110",
+    "ad_type": "native",
+    "native_template_size": "small",
+    "is_enable": true,
+    "is_disable_for_low_device": true
+  },
+  {
+    "place_name": "anchored_native_in_list_test",
+    "ad_id": "ca-app-pub-3940256099942544/2247696110",
+    "ad_type": "native",
+    "native_template_size": "small",
+    "is_enable": true,
+    "is_disable_for_low_device": false
+  }
+]</code></pre>
+      <p>App tự phân loại thiết bị. <code>AdmobAdsInitializer.isLowDevice</code> mặc định <code>false</code>; thư viện không tự nhận diện máy yếu. Trong class do Hilt quản lý, inject instance của app:</p>
+      <pre><code>@Inject lateinit var admobAdsInitializer: AdmobAdsInitializer</code></pre>
+      <p>Set cờ trước khi bắt đầu luồng ads, kể cả preload. Ví dụ đánh dấu thiết bị là low device:</p>
+      <pre><code>admobAdsInitializer.isLowDevice = true</code></pre>
+      <p>Import <code>com.codebasetemplate.required.ads.AdmobAdsInitializer</code> và <code>javax.inject.Inject</code>. Dùng instance được inject để app và ads manager đọc cùng biến; không tự tạo instance mới. Cờ nằm trong bộ nhớ và mặc định lại <code>false</code> khi app tạo instance mới.</p>
+      <table>
+        <thead><tr><th>isLowDevice ở app</th><th>is_disable_for_low_device ở placement</th><th>Kết quả của điều kiện low device</th></tr></thead>
+        <tbody>
+          <tr><td><code>false</code></td><td>Bất kỳ</td><td>Không chặn.</td></tr>
+          <tr><td><code>true</code></td><td><code>false</code>, thiếu hoặc <code>null</code></td><td>Không chặn.</td></tr>
+          <tr><td><code>true</code></td><td><code>true</code></td><td>Chặn tải, tải lại và hiển thị placement, kể cả ad đã cache.</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <strong>Phạm vi:</strong> <code>is_enable</code> và các điều kiện chặn ads khác vẫn được áp dụng. <code>native_config</code> lồng trong interstitial có cờ riêng, không kế thừa giá trị từ parent. Nếu interstitial bị chặn thì luồng đó không kích hoạt native sau dismiss. A/B override thay toàn bộ object: bỏ cờ khỏi variant sẽ nhận mặc định <code>false</code>.
+      </div>
+      <p>Lọc Logcat theo tag <code>AdmobManager</code> và tiền tố <code>LowDeviceAds</code>. App log khi <code>isLowDevice</code> đổi giá trị; log chặn ghi operation, placement, ad type và hai cờ. Không có log chặn khi điều kiện low device cho phép ads:</p>
+      <pre><code>LowDeviceAds: isLowDevice changed from false to true
+LowDeviceAds: blocked operation=isNotAbleToVisibleAdsToUser placement=anchored_bottom_home adType=native isLowDevice=true is_disable_for_low_device=true</code></pre>
 
       <h3>Versioned ad places</h3>
       <div class="config-keys" data-config-key="ad_places_version_config banner_native_ad_places_2 app_open_ad_places_2 rewarded_rewardedinter_inter_ad_places_2">
@@ -659,7 +701,7 @@ Mapper → cache → AdsManager</code></pre>
     override val rewardedRewardedInterInterAdPlacesKey =
         "my_rewarded_inter_ad_places"
 }</code></pre>
-      <p>Provider của app đã được đăng ký vào Hilt trong <code>RequiredModule</code>. Khi tạo app module mới hoặc di chuyển implementation, giữ binding <code>@IntoSet</code> sau:</p>
+      <p>Lớp provider đã có sẵn, nhưng binding <code>@IntoSet</code> trong <code>RequiredModule</code> mặc định đang được comment. Khi cần dùng key riêng, thêm import <code>com.codebasetemplate.required.firebase.AppAdPlacesRemoteConfigKeyProvider</code> và bật binding sau. Nếu không đăng ký provider, core dùng các fallback key <code>*_2</code> mặc định:</p>
       <pre><code>@Provides
 @IntoSet
 @Singleton
@@ -706,6 +748,7 @@ fun provideAdPlacesRemoteConfigKeyProvider(
 
       <div class="note">
         <strong>Quan trọng:</strong> override thay thế toàn bộ object, không merge từng field. Mọi field không xuất hiện trong variant sẽ nhận default của mapper, không giữ giá trị từ object gốc. Vì vậy hãy copy object gốc rồi sửa các field cần test.
+        Với <code>is_disable_for_low_device</code>, thiếu hoặc <code>null</code> trong variant sẽ nhận <code>false</code>, kể cả object gốc đang đặt <code>true</code>. Xem <a href="#low-device-ads">cấu hình low device theo placement</a>.
       </div>
 
       <h3>3. Thiết lập experiment trên Firebase</h3>

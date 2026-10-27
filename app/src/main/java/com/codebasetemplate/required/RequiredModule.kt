@@ -88,8 +88,8 @@ class RequiredModule {
      */
     @Provides
     @Singleton
-    fun provideAdsSkdInitializer(@ApplicationContext context: Context): AdsSdkInitializer =
-        AdmobAdsInitializer(context)
+    fun provideAdsSkdInitializer(initializer: AdmobAdsInitializer): AdsSdkInitializer =
+        initializer
 
     /**
      * Cung cấp analytics tracking bằng Adjust.

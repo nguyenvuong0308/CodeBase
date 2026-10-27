@@ -46,6 +46,7 @@ class NativeInterstitialTest {
     private lateinit var place: NativeAdPlace
     private lateinit var analytics: AnalyticsManager
     private lateinit var config: RemoteConfigRepository
+    private val initializer = mock(AdsSdkInitializer::class.java)
     private lateinit var fragments: FragmentManager
     private val scope = CoroutineScope(Dispatchers.Main)
     private val events = mutableListOf<AdFullScreenUiResource>()
@@ -76,7 +77,7 @@ class NativeInterstitialTest {
         `when`(config.getAdPlaceBy(name)).thenReturn(place)
         manager = AdmobManager(RuntimeEnvironment.getApplication(), config,
             mock(PurchasePreferences::class.java), analytics,
-            mock(AppPreferences::class.java), mock(AdsSdkInitializer::class.java),
+            mock(AppPreferences::class.java), initializer,
             mock(AdjustAnalytics::class.java))
         activity = Robolectric.buildActivity(Activity::class.java).setup().get()
         fragments = mock(FragmentManager::class.java)
@@ -92,6 +93,32 @@ class NativeInterstitialTest {
             (it.get(manager) as CoroutineScope).cancel()
         }
         activity.finish()
+    }
+
+    @Test
+    fun `low device blocks native interstitial load without requesting SDK`() {
+        `when`(initializer.isLowDevice).thenReturn(true)
+        `when`(place.isDisableForLowDevice).thenReturn(true)
+
+        manager.loadFullscreenAd(activity, name, "low-device")
+        idle()
+
+        assertTrue(ShadowNativeLoader.callbacks.isEmpty())
+        assertEquals(1, events.filterIsInstance<AdFullScreenUiResource.AdNotValidOrLoadFailed>().size)
+    }
+
+    @Test
+    fun `low device blocks a native interstitial cached before the flag changes`() {
+        loadAd()
+        `when`(initializer.isLowDevice).thenReturn(true)
+        `when`(place.isDisableForLowDevice).thenReturn(true)
+
+        mockDialogs(DialogCallbacks()).use { dialogs ->
+            manager.showAd(activity, fragments, name, "low-device", true)
+            idle()
+            assertTrue(dialogs.constructed().isEmpty())
+            assertEquals(listOf(false), completions())
+        }
     }
 
     @Test

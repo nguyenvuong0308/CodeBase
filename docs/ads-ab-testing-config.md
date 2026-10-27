@@ -32,6 +32,7 @@ Giá trị control có thể để rỗng. Variant phải chứa object ad place
   "ad_type": "native",
   "native_template_size": "medium_cta_bottom",
   "is_enable": true,
+  "is_disable_for_low_device": true,
   "background_color": "#FFFFFF",
   "background_cta": "#5E56F5"
 }
@@ -47,6 +48,20 @@ Giá trị control có thể để rỗng. Variant phải chứa object ad place
 6. Override không thể thêm `place_name` mới.
 
 Do replace diễn ra trước khi map sang domain `AdPlace`, các call site phía app không cần thay đổi.
+
+## Low device theo từng placement
+
+`is_disable_for_low_device` nằm trong object có `place_name`, không đặt ở config cấp ad type.
+Chỉ placement có cờ `true` bị chặn khi app đã set `AdmobAdsInitializer.isLowDevice = true`
+trên instance được inject, trước luồng tải/hiển thị ads. Biến ở app mặc định `false`;
+cờ placement thiếu hoặc `null` cũng mặc định `false`.
+
+Hai placement cùng loại hoặc cùng ad unit có thể có cờ khác nhau. `native_config` lồng
+trong interstitial có cờ riêng. Vì A/B thay toàn bộ object, variant phải giữ
+`is_disable_for_low_device: true` nếu muốn tiếp tục chặn placement đó trên low device;
+bỏ field sẽ trả về `false`, không kế thừa giá trị từ control.
+
+Xem [hướng dẫn setup app và log low device](firebase-ads-guide/firebase_ads_config_guide.html#low-device-ads).
 
 ## Thiết lập experiment
 

@@ -195,4 +195,7 @@ internal data class AdPlaceModel(
     @Json(name = "background_color_ads_notify_view")
     val backgroundColorAdsNotifyView: String?,
 
+    @Json(name = "is_disable_for_low_device")
+    val isDisableForLowDevice: Boolean? = null,
+
 )
