@@ -9,6 +9,12 @@ internal class LanguageConfirmDelay(
     private var pending: Runnable? = null
     private var hasBeenShown = false
 
+    fun initialize(alwaysShow: Boolean) {
+        cancel()
+        hasBeenShown = false
+        if (alwaysShow) showConfirmation()
+    }
+
     fun onLanguageSelected(delayMs: Long) {
         if (hasBeenShown) {
             setVisible(true)

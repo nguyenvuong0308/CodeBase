@@ -4,6 +4,7 @@
     <color name="startflow_language_v1_background">#DCEDFF</color>
     <color name="startflow_language_v1_toolbar_title">#FF000000</color>
     <color name="startflow_language_v1_toolbar_action">#FF000000</color>
+    <color name="startflow_language_v1_toolbar_disable">#586A6A6A</color>
     <color name="startflow_language_v1_loading_indicator">#2196F3</color>
     <color name="startflow_language_v1_loading_text">#FF000000</color>
     <color name="startflow_language_v1_ad_background">#FF000000</color>

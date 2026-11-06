@@ -15,4 +15,6 @@ data class LanguageActivityConfigModel(
     val v1ConfirmDelayMs: Long? = null,
     @Json(name = "v1_action_use_text")
     val v1ActionUseText: Boolean? = null,
+    @Json(name = "v1_save_always_show")
+    val v1SaveAlwaysShow: Boolean? = null,
 )

@@ -27,7 +27,8 @@ class FirebaseAdsConfigGuideTest(unittest.TestCase):
             r'"time_show_loading_lfo":\s*3,\s*'
             r'"is_show_click_guide":\s*true,\s*'
             r'"v1_confirm_delay_ms":\s*3000,\s*'
-            r'"v1_action_use_text":\s*false\s*\})</code></pre>',
+            r'"v1_action_use_text":\s*false,\s*'
+            r'"v1_save_always_show":\s*false\s*\})</code></pre>',
             self.html,
         )
 
@@ -36,6 +37,7 @@ class FirebaseAdsConfigGuideTest(unittest.TestCase):
         self.assertIs(config["is_show_click_guide"], True)
         self.assertEqual(config["v1_confirm_delay_ms"], 3000)
         self.assertIs(config["v1_action_use_text"], False)
+        self.assertIs(config["v1_save_always_show"], False)
 
     def test_click_guide_config_documents_complete_boolean_contract(self) -> None:
         self.assertIn("<code>is_show_click_guide</code>", self.html)

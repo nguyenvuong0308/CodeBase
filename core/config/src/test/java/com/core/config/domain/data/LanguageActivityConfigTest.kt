@@ -14,6 +14,30 @@ class LanguageActivityConfigTest {
     private val adapter = Moshi.Builder().build().adapter(LanguageActivityConfigModel::class.java)
 
     @Test
+    fun `v1 always show defaults to disabled for missing or null config`() {
+        assertFalse(LanguageActivityConfig().v1SaveAlwaysShow)
+        assertFalse(LanguageActivityConfig.from(null).v1SaveAlwaysShow)
+        for (json in listOf("{}", """{"v1_save_always_show":null}""")) {
+            assertFalse(LanguageActivityConfig.from(adapter.fromJson(json)).v1SaveAlwaysShow)
+        }
+    }
+
+    @Test
+    fun `v1 always show follows remote boolean and preserves action and delay config`() {
+        for (alwaysShow in listOf(false, true)) {
+            for (useText in listOf(false, true)) {
+                val model = adapter.fromJson(
+                    """{"v1_save_always_show":$alwaysShow,"v1_action_use_text":$useText,"v1_confirm_delay_ms":1500}"""
+                )
+                val config = LanguageActivityConfig.from(model)
+                assertEquals(alwaysShow, config.v1SaveAlwaysShow)
+                assertEquals(useText, config.v1ActionUseText)
+                assertEquals(1_500L, config.v1ConfirmDelayMs)
+            }
+        }
+    }
+
+    @Test
     fun `v1 action defaults to icon for missing or null config`() {
         assertFalse(LanguageActivityConfig().v1ActionUseText)
         assertFalse(LanguageActivityConfig.from(null).v1ActionUseText)
@@ -65,6 +89,8 @@ class LanguageActivityConfigTest {
             assertEquals(3_000L, config.v1ConfirmDelayMs)
             assertEquals(false, adapter.fromJson(json)!!.v1ActionUseText)
             assertFalse(config.v1ActionUseText)
+            assertEquals(false, adapter.fromJson(json)!!.v1SaveAlwaysShow)
+            assertFalse(config.v1SaveAlwaysShow)
         }
     }
 

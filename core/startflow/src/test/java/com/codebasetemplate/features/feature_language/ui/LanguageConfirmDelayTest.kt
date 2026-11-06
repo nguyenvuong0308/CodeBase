@@ -21,12 +21,33 @@ class LanguageConfirmDelayTest {
 
     @Test
     fun `confirm remains hidden until three seconds after selection`() {
+        delay.initialize(alwaysShow = false)
+        advanceBy(5_000)
+        assertFalse(visible)
+        assertTrue(callbacks.isEmpty())
         delay.onLanguageSelected(3_000)
         advanceBy(2_999)
         assertFalse(visible)
         advanceBy(1)
         assertTrue(visible)
         assertTrue(callbacks.isEmpty())
+    }
+
+    @Test
+    fun `initialize clears stale delay and resets previous reveal state`() {
+        delay.onLanguageSelected(3_000)
+        val staleCallback = callbacks.keys.single()
+        delay.initialize(alwaysShow = true)
+        assertTrue(visible)
+        assertTrue(callbacks.isEmpty())
+        delay.initialize(alwaysShow = false)
+        staleCallback.run()
+        assertFalse(visible)
+        delay.onLanguageSelected(3_000)
+        advanceBy(2_999)
+        assertFalse(visible)
+        advanceBy(1)
+        assertTrue(visible)
     }
 
     @Test

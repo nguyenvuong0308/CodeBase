@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
 import androidx.core.os.ConfigurationCompat
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -99,6 +100,8 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
 
     private var hasUserSelectedLanguage = false
 
+    private var hasSelectedLanguage = false
+
     private val languageConfig by lazy { remoteConfigRepository.getLanguageActivityConfig() }
 
     private var isConfirmationReady = false
@@ -108,12 +111,21 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
             postDelayed = { callback, delay -> viewBinding.root.postDelayed(callback, delay) },
             removeCallbacks = { callback -> viewBinding.root.removeCallbacks(callback) },
             setVisible = { visible ->
-                val state = resolveLanguageV1ActionState(languageConfig.v1ActionUseText, visible)
+                val state = resolveLanguageV1ActionState(
+                    useText = languageConfig.v1ActionUseText,
+                    ready = visible,
+                    hasSelectedLanguage = hasSelectedLanguage,
+                )
                 isConfirmationReady = state.canConfirm
                 viewBinding.toolbar.showAction = state.showIcon
-                viewBinding.toolbar.isEnableAction = state.showIcon
+                viewBinding.toolbar.isEnableAction = state.enableIcon
                 viewBinding.toolbar.showTvAction = state.showText
-                viewBinding.toolbar.isEnableTvAction = state.showText
+                viewBinding.toolbar.isEnableTvAction = state.enableText
+                viewBinding.toolbar.textColorTvAction = ContextCompat.getColor(
+                    this,
+                    if (state.canConfirm) R.color.startflow_language_v1_toolbar_action
+                    else R.color.startflow_language_v1_toolbar_disable,
+                )
             },
         )
     }
@@ -225,6 +237,7 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
             }
 
             supportedLanguageAdapter.onClickListener = {
+                hasSelectedLanguage = true
                 confirmDelay.onLanguageSelected(languageConfig.v1ConfirmDelayMs)
                 startFlowAnalytics.languageSelected(it.languageCode, isFromSetting)
                 hasUserSelectedLanguage = true
@@ -402,7 +415,6 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
         viewBinding.toolbar.isEnableTvAction = false
         viewBinding.toolbar.findViewById<View>(com.core.baseui.R.id.rivAction)
             .contentDescription = getString(R.string.core_common_save)
-        confirmDelay.cancel()
 
         val allLanguages = arrayListOf(
             SupportedLanguage.ENGLISH,
@@ -487,6 +499,8 @@ class LanguageActivity : StartFlowActivity<StartflowActivityLanguageBinding>() {
         }
 
         supportedLanguageAdapter.submitList(supportedLanguages.toMutableList())
+        hasSelectedLanguage = supportedLanguages.any { it.isSelected }
+        confirmDelay.initialize(alwaysShow = languageConfig.v1SaveAlwaysShow)
     }
 
     private fun changeLanguage(supportedLanguage: SupportedLanguage) {

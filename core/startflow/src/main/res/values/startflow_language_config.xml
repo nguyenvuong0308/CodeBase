@@ -24,5 +24,8 @@
         <item name="ctv_ic_action_show">false</item>
         <item name="ctv_ic_action_enable">false</item>
         <item name="ctv_ic_action_icon">@drawable/ic_language_v1_check</item>
+        <item name="ctv_ic_action_apply_scale_x">false</item>
+        <item name="ctv_tv_title">@string/core_screen_language</item>
+        <item name="ctv_tv_title_text_color">@color/startflow_language_v1_toolbar_title</item>
     </style>
 </resources>

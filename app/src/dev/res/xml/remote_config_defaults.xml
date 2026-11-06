@@ -413,7 +413,7 @@
             "ad_type": "native",
             "is_tracking_click": true,
             "native_template_size": "medium_cta_bottom",
-            "is_enable": true,
+            "is_enable": false,
             "background_color": "#FCFAFF",
             "primary_text_color": "#141218",
             "body_text_color": "#938f96",
@@ -1116,7 +1116,9 @@
             {
             "version": 1,
             "time_show_loading_lfo": 3,
-            "is_show_click_guide": false
+            "is_show_click_guide": false,
+            "v1_save_always_show": true,
+            "v1_action_use_text": true
             }
         </value>
     </entry>

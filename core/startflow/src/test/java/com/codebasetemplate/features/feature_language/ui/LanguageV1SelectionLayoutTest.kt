@@ -9,6 +9,21 @@ import org.w3c.dom.Element
 
 class LanguageV1SelectionLayoutTest {
     @Test
+    fun `check icon uses distinct enabled and disabled color resources`() {
+        val path = "src/main/res/drawable/ic_language_v1_check.xml"
+        val file = listOf(File(path), File("core/startflow/$path")).first { it.isFile }
+        val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
+        val items = document.getElementsByTagName("item")
+        val strokesByEnabledState = (0 until items.length).map { items.item(it) as Element }
+            .associate { item ->
+                val pathElement = item.getElementsByTagName("path").item(0) as Element
+                item.getAttribute("android:state_enabled") to pathElement.getAttribute("android:strokeColor")
+            }
+        assertEquals("@color/startflow_language_v1_toolbar_action", strokesByEnabledState["true"])
+        assertEquals("@color/startflow_language_v1_toolbar_disable", strokesByEnabledState["false"])
+    }
+
+    @Test
     fun `both confirmation modes start hidden with localized text and check icon available`() {
         val toolbar = element("startflow_activity_language.xml", "toolbar")
         assertEquals("@style/LanguageToolbarStyleV1", toolbar.getAttribute("style"))

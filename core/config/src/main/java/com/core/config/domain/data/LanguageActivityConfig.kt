@@ -8,12 +8,13 @@ data class LanguageActivityConfig(
     val isShowClickGuide: Boolean = true,
     val v1ConfirmDelayMs: Long = DEFAULT_V1_CONFIRM_DELAY_MS,
     val v1ActionUseText: Boolean = false,
+    val v1SaveAlwaysShow: Boolean = false,
 ) {
     val isV2: Boolean
         get() = version == LANGUAGE_ACTIVITY_VERSION_2
 
     companion object {
-        const val DEFAULT_V1_CONFIRM_DELAY_MS = 3_000L
+        const val DEFAULT_V1_CONFIRM_DELAY_MS = 100L
         const val LANGUAGE_ACTIVITY_VERSION_1 = 1
         const val LANGUAGE_ACTIVITY_VERSION_2 = 2
 
@@ -30,6 +31,7 @@ data class LanguageActivityConfig(
                 v1ConfirmDelayMs = model?.v1ConfirmDelayMs?.takeIf { it >= 0 }
                     ?: DEFAULT_V1_CONFIRM_DELAY_MS,
                 v1ActionUseText = model?.v1ActionUseText ?: false,
+                v1SaveAlwaysShow = model?.v1SaveAlwaysShow ?: false,
             )
         }
     }

@@ -25,9 +25,7 @@
             style="@style/LanguageToolbarStyleV1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:ctv_ic_action_apply_scale_x="false"
-            app:ctv_tv_title="@string/core_screen_language"
-            app:ctv_tv_title_text_color="@color/startflow_language_v1_toolbar_title" />
+             />
 
         <FrameLayout
             android:layout_width="match_parent"
