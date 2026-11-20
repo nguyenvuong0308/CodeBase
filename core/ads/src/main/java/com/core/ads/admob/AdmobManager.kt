@@ -140,6 +140,10 @@ internal fun getDismissAction(isNative: Boolean): String =
 // stuck ad unit so waiting placements don't stay latched on isLoading = true forever.
 private const val FULL_SCREEN_LOAD_TIMEOUT_MS = 30_000L
 
+// AdMob expires a loaded interstitial after 1 hour. Drop it a little earlier so a shared
+// cached ad is never shown (or kept blocking a fresh load) once it can no longer impress.
+internal const val INTERSTITIAL_AD_TTL_MS = 55 * 60 * 1_000L
+
 @Singleton
 class AdmobManager @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -205,6 +209,8 @@ class AdmobManager @Inject constructor(
         var isLoading: Boolean = false,
         var loadId: Int = 0,
         var interstitialAd: InterstitialAd? = null,
+        // SystemClock.elapsedRealtime() of the moment interstitialAd was loaded.
+        var interstitialLoadedAtMillis: Long = 0L,
         var rewardedInterstitialAd: RewardedInterstitialAd? = null,
         var rewardedAd: RewardedAd? = null,
         val waiterActivities: MutableMap<IAdPlaceName, Activity> = linkedMapOf(),
@@ -217,6 +223,18 @@ class AdmobManager @Inject constructor(
                 AdType.RewardedVideo -> rewardedAd != null
                 else -> false
             }
+        }
+
+        fun storeInterstitial(ad: InterstitialAd) {
+            interstitialAd = ad
+            interstitialLoadedAtMillis = SystemClock.elapsedRealtime()
+        }
+
+        fun dropInterstitialIfExpired() {
+            if (interstitialAd == null) return
+            if (SystemClock.elapsedRealtime() - interstitialLoadedAtMillis < INTERSTITIAL_AD_TTL_MS) return
+            interstitialAd = null
+            interstitialLoadedAtMillis = 0L
         }
     }
 
@@ -773,115 +791,121 @@ class AdmobManager @Inject constructor(
             notifyAdFullScreenCompleted(adHolder.adPlace.placeName, false, false)
             return
         }
+        val isAdAvailable = adHolder.interstitialAd != null ||
+                findLoadedFullScreenAdUnitHolder(adHolder.adPlace) != null
+        if (isAdAvailable &&
+            (isCanNotShowInterAd(adHolder.adPlace) || isDisableByTestAd(adHolder.adPlace.placeName.name))
+        ) {
+            // Blocked by capping/test ad: leave the ad in the shared ad-unit cache so sibling
+            // placements using the same ad unit id can still show it instead of requesting another.
+            notifyAdFullScreenCompleted(adHolder.adPlace.placeName, false)
+            return
+        }
         val interstitialAd = adHolder.interstitialAd ?: consumeInterstitialAd(adHolder.adPlace)?.also {
             adHolder.interstitialAd = it
         }
         if (interstitialAd != null) {
-            if (isCanNotShowInterAd(adHolder.adPlace) || isDisableByTestAd(adHolder.adPlace.placeName.name)) {
-                notifyAdFullScreenCompleted(adHolder.adPlace.placeName, false)
-            } else {
-                adHolder.isShowing = true
-                interstitialAd.adEventCallback = object : InterstitialAdEventCallback {
-                    override fun onAdFailedToShowFullScreenContent(adError: FullScreenContentError) = runOnMain {
-                        val placeName = adHolder.adPlace.placeName
-                        Log.i(TAG, "Interstitial failed to show $placeName")
-                        Firebase.crashlytics.log("Interstitial failed to show $placeName: ${adError.message}")
-                        activity.removeAdLoaderIfAlive()
-                        adHolder.reset()
+            adHolder.isShowing = true
+            interstitialAd.adEventCallback = object : InterstitialAdEventCallback {
+                override fun onAdFailedToShowFullScreenContent(adError: FullScreenContentError) = runOnMain {
+                    val placeName = adHolder.adPlace.placeName
+                    Log.i(TAG, "Interstitial failed to show $placeName")
+                    Firebase.crashlytics.log("Interstitial failed to show $placeName: ${adError.message}")
+                    activity.removeAdLoaderIfAlive()
+                    adHolder.reset()
 
-                        if (adHolder.adPlace.isAutoLoadAfterDismiss) {
-                            loadInterstitialIfNeed(activity, adHolder)
-                        }
-
-                        notifyAdFullScreenNotValidOrLoadFailed(placeName)
-                        notifyAdFullScreenCompleted(placeName, false)
+                    if (adHolder.adPlace.isAutoLoadAfterDismiss) {
+                        loadInterstitialIfNeed(activity, adHolder)
                     }
 
-                    override fun onAdShowedFullScreenContent() = runOnMain {
-                        val placeName = adHolder.adPlace.placeName
-                        Log.i(TAG, "Interstitial showed $placeName")
-                        adHolder.isShowing = true
-                        activity.showAdLoaderIfAlive()
-                        notifyAdFullScreenSucceedToShow(placeName)
-                        if(adHolder.adPlace.isTrackingShow) {
-                            sendEventShow(adHolder.adPlace.placeName)
-                        }
-                    }
+                    notifyAdFullScreenNotValidOrLoadFailed(placeName)
+                    notifyAdFullScreenCompleted(placeName, false)
+                }
 
-                    override fun onAdImpression() = runOnMain {
-                        val interstitialPlace = adHolder.adPlace as? InterstitialAdPlace
-                        // Có thể trì hoãn việc load native đến khi interstitial ghi nhận impression
-                        // để hạn chế load thừa nếu interstitial không show thành công.
-                        if (interstitialPlace?.nativeAfterLoadStrategy is NativeAfterInterstitialLoadStrategy.OnInterstitialImpression) {
-                            Log.w(
-                                TAG,
-                                "Native after interstitial preload on impression ${interstitialPlace.placeName}"
-                            )
-                            preloadNativeAfterInterstitialIfNeed(activity, interstitialPlace)
-                        }
-                    }
-
-                    override fun onAdDismissedFullScreenContent() = runOnMain {
-                        val placeName = adHolder.adPlace.placeName
-                        val interstitialPlace = adHolder.adPlace as? InterstitialAdPlace
-                        val nativeAfterFragmentManager = adHolder.fragmentManager
-                        val nativeAfterIdentifier = adHolder.identifier
-                        val isAutoLoadAfterDismiss = adHolder.adPlace.isAutoLoadAfterDismiss
-                        Log.i(TAG, "Interstitial dismissed $placeName")
-                        if (adHolder.adPlace.isTrackingShow) {
-                            sendEventDismiss(placeName, false)
-                        }
-                        adHolder.isShowing = false
-                        PreventShowManyInterstitialAds.increaseNumberOfShowingInterAdInSession()
-                        PreventShowManyInterstitialAds.startCountDownTimerIfNeed(
-                            remoteConfigRepository.getInterstitialAdConfig().timePerSession
-                        )
-                        PreventShowManyInterstitialAds.updateLastTimeShowedInterAd()
-                        activity.removeAdLoaderIfAlive()
-
-                        adHolder.reset()
-
-                        if (isAutoLoadAfterDismiss) {
-                            loadInterstitialIfNeed(activity, adHolder)
-                        }
-
-                        // Giữ cả AdDismissed và AdCompleted đến khi native đóng để listener không
-                        // điều hướng khỏi Activity trong lúc màn native sau interstitial đang show.
-                        val completeInterstitialFlow = {
-                            notifyAdFullScreenDismissed(
-                                adPlaceName = placeName,
-                                isEarnedReward = true,
-                                amount = 0
-                            )
-                            notifyAdFullScreenCompleted(placeName, true)
-                        }
-                        val isNativeAfterShown = showNativeAfterInterstitialIfReady(
-                            activity = activity,
-                            fragmentManager = nativeAfterFragmentManager,
-                            interstitialPlace = interstitialPlace,
-                            identifier = nativeAfterIdentifier,
-                            onCompleted = completeInterstitialFlow
-                        )
-                        if (!isNativeAfterShown) {
-                            completeInterstitialFlow()
-                        }
-
-                    }
-
-                    override fun onAdClicked() = runOnMain {
-                        if(adHolder.adPlace.isTrackingClick) {
-                            sendEventClick(adHolder.adPlace.placeName)
-                        }
-                        increaseAdClickedCount()
-                    }
-
-                    override fun onAdPaid(adValue: AdValue) = runOnMain {
-                        trackAdjustAdRevenue(interstitialAd, AD_FORMAT_INTERSTITIAL, adValue)
+                override fun onAdShowedFullScreenContent() = runOnMain {
+                    val placeName = adHolder.adPlace.placeName
+                    Log.i(TAG, "Interstitial showed $placeName")
+                    adHolder.isShowing = true
+                    activity.showAdLoaderIfAlive()
+                    notifyAdFullScreenSucceedToShow(placeName)
+                    if(adHolder.adPlace.isTrackingShow) {
+                        sendEventShow(adHolder.adPlace.placeName)
                     }
                 }
-                showFullScreenSafely(activity, adHolder) {
-                    interstitialAd.show(activity)
+
+                override fun onAdImpression() = runOnMain {
+                    val interstitialPlace = adHolder.adPlace as? InterstitialAdPlace
+                    // Có thể trì hoãn việc load native đến khi interstitial ghi nhận impression
+                    // để hạn chế load thừa nếu interstitial không show thành công.
+                    if (interstitialPlace?.nativeAfterLoadStrategy is NativeAfterInterstitialLoadStrategy.OnInterstitialImpression) {
+                        Log.w(
+                            TAG,
+                            "Native after interstitial preload on impression ${interstitialPlace.placeName}"
+                        )
+                        preloadNativeAfterInterstitialIfNeed(activity, interstitialPlace)
+                    }
                 }
+
+                override fun onAdDismissedFullScreenContent() = runOnMain {
+                    val placeName = adHolder.adPlace.placeName
+                    val interstitialPlace = adHolder.adPlace as? InterstitialAdPlace
+                    val nativeAfterFragmentManager = adHolder.fragmentManager
+                    val nativeAfterIdentifier = adHolder.identifier
+                    val isAutoLoadAfterDismiss = adHolder.adPlace.isAutoLoadAfterDismiss
+                    Log.i(TAG, "Interstitial dismissed $placeName")
+                    if (adHolder.adPlace.isTrackingShow) {
+                        sendEventDismiss(placeName, false)
+                    }
+                    adHolder.isShowing = false
+                    PreventShowManyInterstitialAds.increaseNumberOfShowingInterAdInSession()
+                    PreventShowManyInterstitialAds.startCountDownTimerIfNeed(
+                        remoteConfigRepository.getInterstitialAdConfig().timePerSession
+                    )
+                    PreventShowManyInterstitialAds.updateLastTimeShowedInterAd()
+                    activity.removeAdLoaderIfAlive()
+
+                    adHolder.reset()
+
+                    if (isAutoLoadAfterDismiss) {
+                        loadInterstitialIfNeed(activity, adHolder)
+                    }
+
+                    // Giữ cả AdDismissed và AdCompleted đến khi native đóng để listener không
+                    // điều hướng khỏi Activity trong lúc màn native sau interstitial đang show.
+                    val completeInterstitialFlow = {
+                        notifyAdFullScreenDismissed(
+                            adPlaceName = placeName,
+                            isEarnedReward = true,
+                            amount = 0
+                        )
+                        notifyAdFullScreenCompleted(placeName, true)
+                    }
+                    val isNativeAfterShown = showNativeAfterInterstitialIfReady(
+                        activity = activity,
+                        fragmentManager = nativeAfterFragmentManager,
+                        interstitialPlace = interstitialPlace,
+                        identifier = nativeAfterIdentifier,
+                        onCompleted = completeInterstitialFlow
+                    )
+                    if (!isNativeAfterShown) {
+                        completeInterstitialFlow()
+                    }
+
+                }
+
+                override fun onAdClicked() = runOnMain {
+                    if(adHolder.adPlace.isTrackingClick) {
+                        sendEventClick(adHolder.adPlace.placeName)
+                    }
+                    increaseAdClickedCount()
+                }
+
+                override fun onAdPaid(adValue: AdValue) = runOnMain {
+                    trackAdjustAdRevenue(interstitialAd, AD_FORMAT_INTERSTITIAL, adValue)
+                }
+            }
+            showFullScreenSafely(activity, adHolder) {
+                interstitialAd.show(activity)
             }
         } else {
             handleWhenRequestShowAdIfAdUnavailable(
@@ -1101,6 +1125,7 @@ class AdmobManager @Inject constructor(
 
         if (adHolder.isLoading) {
             if (adHolder.isWaitLoadToShow) {
+                registerWaitLoadToShowOnLoadingAdUnit(placeName, activity)
                 activity.showAdLoaderIfAlive()
             } else {
                 notifyAdFullScreenCompleted(placeName, false)
@@ -1373,6 +1398,7 @@ class AdmobManager @Inject constructor(
                 }
                 val wasWaitLoadToShow = adHolder.isWaitLoadToShow
                 onFullScreenAdUnitFailed(adHolder, adUnitHolder, adUnitId)
+                if (resumeInterstitialFromSharedCache(activity, adHolder)) return@runOnMain
                 if (wasWaitLoadToShow) {
                     activity.removeAdLoaderIfAlive()
                     notifyAdFullScreenNotValidOrLoadFailed(placeName)
@@ -1436,12 +1462,18 @@ class AdmobManager @Inject constructor(
             }
 
             override fun onAdLoaded(p0: InterstitialAd) = runOnMain {
-                if (adUnitHolder.loadId != loadId || !adUnitHolder.isLoading) return@runOnMain
+                if (adUnitHolder.loadId != loadId) return@runOnMain
+                if (!adUnitHolder.isLoading) {
+                    // The load timed out and its waiters were already released, but the SDK still
+                    // delivered a (matched) ad. Keep it for the next show instead of wasting it.
+                    keepLateInterstitialAd(adHolder.adPlace, adUnitId, p0)
+                    return@runOnMain
+                }
                 val placeName = adHolder.adPlace.placeName
                 Log.i(TAG, "Interstitial loaded $placeName $adUnitId")
                 p0.setImmersiveMode(true)
                 adUnitHolder.isLoading = false
-                adUnitHolder.interstitialAd = p0
+                adUnitHolder.storeInterstitial(p0)
                 onFullScreenAdUnitLoaded(adHolder, adUnitHolder)
                 if (showFirstWaitLoadToShowAdIfNeed(adUnitHolder)) {
                     return@runOnMain
@@ -2328,6 +2360,7 @@ class AdmobManager @Inject constructor(
         return adPlace.getWaterfallAdUnitIds()
             .firstNotNullOfOrNull { adUnitId ->
                 fullScreenAdUnitHolderMap[getFullScreenAdUnitKey(adPlace, adUnitId)]
+                    ?.also { it.dropInterstitialIfExpired() }
                     ?.takeIf { it.isLoaded(adPlace.adType) }
             }
     }
@@ -2343,6 +2376,19 @@ class AdmobManager @Inject constructor(
             adUnitHolder.waitLoadToShowActivities[adHolder.adPlace.placeName] = activity
             activity.showAdLoaderIfAlive()
         }
+    }
+
+    /**
+     * A placement that was only preloading (plain waiter of an in-flight ad-unit load, possibly
+     * started by a sibling placement) now wants to show as soon as the load finishes. Register it
+     * as wait-to-show on that load, otherwise the loaded ad is never shown and its loader hangs.
+     */
+    private fun registerWaitLoadToShowOnLoadingAdUnit(placeName: IAdPlaceName, activity: Activity) {
+        val adUnitHolder = fullScreenAdUnitHolderMap.values.firstOrNull {
+            it.isLoading && it.waiterActivities.containsKey(placeName)
+        } ?: return
+        adUnitHolder.waiterActivities[placeName] = activity
+        adUnitHolder.waitLoadToShowActivities[placeName] = activity
     }
 
     private fun onFullScreenAdUnitLoaded(
@@ -2373,7 +2419,7 @@ class AdmobManager @Inject constructor(
 
     /**
      * Handles every waiter of a just-failed ad unit except [ownerPlaceName]:
-     * if the placement still has a lower tier in its own waterfall it resumes there,
+     * reuse a late interstitial first, or resume a lower tier in the placement's waterfall,
      * otherwise it is notified failed. Also resets the owner's loading flag and clears
      * the waiter collections on [adUnitHolder].
      */
@@ -2389,6 +2435,12 @@ class AdmobManager @Inject constructor(
             val siblingWaterfall = siblingHolder?.adPlace?.getWaterfallAdUnitIds().orEmpty()
             val siblingNextIndex = siblingWaterfall.indexOf(failedAdUnitId) + 1
             siblingHolder?.isLoading = false
+            if (siblingHolder != null && activity != null &&
+                !activity.isDestroyed && !activity.isFinishing &&
+                resumeInterstitialFromSharedCache(activity, siblingHolder)
+            ) {
+                return@forEach
+            }
             val canResume = siblingHolder != null && activity != null &&
                     !activity.isDestroyed && !activity.isFinishing &&
                     siblingNextIndex in 1 until siblingWaterfall.size
@@ -2409,6 +2461,24 @@ class AdmobManager @Inject constructor(
         adUnitHolder.waitLoadToShowActivities.clear()
     }
 
+    private fun resumeInterstitialFromSharedCache(activity: Activity, adHolder: AdHolder): Boolean {
+        // An earlier tier can arrive after its timeout while the fallback is still loading.
+        // Recheck the shared cache before failing the placement, including on fallback timeout.
+        if (adHolder !is InterstitialAdHolder ||
+            findLoadedFullScreenAdUnitHolder(adHolder.adPlace) == null
+        ) return false
+        // Shared fallback waiters may each have a different late high-floor ad cached.
+        // Let only one waiter show; keep the others' ads available for a later request.
+        if (adHolder.isWaitLoadToShow && isHasFullscreenAdShowing()) {
+            adHolder.isWaitLoadToShow = false
+            activity.removeAdLoaderIfAlive()
+            notifyAdFullScreenCompleted(adHolder.adPlace.placeName, false)
+            return true
+        }
+        loadInterstitialIfNeed(activity, adHolder)
+        return true
+    }
+
     private fun scheduleFullScreenLoadTimeout(
         adUnitHolder: FullScreenAdUnitHolder,
         adUnitId: String,
@@ -2425,6 +2495,17 @@ class AdmobManager @Inject constructor(
             // No distinguished owner on timeout: every waiter resumes its own waterfall or fails.
             resumeSiblingWaitersOnFail(adUnitHolder, ownerPlaceName = null, failedAdUnitId = adUnitId)
         }
+    }
+
+    private fun keepLateInterstitialAd(adPlace: AdPlace, adUnitId: String, ad: InterstitialAd) {
+        val adUnitHolder = getOrCreateFullScreenAdUnitHolder(adPlace, adUnitId)
+        adUnitHolder.dropInterstitialIfExpired()
+        // A replacement load is in flight or already delivered: that one owns the cache slot.
+        if (adUnitHolder.isLoading || adUnitHolder.interstitialAd != null) return
+        Log.i(TAG, "Interstitial loaded after timeout, kept in shared cache $adUnitId")
+        ad.setImmersiveMode(true)
+        adUnitHolder.storeInterstitial(ad)
+        notifyAdFullScreenLoaded(adPlace.placeName)
     }
 
     private fun resumeFullScreenWaiter(
@@ -2473,8 +2554,10 @@ class AdmobManager @Inject constructor(
         adPlace.getWaterfallAdUnitIds().forEach { adUnitId ->
             val key = getFullScreenAdUnitKey(adPlace, adUnitId)
             val adUnitHolder = fullScreenAdUnitHolderMap[key] ?: return@forEach
+            adUnitHolder.dropInterstitialIfExpired()
             val ad = adUnitHolder.interstitialAd ?: return@forEach
             adUnitHolder.interstitialAd = null
+            adUnitHolder.interstitialLoadedAtMillis = 0L
             if (!adUnitHolder.isLoading && !adUnitHolder.isLoaded(adPlace.adType)) {
                 fullScreenAdUnitHolderMap.remove(key)
             }
