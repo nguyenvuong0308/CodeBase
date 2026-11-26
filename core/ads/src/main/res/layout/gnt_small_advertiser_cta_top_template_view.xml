@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView
+        android:id="@+id/native_ad_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/core_bg_native_ads">
+
+        <RelativeLayout
+            android:id="@+id/background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="@dimen/_12dp"
+            android:paddingBottom="@dimen/_14dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/icon"
+                android:layout_width="@dimen/_44dp"
+                android:layout_height="@dimen/_44dp"
+                android:layout_below="@+id/layout_cta"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="@dimen/_14dp"
+                android:layout_marginTop="@dimen/_12dp"
+                android:layout_marginEnd="@dimen/_10dp"
+                android:scaleType="fitCenter"
+                android:visibility="visible" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/primary"
+                style="@style/AdsTitleTextStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/icon"
+                android:layout_marginEnd="@dimen/_14dp"
+                android:layout_toEndOf="@+id/icon"
+                tools:text="Sollicitudin diam eleifend" />
+
+            <LinearLayout
+                android:id="@+id/layout_advertiser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/primary"
+                android:layout_alignStart="@+id/primary"
+                android:layout_alignEnd="@+id/primary"
+                android:layout_marginTop="@dimen/_4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/ad_notification_view"
+                    style="@style/AdsNotificationViewStyle" />
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/advertiser"
+                    style="@style/AdsBodyTextStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_6dp"
+                    android:layout_weight="1"
+                    android:maxLines="1"
+                    tools:text="RES Tuyển dụng" />
+            </LinearLayout>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/body"
+                style="@style/AdsBodyTextStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/layout_advertiser"
+                android:layout_marginStart="@dimen/_14dp"
+                android:layout_marginTop="@dimen/_8dp"
+                android:layout_marginEnd="@dimen/_14dp"
+                android:maxLines="1"
+                tools:text="Risus nunc aliquet tempus arcu et convallis ut nullam nullam" />
+
+            <FrameLayout
+                android:id="@+id/layout_cta"
+                style="@style/CtaCardViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="@dimen/_14dp"
+                android:layout_marginEnd="@dimen/_14dp"
+                tools:background="@drawable/core_bg_cta_ads">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/cta"
+                    style="@style/CtaViewStyle"
+                    android:paddingTop="@dimen/_8dp"
+                    android:paddingBottom="@dimen/_9dp"
+                    tools:text="Sign up" />
+            </FrameLayout>
+        </RelativeLayout>
+
+    </com.google.android.libraries.ads.mobile.sdk.nativead.NativeAdView>
+
+</merge>

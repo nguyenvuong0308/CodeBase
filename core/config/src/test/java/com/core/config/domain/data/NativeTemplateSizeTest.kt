@@ -39,6 +39,22 @@ class NativeTemplateSizeTest {
     }
 
     @Test
+    fun `small advertiser cta bottom key resolves to built in template`() {
+        val result = NativeTemplateSize.getSizeBy("small_advertiser_cta_bottom")
+
+        assertSame(NativeTemplateSize.SmallAdvertiserCtaBottom, result)
+        assertEquals("small_advertiser_cta_bottom", result.key)
+    }
+
+    @Test
+    fun `small advertiser cta top key resolves to built in template`() {
+        val result = NativeTemplateSize.getSizeBy("small_advertiser_cta_top")
+
+        assertSame(NativeTemplateSize.SmallAdvertiserCtaTop, result)
+        assertEquals("small_advertiser_cta_top", result.key)
+    }
+
+    @Test
     fun `similar unknown key remains custom`() {
         val result = NativeTemplateSize.getSizeBy("medium_media_left_cta_right_custom")
 

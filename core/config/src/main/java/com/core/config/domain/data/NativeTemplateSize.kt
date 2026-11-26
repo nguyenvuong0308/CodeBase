@@ -11,6 +11,8 @@ sealed class NativeTemplateSize {
             Small,
             SmallCtaTop,
             SmallCtaBottom,
+            SmallAdvertiserCtaBottom,
+            SmallAdvertiserCtaTop,
             SmallCtaRight,
             SmallBannerCtaRight,
             MiniCtaRight,
@@ -55,6 +57,14 @@ sealed class NativeTemplateSize {
 
     object SmallCtaBottom : NativeTemplateSize() {
         override val key = "small_cta_bottom"
+    }
+
+    object SmallAdvertiserCtaBottom : NativeTemplateSize() {
+        override val key = "small_advertiser_cta_bottom"
+    }
+
+    object SmallAdvertiserCtaTop : NativeTemplateSize() {
+        override val key = "small_advertiser_cta_top"
     }
 
     object SmallCtaRight: NativeTemplateSize() {

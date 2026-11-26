@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.facebook.shimmer.ShimmerFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/native_ad_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="@dimen/_12dp"
+        android:paddingBottom="@dimen/_14dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/icon"
+            android:layout_width="@dimen/_44dp"
+            android:layout_height="@dimen/_44dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="@dimen/_14dp"
+            android:layout_marginEnd="@dimen/_10dp"
+            android:background="@color/shimmer_bg"
+            android:scaleType="fitCenter" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/primary"
+            style="@style/AdsTitleTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="@dimen/_14dp"
+            android:layout_toEndOf="@+id/icon"
+            android:background="@color/shimmer_bg"
+            tools:text="" />
+
+        <LinearLayout
+            android:id="@+id/layout_advertiser"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/primary"
+            android:layout_alignStart="@+id/primary"
+            android:layout_alignEnd="@+id/primary"
+            android:layout_marginTop="@dimen/_4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/ad_notification_view"
+                style="@style/AdsNotificationViewStyle"
+                android:background="@color/shimmer_bg"
+                tools:text="" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/advertiser"
+                style="@style/AdsBodyTextStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_6dp"
+                android:layout_weight="1"
+                android:background="@color/shimmer_bg"
+                android:maxLines="1"
+                tools:text="" />
+        </LinearLayout>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/body"
+            style="@style/AdsBodyTextStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/layout_advertiser"
+            android:layout_marginStart="@dimen/_14dp"
+            android:layout_marginTop="@dimen/_8dp"
+            android:layout_marginEnd="@dimen/_14dp"
+            android:background="@color/shimmer_bg"
+            android:lines="1"
+            tools:text="" />
+
+        <FrameLayout
+            android:id="@+id/layout_cta"
+            style="@style/CtaCardViewStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/body"
+            android:layout_marginStart="@dimen/_14dp"
+            android:layout_marginTop="@dimen/_12dp"
+            android:layout_marginEnd="@dimen/_14dp"
+            android:background="@color/shimmer_bg">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/cta"
+                style="@style/CtaViewStyle"
+                android:background="@color/shimmer_bg"
+                android:paddingTop="@dimen/_8dp"
+                android:paddingBottom="@dimen/_9dp"
+                tools:text="" />
+        </FrameLayout>
+
+    </RelativeLayout>
+
+</com.facebook.shimmer.ShimmerFrameLayout>

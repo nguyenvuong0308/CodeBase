@@ -275,6 +275,10 @@ class BannerNativeContainerLayout @JvmOverloads constructor(
 
             NativeTemplateSize.SmallCtaBottom -> NativeSmallCtaBottomTemplateView(context)
 
+            NativeTemplateSize.SmallAdvertiserCtaBottom -> NativeSmallAdvertiserCtaBottomTemplateView(context)
+
+            NativeTemplateSize.SmallAdvertiserCtaTop -> NativeSmallAdvertiserCtaTopTemplateView(context)
+
             NativeTemplateSize.MediumCtaBottom -> NativeMediumCtaBottomTemplateView(context)
 
             NativeTemplateSize.MediumShortCtaBottom -> NativeMediumShortCtaBottomTemplateView(context)

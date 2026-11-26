@@ -158,6 +158,24 @@ class NativeInterstitialAdPlaceMapperTest {
         assertNull(mapTemplate("native_interstitial", "full_interstitial_v4").controlCloseReadyStyle)
     }
 
+    @Test
+    fun `firebase native json maps small advertiser templates`() {
+        mapOf(
+            "small_advertiser_cta_bottom" to NativeTemplateSize.SmallAdvertiserCtaBottom,
+            "small_advertiser_cta_top" to NativeTemplateSize.SmallAdvertiserCtaTop,
+        ).forEach { (key, expected) ->
+            val place = mapper.toData(adapter.fromJson("""{
+                "place_name":"action_app_open", "ad_type":"native",
+                "ad_id":"native-unit", "is_enable":true,
+                "native_template_size":"$key", "cta_radius_dp":16
+            }""")!!) as NativeAdPlace
+
+            assertSame(expected, place.nativeTemplateSize)
+            assertTrue(place.isNativeType())
+            assertEquals("native-unit", place.adId)
+        }
+    }
+
     private fun mapTemplate(type: String, key: String?): NativeAdPlace {
         val model = adapter.fromJson("""{
             "place_name":"action_app_open", "ad_type":"$type"

@@ -17,6 +17,8 @@ $previews = @(
     @{ Key = 'small'; File = 'small.png' },
     @{ Key = 'small_cta_top'; File = 'small_cta_top.png' },
     @{ Key = 'small_cta_bottom'; File = 'small_cta_bottom.png' },
+    @{ Key = 'small_advertiser_cta_bottom'; File = 'small_advertiser_cta_bottom.png' },
+    @{ Key = 'small_advertiser_cta_top'; File = 'small_advertiser_cta_top.png' },
     @{ Key = 'small_cta_right'; File = 'small_cta_right.png' },
     @{ Key = 'small_banner_cta_right'; File = 'small_banner_cta_right.png' },
     @{ Key = 'mini_cta_right'; File = 'mini_cta_right.png' },

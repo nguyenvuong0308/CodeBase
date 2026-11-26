@@ -23,6 +23,8 @@ internal fun resolveNativeShimmerLayout(
     NativeTemplateSize.Small -> R.layout.gnt_small_template_view_shimmer
     NativeTemplateSize.SmallCtaTop -> R.layout.gnt_small_cta_top_template_view_shimmer
     NativeTemplateSize.SmallCtaBottom -> R.layout.gnt_small_cta_bottom_template_view_shimmer
+    NativeTemplateSize.SmallAdvertiserCtaBottom -> R.layout.gnt_small_advertiser_cta_bottom_template_view_shimmer
+    NativeTemplateSize.SmallAdvertiserCtaTop -> R.layout.gnt_small_advertiser_cta_top_template_view_shimmer
     NativeTemplateSize.SmallCtaRight -> R.layout.gnt_small_cta_right_shimmer
     NativeTemplateSize.SmallBannerCtaRight -> R.layout.gnt_small_banner_cta_right_shimmer
     NativeTemplateSize.SmallForPopup -> R.layout.gnt_small_for_popup_template_view_shimmer
