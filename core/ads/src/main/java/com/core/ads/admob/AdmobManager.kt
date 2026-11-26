@@ -83,7 +83,6 @@ import com.google.android.libraries.ads.mobile.sdk.rewarded.RewardedAdEventCallb
 import com.google.android.libraries.ads.mobile.sdk.rewardedinterstitial.RewardedInterstitialAd
 import com.google.android.libraries.ads.mobile.sdk.rewardedinterstitial.RewardedInterstitialAdEventCallback
 import com.google.android.ump.ConsentInformation
-import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
 import com.google.firebase.Firebase
 import com.google.firebase.crashlytics.crashlytics
@@ -438,22 +437,7 @@ class AdmobManager @Inject constructor(
         applicationScope.launch {
             _requestConsentFlow.emit(ConsentFormUiResource.Loading)
         }
-//        val requestConsentConfig = remoteConfigRepository.getRequestConsentConfig()
-
-//        val debugSettingsBuilder = ConsentDebugSettings.Builder(context).apply {
-//            if (requestConsentConfig.debugIsEEA) {
-//                setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_EEA)
-//            } else {
-//                setDebugGeography(ConsentDebugSettings.DebugGeography.DEBUG_GEOGRAPHY_NOT_EEA)
-//            }
-//            requestConsentConfig.debugListTestDeviceHashedId.forEach { addTestDeviceHashedId(it) }
-//            addTestDeviceHashedId("ED37AE717C4AA9D6D00A240AABBB250A")
-//        }
-
-        val params = ConsentRequestParameters.Builder()
-            .setTagForUnderAgeOfConsent(false)
-//            .setConsentDebugSettings(debugSettingsBuilder.build())
-            .build()
+        val params = adsSdkInitializer.createConsentRequestParameters(context)
 
         if (NetworkUtils.isInternetAvailable(activity)) {
             applicationScope.launch {
@@ -464,11 +448,6 @@ class AdmobManager @Inject constructor(
                             params,
                             {
                                 Timber.e("requestConsentInfoUpdate running")
-//                                if (!requestConsentConfig.isEnable) {
-//                                    onEuConsentComplete()
-//                                    cont.resume(true) { _, _, _ ->}
-//                                    return@requestConsentInfoUpdate
-//                                }
                                 if (consentInformation.isConsentFormAvailable) {
                                     displayConsentForm(activity, isForceShow)
                                     Timber.d("requestConsentInfoUpdate displayConsentForm")
@@ -2779,12 +2758,6 @@ class AdmobManager @Inject constructor(
     // load failure), ads stay blocked. Instead of waiting for the next cold start, retry the UMP
     // flow as soon as a network is available again, using the foreground Activity.
 
-    private val consentRetryParams: ConsentRequestParameters by lazy {
-        ConsentRequestParameters.Builder()
-            .setTagForUnderAgeOfConsent(false)
-            .build()
-    }
-
     @Volatile
     private var isConsentRetryPending = false
     private var isConsentRetrying = false
@@ -2897,7 +2870,7 @@ class AdmobManager @Inject constructor(
     private fun requestConsentForRetry(activity: Activity) {
         consentInformation.requestConsentInfoUpdate(
             activity,
-            consentRetryParams,
+            adsSdkInitializer.createConsentRequestParameters(context),
             {
                 if (activity.isFinishing || activity.isDestroyed) {
                     isConsentRetrying = false
