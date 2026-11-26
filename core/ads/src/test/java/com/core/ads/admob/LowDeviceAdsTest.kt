@@ -55,6 +55,7 @@ class LowDeviceAdsTest {
         manager = AdmobManager(RuntimeEnvironment.getApplication(), config,
             mock(PurchasePreferences::class.java), mock(AnalyticsManager::class.java),
             mock(AppPreferences::class.java), initializer, mock(AdjustAnalytics::class.java))
+        manager.canRequestAdsOverride = true
     }
 
     @After

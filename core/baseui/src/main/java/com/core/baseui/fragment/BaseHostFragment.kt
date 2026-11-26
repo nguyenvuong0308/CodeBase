@@ -175,6 +175,11 @@ abstract class BaseHostFragment<B: ViewBinding, E : NavigatorEvent, VM : BaseSha
             preloadAds()
         }
 
+        // Consent granted after this screen was shown: reload the ads it skipped.
+        collectFlowOn(adsManager.adsBecameAvailableFlow, Lifecycle.State.STARTED) {
+            preloadAds()
+        }
+
         collectFlowOn(networkConnectionManager.isNetworkConnectedFlow, Lifecycle.State.RESUMED) {
             CoroutineScope(coroutineContext).launch {
                 delay(1000)

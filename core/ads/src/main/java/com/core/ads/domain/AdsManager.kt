@@ -21,6 +21,12 @@ interface AdsManager {
 
     val requestConsentFlow: SharedFlow<ConsentFormUiResource>
 
+    /**
+     * Emits when ads become allowed after the splash flow (consent gathered by a retry or via
+     * Privacy options). Screens that skipped ad loads while consent was missing should preload.
+     */
+    val adsBecameAvailableFlow: SharedFlow<Unit>
+
     fun isHasFullscreenAdShowing(): Boolean
 
     fun isHasAppOpenAdShowing(): Boolean

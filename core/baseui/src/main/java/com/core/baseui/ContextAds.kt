@@ -245,6 +245,18 @@ abstract class ContextAds(
             }
         }
 
+        // Consent granted after this screen was shown (consent retry / Privacy options):
+        // its earlier ad loads were skipped, so preload them now.
+        collectFlowOn(
+            lifecycleOwner = lifecycleOwner,
+            lifecycleScope = lifecycleScope,
+            sharedFlow = adsManager.adsBecameAvailableFlow,
+            lifecycleState = Lifecycle.State.STARTED
+        ) {
+            Log.d(TAG, "handleObservable: adsBecameAvailable, preload ads")
+            preloadAds()
+        }
+
         collectFlowOn(
             lifecycleOwner = lifecycleOwner,
             lifecycleScope = lifecycleScope,

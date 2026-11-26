@@ -79,6 +79,7 @@ class NativeInterstitialTest {
             mock(PurchasePreferences::class.java), analytics,
             mock(AppPreferences::class.java), initializer,
             mock(AdjustAnalytics::class.java))
+        manager.canRequestAdsOverride = true
         activity = Robolectric.buildActivity(Activity::class.java).setup().get()
         fragments = mock(FragmentManager::class.java)
         scope.launch(start = CoroutineStart.UNDISPATCHED) { manager.adFullScreenFlow.collect { events += it } }

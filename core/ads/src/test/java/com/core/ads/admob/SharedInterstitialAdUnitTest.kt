@@ -98,6 +98,7 @@ class SharedInterstitialAdUnitTest {
             mock(AppPreferences::class.java), mock(AdsSdkInitializer::class.java),
             mock(AdjustAnalytics::class.java)
         )
+        manager.canRequestAdsOverride = true
         activity = Robolectric.buildActivity(Activity::class.java).setup().get()
         holderA = InterstitialAdHolder(adPlace = place(nameA))
         holderB = InterstitialAdHolder(adPlace = place(nameB))

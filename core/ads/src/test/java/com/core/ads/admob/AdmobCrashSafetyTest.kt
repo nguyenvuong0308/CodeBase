@@ -87,6 +87,7 @@ class AdmobCrashSafetyTest {
             mock(PurchasePreferences::class.java), mock(AnalyticsManager::class.java),
             preferences, initializer, mock(AdjustAnalytics::class.java),
         )
+        manager.canRequestAdsOverride = true
         activity = Robolectric.buildActivity(Activity::class.java).setup().get()
     }
 
@@ -127,6 +128,79 @@ class AdmobCrashSafetyTest {
             verifyNoInteractions(config)
         } finally {
             collector.cancel()
+        }
+    }
+
+    @Test
+    fun `consent not gathered releases splash without MobileAds init or ad requests`() {
+        manager.canRequestAdsOverride = false
+        val events = mutableListOf<ConsentFormUiResource>()
+        val collector = CoroutineScope(Dispatchers.Main).launch(start = CoroutineStart.UNDISPATCHED) {
+            manager.requestConsentFlow.collect { events += it }
+        }
+        try {
+            AdmobManager::class.java.getDeclaredMethod("onEuConsentComplete").let {
+                it.isAccessible = true
+                it.invoke(manager)
+            }
+            shadowOf(Looper.getMainLooper()).idle()
+
+            assertEquals(listOf(ConsentFormUiResource.Complete), events)
+            assertFalse(ShadowAdsReadiness.initializationEntered.await(300, TimeUnit.MILLISECONDS))
+            assertTrue(manager.isNotAbleToVisibleAdsToUser(placeName))
+            manager.loadFullscreenAd(activity, placeName, "no consent")
+            manager.loadBannerNativeAd(activity, placeName, "no consent", false, false)
+            verifyNoInteractions(config)
+            assertTrue(ShadowNativeLoader.callbacks.isEmpty())
+            assertTrue(ShadowInterstitialLoader.callbacks.isEmpty())
+        } finally {
+            collector.cancel()
+        }
+    }
+
+    @Test
+    fun `late consent with SDK already initialized asks screens to reload ads`() {
+        ShadowAdsReadiness.ready = true
+        var emitted = 0
+        val collector = CoroutineScope(Dispatchers.Main).launch(start = CoroutineStart.UNDISPATCHED) {
+            manager.adsBecameAvailableFlow.collect { emitted++ }
+        }
+        try {
+            invokePrivate("onConsentGrantedLate")
+            shadowOf(Looper.getMainLooper()).idle()
+
+            assertEquals(1, emitted)
+            assertFalse(ShadowAdsReadiness.initializationEntered.await(300, TimeUnit.MILLISECONDS))
+        } finally {
+            collector.cancel()
+        }
+    }
+
+    @Test
+    fun `late consent without SDK initializes it and defers the reload signal until init completes`() {
+        var emitted = 0
+        val collector = CoroutineScope(Dispatchers.Main).launch(start = CoroutineStart.UNDISPATCHED) {
+            manager.adsBecameAvailableFlow.collect { emitted++ }
+        }
+        try {
+            invokePrivate("onConsentGrantedLate")
+            shadowOf(Looper.getMainLooper()).idle()
+
+            assertTrue(ShadowAdsReadiness.initializationEntered.await(5, TimeUnit.SECONDS))
+            assertEquals(0, emitted)
+            AdmobManager::class.java.getDeclaredField("notifyAdsAvailableAfterInit").let {
+                it.isAccessible = true
+                assertTrue(it.getBoolean(manager))
+            }
+        } finally {
+            collector.cancel()
+        }
+    }
+
+    private fun invokePrivate(name: String) {
+        AdmobManager::class.java.getDeclaredMethod(name).let {
+            it.isAccessible = true
+            it.invoke(manager)
         }
     }
 

@@ -65,6 +65,7 @@ class WaterfallIndexOutOfRangeTest {
             mock(AppPreferences::class.java), mock(AdsSdkInitializer::class.java),
             mock(AdjustAnalytics::class.java)
         )
+        manager.canRequestAdsOverride = true
         activity = Robolectric.buildActivity(Activity::class.java).setup().get()
         scope.launch(start = CoroutineStart.UNDISPATCHED) { manager.adFullScreenFlow.collect { fullScreenEvents += it } }
         scope.launch(start = CoroutineStart.UNDISPATCHED) { manager.adLoadBannerNativeFlow.collect { bannerNativeEvents += it } }

@@ -1,12 +1,16 @@
 package com.core.ads.admob
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import android.view.ViewGroup
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.FragmentManager
@@ -86,6 +90,7 @@ import com.google.firebase.crashlytics.crashlytics
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -96,6 +101,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -130,6 +136,27 @@ internal fun buildAdEventName(baseName: String, action: String): String {
         .replace(Regex("[^A-Za-z0-9_]"), "_")
 
     return "$safeBaseName$suffix"
+}
+
+// Minimum gap between two consent retries, so flapping networks don't spam UMP requests.
+internal const val CONSENT_RETRY_MIN_INTERVAL_MS = 30_000L
+
+internal fun shouldRetryConsent(
+    isPending: Boolean,
+    isSplashConsentRequesting: Boolean,
+    isRetrying: Boolean,
+    hasForegroundActivity: Boolean,
+    hasInternet: Boolean,
+    isFullscreenAdShowing: Boolean,
+    elapsedSinceLastAttemptMs: Long,
+): Boolean {
+    return isPending &&
+            !isSplashConsentRequesting &&
+            !isRetrying &&
+            hasForegroundActivity &&
+            hasInternet &&
+            !isFullscreenAdShowing &&
+            elapsedSinceLastAttemptMs >= CONSENT_RETRY_MIN_INTERVAL_MS
 }
 
 internal fun getDismissAction(isNative: Boolean): String =
@@ -175,6 +202,12 @@ class AdmobManager @Inject constructor(
     private val _requestConsentFlow = MutableSharedFlow<ConsentFormUiResource>()
     override val requestConsentFlow = _requestConsentFlow.asSharedFlow()
 
+    private val _adsBecameAvailableFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    override val adsBecameAvailableFlow = _adsBecameAvailableFlow.asSharedFlow()
+
+    @Volatile
+    private var notifyAdsAvailableAfterInit = false
+
     private val adHolderBannerNativeMap = mutableMapOf<IAdPlaceName, AdHolder>()
     private val adHolderFullScreenMap = mutableMapOf<IAdPlaceName, AdHolder>()
     // Shared full-screen ad-unit cache. Placements can share a high-floor ad unit id, so the
@@ -191,6 +224,13 @@ class AdmobManager @Inject constructor(
 
     @Volatile
     private var isConsentCompletionNotified = false
+
+    @Volatile
+    private var isMobileAdsInitRequested = false
+
+    /** Test hook: overrides UMP canRequestAds() (Robolectric has no stored consent). */
+    @VisibleForTesting
+    internal var canRequestAdsOverride: Boolean? = null
 
     @Volatile
     private var consentFlowStartElapsedRealtime = 0L
@@ -263,6 +303,10 @@ class AdmobManager @Inject constructor(
     }
 
     override fun isNotAbleToVisibleAdsToUser(adPlaceName: IAdPlaceName): Boolean {
+        if (!canRequestAds()) {
+            Log.d(TAG, "isNotAbleToVisibleAdsToUser: consent not gathered (canRequestAds = false)")
+            return true
+        }
         if (!remoteConfigRepository.getAppConfig().isEnableAds) {
             Log.d(TAG, "isNotAbleToVisibleAdsToUser: isEnableAds = false")
             return true
@@ -307,6 +351,10 @@ class AdmobManager @Inject constructor(
     }
 
     private fun isNotAbleToVisibleResolvedAdPlace(adPlace: AdPlace): Boolean {
+        if (!canRequestAds()) {
+            Log.d(TAG, "isNotAbleToVisibleResolvedAdPlace: consent not gathered (canRequestAds = false)")
+            return true
+        }
         if (adPlace.isDisabledForLowDevice("isNotAbleToVisibleResolvedAdPlace")) return true
         if (!remoteConfigRepository.getAppConfig().isEnableAds) {
             Log.d(TAG, "isNotAbleToVisibleResolvedAdPlace: isEnableAds = false")
@@ -385,6 +433,7 @@ class AdmobManager @Inject constructor(
         isConsentRequesting = true
         isConsentCompleted = false
         isConsentCompletionNotified = false
+        isMobileAdsInitRequested = false
         consentFlowStartElapsedRealtime = SystemClock.elapsedRealtime()
         applicationScope.launch {
             _requestConsentFlow.emit(ConsentFormUiResource.Loading)
@@ -473,6 +522,9 @@ class AdmobManager @Inject constructor(
                             applicationScope.launch {
                                 _requestConsentFlow.emit(ConsentFormUiResource.Complete)
                             }
+                            // Privacy options: consent may have just been granted (or granted
+                            // again after a withdrawal) while MobileAds is not initialized.
+                            if (canRequestAds()) onConsentGrantedLate()
                         }
                     }
                     return@loadConsentForm
@@ -2676,20 +2728,232 @@ class AdmobManager @Inject constructor(
         }
     }
 
+    /**
+     * UMP gate: true only when consent was obtained or is not required (status cached by UMP).
+     * Ad requests made while this is false carry no TC string in EEA/UK/CH and are reported by
+     * AdMob as "Consent requirement: Low coverage".
+     */
+    private fun canRequestAds(): Boolean {
+        canRequestAdsOverride?.let { return it }
+        return runCatching { consentInformation.canRequestAds() }.getOrDefault(false)
+    }
+
+    /**
+     * Called when the consent flow ends, successfully or not (error, timeout, offline, form
+     * failure). The splash flow is always released, but MobileAds is only initialized once UMP
+     * allows ad requests. A later call in the same flow (e.g. a consent form shown after the
+     * timeout) can still initialize MobileAds.
+     */
     private fun onEuConsentComplete() {
-        if (isConsentCompleted) return
-        isConsentCompleted = true
         isConsentRequesting = false
-        val elapsed = SystemClock.elapsedRealtime() - consentFlowStartElapsedRealtime
-        val remainingTimeout =
-            (CONSENT_AND_MOBILE_ADS_TOTAL_TIMEOUT_MS - elapsed).coerceAtLeast(0L)
-        applicationScope.launch {
-            delay(remainingTimeout)
-            if (!isConsentCompletionNotified) {
-                Log.w(TAG,"Consent + MobileAds.initialize timeout, continue splash flow without waiting")
-                notifyConsentCompleteOnce()
+        if (!isConsentCompleted) {
+            isConsentCompleted = true
+            val elapsed = SystemClock.elapsedRealtime() - consentFlowStartElapsedRealtime
+            val remainingTimeout =
+                (CONSENT_AND_MOBILE_ADS_TOTAL_TIMEOUT_MS - elapsed).coerceAtLeast(0L)
+            applicationScope.launch {
+                delay(remainingTimeout)
+                if (!isConsentCompletionNotified) {
+                    Log.w(TAG,"Consent + MobileAds.initialize timeout, continue splash flow without waiting")
+                    notifyConsentCompleteOnce()
+                }
             }
         }
+        if (!canRequestAds()) {
+            Log.w(
+                TAG,
+                "Consent not gathered (status=${runCatching { consentInformation.consentStatus }.getOrNull()}), " +
+                        "skip MobileAds.initialize and ad requests"
+            )
+            notifyConsentCompleteOnce()
+            scheduleConsentRetry()
+            return
+        }
+        cancelConsentRetry()
+        initializeMobileAdsOnce()
+    }
+
+    // region Consent retry when the network comes back
+    //
+    // When the splash consent flow ends without consent (offline, request error, timeout, form
+    // load failure), ads stay blocked. Instead of waiting for the next cold start, retry the UMP
+    // flow as soon as a network is available again, using the foreground Activity.
+
+    private val consentRetryParams: ConsentRequestParameters by lazy {
+        ConsentRequestParameters.Builder()
+            .setTagForUnderAgeOfConsent(false)
+            .build()
+    }
+
+    @Volatile
+    private var isConsentRetryPending = false
+    private var isConsentRetrying = false
+    private var lastConsentRetryElapsedRealtime = 0L
+    private var resumedActivityRef: WeakReference<Activity>? = null
+    private var isConsentRetryActivityCallbacksRegistered = false
+    private var consentRetryNetworkCallback: ConnectivityManager.NetworkCallback? = null
+    private var consentRetryDelayJob: Job? = null
+
+    private val consentRetryActivityCallbacks = object : Application.ActivityLifecycleCallbacks {
+        override fun onActivityResumed(activity: Activity) {
+            resumedActivityRef = WeakReference(activity)
+            // Covers a network that came back while the app was in background.
+            tryRetryConsent("activity_resumed")
+        }
+
+        override fun onActivityPaused(activity: Activity) {
+            if (resumedActivityRef?.get() === activity) resumedActivityRef = null
+        }
+
+        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
+        override fun onActivityStarted(activity: Activity) = Unit
+        override fun onActivityStopped(activity: Activity) = Unit
+        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+        override fun onActivityDestroyed(activity: Activity) = Unit
+    }
+
+    private fun scheduleConsentRetry() {
+        if (isConsentRetryPending) return
+        isConsentRetryPending = true
+        // Give the splash flow's late UMP callback (after a timeout) a head start before retrying.
+        lastConsentRetryElapsedRealtime = SystemClock.elapsedRealtime()
+        Log.d(TAG, "[ConsentRetry] scheduled, waiting for network")
+        runCatching {
+            if (!isConsentRetryActivityCallbacksRegistered) {
+                (context as? Application)?.registerActivityLifecycleCallbacks(consentRetryActivityCallbacks)
+                isConsentRetryActivityCallbacksRegistered = true
+            }
+            if (consentRetryNetworkCallback == null) {
+                val callback = object : ConnectivityManager.NetworkCallback() {
+                    override fun onAvailable(network: Network) {
+                        applicationScope.launch { tryRetryConsent("network_available") }
+                    }
+                }
+                val connectivityManager =
+                    context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                connectivityManager.registerDefaultNetworkCallback(callback)
+                consentRetryNetworkCallback = callback
+            }
+        }.onFailure { Log.e(TAG, "[ConsentRetry] failed to register listeners", it) }
+    }
+
+    private fun cancelConsentRetry() {
+        if (!isConsentRetryPending && consentRetryNetworkCallback == null) return
+        isConsentRetryPending = false
+        consentRetryDelayJob?.cancel()
+        consentRetryDelayJob = null
+        consentRetryNetworkCallback?.let { callback ->
+            runCatching {
+                val connectivityManager =
+                    context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                connectivityManager.unregisterNetworkCallback(callback)
+            }
+        }
+        consentRetryNetworkCallback = null
+        Log.d(TAG, "[ConsentRetry] cancelled")
+    }
+
+    private fun tryRetryConsent(trigger: String) {
+        val activity = resumedActivityRef?.get()
+        val now = SystemClock.elapsedRealtime()
+        val canRetry = shouldRetryConsent(
+            isPending = isConsentRetryPending,
+            isSplashConsentRequesting = isConsentRequesting,
+            isRetrying = isConsentRetrying,
+            hasForegroundActivity = activity != null && !activity.isFinishing && !activity.isDestroyed,
+            hasInternet = activity != null && NetworkUtils.isInternetAvailable(activity),
+            isFullscreenAdShowing = isHasFullscreenAdShowing(),
+            elapsedSinceLastAttemptMs = now - lastConsentRetryElapsedRealtime,
+        )
+        if (!canRetry || activity == null) {
+            scheduleDelayedConsentRetryIfThrottled(now)
+            return
+        }
+        if (canRequestAds()) {
+            // Consent was gathered elsewhere (e.g. Privacy options) in the meantime.
+            onConsentGrantedLate()
+            return
+        }
+        isConsentRetrying = true
+        lastConsentRetryElapsedRealtime = now
+        Log.d(TAG, "[ConsentRetry] retry triggered by $trigger")
+        runCatching { requestConsentForRetry(activity) }.onFailure {
+            isConsentRetrying = false
+            Log.e(TAG, "[ConsentRetry] retry crashed", it)
+        }
+    }
+
+    /** A retry blocked only by the min interval is re-run once the interval has passed. */
+    private fun scheduleDelayedConsentRetryIfThrottled(now: Long) {
+        if (!isConsentRetryPending || consentRetryDelayJob?.isActive == true) return
+        val remaining = CONSENT_RETRY_MIN_INTERVAL_MS - (now - lastConsentRetryElapsedRealtime)
+        if (remaining <= 0L) return
+        consentRetryDelayJob = applicationScope.launch {
+            delay(remaining)
+            tryRetryConsent("delayed")
+        }
+    }
+
+    private fun requestConsentForRetry(activity: Activity) {
+        consentInformation.requestConsentInfoUpdate(
+            activity,
+            consentRetryParams,
+            {
+                if (activity.isFinishing || activity.isDestroyed) {
+                    isConsentRetrying = false
+                    return@requestConsentInfoUpdate
+                }
+                UserMessagingPlatform.loadAndShowConsentFormIfRequired(activity) { formError ->
+                    isConsentRetrying = false
+                    if (formError != null) {
+                        Log.w(TAG, "[ConsentRetry] form error: ${formError.message}")
+                    }
+                    syncStoredGdprConsent()
+                    onConsentRetryFinished()
+                }
+            },
+            { requestError ->
+                isConsentRetrying = false
+                Log.w(TAG, "[ConsentRetry] request failed: ${requestError.message}")
+                // Stays pending: the next network/resume event retries again.
+            }
+        )
+    }
+
+    private fun onConsentRetryFinished() {
+        if (canRequestAds()) {
+            Log.d(TAG, "[ConsentRetry] consent gathered, initializing MobileAds")
+            onConsentGrantedLate()
+        } else {
+            Log.d(TAG, "[ConsentRetry] consent still not gathered, keep waiting")
+        }
+    }
+
+    // endregion
+
+    /**
+     * Consent became available after the splash flow (consent retry or Privacy options).
+     * Screens already rendered skipped their ad loads, so tell them to preload again once the
+     * SDK is ready.
+     */
+    private fun onConsentGrantedLate() {
+        cancelConsentRetry()
+        if (MobileAds.isInitialized) {
+            emitAdsBecameAvailable()
+            return
+        }
+        notifyAdsAvailableAfterInit = true
+        initializeMobileAdsOnce()
+    }
+
+    private fun emitAdsBecameAvailable() {
+        Log.d(TAG, "[ConsentRetry] ads became available, ask screens to preload")
+        _adsBecameAvailableFlow.tryEmit(Unit)
+    }
+
+    private fun initializeMobileAdsOnce() {
+        if (isMobileAdsInitRequested) return
+        isMobileAdsInitRequested = true
         applicationScope.launch(Dispatchers.IO) {
             try {
                 val requestConfiguration =
@@ -2710,6 +2974,10 @@ class AdmobManager @Inject constructor(
                         }
                         adsSdkInitializer.onAdInitCompleted()
                         notifyConsentCompleteOnce()
+                        if (notifyAdsAvailableAfterInit) {
+                            notifyAdsAvailableAfterInit = false
+                            emitAdsBecameAvailable()
+                        }
                     }
                 }
             } catch (error: Exception) {
